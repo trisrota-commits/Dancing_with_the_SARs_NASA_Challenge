@@ -1,5 +1,10 @@
 // App wiring: polls the feeds, keeps the globe in sync and fills the panels.
 
+// Which version of the app this is. `tools/pack.sh` sets it; it shows at the
+// end of the credits line, so nobody has to wonder whether the browser is
+// still showing an older copy.
+const BUILD = '2026-11-14 20:51 UTC';
+
 import { CATEGORIES, FAMILIES, PALETTE, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START } from './config.js';
 import { fetchFeed, fetchArchive } from './feeds.js';
 import { buildIncidents, tagNisarCoverage, pointInPolygon, distanceKm } from './incidents.js';
@@ -2385,6 +2390,7 @@ async function start() {
 }
 
 // Handy in the browser console while developing.
-window.app = { state, globe, replay };
+window.app = { state, globe, replay, build: BUILD };
+$('credits').append(` · Version ${BUILD}`);
 
 start();
