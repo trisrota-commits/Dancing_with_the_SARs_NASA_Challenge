@@ -16,6 +16,19 @@ const KEYWORDS = {
   ice: '(ice OR iceberg)',
 };
 
+// Words that show a headline is about this kind of event. GDACS links
+// articles by topic and country, and some of them are about something else,
+// so headlines that name the event type are listed first.
+const ON_TOPIC = {
+  earthquake: /quake|seism|tremor|magnitude|tsunami/i,
+  wildfire: /fire|blaze|burn/i,
+  flood: /flood|inundat|deluge|rain/i,
+  storm: /storm|cyclone|hurricane|typhoon|wind/i,
+  volcano: /volcan|erupt|lava|ash/i,
+  drought: /drought|dry|water short/i,
+  ice: /ice|glacier|berg/i,
+};
+
 async function fromGdacs(key) {
   const res = await fetch(`https://www.gdacs.org/gdacsapi/api/emm/getemmnewsbykey?eventtype=${encodeURIComponent(key.type)}&eventid=${encodeURIComponent(key.id)}`);
   if (!res.ok) return [];
@@ -45,8 +58,15 @@ async function fromGdelt(incident) {
   const word = KEYWORDS[incident.category];
   if (!place || !word) return [];
   const query = `"${place}" ${word}`;
-  const res = await fetch(`https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(query)}&mode=artlist&format=json&maxrecords=20&timespan=14d&sort=datedesc`);
-  if (!res.ok) return [];
+  const url = `https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(query)}&mode=artlist&format=json&maxrecords=20&timespan=14d&sort=datedesc`;
+  // GDELT allows one request every five seconds and refuses the rest, so a
+  // refusal is tried once more after a pause.
+  let res = await fetch(url).catch(() => null);
+  if (!res || !res.ok) {
+    await new Promise((r) => setTimeout(r, 6000));
+    res = await fetch(url).catch(() => null);
+  }
+  if (!res || !res.ok) return [];
   const text = await res.text();
   let data;
   try {
@@ -74,16 +94,18 @@ export async function newsFor(incident) {
   const key = incident.reports.find((r) => r.gdacsKey)?.gdacsKey;
   if (key) {
     const articles = await fromGdacs(key).catch(() => []);
-    if (articles.length) return { articles: dedupe(articles), via: 'gdacs' };
+    if (articles.length) return { articles: dedupe(articles, ON_TOPIC[incident.category]), via: 'gdacs' };
   }
   const articles = await fromGdelt(incident).catch(() => []);
   return { articles: dedupe(articles), via: 'gdelt' };
 }
 
-function dedupe(articles) {
+// One entry per headline, on-topic ones first, then the newest first.
+function dedupe(articles, onTopic) {
   const seen = new Set();
+  const fits = (a) => (onTopic && onTopic.test(a.title) ? 1 : 0);
   return articles
     .filter((a) => a.title && /^https?:\/\//.test(a.url || '') && !seen.has(a.title) && seen.add(a.title))
-    .sort((a, b) => (b.time || 0) - (a.time || 0))
+    .sort((a, b) => fits(b) - fits(a) || (b.time || 0) - (a.time || 0))
     .slice(0, 8);
 }

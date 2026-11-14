@@ -10,6 +10,15 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
 - Plots earthquakes, wildfires, floods, storms and other events from three
   live feeds (USGS, NASA EONET, GDACS) on a 3D globe with real terrain, and
   merges reports of the same event into one dot.
+- **Clicking an event opens a small card**, not a wall of data: what it is,
+  the news about it, one line on what NISAR has seen there, and a button
+  for the NISAR image. "Show details" opens the panel.
+- **The details start with one plain text** that explains the event and
+  names every source as a link: hover one to see what it is (for NISAR,
+  the newest pass itself), click it to open what was taken from it. A
+  small timeline sets the event against NISAR's passes. Everything else
+  is folded away, NISAR first. The sentences are fixed templates filled
+  from the data; a sentence only appears when its data has arrived.
 - **Replays what happened** when you click an event, built only from data:
   - Earthquake: wave fronts crossing the terrain as a glow and a ripple in
     the ground, through the published shaking-intensity outlines, then the
@@ -183,6 +192,8 @@ app in headless Chromium against the live services.
 - `js/replay/mvt.js` – small vector-tile reader for the fire detections
 - `js/search.js` – fuzzy event search and place lookup
 - `js/news.js` – press coverage per event
+- `js/narrative.js` – the plain-text account of an event with its source
+  links, the one-line NISAR summary and the event timeline
 - `js/sound.js` – plays a time-lapse as notes
 - `tools/smoke.js` – browser smoke test against the live services
 - `docs/HANDOFF.md` – where the project stands and how to continue it

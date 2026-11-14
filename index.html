@@ -48,14 +48,14 @@
         <p class="hint">Bigger dot = stronger event, and in the 3D view a taller beam means the same. A white ring means NISAR imaged that spot in its latest passes. Click a dot to replay what happened.</p>
       </details>
 
-      <details open>
+      <details>
         <summary>Changing places <span id="place-count" class="count"></span></summary>
         <div id="place-chips"></div>
         <ul id="place-list" class="links"></ul>
         <p class="hint">Diamonds mark slow changes that no event feed reports: glacier loss, sinking cities, wetland floods, forest clearing, farming seasons, volcanoes, moving slopes and a filling reservoir. Click one to play NISAR’s passes over it.</p>
       </details>
 
-      <details open>
+      <details>
         <summary>NISAR radar</summary>
         <label class="check"><input type="checkbox" id="footprints" checked /> Where NISAR looked recently <span id="scene-count" class="count"></span></label>
         <label class="check"><input type="checkbox" id="nisar-tiles" /> NISAR radar picture on the globe</label>
@@ -83,7 +83,7 @@
         </ul>
       </details>
 
-      <details open>
+      <details>
         <summary>Live sky and wildlife</summary>
         <label class="check"><input type="checkbox" id="live-nisar" checked /> NISAR satellite, live <span id="nisar-live-status" class="count"></span></label>
         <label class="check"><input type="checkbox" id="lighting" checked /> Real day and night, and the real star sky</label>
@@ -119,7 +119,7 @@
         <p class="hint">Right-drag, or drag with two fingers, to tilt and turn the view.</p>
       </details>
 
-      <details open class="grow">
+      <details class="grow">
         <summary>Live feed</summary>
         <ol id="feed"></ol>
       </details>
@@ -130,6 +130,9 @@
       <button id="share" title="Copy a link to what is open here">Copy link</button>
       <div id="detail"></div>
     </aside>
+
+    <aside id="card" aria-live="polite" hidden></aside>
+    <div id="tip" role="tooltip" hidden></div>
 
     <nav id="nav" aria-label="Map view">
       <button id="nav-tilt" title="Switch between top-down and tilted 3D view">3D</button>

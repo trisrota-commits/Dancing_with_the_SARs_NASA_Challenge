@@ -46,7 +46,11 @@ const proxy = process.env.HTTPS_PROXY ? { server: process.env.HTTPS_PROXY, bypas
   });
   await step('event panel', async () => {
     await page.click('#ticker-text');
-    await page.waitForFunction(() => document.querySelector('#radar') && !document.querySelector('#radar .spinner'), null, { timeout: 60000 });
+    // An event opens as a small card; the panel follows on request.
+    await page.waitForSelector('#card:not([hidden]) #card-details', { timeout: 30000 });
+    if (await page.locator('#right').isVisible()) throw new Error('the details panel opened without being asked');
+    await page.click('#card-details');
+    await page.waitForFunction(() => document.querySelector('#radar') && !document.querySelector('#radar .spinner') && document.querySelector('#story-text p'), null, { timeout: 60000 });
     return (await page.locator('#detail h3').first().innerText()).slice(0, 60);
   });
   await step('archive window', async () => {
