@@ -12,6 +12,25 @@ function stamp(s) {
   return m ? Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]) : NaN;
 }
 
+// NISAR records in several polarisation modes, and the preview colours mean
+// different things in each. The mode is the tenth field of the scene name:
+// two letters per frequency band, e.g. DHDH (both bands dual: HH and HV),
+// SHNA (band A single HH, no band B) or NASV (band B only, single VV).
+// In dual-mode previews red and blue carry the co-polarised echo and green
+// the cross-polarised one; single-mode previews are that one channel in grey.
+const POL_MODES = {
+  DH: { code: 'DH', co: 'HH', cross: 'HV' },
+  DV: { code: 'DV', co: 'VV', cross: 'VH' },
+  SH: { code: 'SH', co: 'HH', cross: null },
+  SV: { code: 'SV', co: 'VV', cross: null },
+};
+
+export function polMode(field) {
+  const band = field && field.slice(0, 2) !== 'NA' ? field.slice(0, 2) : (field || '').slice(2, 4);
+  // Anything else (quad-pol, for instance) has an unverified colour layout.
+  return POL_MODES[band] || { code: band || '??', co: null, cross: null };
+}
+
 function parseEntry(entry) {
   const name = entry.title;
   const parts = name.split('_');
@@ -33,6 +52,7 @@ function parseEntry(entry) {
     direction: parts[6] === 'A' ? 'Ascending' : 'Descending',
     frame: parts[7],
     stack: `${parts[5]}-${parts[6]}-${parts[7]}`,
+    pol: polMode(parts[9]),
     time: Date.parse(entry.time_start),
     ring,
     sizeMb: Number(entry.granule_size) || null,
@@ -131,8 +151,22 @@ export async function historyAt(lat, lon) {
     else stacks.get(s.stack).unplaced++;
   }
   const list = [...stacks.values()];
-  for (const st of list) st.scenes.sort((a, b) => a.time - b.time);
+  for (const st of list) {
+    // Keep the polarisation mode most passes share; the rest cannot be
+    // compared with them and are counted, not shown.
+    const modes = new Map();
+    for (const s of st.scenes) modes.set(s.pol.code, (modes.get(s.pol.code) || 0) + (s.pol.co ? 1 : 0.001));
+    const main = [...modes.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
+    st.otherModes = st.scenes.filter((s) => s.pol.code !== main).length;
+    st.scenes = st.scenes.filter((s) => s.pol.code === main).sort((a, b) => a.time - b.time);
+    st.pol = st.scenes[0]?.pol;
+  }
   return list.filter((st) => st.scenes.length >= 2).sort((a, b) => b.scenes.length - a.scenes.length);
+}
+
+// Interferograms over a point, newest first. Each compares two passes.
+export async function interferogramsAt(lat, lon) {
+  return dedupe(await search(NISAR_GUNW, '*_GUNW_*', { point: `${lon},${lat}` }, 80)).filter((s) => s.image && s.refTime && s.secTime);
 }
 
 // The newest passes over a point, whatever their date: what the next-pass
@@ -148,7 +182,8 @@ export function bestPair(scenes, eventTime, requirePreview = true) {
     if (s.product !== 'GCOV' || !s.track || !s.frame ||
         !['Ascending', 'Descending'].includes(s.direction) || !Number.isFinite(s.time)) continue;
     if (requirePreview && !s.image) continue;
-    const stack = `${s.track}-${s.direction}-${s.frame}`;
+    // Passes in different polarisation modes are not comparable.
+    const stack = `${s.track}-${s.direction}-${s.frame}-${s.pol?.code ?? ''}`;
     if (!byStack.has(stack)) byStack.set(stack, []);
     byStack.get(stack).push(s);
   }

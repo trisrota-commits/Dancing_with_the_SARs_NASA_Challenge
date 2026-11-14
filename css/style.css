@@ -1159,3 +1159,53 @@ dd {
     display: none;
   }
 }
+
+/* ---------- stories ---------- */
+
+#stories {
+  display: grid;
+  gap: 5px;
+}
+
+#stories button {
+  text-align: left;
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 8px;
+  align-items: baseline;
+  line-height: 1.3;
+}
+
+#stories small {
+  color: var(--accent);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.story {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+}
+
+.story h4 .badge {
+  display: inline-block;
+  padding: 0 6px;
+  margin-left: 4px;
+  letter-spacing: 0.03em;
+}
+
+#story-next {
+  margin-top: 10px;
+  width: 100%;
+  text-align: left;
+}
+
+.facts {
+  margin-top: 8px;
+}
+
+.facts li {
+  grid-template-columns: 74px 1fr;
+}

@@ -23,6 +23,12 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
   change** between two passes in plain colours (echo got weaker / stronger),
   with the source radar image one tick box underneath and a before/after
   divider for the raw images.
+- **Five curated stories** (ice, wetland, farmland, earthquake, ground
+  movement), each answering what to look at, why it happens, which
+  polarisation shows it, what a camera would miss and what it is useful for.
+  The places and explanations are ours; every number is computed live.
+- Features **interferograms**: any earthquake with a pair of passes either
+  side of it gets a "Show ground movement" card.
 - Plays a **NISAR time-lapse for any spot on Earth**: click the ground (or
   search a place) to step through every placeable pass of one repeat track,
   switch between the colour composite, HH only and HV only, and read a chart
@@ -83,7 +89,9 @@ from a web server.
 - `js/incidents.js` – merges duplicate reports, links nearby events
 - `js/nisar.js` – NISAR scene search and preview handling
 - `js/change.js` – what changed between two NISAR passes
-- `js/timelapse.js` – loads the passes of one repeat track, splits HH and HV
+- `js/timelapse.js` – loads the passes of one repeat track, splits the
+  polarisation channels and describes a point history in plain statements
+- `js/stories.js` – the curated stories (places and explanations only)
 - `js/chart.js` – the HH/HV history chart
 - `js/replay/replay.js` – event replay templates and player
 - `js/replay/sources.js` – per-event data: shaking contours, nearby quakes,
@@ -112,6 +120,15 @@ Elevation: Mapzen Terrain Tiles (AWS Open Data). Place search: Photon
 (OpenStreetMap). Rendering: three.js.
 
 ## How honest the pictures are
+
+- NISAR records in several polarisation modes, and the preview colours mean
+  different things in each. The app reads each pass's mode from its name,
+  labels the channels accordingly (HH/HV, VV/VH, or one channel), and never
+  mixes modes in a time-lapse or a before/after pair.
+- Stories contain no typed-in measurements. Their numbers come from the
+  passes loaded at that moment, by fixed rules: highest, lowest and latest
+  value of each channel with dates, and where the channels sit furthest apart.
+- Explanations of cause are marked as hypotheses.
 
 - Replays never draw anything between data points without saying so; the
   panel lists each element with its source and whether it is observed,

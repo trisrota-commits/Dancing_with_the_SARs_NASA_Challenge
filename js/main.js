@@ -3,8 +3,9 @@
 import { CATEGORIES, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START } from './config.js';
 import { fetchFeed, fetchArchive } from './feeds.js';
 import { buildIncidents, tagNisarCoverage, pointInPolygon, distanceKm } from './incidents.js';
-import { latestScenes, scenesAt, bestPair, comparisonStatus, imageBounds, latestTileDate, historyAt, newestAt, nextPass, REPEAT_DAYS } from './nisar.js';
-import { loadFrames, spread, view, history } from './timelapse.js';
+import { latestScenes, scenesAt, bestPair, comparisonStatus, imageBounds, latestTileDate, historyAt, newestAt, nextPass, interferogramsAt, REPEAT_DAYS } from './nisar.js';
+import { STORIES } from './stories.js';
+import { loadFrames, spread, view, history, describeSeries } from './timelapse.js';
 import { historyChart } from './chart.js';
 import { Globe, loadPicture } from './globe.js';
 import { Replay } from './replay/replay.js';
@@ -369,6 +370,16 @@ function radarHtml(inc, found) {
     // as context while NISAR has no usable pair.
     html += `<p class="note">Before/after comparison unavailable: ${esc(reason)}</p>${backscatter.length ? SENTINEL_OFFER : ''}`;
   }
+  // An interferogram whose two passes sit either side of the event shows
+  // how far the ground itself moved.
+  const spanning = interferograms.filter((g) => g.refTime < inc.time && g.secTime > inc.time).sort((a, b) => a.secTime - a.refTime - (b.secTime - b.refTime));
+  if (spanning.length) {
+    const g = spanning[0];
+    html += `<div class="card pair"><div class="src">Ground movement</div>
+      <p>An interferogram compares the passes of ${day(g.refTime)} and ${day(g.secTime)}, either side of this event${spanning.length > 1 ? `, and ${spanning.length - 1} more ${spanning.length > 2 ? 'do' : 'does'} too` : ''}.</p>
+      <div class="actions"><button class="primary" id="igram-go" data-show="${esc(g.id)}">Show ground movement</button></div>
+      <p class="hint">Each full run through the colours means the distance to the satellite changed by about 12 cm, half of NISAR's 24 cm wavelength. Tight bands that crowd around one place are ground movement. Broad bands across the whole picture are mostly the atmosphere, and speckle means the two passes did not match, as over water.</p></div>`;
+  }
   html += backscatter.slice(0, 8).map((s) => sceneCard(s, inc.time)).join('');
   if (backscatter.length > 8) html += `<p class="hint">${backscatter.length - 8} older scenes not listed.</p>`;
   if (interferograms.length) {
@@ -377,11 +388,11 @@ function radarHtml(inc, found) {
   return html;
 }
 
-async function selectIncident(inc, fly) {
+async function selectIncident(inc, fly, intro = '') {
   endCompare();
   const token = ++state.lookup;
   state.selected = { kind: 'incident', incident: inc };
-  openPanel(incidentHtml(inc, '<p class="spinner">Searching the NISAR archive…</p>'));
+  openPanel(intro + incidentHtml(inc, '<p class="spinner">Searching the NISAR archive…</p>'));
   globe.select(inc);
   if (fly) globe.flyTo(inc.lat, inc.lon);
   replay.start(inc);
@@ -516,6 +527,8 @@ async function showChanges(button) {
   try {
     const [b1, b2, before, after] = await Promise.all([imageBounds(pair.before), imageBounds(pair.after), loadPicture(pair.before.image), loadPicture(pair.after.image)]);
     const result = changeMap(before, b1, after, b2);
+    const pol = pair.after.pol?.co ? pair.after.pol : { co: 'radar', cross: null };
+    const channels = pol.cross ? `combined ${pol.co} + ${pol.cross}` : pol.co;
     if (!result) throw new Error('The two passes do not overlap');
     state.change = { result, after, afterBounds: b2, pair };
     drapeChanges(false);
@@ -529,7 +542,7 @@ async function showChanges(button) {
         <li><i style="--c:#ffaa3c"></i><span><b>Echo got stronger</b> on ${km(result.strongerKm2)} km² (${pct(result.strongerShare)}). Typical causes: flooded vegetation, wetter or rougher ground, new structures.</span></li>
       </ul>
       <label class="check"><input type="checkbox" id="under" /> Show the radar image underneath</label>
-      <p class="hint">Computed in your browser from NASA's preview images of both passes over ${km(result.comparedKm2)} km². A pixel is coloured where the combined HH + HV brightness moved by more than ${Math.round((CHANGE_THRESHOLD / 255) * 100)}% of full scale. Differences that a shift of up to two pixels between the images would explain are ignored. Previews are 8-bit and reduced in resolution, so treat this as where to look, not a measurement. Open sea changes with the wind between passes. The causes listed are the usual ones, not a diagnosis.</p>`;
+      <p class="hint">Computed in your browser from NASA's preview images of both passes over ${km(result.comparedKm2)} km². A pixel is coloured where the ${esc(channels)} brightness moved by more than ${Math.round((CHANGE_THRESHOLD / 255) * 100)}% of full scale. Differences that a shift of up to two pixels between the images would explain are ignored. Previews are 8-bit and reduced in resolution, so treat this as where to look, not a measurement. Open sea changes with the wind between passes. The causes listed are the usual ones, not a diagnosis.</p>`;
     button.textContent = 'Changes shown';
   } catch (err) {
     button.textContent = 'Could not compare';
@@ -543,6 +556,84 @@ function drapeChanges(withSource) {
   globe.clearScenes();
   if (withSource) globe.addPicture(c.after, c.afterBounds);
   globe.addPicture(c.result.canvas, c.result.bounds, undefined, 0.9);
+}
+
+// ---------- stories ----------
+
+function storyHtml(story) {
+  const n = STORIES.indexOf(story);
+  const next = STORIES[(n + 1) % STORIES.length];
+  const part = (heading, text, hypothesis) => `<h4>${heading}${hypothesis ? ' <span class="badge computed">Hypothesis</span>' : ''}</h4><p class="note">${esc(text)}</p>`;
+  return `<div class="story" data-story="${story.id}">
+    <span class="tag">Story ${n + 1} of ${STORIES.length} · ${esc(story.kind)}</span>
+    <h3>${esc(story.title)}</h3>
+    <p class="note">${esc(story.place)} · ${where(story.lat, story.lon)}</p>
+    ${part('What to look at', story.look)}
+    ${part('Why it happens', story.why, true)}
+    ${part('Which polarisation shows it', story.pol, true)}
+    ${part('What a camera would miss', story.beyond)}
+    ${part('What it could be used for', story.next)}
+    <p class="hint">The place and the explanations are our choice. Every number below is computed from the NISAR passes and feeds loaded right now.</p>
+    <button id="story-next" data-next="${next.id}">Next story: ${esc(next.title)} ▸</button>
+  </div>`;
+}
+
+async function openStory(id) {
+  const story = STORIES.find((x) => x.id === id);
+  if (!story) return;
+  endCompare();
+  replay.stop();
+  state.lookup++;
+  state.selected = { kind: 'story', story };
+  globe.select(null);
+
+  if (story.action === 'lapse') {
+    openPanel(`${storyHtml(story)}<h4>NISAR time-lapse at this point</h4>${lapseBox(story.lat, story.lon)}`);
+    return startLapse();
+  }
+  if (story.action === 'interferogram') {
+    openPanel(`${storyHtml(story)}<h4>The interferogram</h4><div id="igram"><p class="spinner">Searching the NISAR archive…</p></div>`);
+    globe.flyTo(story.lat, story.lon, 600_000);
+    const token = state.lookup;
+    try {
+      const list = await interferogramsAt(story.lat, story.lon);
+      if (token !== state.lookup) return;
+      if (!list.length) throw new Error('No interferogram with a preview covers this point.');
+      // The longest gap between passes gives slow movement the most time to show.
+      const pick = [...list].sort((a, b) => b.secTime - b.refTime - (a.secTime - a.refTime))[0];
+      state.selected.found = { backscatter: [], interferograms: list };
+      const bounds = await imageBounds(pick);
+      await globe.addScene(pick, bounds);
+      globe.flyToBounds(bounds);
+      $('igram').innerHTML = `<p class="note">Shown on the globe: ${day(pick.refTime)} compared with ${day(pick.secTime)}, ${Math.round((pick.secTime - pick.refTime) / DAY)} days apart, ${esc(pick.direction.toLowerCase())} track ${esc(pick.track)}. ${list.length} pairs cover this point in all.</p>
+        ${list.slice(0, 4).map((x) => sceneCard(x, null)).join('')}`;
+    } catch (err) {
+      if (token === state.lookup) $('igram').innerHTML = `<p class="note">${esc(err.message)}</p>`;
+    }
+    return;
+  }
+  // An event story: find the event in the archive and open it under the story.
+  openPanel(`${storyHtml(story)}<p class="spinner">Loading events since NISAR's data began…</p>`);
+  globe.flyTo(story.lat, story.lon, 900_000);
+  const token = state.lookup;
+  if (!state.archive) {
+    $('window').value = 'nisar';
+    await $('window').onchange({ target: $('window') });
+  }
+  if (token !== state.lookup) return;
+  // The strongest event of the story's kind near its point, from the feeds.
+  const incident = state.incidents
+    .filter((i) => i.category === story.category && distanceKm(i, story) <= story.withinKm)
+    .sort((a, b) => b.severity - a.severity)[0];
+  if (!incident) {
+    $('detail').querySelector('.spinner').outerHTML = '<p class="note">This event is not in the feeds\' archives right now.</p>';
+    return;
+  }
+  state.hidden.delete(incident.category);
+  draw();
+  await selectIncident(incident, false, storyHtml(story));
+  // The story is about the ground movement, so show it straight away.
+  if (token + 1 === state.lookup) $('igram-go')?.click();
 }
 
 // ---------- alerts ticker ----------
@@ -685,7 +776,8 @@ async function startLapse(stackIndex = 0, all = false) {
 
   const lapse = { lat, lon, stacks, stackIndex, all, frames, mode: 'colour', chart: null };
   state.lapse = lapse;
-  const names = { colour: 'HH + HV colour', hh: 'HH only', hv: 'HV only' };
+  const pol = stack.pol?.co ? stack.pol : { co: 'Radar', cross: null };
+  const names = { colour: pol.cross ? `${pol.co} + ${pol.cross} colour` : `${pol.co} (single polarisation)`, co: `${pol.co} only`, cross: `${pol.cross} only` };
   const plan = {
     duration: frames.length * LAPSE_STEP,
     parts: null,
@@ -710,20 +802,24 @@ async function startLapse(stackIndex = 0, all = false) {
   lapse.plan = plan;
 
   box.innerHTML = `
-    <p class="note">${frames.length} of ${stack.scenes.length} passes on ${esc(stack.direction.toLowerCase())} track ${esc(stack.track)}, frame ${esc(stack.frame)}, ${day(frames[0].time)} to ${day(frames[frames.length - 1].time)}.${stack.unplaced ? ` ${stack.unplaced} earlier passes are left out: their previews were published without public corner coordinates, so they cannot be placed on the map accurately.` : ''}</p>
+    <p class="note">${frames.length} of ${stack.scenes.length} passes on ${esc(stack.direction.toLowerCase())} track ${esc(stack.track)}, frame ${esc(stack.frame)}, ${day(frames[0].time)} to ${day(frames[frames.length - 1].time)}.${stack.unplaced ? ` ${stack.unplaced} earlier passes are left out: their previews were published without public corner coordinates, so they cannot be placed on the map accurately.` : ''}${stack.otherModes ? ` ${stack.otherModes} passes recorded in a different polarisation mode are left out too, because their previews are not comparable with these.` : ''}</p>
     ${state.selected?.kind === 'incident' ? '' : nextPassHtml(stacks.flatMap((st) => st.scenes))}
     <div class="actions seg" role="group" aria-label="Which radar channel to show">
-      <button data-mode="colour" class="on">Colour</button>
-      <button data-mode="hh">HH only</button>
-      <button data-mode="hv">HV only</button>
+      <button data-mode="colour" class="on">${pol.cross ? 'Colour' : 'As published'}</button>
+      ${pol.cross ? `<button data-mode="co">${esc(pol.co)} only</button><button data-mode="cross">${esc(pol.cross)} only</button>` : ''}
     </div>
     ${stacks.length > 1 ? `<label class="row"><span>Track</span><select id="lapse-stack">${stacks.map((st, n) => `<option value="${n}" ${n === stackIndex ? 'selected' : ''}>${esc(st.direction)} ${esc(st.track)} (${st.scenes.length} passes)</option>`).join('')}</select></label>` : ''}
     ${stack.scenes.length > frames.length || all ? `<label class="check"><input type="checkbox" id="lapse-all" ${all ? 'checked' : ''} /> Load all ${stack.scenes.length} passes (about ${stack.scenes.length} MB)</label>` : ''}
     <h4>Brightness at ${where(lat, lon)}</h4>
     <div id="lapse-chart"></div>
-    <p class="hint">Each pass is NASA's preview of a NISAR backscatter scene. HH is the echo that comes back in the polarisation that was sent; HV is the part that came back twisted, which mostly happens inside vegetation. Values are the 0–255 preview brightness averaged over 5×5 pixels, not calibrated radar units. Click the chart to jump to a pass.</p>`;
+    <p class="hint">Each pass is NASA's preview of a NISAR backscatter scene, recorded here in ${pol.cross ? `dual polarisation. ${esc(pol.co)} is the echo that comes back in the polarisation that was sent; ${esc(pol.cross)} is the part that came back twisted, which mostly happens inside vegetation` : `single polarisation (${esc(pol.co)}), so there is no cross-polarised channel`}. Values are the 0–255 preview brightness averaged over 5×5 pixels, not calibrated radar units. Click the chart to jump to a pass.</p>`;
   const series = history(frames, lat, lon);
-  if (series.some((p) => p.hh != null)) lapse.chart = historyChart($('lapse-chart'), series, (i) => replay.seek((i + 0.01) / frames.length));
+  if (series.some((p) => p.co != null)) {
+    lapse.chart = historyChart($('lapse-chart'), series, pol, (i) => replay.seek((i + 0.01) / frames.length));
+    // What the numbers say, worked out from the series by fixed rules.
+    const lines = describeSeries(series, pol);
+    if (lines.length) $('lapse-chart').insertAdjacentHTML('beforeend', `<ul class="parts facts">${lines.map((l) => `<li><span class="badge observed">Computed</span><span>${esc(l)}</span></li>`).join('')}</ul>`);
+  }
   else $('lapse-chart').innerHTML = '<p class="note">These passes do not cover the exact point, so there is no history to chart.</p>';
 
   replay.run(plan);
@@ -922,9 +1018,9 @@ async function start() {
       return rebuild();
     }
     $('window-note').hidden = false;
-    $('window-note').textContent = 'Loading larger events since 17 June 2026…';
+    $('window-note').textContent = `Loading larger events since ${day(NISAR_START)}…`;
     state.archive = await fetchArchive();
-    $('window-note').textContent = `Since NISAR's calibrated data began (17 June 2026): earthquakes of magnitude 6 and up, orange and red GDACS alerts, and NASA-tracked floods, storms, volcanoes and ice. Smaller events are shown for the last 14 days only.`;
+    $('window-note').textContent = `Events since ${day(NISAR_START)}: earthquakes of magnitude 6 and up, orange and red GDACS alerts, and NASA-tracked floods, storms, volcanoes and ice. Smaller events are shown for the last 14 days only.`;
     rebuild();
   };
   $('chips').onclick = (e) => {
@@ -954,6 +1050,11 @@ async function start() {
     $('nav-tilt').textContent = view.pitch > 5 ? '2D' : '3D';
   };
   $('close').onclick = closePanel;
+  $('stories').innerHTML = STORIES.map((x) => `<button data-story="${x.id}"><small>${esc(x.kind)}</small>${esc(x.title)}</button>`).join('');
+  $('stories').onclick = (e) => {
+    const b = e.target.closest('[data-story]');
+    if (b) openStory(b.dataset.story);
+  };
   $('chips-all').onclick = () => {
     state.hidden.clear();
     draw();
@@ -1016,6 +1117,7 @@ async function start() {
     if (t.dataset.show) return showScene(t.dataset.show, t);
     if (t.id === 'compare') return compare(t);
     if (t.id === 'changes') return showChanges(t);
+    if (t.id === 'story-next') return openStory(t.dataset.next);
     if (t.id === 'lapse-go') return startLapse();
     if (t.id === 's1-now') {
       $('ov-s1').checked = true;
