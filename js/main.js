@@ -191,10 +191,10 @@ function renderFeed() {
     .map((item, n) => {
       if (item.incident) {
         const i = item.incident;
-        return `<li data-n="${n}" class="${state.fresh.has(i.id) ? 'fresh' : ''}">${dot(i.category)}<span class="name">${esc(i.title)}</span><span class="t">${ago(item.time)}</span></li>`;
+        return `<li tabindex="0" role="button" data-n="${n}" class="${state.fresh.has(i.id) ? 'fresh' : ''}">${dot(i.category)}<span class="name">${esc(i.title)}</span><span class="t">${ago(item.time)}</span></li>`;
       }
       const s = item.scene;
-      return `<li data-n="${n}" class="${state.fresh.has(s.id) ? 'fresh' : ''}"><i class="dot" style="--c:#39e6c4;border-radius:2px"></i><span class="name">NISAR pass, track ${esc(s.track)} frame ${esc(s.frame)}</span><span class="t">${ago(item.time)}</span></li>`;
+      return `<li tabindex="0" role="button" data-n="${n}" class="${state.fresh.has(s.id) ? 'fresh' : ''}"><i class="dot" style="--c:#39e6c4;border-radius:2px"></i><span class="name">NISAR pass, track ${esc(s.track)} frame ${esc(s.frame)}</span><span class="t">${ago(item.time)}</span></li>`;
     })
     .join('');
   $('feed').onclick = (e) => {
@@ -208,12 +208,34 @@ function renderFeed() {
 
 // ---------- detail panel ----------
 
+// The left menu steps aside while something is selected, so the map and
+// what was picked have the room, and comes back when it is closed. Someone
+// who opens or shuts the menu by hand during a selection keeps it that way.
+const menu = { folded: false, byHand: false };
+
+function focusLayout(on) {
+  const left = $('left');
+  if (on) {
+    if (!menu.byHand && !left.classList.contains('closed')) {
+      left.classList.add('closed');
+      menu.folded = true;
+    }
+  } else {
+    if (menu.folded && !menu.byHand) left.classList.remove('closed');
+    menu.folded = false;
+    menu.byHand = false;
+  }
+  $('menu').setAttribute('aria-expanded', String(!left.classList.contains('closed')));
+}
+
 // Fills the details panel. An event opens quietly: the panel is filled but
 // stays shut, and the small card shows until "Show details" is pressed.
-function openPanel(html, quiet = false) {
+function openPanel(html, quiet = false, fold = true) {
   $('detail').innerHTML = html;
   $('right').hidden = quiet;
   $('card').hidden = !quiet;
+  // A story is picked from the menu, so the menu stays for the next one.
+  if (fold) focusLayout(true);
   $('tip').hidden = true;
   $('right').scrollTop = 0;
 }
@@ -225,6 +247,7 @@ function closePanel() {
   $('right').hidden = true;
   $('card').hidden = true;
   $('tip').hidden = true;
+  focusLayout(false);
   globe.select(null);
   replay.stop();
   endCompare();
@@ -265,8 +288,8 @@ function renderCard() {
     <p class="nisar-line">${esc(nisarLine(inc, sel.found))}</p>
     <div class="actions">
       <button class="primary" id="card-details">Show details</button>
-      ${sel.found && bestPair(sel.found.backscatter, inc.time, true, inc) ? `<button id="card-change" aria-pressed="${!!sel.changeShown}">${sel.changeShown ? 'Back to the radar picture' : 'Show what changed'}</button>` : ''}
-      ${scene ? `<button id="card-nisar" aria-pressed="${!sel.nisarOff}">${sel.nisarOff ? 'Show the NISAR image' : 'Hide the NISAR image'}</button>` : ''}
+      ${sel.found && bestPair(sel.found.backscatter, inc.time, true, inc) ? `<button id="card-change" aria-pressed="${stage.owner === 'change'}">${stage.owner === 'change' ? 'Back to the radar picture' : 'Show what changed'}</button>` : ''}
+      ${scene ? `<button id="card-nisar" aria-pressed="${stage.owner === 'timeline' && !sel.nisarOff}">${stage.owner === 'timeline' && !sel.nisarOff ? 'Hide the radar picture' : 'Show the radar picture'}</button>` : ''}
     </div>`;
 }
 
@@ -286,42 +309,11 @@ function showDetails() {
   if (sel?.kind !== 'incident') return;
   $('right').hidden = false;
   $('card').hidden = true;
+  // Keyboard and screen-reader users land in the panel they just opened.
+  $('close').focus({ preventScroll: true });
   if (!sel.historyStarted) {
     sel.historyStarted = true;
     startIncidentHistory(sel.incident, sel);
-  }
-}
-
-// The change between the two passes either side of the event, straight
-// from the card: the colours go over the newer radar picture, and the
-// timeline stays. Pressing again goes back to the radar picture.
-async function toggleCardChange(button) {
-  const sel = state.selected;
-  if (sel?.kind !== 'incident' || !sel.found) return;
-  const back = () => {
-    sel.changeShown = false;
-    sel.passIndex = undefined;
-    state.change = null;
-    if (replay.timeline) replay.report();
-    renderCard();
-  };
-  if (sel.changeShown) return back();
-  const pair = bestPair(sel.found.backscatter, sel.incident.time, true, sel.incident);
-  if (!pair) return;
-  button.textContent = 'Comparing two passes…';
-  try {
-    const [b1, b2, before, after] = await Promise.all([imageBounds(pair.before), imageBounds(pair.after), loadPicture(pair.before.image), loadPicture(pair.after.image)]);
-    if (state.selected !== sel) return;
-    const result = changeMap(before, b1, after, b2);
-    if (!result) throw new Error('no overlap');
-    sel.changeShown = true;
-    sel.manualPicture = false;
-    state.change = { result, after, afterBounds: b2, pair };
-    drapeChanges(true);
-    setLegend('change', { result, from: pair.before.time, to: pair.after.time });
-    renderCard();
-  } catch {
-    button.textContent = 'These two passes could not be compared';
   }
 }
 
@@ -329,13 +321,12 @@ async function toggleCardChange(button) {
 function toggleCardImage() {
   const sel = state.selected;
   if (sel?.kind !== 'incident') return;
-  sel.manualPicture = false;
-  sel.changeShown = false;
+  // Anything else on the globe counts as "hidden": the button brings the
+  // timeline's picture back; pressed again, it hides it.
+  if (stage.owner === 'timeline') sel.nisarOff = !sel.nisarOff;
+  else sel.nisarOff = false;
   sel.passIndex = undefined;
-  sel.nisarOff = !sel.nisarOff;
-  if (replay.timeline) replay.report();
-  else syncNisar(Date.now());
-  renderCard();
+  backToTimeline();
 }
 
 // The hover box for a source named in the text. For NISAR it shows the
@@ -370,6 +361,7 @@ function renderReplay(u) {
   }
   bar.hidden = false;
   bar.classList.toggle('timeline', !!u.timeline);
+  if (u.timeline || u.state === 'loading') bar.classList.remove('back');
   if (u.state === 'loading') {
     bar.classList.add('timeline');
     $('replay-caption').textContent = 'Gathering what is known about this event…';
@@ -398,12 +390,24 @@ function renderReplay(u) {
     const event = state.selected?.incident;
     if (event) $('replay-span').style.background = CATEGORIES[event.category].color;
     $('replay-from').textContent = day(u.range.from);
+    document.querySelector('.key-event').style.background = event ? CATEGORIES[event.category].color : '';
+    $('replay-bar').setAttribute('aria-label', 'Timeline: drag to go back in time');
+    $('replay-bar').setAttribute('aria-valuetext', u.live ? 'Latest' : day(u.ms));
     $('replay-live').classList.toggle('on', u.live);
     $('replay-live').textContent = u.live ? '● Latest' : 'Go to latest';
     const pass = syncNisar(u.ms);
-    $('replay-caption').textContent = `${u.live ? 'Latest' : day(u.ms)} · ${u.caption}${pass ? ` · NISAR pass of ${day(pass.time)} underneath` : ''}`;
+    // The opening plays in seconds, not on a date.
+    $('replay-caption').textContent = `${u.intro ? '' : `${u.live ? 'Latest' : day(u.ms)} · `}${u.caption}${pass ? ` · NISAR pass of ${day(pass.time)} underneath` : ''}`;
   } else {
-    $('replay-caption').textContent = u.caption;
+    // The time-lapse is a looping player, and says so. Inside an event it
+    // offers the way back to that event's timeline.
+    $('replay-caption').textContent = `Time-lapse (loops) · ${u.caption}`;
+    $('replay-bar').setAttribute('aria-label', 'Time-lapse position');
+    $('replay-bar').setAttribute('aria-valuetext', u.caption);
+    const inEvent = state.selected?.kind === 'incident';
+    bar.classList.toggle('back', inEvent);
+    $('replay-live').classList.remove('on');
+    $('replay-live').textContent = 'Back to the event';
   }
   if (list && u.parts && list.partsRef !== u.parts) {
     list.partsRef = u.parts;
@@ -431,32 +435,37 @@ function timelinePasses(inc, found) {
 function syncNisar(ms) {
   const sel = state.selected;
   if (sel?.kind !== 'incident' || !sel.passes?.length) return null;
-  // A picture the reader chose, or the change picture, is left alone.
-  if (sel.manualPicture || sel.changeShown) return null;
+  // Only while the timeline owns the globe: a pass picked by hand, the
+  // change picture or the divider is left alone.
+  if (stage.owner !== 'timeline') return null;
   let i = -1;
   if (!sel.nisarOff) sel.passes.forEach((x, k) => x.time <= ms && (i = k));
   const pass = i >= 0 ? sel.passes[i] : null;
-  if (i === sel.passIndex) return pass;
+  // The caption names a pass only once its picture is really up.
+  if (i === sel.passIndex) return sel.passLoaded === i ? pass : null;
   sel.passIndex = i;
   if (!pass) {
     globe.clearScenes();
     setLegend(null);
     return null;
   }
-  setLegend('radar', { pol: pass.pol, time: pass.time });
   // The first picture is uncovered by the sweep; later ones cross-fade.
   const first = !sel.passShown;
   sel.passShown = true;
+  const token = stage.token;
   Promise.all([imageBounds(pass), loadPicture(pass.image)])
     .then(([bounds, picture]) => {
-      if (state.selected !== sel || sel.passIndex !== i) return;
+      if (state.selected !== sel || sel.passIndex !== i || token !== stage.token) return;
       if (first) globe.sweepTo(picture, bounds, pass.direction !== 'Descending');
       else globe.fadeTo(picture, bounds, 0.45);
+      setLegend('radar', { pol: pass.pol, time: pass.time });
+      sel.passLoaded = i;
+      if (replay.timeline) replay.report();
     })
     .catch(() => {
       /* a preview that will not load leaves the last picture up */
     });
-  return pass;
+  return null;
 }
 
 function sceneCard(scene, eventTime) {
@@ -506,7 +515,7 @@ function incidentHtml(inc, radar) {
   const related = inc.related.length
     ? `<ul class="links">${inc.related
         .slice(0, 12)
-        .map((l, n) => `<li data-rel="${n}">${dot(l.incident.category)}<span>${esc(l.incident.title)}</span><span class="km">${Math.round(l.km)} km</span></li>`)
+        .map((l, n) => `<li tabindex="0" role="button" data-rel="${n}">${dot(l.incident.category)}<span>${esc(l.incident.title)}</span><span class="km">${Math.round(l.km)} km</span></li>`)
         .join('')}</ul>${inc.related.length > 12 ? `<p class="hint">and ${inc.related.length - 12} more</p>` : ''}`
     : `<p class="note">Nothing else within ${RELATED_KM} km and ${RELATED_DAYS} days.</p>`;
 
@@ -525,7 +534,7 @@ function incidentHtml(inc, radar) {
       <div id="radar">${radar}</div>
       ${lapseBox(inc.lat, inc.lon)}
     </details>
-    <details class="fold" id="sec-replay"><summary>How the replay is built</summary><div id="replay-parts"></div></details>
+    <details class="fold" id="sec-replay"><summary>How the drawing on the globe is built</summary><div id="replay-parts"></div></details>
     <details class="fold" id="sec-news"><summary>In the news</summary><div id="news"><p class="spinner">Looking for press coverage…</p></div></details>
     <details class="fold" id="sec-linked"><summary>Linked events (${inc.related.length})</summary>${related}</details>
     <details class="fold" id="sec-reports"><summary>Source reports and facts</summary>
@@ -548,7 +557,8 @@ function nextPassHtml(scenes) {
     <div class="src">Next NISAR overpass <span class="badge computed">Computed</span></div>
     <p><b class="countdown" data-until="${est.time}">…</b></p>
     <p>${utc(est.time)} · ${esc(local)} your time</p>
-    <p>Newest archived pass on ${esc(est.last.direction.toLowerCase())} track ${esc(est.last.track)}, frame ${esc(est.last.frame)} (${utc(est.last.time)}), plus NISAR's ${REPEAT_DAYS}-day repeat cycle.${weak} An overpass is not a guaranteed acquisition, and images reach the archive hours to days later. NASA's own observation plan needs a login, so it is not used here.</p>
+    <details class="fold inner"><summary>How this is worked out</summary>
+    <p>Newest archived pass on ${esc(est.last.direction.toLowerCase())} track ${esc(est.last.track)}, frame ${esc(est.last.frame)} (${utc(est.last.time)}), plus NISAR's ${REPEAT_DAYS}-day repeat cycle.${weak} An overpass is not a guaranteed acquisition, and images reach the archive hours to days later. NASA's own observation plan needs a login, so it is not used here.</p></details>
   </div>`;
 }
 
@@ -582,7 +592,7 @@ function radarHtml(inc, found) {
   }
   const { pair, reason } = comparisonStatus(backscatter, inc.time, inc);
   const before = backscatter.filter((s) => s.time < inc.time).length;
-  let html = `<p class="note">${backscatter.length} backscatter scenes (${before} before, ${backscatter.length - before} after) and ${interferograms.length} interferograms.</p>`;
+  let html = `<p class="note">${backscatter.length} radar images (${before} before the event, ${backscatter.length - before} after) and ${interferograms.length} interferograms, which compare two passes to show ground movement.</p>`;
   html += nextPassHtml(found.newest?.length ? found.newest : backscatter);
   if (pair) {
     const explanation = Object.hasOwn(CHANGE_EXPLANATIONS, inc.category) ? CHANGE_EXPLANATIONS[inc.category] : CHANGE_EXPLANATIONS.other;
@@ -625,16 +635,18 @@ function radarHtml(inc, found) {
 }
 
 async function selectIncident(inc, fly, intro = '') {
-  endCompare();
+  take('timeline');
   const token = ++state.lookup;
   // A story, or someone already reading details, goes straight to the
   // panel; otherwise the event opens as the small card.
   const detailed = !!intro || (!$('right').hidden && state.selected?.kind === 'incident');
-  state.selected = { kind: 'incident', incident: inc, historyStarted: detailed };
-  openPanel(intro + incidentHtml(inc, '<p class="spinner">Searching the NISAR archive…</p>'), !detailed);
+  // The linked events as listed in the panel: a feed refresh re-sorts them.
+  state.selected = { kind: 'incident', incident: inc, historyStarted: detailed, related: inc.related, story: !!intro };
+  openPanel(intro + incidentHtml(inc, '<p class="spinner">Searching the NISAR archive…</p>'), !detailed, !intro);
   renderCard();
   renderNarrative();
-  showMeasured(() => state.selected?.incident === inc, measuredNear(inc.lat, inc.lon));
+  const opened = state.selected;
+  showMeasured(() => state.selected === opened, measuredNear(inc.lat, inc.lon));
   globe.select(inc);
   if (fly) globe.flyTo(inc.lat, inc.lon);
   replay.start(inc);
@@ -652,7 +664,12 @@ async function selectIncident(inc, fly, intro = '') {
     ]);
     found = { ...around, newest };
   } catch (err) {
-    if (token === state.lookup) $('radar').innerHTML = `<p class="note">NISAR search failed: ${esc(err.message)}</p>`;
+    if (token !== state.lookup) return;
+    // Say so where the reader is looking, not only in the folded section.
+    $('radar').innerHTML = `<p class="note">NISAR search failed: ${esc(err.message)}</p>`;
+    state.selected.found = { backscatter: [], interferograms: [], newest: [], failed: true };
+    renderCard();
+    renderNarrative();
     return;
   }
   if (token !== state.lookup) return;
@@ -672,6 +689,7 @@ async function selectIncident(inc, fly, intro = '') {
 }
 
 function selectScene(scene, fly) {
+  setLink('');
   endCompare();
   replay.stop();
   state.lookup++;
@@ -690,7 +708,7 @@ function selectScene(scene, fly) {
     <h4>Events inside this pass (${inside.length})</h4>
     ${
       inside.length
-        ? `<ul class="links">${inside.map((i, n) => `<li data-in="${n}">${dot(i.category)}<span>${esc(i.title)}</span></li>`).join('')}</ul>`
+        ? `<ul class="links">${inside.map((i, n) => `<li tabindex="0" role="button" data-in="${n}">${dot(i.category)}<span>${esc(i.title)}</span></li>`).join('')}</ul>`
         : '<p class="note">No tracked event falls inside this footprint.</p>'
     }
     <p class="hint">${esc(scene.name)}</p>`);
@@ -700,6 +718,9 @@ function selectScene(scene, fly) {
 }
 
 function choose(found) {
+  endCompare();
+  globe.select(null);
+  setLink('');
   replay.stop();
   state.selected = { kind: 'choice', found };
   state.lookup++;
@@ -707,16 +728,16 @@ function choose(found) {
     <ul class="links">${found
       .map((f, n) =>
         f.kind === 'incident'
-          ? `<li data-pick="${n}">${dot(f.incident.category)}<span>${esc(f.incident.title)}</span><span class="km">${ago(f.incident.endTime)}</span></li>`
+          ? `<li tabindex="0" role="button" data-pick="${n}">${dot(f.incident.category)}<span>${esc(f.incident.title)}</span><span class="km">${ago(f.incident.endTime)}</span></li>`
           : f.kind === 'place'
-            ? `<li data-pick="${n}">${diamond(f.place.kind)}<span>${esc(f.place.name)}</span><span class="km">${esc(PLACE_KINDS[f.place.kind].label)}</span></li>`
+            ? `<li tabindex="0" role="button" data-pick="${n}">${diamond(f.place.kind)}<span>${esc(f.place.name)}</span><span class="km">${esc(PLACE_KINDS[f.place.kind].label)}</span></li>`
             : f.kind === 'satellite'
-              ? `<li data-pick="${n}"><i class="dot" style="--c:#39e6c4"></i><span>NISAR, live position</span><span class="km">satellite</span></li>`
+              ? `<li tabindex="0" role="button" data-pick="${n}"><i class="dot" style="--c:#39e6c4"></i><span>NISAR, live position</span><span class="km">satellite</span></li>`
               : f.kind === 'animal'
-                ? `<li data-pick="${n}"><i class="dot" style="--c:${speciesOf(f.animal).color}"></i><span>${esc(f.animal.common)}</span><span class="km">${esc(f.animal.date || '')}</span></li>`
+                ? `<li tabindex="0" role="button" data-pick="${n}"><i class="dot" style="--c:${speciesOf(f.animal).color}"></i><span>${esc(f.animal.common)}</span><span class="km">${esc(f.animal.date || '')}</span></li>`
                 : f.kind === 'poi'
-                  ? `<li data-pick="${n}"><i class="dot" style="--c:#f4e3b2"></i><span>${esc(f.poi.name)}</span><span class="km">landmark</span></li>`
-                  : `<li data-pick="${n}"><i class="dot" style="--c:#39e6c4;border-radius:2px"></i><span>NISAR pass, track ${esc(f.scene.track)} frame ${esc(f.scene.frame)}</span><span class="km">${ago(f.scene.time)}</span></li>`,
+                  ? `<li tabindex="0" role="button" data-pick="${n}"><i class="dot" style="--c:#f4e3b2"></i><span>${esc(f.poi.name)}</span><span class="km">landmark</span></li>`
+                  : `<li tabindex="0" role="button" data-pick="${n}"><i class="dot" style="--c:#39e6c4;border-radius:2px"></i><span>NISAR pass, track ${esc(f.scene.track)} frame ${esc(f.scene.frame)}</span><span class="km">${ago(f.scene.time)}</span></li>`,
       )
       .join('')}</ul>`);
 }
@@ -731,32 +752,36 @@ function allScenes() {
 async function showScene(id, button) {
   const scene = allScenes().find((s) => s.id === id);
   if (!scene) return;
-  endCompare();
+  const token = take('manual');
   button.textContent = 'Loading…';
   try {
-    const bounds = await imageBounds(scene);
-    await globe.addScene(scene, bounds);
+    const [bounds, picture] = await Promise.all([imageBounds(scene), loadPicture(scene.image)]);
+    if (token !== stage.token) return;
+    globe.sweepTo(picture, bounds, scene.direction !== 'Descending');
     globe.flyToBounds(bounds);
-    // A picture chosen by hand stays until the reader picks another.
-    if (state.selected) state.selected.manualPicture = true;
     if (scene.product === 'GUNW') setLegend('interferogram', { from: scene.refTime, to: scene.secTime });
     else setLegend('radar', { pol: scene.pol, time: scene.time });
     button.textContent = 'Shown';
+    renderCard();
   } catch {
+    if (token !== stage.token) return;
     button.textContent = 'Preview failed';
+    backToTimeline();
   }
 }
 
 async function compare(button) {
-  const inc = state.selected.incident;
-  const pair = bestPair(state.selected.found.backscatter, inc.time, true, inc);
+  const sel = state.selected;
+  const inc = sel.incident;
+  const pair = bestPair(sel.found.backscatter, inc.time, true, inc);
   if (!pair) return;
-  endCompare();
-  replay.stop();
+  const token = take('compare');
   button.textContent = 'Loading…';
   try {
-    const [b1, b2] = await Promise.all([imageBounds(pair.before), imageBounds(pair.after)]);
-    await Promise.all([globe.addScene(pair.before, b1, 'left'), globe.addScene(pair.after, b2, 'right')]);
+    const [b1, b2, before, after] = await Promise.all([imageBounds(pair.before), imageBounds(pair.after), loadPicture(pair.before.image), loadPicture(pair.after.image)]);
+    if (token !== stage.token) return;
+    globe.addPicture(before, b1, 'left');
+    globe.addPicture(after, b2, 'right');
     globe.flyToBounds(b2);
     globe.select(inc, [pair.after]);
     $('split-before').textContent = `Before · ${day(pair.before.time)}`;
@@ -765,8 +790,11 @@ async function compare(button) {
     setSplit(0.5);
     setLegend('radar', { pol: pair.after.pol });
     button.textContent = 'Comparing: drag the white bar';
+    renderCard();
   } catch {
+    if (token !== stage.token) return;
     button.textContent = 'Preview failed';
+    backToTimeline();
   }
 }
 
@@ -810,11 +838,25 @@ function setLegend(kind, info = {}) {
       <ul>${row('#40aaff', `Echo got weaker: ${km(info.result.weakerKm2)} km²`) + row('#ffaa3c', `Echo got stronger: ${km(info.result.strongerKm2)} km²`)}</ul>
       <small>Worked out from preview pictures: a guide to where to look, not a measurement, and not a statement of cause.</small>`;
   }
-  box.innerHTML = html;
+  // On a phone the key is one line until tapped, to leave the map visible.
+  const title = html.slice(0, html.indexOf('</b>') + 4);
+  box.innerHTML = `<details ${window.innerWidth > 760 ? 'open' : ''}><summary>${title}</summary>${html.slice(title.length)}</details>`;
   box.hidden = false;
 }
 
-function endCompare() {
+// One thing at a time owns the picture on the globe, with its key and
+// divider: the event timeline, a pass picked by hand, the change picture,
+// the before/after divider, a chart date, the time-lapse, or nothing.
+// Taking the globe clears what was there and hands back a token; work that
+// waits for pictures checks the token before drawing, so a slow download
+// can never land on top of what the reader asked for next.
+const stage = { owner: 'none', token: 0 };
+
+function take(owner) {
+  stage.token++;
+  stage.owner = owner;
+  // A running time-lapse yields to whatever takes the globe from it.
+  if (owner !== 'lapse' && replay.plan && !replay.timeline) replay.stop();
   setLegend(null);
   globe.clearScenes();
   // The divider stays up while the two radar wavelengths are being compared.
@@ -823,41 +865,71 @@ function endCompare() {
   state.change = null;
   const out = $('change-out');
   if (out) out.innerHTML = '';
+  // Buttons that had put a picture up go back to offering it.
+  if ($('compare')) $('compare').textContent = 'Compare the source images';
+  if ($('changes')) $('changes').textContent = 'Show what changed';
+  document.querySelectorAll('#detail [data-show]').forEach((b) => (b.textContent = b.id === 'igram-go' ? 'Show ground movement' : 'Show on globe'));
+  // The timeline draws its pass afresh when it next owns the globe.
+  if (state.selected) state.selected.passIndex = state.selected.passLoaded = undefined;
+  return stage.token;
+}
+
+function endCompare() {
+  take('none');
+}
+
+// Hands the globe back to the event's timeline and shows its pass again.
+function backToTimeline() {
+  if (stage.owner !== 'timeline') take('timeline');
+  if (replay.timeline) replay.report();
+  else syncNisar(Date.now());
+  renderCard();
 }
 
 // The friendly view: colours only where the radar echo changed between the
 // two passes, with the source image available underneath as proof.
+// "Show what changed", from the card or from the details panel: the change
+// between the two passes either side of the event, over the newer radar
+// picture. The timeline stays; pressing again goes back to its picture.
 async function showChanges(button) {
-  const inc = state.selected.incident;
-  const pair = bestPair(state.selected.found.backscatter, inc.time, true, inc);
+  const sel = state.selected;
+  if (sel?.kind !== 'incident' || !sel.found) return;
+  if (stage.owner === 'change') return backToTimeline();
+  const inc = sel.incident;
+  const pair = bestPair(sel.found.backscatter, inc.time, true, inc);
   if (!pair) return;
-  endCompare();
-  replay.stop();
+  const token = take('change');
   button.textContent = 'Comparing the two passes…';
   try {
     const [b1, b2, before, after] = await Promise.all([imageBounds(pair.before), imageBounds(pair.after), loadPicture(pair.before.image), loadPicture(pair.after.image)]);
+    if (token !== stage.token) return;
     const result = changeMap(before, b1, after, b2);
     const pol = pair.after.pol?.co ? pair.after.pol : { co: 'radar', cross: null };
     const channels = pol.cross ? `combined ${pol.co} + ${pol.cross}` : pol.co;
     if (!result) throw new Error('The two passes do not overlap');
     state.change = { result, after, afterBounds: b2, pair };
-    drapeChanges(false);
+    drapeChanges(true);
     setLegend('change', { result, from: pair.before.time, to: pair.after.time });
-    globe.flyToBounds(result.bounds);
     globe.select(inc, [pair.after]);
     const km = (v) => (v >= 100 ? Math.round(v).toLocaleString('en') : v.toFixed(1));
     const pct = (v) => `${(v * 100).toFixed(1)}%`;
-    $('change-out').innerHTML = `
+    if ($('change-out')) {
+      $('change-out').innerHTML = `
       <ul class="legend">
         <li><i style="--c:#40aaff"></i><span><b>Echo got weaker</b> on ${km(result.weakerKm2)} km² (${pct(result.weakerShare)}). Typical causes: new open water, burnt or cleared vegetation, smoother ground.</span></li>
         <li><i style="--c:#ffaa3c"></i><span><b>Echo got stronger</b> on ${km(result.strongerKm2)} km² (${pct(result.strongerShare)}). Typical causes: flooded vegetation, wetter or rougher ground, new structures.</span></li>
       </ul>
-      <label class="check"><input type="checkbox" id="under" /> Show the radar image underneath</label>
-      <p class="hint">Computed in your browser from NASA's preview images of both passes over ${km(result.comparedKm2)} km². A pixel is coloured where the ${esc(channels)} brightness moved by more than ${Math.round((CHANGE_THRESHOLD / 255) * 100)}% of full scale. Differences that a shift of up to two pixels between the images would explain are ignored. Previews are 8-bit and reduced in resolution, so treat this as where to look, not a measurement. Open sea changes with the wind between passes. The causes listed are the usual ones, not a diagnosis.</p>`;
-    button.textContent = 'Changes shown';
+      <label class="check"><input type="checkbox" id="under" checked /> Show the radar image underneath</label>
+      <details class="fold inner"><summary>How this is worked out</summary>
+      <p class="hint">Computed in your browser from NASA's preview images of both passes over ${km(result.comparedKm2)} km². A pixel is coloured where the ${esc(channels)} brightness moved by more than ${Math.round((CHANGE_THRESHOLD / 255) * 100)}% of full scale. Differences that a shift of up to two pixels between the images would explain are ignored. Previews are 8-bit and reduced in resolution, so treat this as where to look, not a measurement. Open sea changes with the wind between passes. The causes listed are the usual ones, not a diagnosis.</p></details>`;
+    }
+    if ($('changes')) $('changes').textContent = 'Back to the radar picture';
+    renderCard();
   } catch (err) {
-    button.textContent = 'Could not compare';
-    $('change-out').innerHTML = `<p class="note">${esc(err.message)}</p>`;
+    if (token !== stage.token) return;
+    backToTimeline();
+    if ($('changes')) $('changes').textContent = 'Could not compare';
+    if ($('change-out')) $('change-out').innerHTML = `<p class="note">${esc(err.message)}</p>`;
   }
 }
 
@@ -906,6 +978,8 @@ function setLink(hash) {
 // Opens whatever a shared link points at. Events may need a moment, or the
 // archive, before they are loaded.
 async function openLink() {
+  // Whatever the reader picks while this is still looking wins.
+  const look = state.lookup;
   const [key, raw] = location.hash.slice(1).split('=');
   const value = decodeURIComponent(raw || '');
   if (!key || !value) return;
@@ -927,7 +1001,7 @@ async function openLink() {
     await $('window').onchange({ target: $('window') });
   }
   const incident = find();
-  if (incident) {
+  if (incident && look === state.lookup) {
     state.hidden.delete(incident.category);
     draw();
     selectIncident(incident, true);
@@ -968,11 +1042,11 @@ async function openStory(id) {
   setLink(`story=${story.id}`);
 
   if (story.action === 'lapse') {
-    openPanel(storyHtml(story, `<h4>NISAR time-lapse at this point</h4>${lapseBox(story.lat, story.lon)}`));
+    openPanel(storyHtml(story, `<h4>NISAR time-lapse at this point</h4>${lapseBox(story.lat, story.lon)}`), false, false);
     return startLapse();
   }
   if (story.action === 'interferogram') {
-    openPanel(storyHtml(story, `<h4>The interferogram</h4><div id="igram"><p class="spinner">Searching the NISAR archive…</p></div>`));
+    openPanel(storyHtml(story, `<h4>The interferogram</h4><div id="igram"><p class="spinner">Searching the NISAR archive…</p></div>`), false, false);
     globe.flyTo(story.lat, story.lon, 600_000);
     const token = state.lookup;
     try {
@@ -982,8 +1056,10 @@ async function openStory(id) {
       // The longest gap between passes gives slow movement the most time to show.
       const pick = [...list].sort((a, b) => b.secTime - b.refTime - (a.secTime - a.refTime))[0];
       state.selected.found = { backscatter: [], interferograms: list };
-      const bounds = await imageBounds(pick);
-      await globe.addScene(pick, bounds);
+      const [bounds, picture] = await Promise.all([imageBounds(pick), loadPicture(pick.image)]);
+      if (token !== state.lookup) return;
+      take('manual');
+      globe.sweepTo(picture, bounds, pick.direction !== 'Descending');
       setLegend('interferogram', { from: pick.refTime, to: pick.secTime });
       globe.flyToBounds(bounds);
       $('igram').innerHTML = `<p class="note">Shown on the globe: ${day(pick.refTime)} compared with ${day(pick.secTime)}, ${Math.round((pick.secTime - pick.refTime) / DAY)} days apart, ${esc(pick.direction.toLowerCase())} track ${esc(pick.track)}. ${list.length} pairs cover this point in all.</p>
@@ -994,7 +1070,7 @@ async function openStory(id) {
     return;
   }
   // An event story: find the event in the archive and open it under the story.
-  openPanel(`${storyHtml(story)}<p class="spinner">Loading events since NISAR's data began…</p>`);
+  openPanel(`${storyHtml(story)}<p class="spinner">Loading events since NISAR's data began…</p>`, false, false);
   globe.flyTo(story.lat, story.lon, 900_000);
   const token = state.lookup;
   if (!state.archive) {
@@ -1013,9 +1089,10 @@ async function openStory(id) {
   state.hidden.delete(incident.category);
   draw();
   await selectIncident(incident, false, storyHtml(story));
+  if (token + 1 !== state.lookup) return;
   setLink(`story=${story.id}`);
   // The story is about the ground movement, so show it straight away.
-  if (token + 1 === state.lookup) $('igram-go')?.click();
+  $('igram-go')?.click();
 }
 
 // ---------- alerts ticker ----------
@@ -1069,7 +1146,7 @@ function renderTicker() {
   $('ticker-label').textContent = label;
   $('ticker-label').className = `badge ${label === 'New' ? 'observed' : ''}`;
   $('ticker-text').disabled = false;
-  $('ticker-text').textContent = [`${CATEGORIES[incident.category].label}: ${incident.title}`, size(incident.magnitude), sources, `${utc(label === 'Ongoing' ? incident.endTime : incident.time)} (${ago(label === 'Ongoing' ? incident.endTime : incident.time)})`]
+  $('ticker-text').textContent = [`${CATEGORIES[incident.category].label}: ${incident.title}`, size(incident.magnitude), incident.nisarScenes.length ? 'NISAR passed here in the last days' : null, sources, `${utc(label === 'Ongoing' ? incident.endTime : incident.time)} (${ago(label === 'Ongoing' ? incident.endTime : incident.time)})`]
     .filter(Boolean)
     .join(' · ');
   $('ticker-count').textContent = `${ticker.at + 1}/${ticker.items.length}`;
@@ -1160,7 +1237,7 @@ async function startIncidentHistory(inc, selection) {
       <p class="note">${usable} usable samples from ${wanted.length} requested previews of ${stack.scenes.length} available passes. Same ${esc(stack.direction)} track ${esc(stack.track)}, frame ${esc(stack.frame)}; ${day(wanted[0].time)} to ${day(wanted[wanted.length - 1].time)}.${stack.unplaced ? ` ${stack.unplaced} other passes lack placeable previews and are omitted.` : ''}</p>
       <div id="incident-history-chart"></div>
       <p id="incident-history-status" class="note" role="status">${usable < 2 ? 'Insufficient data for a trend: fewer than two previews have samples at this pin. ' : ''}${wanted.length - usable} requested passes have no sample (failed image or no coverage); these are gaps, not zero brightness.</p>
-      <p class="hint">${esc(channels)} ${pol.cross ? 'are' : 'is'} NASA preview brightness (0–255), not calibrated backscatter or a measurement of forest loss, area lost or ice melt. Samples average up to 5×5 preview pixels; the ground footprint varies with image resolution and coverage, not a fixed area. Click a chart date to stop the replay and show that preview on the globe.</p>`;
+      <p class="hint">${esc(channels)} ${pol.cross ? 'are' : 'is'} NASA preview brightness (0–255), not calibrated backscatter or a measurement of forest loss, area lost or ice melt. Samples average up to 5×5 preview pixels; the ground footprint varies with image resolution and coverage, not a fixed area. Click a chart date to show that pass on the globe.</p>`;
     if (!usable) {
       $('incident-history-chart').innerHTML = '<p class="note">No brightness history could be sampled from these previews.</p>';
       return;
@@ -1173,10 +1250,12 @@ async function startIncidentHistory(inc, selection) {
         status.textContent = `${day(wanted[i].time)}: preview unavailable; no image to show.`;
         return;
       }
-      // Explicit user interaction takes over the globe; background loading never does.
-      replay.stop();
-      endCompare();
+      // A date picked by hand takes the globe; the timeline keeps running
+      // underneath and takes it back when it is next touched.
+      take('chart');
       globe.addPicture(view(frame, 'colour'), frame.bounds);
+      setLegend('radar', { pol, time: frame.time });
+      renderCard();
       globe.flyToBounds(frame.bounds);
       chart.setActive(i);
       status.textContent = `${day(frame.time)}: preview shown on globe.${points[i].co == null ? ' No sample at the exact pin.' : ''}`;
@@ -1197,8 +1276,12 @@ async function startLapse(stackIndex = 0, all = false) {
   if (!box) return;
   const lat = +box.dataset.lat;
   const lon = +box.dataset.lon;
-  const token = ++state.lookup;
-  endCompare();
+  // Its own counter: bumping the selection's would cancel the event's
+  // NISAR search, which may still be running.
+  const run = (state.lapseRun = (state.lapseRun || 0) + 1);
+  const look = state.lookup;
+  const stale = () => run !== state.lapseRun || look !== state.lookup || !$('lapse');
+  take('lapse');
   replay.stop();
   box.innerHTML = '<p class="spinner">Searching a year of NISAR passes…</p>';
   let stacks = state.lapse?.lat === lat && state.lapse?.lon === lon ? state.lapse.stacks : null;
@@ -1209,7 +1292,7 @@ async function startLapse(stackIndex = 0, all = false) {
     box.innerHTML = `<p class="note">NISAR search failed: ${esc(err.message)}</p>`;
     return;
   }
-  if (token !== state.lookup || !$('lapse')) return;
+  if (stale()) return;
   if (!stacks.length) {
     box.innerHTML = '<p class="note">NISAR has not imaged this spot at least twice on the same track yet. Open ocean is mostly not imaged.</p>';
     return;
@@ -1217,9 +1300,9 @@ async function startLapse(stackIndex = 0, all = false) {
   const stack = stacks[stackIndex];
   const wanted = all ? stack.scenes : spread(stack.scenes, LAPSE_DEFAULT);
   const frames = await loadFrames(wanted, (done, total) => {
-    if (token === state.lookup && $('lapse')) box.innerHTML = `<p class="spinner">Loading pass ${done} of ${total}…</p>`;
+    if (!stale()) box.innerHTML = `<p class="spinner">Loading pass ${done} of ${total}…</p>`;
   });
-  if (token !== state.lookup || !$('lapse')) return;
+  if (stale()) return;
   if (frames.length < 2) {
     box.innerHTML = '<p class="note">The preview images for these passes could not be loaded.</p>';
     return;
@@ -1235,7 +1318,7 @@ async function startLapse(stackIndex = 0, all = false) {
     index: -1,
     draw(t) {
       const i = Math.max(0, Math.min(frames.length - 1, Math.floor(t / LAPSE_STEP)));
-      if (i === this.index && this.mode === lapse.mode) return;
+      if (stage.owner !== 'lapse' || (i === this.index && this.mode === lapse.mode)) return;
       this.index = i;
       this.mode = lapse.mode;
       globe.fadeTo(view(frames[i], lapse.mode), frames[i].bounds, 0.45);
@@ -1248,6 +1331,11 @@ async function startLapse(stackIndex = 0, all = false) {
     },
     teardown() {
       globe.clearScenes();
+      // The passes are large: let them go, keep the track list for a restart.
+      lapse.frames = null;
+      // Its controls would be dead now, so the box offers to play again.
+      const here = $('lapse');
+      if (here && state.lapse === lapse) here.innerHTML = '<button id="lapse-go">▶ Play a year of NISAR passes here</button>';
     },
   };
   lapse.plan = plan;
@@ -1272,7 +1360,7 @@ async function startLapse(stackIndex = 0, all = false) {
     lapse.chart = historyChart($('lapse-chart'), series, pol, (i) => replay.seek((i + 0.01) / frames.length));
     // What the numbers say, worked out from the series by fixed rules.
     const lines = describeSeries(series, pol);
-    if (lines.length) $('lapse-chart').insertAdjacentHTML('beforeend', `<ul class="parts facts">${lines.map((l) => `<li><span class="badge observed">Computed</span><span>${esc(l)}</span></li>`).join('')}</ul>`);
+    if (lines.length) $('lapse-chart').insertAdjacentHTML('beforeend', `<ul class="parts facts">${lines.map((l) => `<li><span class="badge computed">Computed</span><span>${esc(l)}</span></li>`).join('')}</ul>`);
   }
   else $('lapse-chart').innerHTML = '<p class="note">These passes do not cover the exact point, so there is no history to chart.</p>';
 
@@ -1311,6 +1399,7 @@ async function selectSpot(at) {
   replay.stop();
   state.lookup++;
   state.selected = { kind: 'spot' };
+  const spot = state.selected;
   globe.select(null);
   setLink(`spot=${at.lat.toFixed(4)},${at.lon.toFixed(4)}`);
   openPanel(`<span class="tag">Place</span>
@@ -1324,7 +1413,7 @@ async function selectSpot(at) {
     const res = await fetch(`https://photon.komoot.io/reverse?lat=${at.lat}&lon=${at.lon}&lang=en`);
     const p = (await res.json()).features?.[0]?.properties;
     const name = p && [p.name || p.city || p.county, p.state, p.country].filter(Boolean).join(', ');
-    if (name && $('spot-name')) $('spot-name').textContent = name;
+    if (name && $('spot-name') && state.selected === spot) $('spot-name').textContent = name;
   } catch {
     /* coordinates are a fine title */
   }
@@ -1371,9 +1460,12 @@ async function startNisarLive() {
 function tickNisar() {
   const e = live.elements;
   if (!e || !$('live-nisar').checked) {
-    globe.setSatellite(null);
+    // Once is enough: clearing it again every second would redraw the globe.
+    if (live.satelliteShown !== false) globe.setSatellite(null);
+    live.satelliteShown = false;
     return;
   }
+  live.satelliteShown = true;
   const now = new Date();
   if (!live.track || now - live.trackAt > 30_000) {
     live.track = groundTrack(e.satrec, now, 50, 50, 1);
@@ -1395,6 +1487,7 @@ function satFacts(pos) {
 }
 
 function selectSatellite() {
+  setLink('');
   const e = live.elements;
   if (!e) return;
   endCompare();
@@ -1416,6 +1509,7 @@ function selectSatellite() {
 }
 
 function selectAnimal(a) {
+  setLink('');
   const sp = speciesOf(a);
   endCompare();
   replay.stop();
@@ -1438,6 +1532,7 @@ function selectAnimal(a) {
 }
 
 function selectPoi(poi) {
+  setLink('');
   endCompare();
   replay.stop();
   state.lookup++;
@@ -1534,16 +1629,16 @@ async function showMeasured(stillHere, pending, findCompare) {
 async function showMeasuredMap(button) {
   const d = state.selected?.measured;
   if (!d) return;
-  endCompare();
-  replay.stop();
+  const token = take('manual');
   button.textContent = 'Loading…';
   try {
     const picture = await loadPicture(changeImageUrl(d));
+    if (token !== stage.token) return;
     globe.addPicture(picture, d.change.bounds, undefined, 0.95);
     globe.flyToBounds(d.change.bounds);
     button.textContent = 'Change map shown';
   } catch {
-    button.textContent = 'Change map failed to load';
+    if (token === stage.token) button.textContent = 'Change map failed to load';
   }
 }
 
@@ -1569,7 +1664,7 @@ function drawPlaces() {
     )
     .join('');
   $('place-list').innerHTML = shown
-    .map((p) => `<li data-site="${esc(p.id)}">${diamond(p.kind)}<span>${esc(p.name)}</span><span class="km">${esc(p.region)}</span></li>`)
+    .map((p) => `<li tabindex="0" role="button" data-site="${esc(p.id)}">${diamond(p.kind)}<span>${esc(p.name)}</span><span class="km">${esc(p.region)}</span></li>`)
     .join('');
   $('place-count').textContent = shown.length;
 }
@@ -1606,7 +1701,7 @@ async function selectPlace(place, fly) {
     ${
       others.length
         ? `<h4>Same months, other hemisphere</h4><p class="hint">Play one of these next to see the opposite season.</p><ul class="links">${others
-            .map((p) => `<li data-site="${esc(p.id)}">${diamond(p.kind)}<span>${esc(p.name)}</span><span class="km">${esc(p.region)}</span></li>`)
+            .map((p) => `<li tabindex="0" role="button" data-site="${esc(p.id)}">${diamond(p.kind)}<span>${esc(p.name)}</span><span class="km">${esc(p.region)}</span></li>`)
             .join('')}</ul>`
         : ''
     }
@@ -1697,6 +1792,7 @@ function pickHit(n) {
 
 // Lands on a place and lists the events around it.
 function goToPlace(place) {
+  setLink('');
   endCompare();
   replay.stop();
   state.lookup++;
@@ -1717,7 +1813,7 @@ function goToPlace(place) {
     <h4>Events within ${Math.round(reach)} km (${near.length})</h4>
     ${
       near.length
-        ? `<ul class="links">${near.map((x, n) => `<li data-near="${n}">${dot(x.incident.category)}<span>${esc(x.incident.title)}</span><span class="km">${Math.round(x.km)} km</span></li>`).join('')}</ul>`
+        ? `<ul class="links">${near.map((x, n) => `<li tabindex="0" role="button" data-near="${n}">${dot(x.incident.category)}<span>${esc(x.incident.title)}</span><span class="km">${Math.round(x.km)} km</span></li>`).join('')}</ul>`
         : '<p class="note">No tracked event near this place in the current time window.</p>'
     }
     <h4>NISAR radar over this place</h4>
@@ -1809,6 +1905,7 @@ async function start() {
   startNisarLive();
   $('footprints').onchange = draw;
   $('window').onchange = async (e) => {
+    const run = (state.windowRun = (state.windowRun || 0) + 1);
     if (e.target.value !== 'nisar') {
       state.archive = null;
       state.windowDays = +e.target.value;
@@ -1817,7 +1914,10 @@ async function start() {
     }
     $('window-note').hidden = false;
     $('window-note').textContent = `Loading larger events since ${day(NISAR_START)}…`;
-    state.archive = await fetchArchive();
+    const archive = await fetchArchive();
+    // A shorter window chosen while the archive loaded stays chosen.
+    if (run !== state.windowRun) return;
+    state.archive = archive;
     $('window-note').textContent = `Events since ${day(NISAR_START)}: earthquakes of magnitude 6 and up, orange and red GDACS alerts, and NASA-tracked floods, storms, volcanoes and ice. Smaller events are shown for the last 14 days only.`;
     rebuild();
   };
@@ -1842,12 +1942,39 @@ async function start() {
   $('nav-out').onclick = () => globe.zoom(2);
   $('nav-north').onclick = () => globe.faceNorth();
   $('nav-tilt').onclick = () => globe.toggleTilt();
-  globe.onView = (view) => {
-    $('needle').style.transform = `rotate(${-view.heading}deg)`;
-    $('nav-tilt').classList.toggle('on', view.pitch > 5);
-    $('nav-tilt').textContent = view.pitch > 5 ? '2D' : '3D';
+  // Called on every drawn frame, so it only touches the page on a change.
+  const shown = { heading: null, tilted: null };
+  globe.onView = (camera) => {
+    const heading = Math.round(camera.heading);
+    const tilted = camera.pitch > 5;
+    if (heading !== shown.heading) $('needle').style.transform = `rotate(${-heading}deg)`;
+    if (tilted !== shown.tilted) {
+      $('nav-tilt').classList.toggle('on', tilted);
+      $('nav-tilt').textContent = tilted ? '2D' : '3D';
+    }
+    shown.heading = heading;
+    shown.tilted = tilted;
   };
-  $('close').onclick = closePanel;
+  // ✕ on the details of an event steps back to its card and timeline; the
+  // card's own ✕, or ✕ on anything else, lets go of the selection.
+  const stepBack = () => {
+    const sel = state.selected;
+    if (sel?.kind === 'incident' && !sel.story && !$('right').hidden) {
+      $('right').hidden = true;
+      $('card').hidden = false;
+      $('tip').hidden = true;
+      renderCard();
+    } else closePanel();
+  };
+  $('close').onclick = stepBack;
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && state.selected && !e.target.closest('#search')) stepBack();
+    // Rows that act as buttons answer to the keyboard too.
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.matches?.('li[role="button"]')) {
+      e.preventDefault();
+      e.target.click();
+    }
+  });
   $('share').onclick = async () => {
     try {
       await navigator.clipboard.writeText(location.href);
@@ -1883,11 +2010,24 @@ async function start() {
     draw();
   };
 
-  $('replay-toggle').onclick = () => replay.toggle();
+  $('replay-toggle').onclick = () => {
+    if (replay.timeline && stage.owner !== 'timeline') {
+      take('timeline');
+      renderCard();
+    }
+    replay.toggle();
+  };
   // The timeline is dragged like a slider.
   const line = $('replay-bar');
+  const retake = () => {
+    if (replay.timeline && stage.owner !== 'timeline') {
+      take('timeline');
+      renderCard();
+    }
+  };
   const seekTo = (e) => {
     const box = line.getBoundingClientRect();
+    retake();
     replay.seek((e.clientX - box.left) / box.width);
   };
   line.onpointerdown = (e) => {
@@ -1899,9 +2039,22 @@ async function start() {
   line.onkeydown = (e) => {
     if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
     e.preventDefault();
+    retake();
     replay.seek(+line.getAttribute('aria-valuenow') / 100 + (e.key === 'ArrowLeft' ? -0.02 : 0.02));
   };
-  $('replay-live').onclick = () => replay.seek(1);
+  $('replay-live').onclick = () => {
+    const sel = state.selected;
+    if (replay.timeline) {
+      retake();
+      return replay.seek(1);
+    }
+    // From a time-lapse inside an event: back to that event's timeline.
+    if (sel?.kind !== 'incident') return;
+    take('timeline');
+    replay.start(sel.incident, { keepView: true });
+    if (sel.passes) replay.extend(sel.reach, sel.passes.map((x) => x.time));
+    renderCard();
+  };
 
   $('search-box').oninput = runSearch;
   $('search-box').onfocus = runSearch;
@@ -1944,6 +2097,8 @@ async function start() {
   $('menu').onclick = () => {
     const closed = $('left').classList.toggle('closed');
     $('menu').setAttribute('aria-expanded', String(!closed));
+    // A choice made by hand during a selection is kept.
+    if (state.selected) menu.byHand = true;
   };
   if (window.innerWidth <= 760) $('menu').click();
 
@@ -1952,7 +2107,7 @@ async function start() {
     if (t.id === 'card-close') return closePanel();
     if (t.id === 'card-details') return showDetails();
     if (t.id === 'card-nisar') return toggleCardImage();
-    if (t.id === 'card-change') return toggleCardChange(t);
+    if (t.id === 'card-change') return showChanges(t);
   };
   // Sources named in the text: hovering explains one, clicking opens the
   // part of the panel that holds what came from it.
@@ -1996,7 +2151,7 @@ async function start() {
     const li = t.closest('li');
     if (!li) return;
     if (li.dataset.site) return selectPlace(placeById(li.dataset.site), true);
-    if (li.dataset.rel) return selectIncident(sel.incident.related[+li.dataset.rel].incident, true);
+    if (li.dataset.rel) return selectIncident((sel.related || sel.incident.related)[+li.dataset.rel].incident, true);
     if (li.dataset.in) return selectIncident(sel.inside[+li.dataset.in], true);
     if (li.dataset.near) return selectIncident(sel.near[+li.dataset.near].incident, true);
     if (li.dataset.pick) {

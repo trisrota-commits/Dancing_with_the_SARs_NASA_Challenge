@@ -6,8 +6,23 @@ import { distanceKm } from '../incidents.js';
 
 const DAY = 86400_000;
 
+// The signal of the event being loaded: its requests end when it is closed.
+// Every request also gives up after a while, so a server that never
+// answers cannot leave an event "loading" for good.
+let current = null;
+export function useSignal(signal) {
+  current = signal;
+}
+
+const PATIENCE_MS = 15_000;
+function patient(signal) {
+  const timeout = AbortSignal.timeout ? AbortSignal.timeout(PATIENCE_MS) : null;
+  if (signal && timeout) return AbortSignal.any ? AbortSignal.any([signal, timeout]) : signal;
+  return signal || timeout || undefined;
+}
+
 async function json(url) {
-  const res = await fetch(url);
+  const res = await fetch(url, { signal: patient(current) });
   if (!res.ok) throw new Error(`${res.status} from ${new URL(url).host}`);
   return res.json();
 }
@@ -89,7 +104,7 @@ const FIRE_URL = 'https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/VIIRS_NOAA2
 const FIRE_SPAN = 288 / 2 ** 5;
 
 async function fireTile(date, row, col) {
-  const res = await fetch(FIRE_URL.replace('{date}', date).replace('{row}', row).replace('{col}', col));
+  const res = await fetch(FIRE_URL.replace('{date}', date).replace('{row}', row).replace('{col}', col), { signal: patient(current) });
   if (!res.ok) return [];
   return tilePoints(await res.arrayBuffer()).map((p) => ({ lat: 90 - (row + p.y) * FIRE_SPAN, lon: -180 + (col + p.x) * FIRE_SPAN }));
 }
@@ -106,8 +121,10 @@ export async function fireDetections(lat, lon, radiusKm, dates) {
     }
   }
   const days = [];
+  const signal = current;
   // A few days at a time, so a long fire does not flood the network.
   for (let i = 0; i < dates.length; i += 4) {
+    if (signal?.aborted) throw new DOMException('The event was closed', 'AbortError');
     const batch = await Promise.all(
       dates.slice(i, i + 4).map(async (date) => {
         const parts = await Promise.all([...tiles].map((t) => fireTile(date, ...t.split('/').map(Number)).catch(() => [])));

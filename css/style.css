@@ -236,8 +236,38 @@ a {
   flex-direction: column;
 }
 
+/* The menu slides away rather than vanishing, and what sat beside it
+   moves into the room it leaves. */
+#left {
+  transition: transform 0.25s ease, opacity 0.25s ease, visibility 0s;
+}
+
 #left.closed {
-  display: none;
+  transform: translateX(calc(-100% - 20px));
+  opacity: 0;
+  visibility: hidden;
+  transition: transform 0.25s ease, opacity 0.25s ease, visibility 0s 0.25s;
+}
+
+#ticker,
+#credits,
+#legend {
+  transition: left 0.25s ease;
+}
+
+#left.closed ~ #ticker,
+#left.closed ~ #credits {
+  left: 14px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #left,
+  #left.closed,
+  #ticker,
+  #credits,
+  #legend {
+    transition: none;
+  }
 }
 
 #right {
@@ -688,6 +718,11 @@ dd {
   border-radius: 6px;
   white-space: nowrap;
   font-size: 12px;
+}
+
+/* The dates sit under the reports bar while it is showing. */
+body:has(#ticker:not([hidden])) #split-handle span {
+  top: 106px;
 }
 
 #split-before {
@@ -1820,4 +1855,76 @@ body:has(#replay:not([hidden])) #nav {
 
 #welcome li {
   padding: 2px 0;
+}
+
+/* ---------- after the review: room for the bar, phones, the key ---------- */
+
+/* The bar stays clear of the details panel. */
+#right:not([hidden]) ~ #replay {
+  left: calc((100vw - 408px) / 2);
+  width: min(680px, calc(100vw - 440px));
+}
+
+/* A time-lapse inside an event offers the way back to its timeline. */
+#replay.back #replay-live {
+  display: block;
+  flex: none;
+  font-size: 12px;
+  padding: 4px 9px;
+  white-space: nowrap;
+}
+
+#legend summary {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 12.5px;
+  color: var(--text);
+}
+
+#legend details[open] > summary {
+  margin-bottom: 4px;
+}
+
+li[role='button']:focus-visible,
+button:focus-visible,
+#replay-bar:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 760px) {
+  /* The card and the panel sit above the bar instead of on top of it. */
+  body:has(#replay:not([hidden])) #card,
+  body:has(#replay:not([hidden])) #right {
+    bottom: 116px;
+  }
+
+  #right {
+    max-height: 45vh;
+  }
+
+  #card {
+    max-height: 46vh;
+  }
+
+  #right:not([hidden]) ~ #replay {
+    left: 50%;
+    width: calc(100vw - 16px);
+  }
+
+  #replay,
+  #replay.timeline {
+    bottom: 8px;
+    width: calc(100vw - 16px);
+  }
+
+  /* The reports bar would be squeezed to nothing beside a panel. */
+  #right:not([hidden]) ~ #ticker,
+  #card:not([hidden]) ~ #ticker {
+    display: none;
+  }
+
+  #credits {
+    display: none;
+  }
 }

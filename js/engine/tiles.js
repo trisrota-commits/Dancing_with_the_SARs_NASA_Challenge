@@ -14,8 +14,13 @@ const MIN_ZOOM = 2;
 const MAX_ZOOM = 17;
 const MAX_LEAVES = 320;
 const PARALLEL_DOWNLOADS = 14;
-const IMAGE_CACHE = 900;
-const TILE_CACHE = 420;
+// Phones and tablets have far less memory to give a page than a laptop.
+const SMALL = !!globalThis.matchMedia?.('(pointer: coarse)').matches;
+const IMAGE_CACHE = SMALL ? 450 : 900;
+const TILE_CACHE = SMALL ? 220 : 420;
+// Time for painting tiles in one frame, so the globe keeps turning smoothly
+// while a new layer fills in.
+const PAINT_MS = 6;
 
 // Open elevation tiles (Mapzen/AWS Terrain Tiles): height in metres packed
 // into the red, green and blue of each pixel.
@@ -98,7 +103,8 @@ const FRAGMENT = /* glsl */ `
         float differs = step(0.02, length(color - other));
         vec3 next = color;
         color = mix(other, next, smoothstep(edge, edge - 0.03, along));
-        float line = exp(-pow((along - edge) / 0.012, 2.0)) * differs * step(t, 0.999);
+        float q = (along - edge) / 0.012;
+        float line = exp(-q * q) * differs * step(t, 0.999);
         color += vec3(0.22, 0.9, 0.77) * line * 0.8;
       } else if (uFadeDur > 0.0) {
         // Cross-fade from the previous picture, timed from when this tile
@@ -120,21 +126,24 @@ const FRAGMENT = /* glsl */ `
       // Ripples keep about the same size on screen, so detail grows as the
       // camera comes closer: two neighbouring wave sizes, blended.
       float kmPerPixel = max(length(dFdx(km)), length(dFdy(km)));
-      float level = log2(max(kmPerPixel, 1e-6) * 26.0);
-      float size = exp2(floor(level));
-      float wave = mix(ripples(km / size), ripples(km / (size * 2.0)), fract(level));
-      float cover = mask.r;
-      float arrive = smoothstep(-0.15, 0.85, uWater.x - mask.g * uWater.y);
-      float wet = smoothstep(0.1, 0.5, cover) * arrive;
-      vec3 water = mix(vec3(0.24, 0.6, 0.84), vec3(0.05, 0.27, 0.5), smoothstep(0.35, 0.95, cover)) * (0.8 + 0.4 * wave);
-      color = mix(color, water, wet * 0.8);
-      color += vec3(0.85, 0.95, 1.0) * smoothstep(0.66, 0.9, wave) * wet * 0.3;
-      // Waves lapping along the edge of the water.
-      float shore = smoothstep(0.06, 0.28, cover) * (1.0 - smoothstep(0.3, 0.72, cover)) * arrive;
-      float lap = 0.5 + 0.5 * sin(cover * 13.0 - uTime * 1.9 + wave * 5.0);
-      color += vec3(0.8, 0.93, 1.0) * shore * smoothstep(0.5, 1.0, lap) * 0.55;
-      // Water that is just arriving lights up for a moment.
-      color += vec3(0.45, 0.75, 1.0) * arrive * (1.0 - arrive) * smoothstep(0.1, 0.5, cover) * 1.3;
+      // Dry ground (most of every tile) skips the wave maths altogether.
+      if (mask.r > 0.05) {
+        float level = log2(max(kmPerPixel, 1e-6) * 26.0);
+        float size = exp2(floor(level));
+        float wave = mix(ripples(km / size), ripples(km / (size * 2.0)), fract(level));
+        float cover = mask.r;
+        float arrive = smoothstep(-0.15, 0.85, uWater.x - mask.g * uWater.y);
+        float wet = smoothstep(0.1, 0.5, cover) * arrive;
+        vec3 water = mix(vec3(0.24, 0.6, 0.84), vec3(0.05, 0.27, 0.5), smoothstep(0.35, 0.95, cover)) * (0.8 + 0.4 * wave);
+        color = mix(color, water, wet * 0.8);
+        color += vec3(0.85, 0.95, 1.0) * smoothstep(0.66, 0.9, wave) * wet * 0.3;
+        // Waves lapping along the edge of the water.
+        float shore = smoothstep(0.06, 0.28, cover) * (1.0 - smoothstep(0.3, 0.72, cover)) * arrive;
+        float lap = 0.5 + 0.5 * sin(cover * 13.0 - uTime * 1.9 + wave * 5.0);
+        color += vec3(0.8, 0.93, 1.0) * shore * smoothstep(0.5, 1.0, lap) * 0.55;
+        // Water that is just arriving lights up for a moment.
+        color += vec3(0.45, 0.75, 1.0) * arrive * (1.0 - arrive) * smoothstep(0.1, 0.5, cover) * 1.3;
+      }
     }
     float lit = smoothstep(-0.12, 0.18, dot(normalize(vNormal), uSun));
     // Night is dim and cool, but the ground stays readable. uNight drops
@@ -269,6 +278,11 @@ export class TileGlobe {
     this.readerCtx = this.reader.getContext('2d', { willReadFrequently: true });
   }
 
+  // True while a water mask layer is on the globe.
+  get masked() {
+    return this.layers.some((l) => l.mask != null);
+  }
+
   repaintAll() {
     for (const tile of this.tiles.values()) tile.dirty = true;
     this.changed = true;
@@ -302,8 +316,13 @@ export class TileGlobe {
   // Single images laid over a lat/lon box:
   // [{ image, bounds: { west, south, east, north }, side: 'left' | 'right' | undefined, alpha }]
   setPictures(pictures) {
+    // Only the tiles under the old or the new pictures need painting again.
+    const touched = [...this.pictures, ...pictures].map((p) => p.bounds);
     this.pictures = pictures;
-    this.repaintAll();
+    for (const tile of this.tiles.values()) {
+      if (touched.some((b) => b.east > tile.west && b.west < tile.east && b.north > tile.south && b.south < tile.north)) tile.dirty = true;
+    }
+    this.changed = true;
   }
 
   // Outlines drawn on the ground: [{ ring: [{ lat, lon }…], color: 'rgba(…)', width }]
@@ -423,6 +442,7 @@ export class TileGlobe {
 
     // Repaint and reshape a bounded number of tiles per frame.
     let budget = 24;
+    const deadline = performance.now() + PAINT_MS;
     for (const tile of this.tiles.values()) {
       if (!tile.mesh.visible) continue;
       if (tile.shapeDirty) {
@@ -432,7 +452,7 @@ export class TileGlobe {
       if (tile.dirty) {
         this.paint(tile);
         this.changed = true;
-        if (--budget === 0) break;
+        if (--budget === 0 || performance.now() > deadline) break;
       }
     }
     this.pump();
@@ -539,6 +559,9 @@ export class TileGlobe {
     tile.texture.dispose();
     tile.textureB?.dispose();
     tile.textureW?.dispose();
+    // A canvas keeps its memory until it is collected; emptying it gives
+    // the memory back at once, which matters on phones.
+    for (const c of [tile.canvas, tile.canvasB, tile.canvasW]) if (c) c.width = c.height = 0;
     tile.dead = true;
     this.tiles.delete(key);
   }
@@ -566,8 +589,9 @@ export class TileGlobe {
       target.globalAlpha = alpha;
       target.drawImage(entry.img, (x % scale) * span, (y % scale) * span, span, span, 0, 0, SIZE, SIZE);
       entry.lastUsed = this.frame;
-      return;
+      return true;
     }
+    return false;
   }
 
   // Composites everything for this tile. Layers and pictures with a side
@@ -623,7 +647,19 @@ export class TileGlobe {
       tile.textureB.needsUpdate = true;
     }
     tile.mesh.material.uniforms.uUseB.value = sided ? 1 : 0;
+    if (!sided) this.release(tile, 'B');
     tile.texture.needsUpdate = true;
+  }
+
+  // Gives back a tile's second ('B') or water ('W') canvas once nothing
+  // uses it any more.
+  release(tile, which) {
+    const canvas = tile[`canvas${which}`];
+    if (!canvas) return;
+    tile[`texture${which}`].dispose();
+    tile.mesh.material.uniforms[`map${which}`].value = tile.texture;
+    canvas.width = canvas.height = 0;
+    tile[`canvas${which}`] = tile[`ctx${which}`] = tile[`texture${which}`] = null;
   }
 
   // The water mask for this tile: every mask layer gathered on one canvas,
@@ -633,13 +669,20 @@ export class TileGlobe {
     // The sea can only be told from land once the heights are known.
     if (!layers.length || (this.terrain && tile.heightLevel < 0)) {
       use.value = 0;
+      if (!layers.length) this.release(tile, 'W');
       return;
     }
     const scratch = this.scratch.getContext('2d');
     scratch.globalAlpha = 1;
     scratch.clearRect(0, 0, SIZE, SIZE);
     // Latest step first, so the earliest sighting of each spot ends up on top.
-    for (const layer of [...layers].sort((a, b) => b.mask - a.mask)) this.drawLayer(scratch, tile, layer, 1);
+    let drew = false;
+    for (const layer of [...layers].sort((a, b) => b.mask - a.mask)) drew = this.drawLayer(scratch, tile, layer, 1) || drew;
+    // Nothing has arrived for this tile yet: no water to shade.
+    if (!drew) {
+      use.value = 0;
+      return;
+    }
     if (this.terrain) this.wipeSea(scratch, tile);
     if (!tile.canvasW) {
       tile.canvasW = document.createElement('canvas');

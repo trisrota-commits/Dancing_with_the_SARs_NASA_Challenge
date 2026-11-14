@@ -119,6 +119,49 @@ Changes made after going through the app as a first-time visitor:
   print follows.
 - **The timeline has a key** (the event, a NISAR pass, "drag to go back").
 
+### Focus layout and the code review (14 Nov, night)
+
+The lead asked for a critical pass over the code by four reviewers (state
+and flows, the timeline player, engine speed, ease of use) and proposed
+the layout below. Both went into one pull request.
+
+- **Layout.** The left menu is open when the app starts (stories, events,
+  search). Selecting an event, place or spot folds it away and the card or
+  the details panel takes the stage; closing the selection brings the
+  menu back. The ☰ button always opens it, and a menu opened by hand
+  stays open (`focusLayout`, `menu = { folded, byHand }` in `main.js`).
+  The trigger is selection, never zoom level.
+- **Stepping back.** ✕ on the details panel and Escape return to the
+  card; ✕ on the card or a second Escape clears the selection (`stepBack`).
+- **Who owns the picture on the globe.** Six things can put a radar
+  picture on the globe, and they used to overwrite each other silently.
+  `main.js` now has one owner at a time: `stage = { owner, token }` with
+  owners `none`, `timeline`, `manual`, `change`, `compare`, `chart` and
+  `lapse`. Every path calls `take(owner)` first, which clears the previous
+  owner's pictures, legend, divider and button labels, and returns a
+  token. Anything asynchronous checks the token before it draws.
+  `backToTimeline()` hands the globe back to the event's timeline. Use
+  these two; do not call `globe.clearScenes()` directly for a new feature.
+- **Timeline player.** A feed refresh rebuilds the open event's plan in
+  the background and swaps it in (`Replay.start(inc, { keepView: true })`)
+  instead of restarting it. Requests for a closed event are aborted
+  (`useSignal` in `sources.js`, 15 s timeout). Fire and flood windows
+  follow the event's own dates, so an archive event no longer shows the
+  last few weeks. Published outlines are off while the handle stands
+  before the event (`outlines()` helper). Storm time is a 0..1 fraction.
+- **Speed.** See "A frame is only drawn" below. Also: tile painting stops
+  after 6 ms per frame; `setPictures` repaints only the tiles under the
+  old or new pictures; a tile's second and water canvases are released
+  when unused and emptied when a tile is dropped; phones get smaller
+  caches and a pixel ratio of at most 1.5; dry ground skips the water
+  wave maths; effect lines no longer show through the Earth.
+- **Left alone on purpose:** track and frame numbers and the product
+  names (GCOV, GUNW, HDF5) stay in the details panel, because that panel
+  is the proof layer and a NASA reader needs them to find the granule;
+  the phone header still drops the subtitle for lack of room; "Load all
+  passes" is not capped on phones because it is opt-in and states its
+  size; `main.js` was not split so close to the deadline.
+
 ### The awards the lead is aiming at (told 14 Nov)
 
 Space Apps gives these across all challenges: Best Use of Science, Best
@@ -197,13 +240,17 @@ A better point would have to be found by eye first.
   `start.bat` (Windows), `./start.sh` (Linux), or
   `python3 -m http.server 8765` then `http://localhost:8765`.
 - Opening `index.html` from disk does not work (ES modules need a server).
-- `node --test tests/*.test.mjs` runs the unit tests (7, from a teammate).
+- `node --test tests/*.test.mjs` runs the unit tests (15).
 - `python tests/test_measure.py` checks the measurement script on simulated
   files (needs `pip install h5py numpy pyproj pillow`).
 - `node tools/smoke.js` loads the app in headless Chromium against the live
   services and checks the main paths. It needs Playwright and a server on
   port 8765. In a proxied cloud container set `HTTPS_PROXY`; headless
   rendering there is software-only, so frame rates are not representative.
+- `node tools/frames.js` counts the frames the globe really draws, at rest
+  and with the strongest live event of each kind open. About one a second
+  at rest and on an earthquake that has played out; steady drawing with
+  fire or flood water on the globe. Run it after touching `Globe.frame`.
 - `window.app` in the browser console exposes `state`, `globe` and `replay`.
 
 ## Architecture
@@ -253,15 +300,20 @@ time; there is no backend and there are no keys.
 - Terrain heights come from Mapzen Terrarium tiles; one elevation tile
   serves an 8×8 block of map tiles. Sea floor is flattened to sea level.
 - A frame is only drawn when something changed (`globe.dirty`, tile
-  changes, camera moves, or `globe.animating`).
+  changes, camera moves) or while something on the globe moves by itself:
+  fire, a storm's clouds, flood water, a flickering glow, a mark popping
+  in, a new arrival's pulse, and the selection ring for 4.5 s after a
+  selection (it then rests). The list is in `Globe.frame` (`alive`).
+  There is no `globe.animating` flag any more; a playing timeline marks
+  the globe dirty each tick. Check with the frame counter described
+  under "How to run and test" before adding anything that animates.
 - Replay effects (added 14 Nov, afternoon): `globe.setShockwave` drives
   uniforms in the tile shader (glow per pixel, ripple per vertex);
   `Vortex` is a world-sized quad with a procedural cloud shader, floating
   at cloud-top height; `Glow` is additive points with a true ground size
   (fire embers, the epicentre flash); `Beams` are the light beams on event
-  dots, scaled by `shared.uBeam` from camera tilt and distance;
-  `controls.orbit` turns the camera slowly during a replay. Only the
-  orbit honours "prefers reduced motion" so far.
+  dots, scaled by `shared.uBeam` from camera tilt and distance. (The slow
+  camera orbit and push-in were removed with the replay.)
 - Level of detail and smooth build-up (added 14 Nov, evening). The lead's
   rule: effects gain detail as you zoom in, and nothing pops.
   - `js/engine/fire.js`: one instanced particle system per fire. Each
@@ -291,8 +343,6 @@ time; there is no backend and there are no keys.
     while a replay or a radar picture is up (`globe.night`), because
     everything painted into the ground, radar included, was being dimmed
     on the night side.
-  - `globe.pushIn`: the camera drifts to 0.6 of its distance during a
-    replay; any touch ends it, like the orbit.
   - `globe.sweepTo`: a single NISAR picture is uncovered along latitude in
     the pass direction (`uSweep`); `globe.fadeToAll` fades a stack of
     pictures, used for the "what changed" view.
@@ -395,7 +445,7 @@ that appears on a place, or an event nearby, once results exist.
 - The change view still shows a thin line on some coasts and speckle on
   steep ridges.
 - Quad-polarisation passes are skipped.
-- `js/main.js` is about 1,500 lines and should be split.
+- `js/main.js` is about 2,200 lines and should be split.
 
 ## Next steps, in order
 
