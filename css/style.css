@@ -236,8 +236,38 @@ a {
   flex-direction: column;
 }
 
+/* The menu slides away rather than vanishing, and what sat beside it
+   moves into the room it leaves. */
+#left {
+  transition: transform 0.25s ease, opacity 0.25s ease, visibility 0s;
+}
+
 #left.closed {
-  display: none;
+  transform: translateX(calc(-100% - 20px));
+  opacity: 0;
+  visibility: hidden;
+  transition: transform 0.25s ease, opacity 0.25s ease, visibility 0s 0.25s;
+}
+
+#ticker,
+#credits,
+#legend {
+  transition: left 0.25s ease;
+}
+
+#left.closed ~ #ticker,
+#left.closed ~ #credits {
+  left: 14px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #left,
+  #left.closed,
+  #ticker,
+  #credits,
+  #legend {
+    transition: none;
+  }
 }
 
 #right {

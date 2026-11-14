@@ -208,12 +208,33 @@ function renderFeed() {
 
 // ---------- detail panel ----------
 
+// The left menu steps aside while something is selected, so the map and
+// what was picked have the room, and comes back when it is closed. Someone
+// who opens or shuts the menu by hand during a selection keeps it that way.
+const menu = { folded: false, byHand: false };
+
+function focusLayout(on) {
+  const left = $('left');
+  if (on) {
+    if (!menu.byHand && !left.classList.contains('closed')) {
+      left.classList.add('closed');
+      menu.folded = true;
+    }
+  } else {
+    if (menu.folded && !menu.byHand) left.classList.remove('closed');
+    menu.folded = false;
+    menu.byHand = false;
+  }
+  $('menu').setAttribute('aria-expanded', String(!left.classList.contains('closed')));
+}
+
 // Fills the details panel. An event opens quietly: the panel is filled but
 // stays shut, and the small card shows until "Show details" is pressed.
 function openPanel(html, quiet = false) {
   $('detail').innerHTML = html;
   $('right').hidden = quiet;
   $('card').hidden = !quiet;
+  focusLayout(true);
   $('tip').hidden = true;
   $('right').scrollTop = 0;
 }
@@ -225,6 +246,7 @@ function closePanel() {
   $('right').hidden = true;
   $('card').hidden = true;
   $('tip').hidden = true;
+  focusLayout(false);
   globe.select(null);
   replay.stop();
   endCompare();
@@ -1944,6 +1966,8 @@ async function start() {
   $('menu').onclick = () => {
     const closed = $('left').classList.toggle('closed');
     $('menu').setAttribute('aria-expanded', String(!closed));
+    // A choice made by hand during a selection is kept.
+    if (state.selected) menu.byHand = true;
   };
   if (window.innerWidth <= 760) $('menu').click();
 

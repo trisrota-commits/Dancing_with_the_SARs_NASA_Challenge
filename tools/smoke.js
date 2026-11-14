@@ -53,6 +53,13 @@ const proxy = process.env.HTTPS_PROXY ? { server: process.env.HTTPS_PROXY, bypas
     await page.waitForFunction(() => document.querySelector('#radar') && !document.querySelector('#radar .spinner') && document.querySelector('#story-text p'), null, { timeout: 60000 });
     return (await page.locator('#detail h3').first().innerText()).slice(0, 60);
   });
+  await step('menu folds and returns', async () => {
+    // The left menu steps aside while something is selected.
+    if (await page.locator('#left').isVisible()) throw new Error('the menu stayed open over a selection');
+    await page.click('#close');
+    await page.waitForSelector('#left', { state: 'visible', timeout: 5000 });
+    return 'folded while selected, back after closing';
+  });
   await step('archive window', async () => {
     await page.selectOption('#window', 'nisar');
     await page.waitForFunction(() => /Events since/.test(document.getElementById('window-note').textContent), null, { timeout: 60000 });
