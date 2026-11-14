@@ -92,6 +92,7 @@ export function measuredChart(container, d, compare) {
   container.textContent = '';
   const all = [...d.series, ...(compare?.series || [])];
   const values = all.flatMap((s) => [s.hh, s.hv]).filter((v) => v != null);
+  if (!values.length) return;
   const t0 = Math.min(...all.map((s) => s.time));
   const t1 = Math.max(...all.map((s) => s.time));
   const lo = Math.floor(Math.min(...values) / 2) * 2 - 1;
@@ -132,7 +133,7 @@ export function measuredChart(container, d, compare) {
       svg.append(dotEl);
     }
     const last = pts[pts.length - 1];
-    svg.append(el('text', { x: x(last.time) + 4, y: y(last[line.key]) - 5, fill: line.color, class: 'end' }, line.label));
+    svg.append(el('text', { x: x(last.time) + 4, y: y(last[line.key]) - 5, class: 'end' }, line.label));
   }
   container.append(svg);
 }

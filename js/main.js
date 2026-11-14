@@ -306,9 +306,9 @@ function incidentHtml(inc, radar) {
     <h4>What happened here</h4>
     <div id="replay-parts"></div>
     <div id="measured-slot"></div>
-    <h4>NISAR radar over this spot</h4>
     <h4>Preview brightness history at this pin</h4>
     <div id="incident-history" aria-live="polite"><p class="spinner">Searching NISAR repeat passes…</p></div>
+    <h4>NISAR radar over this spot</h4>
     ${lapseBox(inc.lat, inc.lon)}
     <div id="radar">${radar}</div>
     <h4>What radar can show here</h4>
@@ -1066,6 +1066,10 @@ async function showMeasuredMap(button) {
 
 // ---------- changing places ----------
 
+// Kinds of place where the change is ground movement, which shows in
+// interferograms and not in the backscatter time-lapse.
+const MOVING_GROUND = new Set(['subsidence', 'volcano', 'landslide']);
+
 function visiblePlaces() {
   return PLACES.filter((p) => !state.hiddenPlaces.has(p.kind));
 }
@@ -1114,7 +1118,7 @@ async function selectPlace(place, fly) {
     <div id="measured-slot"></div>
     <h4>NISAR passes over this spot</h4>
     ${lapseBox(place.lat, place.lon)}
-    ${place.kind === 'subsidence' ? '<h4>Interferograms (ground movement)</h4><div id="place-ifg"><p class="spinner">Searching for interferograms…</p></div>' : ''}
+    ${MOVING_GROUND.has(place.kind) ? '<h4>Interferograms (ground movement)</h4><div id="place-ifg"><p class="spinner">Searching for interferograms…</p></div>' : ''}
     ${
       others.length
         ? `<h4>Same months, other hemisphere</h4><p class="hint">Play one of these next to see the opposite season.</p><ul class="links">${others
@@ -1132,7 +1136,7 @@ async function selectPlace(place, fly) {
     return null;
   });
 
-  if (place.kind !== 'subsidence') return;
+  if (!MOVING_GROUND.has(place.kind)) return;
   let found;
   try {
     found = await scenesAt(place.lat, place.lon, NISAR_START, Date.now());
