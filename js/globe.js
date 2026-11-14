@@ -196,14 +196,14 @@ export class Globe {
     const found = this.dotsAt(x, y, 5)
       .slice(0, 12)
       .map((h) => ({ kind: 'incident', incident: h.item.incident }));
-    const at = this.footprintsOn && this.locate(x, y);
-    if (at) {
+    const at = this.locate(x, y);
+    if (at && this.footprintsOn) {
       for (const scene of this.scenes) {
         if (found.length >= 12) break;
         if (pointInPolygon(at.lat, at.lon, scene.ring)) found.push({ kind: 'scene', scene });
       }
     }
-    this.pick(found);
+    this.pick(found, at, { x, y });
   }
 
   hover(e) {

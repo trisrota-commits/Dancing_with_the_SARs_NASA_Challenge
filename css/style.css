@@ -926,3 +926,156 @@ dd {
     border-radius: var(--radius);
   }
 }
+
+/* ---------- time-lapse and its chart ---------- */
+
+#here {
+  position: fixed;
+  z-index: 3;
+  transform: translate(-50%, -135%);
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #04221c;
+  font-weight: 600;
+  border-radius: 99px;
+  padding: 6px 14px;
+  white-space: nowrap;
+}
+
+#lapse {
+  margin-bottom: 10px;
+}
+
+.seg {
+  gap: 0;
+  margin: 8px 0;
+}
+
+.seg button {
+  border-radius: 0;
+  margin-left: -1px;
+}
+
+.seg button:first-child {
+  border-radius: 6px 0 0 6px;
+  margin-left: 0;
+}
+
+.seg button:last-child {
+  border-radius: 0 6px 6px 0;
+}
+
+.seg button.on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #04221c;
+  font-weight: 600;
+}
+
+.chart {
+  position: relative;
+}
+
+.chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.chart .grid {
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 1;
+}
+
+.chart .tick {
+  fill: var(--dim);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.chart .end {
+  fill: var(--text);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.chart .active {
+  stroke: rgba(255, 255, 255, 0.55);
+  stroke-width: 1;
+}
+
+.chart .cross {
+  stroke: var(--accent);
+  stroke-width: 1;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 12px;
+  color: var(--dim);
+  margin-bottom: 4px;
+}
+
+.chart-legend i,
+.chart-tip i {
+  display: inline-block;
+  width: 12px;
+  height: 2px;
+  border-radius: 1px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.chart-tip {
+  position: absolute;
+  top: 26px;
+  pointer-events: none;
+  background: rgba(10, 16, 26, 0.96);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.chart-tip .when {
+  color: var(--dim);
+  margin-bottom: 2px;
+}
+
+.chart-tip b {
+  display: inline-block;
+  min-width: 26px;
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-tip span {
+  color: var(--dim);
+  margin-left: 4px;
+}
+
+.chart-table summary {
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+.chart-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-table th,
+.chart-table td {
+  text-align: left;
+  padding: 2px 6px 2px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.chart-table th {
+  color: var(--dim);
+  font-weight: 500;
+}

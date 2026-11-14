@@ -351,7 +351,8 @@ export class Replay {
     this.playing = false;
     this.time = 0;
     this.last = 0;
-    this.tick = this.tick.bind(this);
+    this.loop = 0;
+    this.loops = 0;
   }
 
   async start(incident) {
@@ -371,10 +372,24 @@ export class Replay {
     this.playing = true;
     this.globe.animating = true;
     plan.setup?.();
+    this.loop = ++this.loops;
     const focus = plan.focus || incident;
     this.globe.flyTo(focus.lat, focus.lon, Math.min(9_000_000, plan.frameKm * 1000 * 3.4), { pitch: plan.frameKm < 400 ? 40 : 15 });
     this.last = performance.now();
-    requestAnimationFrame(this.tick);
+    requestAnimationFrame((now) => this.tick(now, this.loop));
+  }
+
+  // Plays a plan built elsewhere (the NISAR time-lapse uses this).
+  run(plan) {
+    this.stop();
+    this.plan = plan;
+    this.time = 0;
+    this.playing = true;
+    this.globe.animating = true;
+    plan.setup?.();
+    this.loop = ++this.loops;
+    this.last = performance.now();
+    requestAnimationFrame((now) => this.tick(now, this.loop));
   }
 
   toggle() {
@@ -394,17 +409,22 @@ export class Replay {
 
   stop() {
     this.token++;
-    if (this.plan) this.globe.clearEffects();
+    if (this.plan) {
+      this.plan.teardown?.();
+      this.globe.clearEffects();
+    }
     this.plan = null;
     this.playing = false;
     this.onUpdate({ state: 'off' });
   }
 
-  tick(now) {
+  tick(now, loop) {
     const plan = this.plan;
-    if (!plan) return;
-    requestAnimationFrame(this.tick);
-    const dt = Math.min(0.1, (now - this.last) / 1000);
+    // A newer replay has its own loop; this one ends.
+    if (!plan || loop !== this.loop) return;
+    requestAnimationFrame((next) => this.tick(next, loop));
+    // The first frame's clock can read slightly before the start time.
+    const dt = Math.max(0, Math.min(0.1, (now - this.last) / 1000));
     this.last = now;
     if (!this.playing) return;
     this.time += dt;
@@ -417,6 +437,6 @@ export class Replay {
   report() {
     const plan = this.plan;
     const t = Math.min(this.time, plan.duration);
-    this.onUpdate({ state: this.playing ? 'playing' : 'paused', caption: plan.caption(t), progress: t / plan.duration, parts: plan.parts });
+    this.onUpdate({ state: this.playing ? 'playing' : 'paused', caption: plan.caption(t), progress: t / plan.duration, parts: plan.parts, plan });
   }
 }
