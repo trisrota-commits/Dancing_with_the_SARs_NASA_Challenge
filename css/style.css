@@ -1904,7 +1904,7 @@ button:focus-visible,
   }
 
   #card {
-    max-height: 40vh;
+    max-height: 46vh;
   }
 
   #right:not([hidden]) ~ #replay {
