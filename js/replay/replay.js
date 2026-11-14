@@ -282,7 +282,7 @@ async function fire(inc, globe) {
         : { kind: 'note', text: `No satellite fire detections within ${Math.round(radius)} km in the last ${days.length} days.` },
       ...(burnt.length ? [{ kind: 'analysis', text: 'Burnt-area outline', source: 'GDACS / GWIS' }] : []),
       { kind: 'computed', text: 'Each detection glows at the sensor\'s 375 m pixel size, fades in during its day (the satellite gives the day, not the hour) and cools to dark red over about three days. Nothing is drawn between detections.' },
-      { kind: 'computed', text: 'Closer in, each detection shows as scorched ground veined with embers, with sparks and thin smoke. That detail is animation: it is not measured, and the smoke rises straight up because the feeds carry no wind.' },
+      { kind: 'computed', text: 'Closer in, each spot sits on the exact position of its detection at true size, reddest at its centre. The shape of the glow, its shimmer and the thin smoke are animation, not measurements; the smoke rises straight up because the feeds carry no wind.' },
     ],
     setup() {
       globe.setEffectZones(burnt.map((b) => ({ ring: b.ring, color: 'rgba(255,166,43,0.95)', fill: 'rgba(255,166,43,0.07)', width: 2 })));

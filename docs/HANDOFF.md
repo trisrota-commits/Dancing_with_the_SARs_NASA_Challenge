@@ -169,9 +169,12 @@ time; there is no backend and there are no keys.
     detection has a `born` time on the replay clock; the shader fades it
     in, burns it and cools it, so scrubbing needs no new buffers. Detail
     is chosen in the vertex shader from the on-screen size of the 375 m
-    detection pixel: ember, then scorched ground with ember veins, soft
-    glows, sparks, smoke. Each particle carries a rank, the closeness at
-    which it joins in, and its size is capped in screen pixels.
+    detection pixel: a small ember from afar, then a soft spot at true
+    size, deep red at the centre through orange to amber at the rim, with
+    a fine shimmer, a pin of light on the exact coordinates and a little
+    thin smoke. This spot look is the one the team chose on 14 Nov, after
+    rejecting flame-tongue sprites and then ember veins; do not add
+    shapes back.
   - Flood water: layers with a `mask` step are painted into a per-tile
     mask (`paintMask`; red = water, green = step first seen). The tile
     shader animates ripples (two wave sizes picked from screen-space
@@ -194,8 +197,7 @@ time; there is no backend and there are no keys.
   - `globe.sweepTo`: a single NISAR picture is uncovered along latitude in
     the pass direction (`uSweep`); `globe.fadeToAll` fades a stack of
     pictures, used for the "what changed" view.
-  - Fire: no flame shapes. Close-up veins stay thin and get sparser with
-    zoom so the view is never flooded.
+  - Fire: soft spots only (see above).
 
 ## Data sources and what we learnt about them
 
@@ -297,8 +299,8 @@ that appears on a place, or an event nearby, once results exist.
 ## Next steps, in order
 
 1. **More and better event animation, in the agreed look (see above).**
-   Done so far: earthquake shock front, storm spiral, fire (embers to ember
-   veins, sparks, smoke), flood water, picture cross-fades, radar sweep
+   Done so far: earthquake shock front, storm spiral, fire (embers to soft
+   spots), flood water, picture cross-fades, radar sweep
    reveal, focus dimming, camera push-in, data labels. The lead's rule for
    anything further: stay in the current style, do not overdo it, and ask
    whether it serves "an easy to understand, easy to use visualization of
