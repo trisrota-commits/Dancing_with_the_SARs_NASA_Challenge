@@ -101,6 +101,29 @@ export async function latestScenes(count = 200) {
   return dedupe(await search(['NISAR_L2_GCOV_V1', 'NISAR_UR_L2'], '*_GCOV_*', {}, count));
 }
 
+// How far inside a frame outline a point lies, in kilometres (0 or less
+// means outside). The picture does not reach the outline: a strip along
+// the edges is empty, so a point close to the edge is often not imaged.
+export function edgeMarginKm(ring, lat, lon) {
+  const kx = 111.32 * Math.cos((lat * Math.PI) / 180);
+  const ky = 110.57;
+  let nearest = Infinity;
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const ax = (ring[i].lon - lon) * kx;
+    const ay = (ring[i].lat - lat) * ky;
+    const bx = (ring[j].lon - lon) * kx;
+    const by = (ring[j].lat - lat) * ky;
+    if (ay > 0 !== by > 0 && 0 < ((bx - ax) * (0 - ay)) / (by - ay) + ax) inside = !inside;
+    const t = Math.max(0, Math.min(1, -(ax * (bx - ax) + ay * (by - ay)) / ((bx - ax) ** 2 + (by - ay) ** 2 || 1)));
+    nearest = Math.min(nearest, Math.hypot(ax + t * (bx - ax), ay + t * (by - ay)));
+  }
+  return inside ? nearest : -nearest;
+}
+
+// A point this far inside the outline is reliably in the picture.
+export const SAFE_MARGIN_KM = 12;
+
 // NISAR flies an exact repeat orbit: the same track comes round every 12 days.
 export const REPEAT_DAYS = 12;
 
@@ -136,7 +159,9 @@ export async function scenesAt(lat, lon, fromMs, toMs) {
 
 // Every backscatter pass over a point since NISAR began science operations,
 // grouped by repeat track ("stack"). Passes on one stack line up exactly, so
-// they can be played as a time-lapse. Stacks with the most passes come first.
+// they can be played as a time-lapse. Stacks that hold the point well inside
+// their frame come first, the one with the most passes leading; stacks
+// that only graze it follow, because their pictures often miss it.
 const ALL_GCOV = ['NISAR_L2_GCOV_V1', 'NISAR_L2_GCOV_PROVISIONAL_V1', 'NISAR_L2_GCOV_BETA_V1', 'NISAR_UR_L2'];
 
 export async function historyAt(lat, lon) {
@@ -160,8 +185,10 @@ export async function historyAt(lat, lon) {
     st.otherModes = st.scenes.filter((s) => s.pol.code !== main).length;
     st.scenes = st.scenes.filter((s) => s.pol.code === main).sort((a, b) => a.time - b.time);
     st.pol = st.scenes[0]?.pol;
+    st.marginKm = st.scenes.length ? Math.min(...st.scenes.map((s) => edgeMarginKm(s.ring, lat, lon))) : -1;
   }
-  return list.filter((st) => st.scenes.length >= 2).sort((a, b) => b.scenes.length - a.scenes.length);
+  const safe = (st) => st.marginKm >= SAFE_MARGIN_KM;
+  return list.filter((st) => st.scenes.length >= 2).sort((a, b) => safe(b) - safe(a) || (safe(a) ? b.scenes.length - a.scenes.length : b.marginKm - a.marginKm));
 }
 
 // Interferograms over a point, newest first. Each compares two passes.
@@ -175,8 +202,10 @@ export async function newestAt(lat, lon) {
   return dedupe(await search(ALL_GCOV, '*_GCOV_*', { point: `${lon},${lat}` }, 30));
 }
 
-// Best before/after pair: same track and frame, closest to the event on each side.
-export function bestPair(scenes, eventTime, requirePreview = true) {
+// Best before/after pair: same track and frame, closest to the event on each
+// side. Given the place (`at`), pairs that hold it well inside their frame
+// win over pairs that only graze it.
+export function bestPair(scenes, eventTime, requirePreview = true, at = null) {
   const byStack = new Map();
   for (const s of scenes) {
     if (s.product !== 'GCOV' || !s.track || !s.frame ||
@@ -193,14 +222,17 @@ export function bestPair(scenes, eventTime, requirePreview = true) {
     const after = list.filter((s) => s.time >= eventTime).sort((a, b) => a.time - b.time)[0];
     if (!before || !after) continue;
     const span = after.time - before.time;
-    if (!best || span < best.span) best = { before, after, span };
+    const placed = at && Number.isFinite(at.lat) && Number.isFinite(at.lon) && before.ring && after.ring;
+    const grazing = placed ? Math.min(edgeMarginKm(before.ring, at.lat, at.lon), edgeMarginKm(after.ring, at.lat, at.lon)) < SAFE_MARGIN_KM : false;
+    if (!best || grazing < best.grazing || (grazing === best.grazing && span < best.span)) best = { before, after, span, grazing };
   }
+  if (best) delete best.grazing;
   return best;
 }
 
 // Metadata-only feasibility check; no preview downloads are needed.
-export function comparisonStatus(scenes, eventTime) {
-  const pair = bestPair(scenes, eventTime);
+export function comparisonStatus(scenes, eventTime, at = null) {
+  const pair = bestPair(scenes, eventTime, true, at);
   if (pair) return { pair, reason: '' };
   const coverage = scenes.filter((s) => s.product === 'GCOV' && Number.isFinite(s.time));
   let reason;
