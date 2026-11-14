@@ -83,6 +83,23 @@
         </ul>
       </details>
 
+      <details open>
+        <summary>Live sky and wildlife</summary>
+        <label class="check"><input type="checkbox" id="live-nisar" checked /> NISAR satellite, live <span id="nisar-live-status" class="count"></span></label>
+        <label class="check"><input type="checkbox" id="lighting" checked /> Real day and night, and the real star sky</label>
+        <label class="check"><input type="checkbox" id="wildlife" /> Wildlife sightings (GBIF) <span id="wildlife-status" class="count"></span></label>
+        <div id="wildlife-controls" hidden>
+          <div id="species-chips"></div>
+          <div class="row">
+            <button id="wildlife-play" aria-label="Pause or play the months">Pause</button>
+            <span id="wildlife-month" class="month"></span>
+          </div>
+          <p class="hint">Real sighting records, 2010–2025, played by month of the year. They also show where people look, so busy coasts have more.</p>
+        </div>
+        <label class="check"><input type="checkbox" id="decor" checked /> Decorations: shooting stars and ocean landmarks</label>
+        <p class="hint">The satellite, sky, sunlight and sightings are real data. Shooting stars are decoration only.</p>
+      </details>
+
       <details>
         <summary>Other satellite layers</summary>
         <div id="overlays"></div>
@@ -90,7 +107,6 @@
           <span>Basemap</span>
           <select id="basemap"></select>
         </label>
-        <label class="check"><input type="checkbox" id="lighting" /> Real day and night</label>
       </details>
 
       <details>

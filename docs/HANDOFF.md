@@ -28,18 +28,26 @@ These came out of the conversation and override anything else in this file.
    explanations), and explanations of cause are labelled as hypotheses.
 2. **Proof stays in the app.** Every friendly visual keeps the source
    imagery one click away, so nobody can say we made things up.
-3. **Simple by default, detail by choice. THIS IS THE NEXT BIG TASK.** The
-   default view must be as simple and easy to understand as possible, and
-   "gamified" so the data reads at a glance. The detailed, complex view
-   (charts, polarisation channels, provenance lists, layer menus) becomes an
-   opt-in. Today the app is the detailed version everywhere; nothing of this
-   has been built yet. See "Next steps".
+3. **The animated globe is the "gamified" view.** On 14 November the lead
+   settled this: there is no separate simple mode to build. Zooming into an
+   event and getting proper animations about it is the game layer. Do not
+   ask about "gamified" again.
+   - **Look:** clean, dark and glowing. Light, small particles and soft
+     smoke on the real terrain. Never drawn or cartoon shapes: the lead
+     rejected flame-tongue sprites as ugly and style-breaking.
+   - **Zoom:** coming closer adds finer detail in the same style; it never
+     just enlarges what was there.
+   - **Motion:** everything builds up and fades; nothing pops in or cuts.
 4. **Stunning.** It should impress: real terrain, real effects, driven by
    real data. Our own three.js engine, fast.
 5. **Low entry bar.** Foldable menus, plain words, search without keyword
    lists.
 
-Things the lead ruled out: a live satellite model, a global time scrubber,
+On 14 November the lead accepted a teammate's live NISAR satellite (real
+position, orbit and swath edges), which reverses the earlier "no live
+satellite". Real day and night are now on from the start.
+
+Things the lead ruled out: a global time scrubber,
 and making Google's photorealistic 3D tiles the core (they cannot take our
 radar overlays easily, need a paid key and show one fixed date).
 
@@ -126,6 +134,9 @@ time; there is no backend and there are no keys.
 | `js/search.js` | Fuzzy event search and place lookup |
 | `js/news.js` | Press coverage per event |
 | `js/sound.js` | Plays a time-lapse as notes |
+| `js/orbit.js` | NISAR's live position, track and swath edges from public orbit elements (teammate) |
+| `js/sky.js`, `js/stars-data.js` | Real star sky, the Sun, shooting stars (teammate) |
+| `js/wildlife.js` | GBIF wildlife sightings by month, ocean landmarks (teammate) |
 | `js/globe.js` | The globe the app talks to |
 | `js/engine/tiles.js` | Tile streaming, terrain, layer compositing |
 | `js/engine/controls.js` | Camera: pan, zoom, tilt, turn, fly-to |
@@ -158,7 +169,9 @@ time; there is no backend and there are no keys.
     detection has a `born` time on the replay clock; the shader fades it
     in, burns it and cools it, so scrubbing needs no new buffers. Detail
     is chosen in the vertex shader from the on-screen size of the 375 m
-    detection pixel: ember, then burning ground, flames, sparks, smoke.
+    detection pixel: ember, then scorched ground with ember veins, soft
+    glows, sparks, smoke. Each particle carries a rank, the closeness at
+    which it joins in, and its size is capped in screen pixels.
   - Flood water: layers with a `mask` step are painted into a per-tile
     mask (`paintMask`; red = water, green = step first seen). The tile
     shader animates ripples (two wave sizes picked from screen-space
@@ -239,6 +252,10 @@ that appears on a place, or an event nearby, once results exist.
   their frame outline while the imaged strip misses it. Ranking tracks by
   thumbnail coverage (`rankByCoverage`) did not fix the test case (1 usable
   sample of 8). Needs a per-pass coverage check.
+- **Live satellite and wildlife are barely checked.** In the test container
+  CelesTrak is unreachable and the fallback orbit source and GBIF answer
+  slowly or with 429, so the satellite was seen once and the wildlife
+  sightings never finished loading.
 - **The new effects have only been seen in software rendering**, as
   still frames. Their motion, and their cost on a real GPU, are unchecked.
 - **Flood water vanishes on land at sea level.** To keep the open sea out,
@@ -262,15 +279,14 @@ that appears on a place, or an event nearby, once results exist.
 
 ## Next steps, in order
 
-1. **Simple, gamified default view (the lead's direction, see above).**
-   Nothing built yet. A sensible first cut: a "simple / detailed" switch
-   where simple mode shows only the globe, big event dots, the stories, and
-   a short panel per event (what, where, when, one headline picture with
-   a plain sentence, one "see the proof" button that opens the detailed
-   panel). Ideas for the game layer: an "explorer" progression through the
-   stories and places, plain-language scales for severity (not raw numbers), and
-   clear pictorial legends. Ask the lead what "gamified" should mean before
-   building much.
+1. **More and better event animation, in the agreed look (see above).**
+   Done so far: earthquake shock front, storm spiral, fire (embers to ember
+   veins, sparks, smoke), flood water, picture cross-fades. Ideas not yet
+   built, none of them confirmed by the lead: a radar pass revealed by a
+   sweep along the satellite's track, "what changed" areas growing in,
+   dimming the map around a playing replay, a camera push-in during a
+   replay, small in-world labels close up, closer detail for storms and
+   quakes.
 2. **Hosting.** The repo has `.nojekyll`, and every path is relative, so
    GitHub Pages works with one setting by a repo admin: Settings → Pages →
    Deploy from a branch → `main` / root. The address would be

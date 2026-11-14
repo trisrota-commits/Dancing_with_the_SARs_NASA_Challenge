@@ -18,7 +18,8 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
     turning the right way for its hemisphere, sized and spun by wind speed.
   - Wildfire: the satellite fire detections of each day as glowing embers
     that ignite through the day and cool to coals. Zoom in and each one
-    becomes a patch of burning ground with flames, sparks and smoke.
+    becomes scorched ground veined with embers, with sparks and thin smoke;
+    the closer you get, the finer the detail.
   - Flood: water the radar saw on land, fading in pass by pass, with moving
     ripples and waves along its edge whose detail grows as you zoom in.
 - Labels every part of a replay as **observed** (measured or catalogued),
@@ -49,6 +50,20 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
   series in dB, a change map and a one-sentence result, with the method
   stated. These come from the full-resolution GCOV products, not the
   previews (see "Measuring with NISAR" below).
+- **NISAR flies live** around the globe: its real position now, worked out
+  in the browser from public orbit elements (SGP4), with its orbit, the
+  edges of its 242 km radar swath on the left of its track, and beams to
+  the ground. Click it for its height, speed and position.
+- **The real sky:** the ~4,100 brightest stars of the Yale Bright Star
+  Catalogue at their true positions, turning with the Earth, and the Sun
+  where it actually is. Day and night are on from the start.
+- **Wildlife sightings** from GBIF, played by month of the year, so
+  migrating whales, rays, sharks, turtles, terns, kob and wildebeest appear
+  and disappear where they were really seen. Wetland places explain how
+  animals follow the floods that NISAR maps.
+- **Decorations**, clearly labelled and switchable: shooting stars, splash
+  rings when whales appear, and three ocean landmarks (the Titanic wreck,
+  Challenger Deep, Point Nemo).
 - Event types include landslides, snow, dust and haze, extreme heat or cold,
   and human-made events from NASA EONET, as well as earthquakes, fires,
   floods, storms, volcanoes, ice and drought.
@@ -91,7 +106,8 @@ this app's workload:
   in the terrain shader itself, the storm is a procedural cloud shader, and
   the camera slowly circles a replay until you touch the globe.
 - Effects have levels of detail and never pop: a fire is one instanced
-  particle system that shows embers from afar and flames up close; flood
+  particle system that shows embers from afar and ember veins, sparks and
+  smoke up close, adding detail without enlarging anything; flood
   water is a mask the terrain shader animates; radar pictures cross-fade.
 - The camera orbits a point on the ground like Google Earth: drag to pan,
   wheel or pinch to zoom, right-drag or two-finger drag to tilt and turn.
@@ -172,6 +188,11 @@ app in headless Chromium against the live services.
   - `fire.js` – the wildfire particle system
   - `controls.js` – pan, zoom, tilt, turn and fly-to camera
   - `geo.js` – coordinate maths
+- `js/orbit.js` – NISAR's live position, ground track and swath edges
+- `js/sky.js`, `js/stars-data.js` – the real star sky, the Sun and the
+  shooting stars
+- `js/wildlife.js` – GBIF sightings by month, and the ocean landmarks
+- `vendor/satellite.es.js` – satellite.js 5.0 (MIT), the SGP4 orbit model
 - `vendor/three.module.min.js` – three.js r170 (MIT), bundled so the engine
   has no CDN dependency
 - `js/main.js` – wiring and panels
@@ -186,6 +207,10 @@ Tiles: NASA GIBS. Events: USGS, NASA EONET, GDACS. Basemap: Esri World Imagery.
 Fire detections: VIIRS on NOAA-20 via NASA GIBS. Surface water: OPERA DSWx.
 Elevation: Mapzen Terrain Tiles (AWS Open Data). Place search: Photon
 (OpenStreetMap). Rendering: three.js.
+NISAR orbit elements: CelesTrak (fallback: tle.ivanstanojevic.me), propagated
+with satellite.js. Stars: Yale Bright Star Catalogue, 5th edition (Hoffleit &
+Warren), public domain. Wildlife sightings: GBIF.org and the datasets it
+publishes, each credited in its record's panel.
 
 ## Measuring with NISAR
 
@@ -232,7 +257,7 @@ the same layout as real GCOV products.
 - Replays never draw anything between data points without saying so; the
   panel lists each element with its source and whether it is observed,
   agency analysis or computed here. Decoration is named as decoration: the
-  flames, sparks and smoke of a fire, the ripples and edge waves of flood
+  ember veins, sparks and smoke of a fire, the ripples and edge waves of flood
   water, the height of the ground ripple and the look of the storm spiral
   follow fixed rules and are not measurements.
 - The NISAR change view is computed in the browser from NASA's 8-bit preview
