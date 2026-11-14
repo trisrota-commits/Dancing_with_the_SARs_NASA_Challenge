@@ -6,10 +6,10 @@
 import * as THREE from '../vendor/three.module.min.js';
 import { CATEGORIES, BASEMAPS, OVERLAYS, NISAR_TILES } from './config.js';
 import { pointInPolygon } from './incidents.js';
-import { RAD, EARTH_RADIUS_M, toLatLon, greatCircle, sunDirection, rgb } from './engine/geo.js';
+import { RAD, EARTH_RADIUS_M, toVec, toLatLon, greatCircle, sunDirection, rgb } from './engine/geo.js';
 import { GlobeControls } from './engine/controls.js';
 import { TileGlobe } from './engine/tiles.js';
-import { Dots, Lines, SelectionRing, atmosphere, stars } from './engine/marks.js';
+import { Dots, Lines, SelectionRing, Vortex, LIFT, atmosphere, stars } from './engine/marks.js';
 
 const DAY = 86400_000;
 const iso = (ms) => new Date(ms).toISOString().slice(0, 10);
@@ -43,6 +43,13 @@ export class Globe {
     this.glow = atmosphere(this.scene);
     this.trackLines = new Lines(this.scene, this.shared, { width: 2 });
     this.linkLines = new Lines(this.scene, this.shared, { width: 1.8, dash: 14 });
+    // Drawn by event replays.
+    this.fxLines = new Lines(this.scene, this.shared, { width: 2.4, order: 26, depthTest: false });
+    this.fxDots = new Dots(this.scene, this.shared);
+    this.fxDots.points.renderOrder = 27;
+    this.vortex = new Vortex(this.scene, this.shared);
+    this.fxZones = [];
+    this.animating = false;
     this.dots = new Dots(this.scene, this.shared);
     this.ring = new SelectionRing(this.scene, this.shared);
 
@@ -52,7 +59,7 @@ export class Globe {
     this.controls.groundAt = this.lift;
     this.controls.onTap = (e) => this.tap(e);
 
-    this.state = { base: 'esri', overlays: {}, nisar: null };
+    this.state = { base: 'esri', overlays: {}, nisar: null, fx: [] };
     this.scenes = [];
     this.footprintsOn = false;
     this.highlighted = [];
@@ -115,12 +122,13 @@ export class Globe {
     if (this.tiles.elevationVersion !== this.liftedAt && this.tiles.frame % 30 === 0) {
       this.liftedAt = this.tiles.elevationVersion;
       this.dots.relift();
+      this.fxDots.relift();
       if (this.selected) this.ring.set(this.selected.lat, this.selected.lon, this.lift(this.selected.lat, this.selected.lon));
       this.dirty = true;
     }
     // Pulsing dots and the selection ring are the only things that animate
     // on their own; without them an idle globe costs nothing.
-    const animating = this.ring.points.visible || seconds < this.pulseUntil;
+    const animating = this.animating || this.ring.points.visible || seconds < this.pulseUntil;
     if (!(moved || tilesChanged || animating || this.dirty)) return;
     this.dirty = false;
 
@@ -229,6 +237,7 @@ export class Globe {
         if (date >= NISAR_TILES.firstDate) layers.push({ url: NISAR_TILES.url.replace('{date}', date), maxLevel: NISAR_TILES.maxLevel });
       }
     }
+    for (const layer of s.fx) layers.push(layer);
     this.tiles.setLayers(layers);
     this.dirty = true;
   }
@@ -290,7 +299,12 @@ export class Globe {
   // Drapes a radar preview over the terrain. side: 'left', 'right' or
   // undefined for the whole screen.
   async addScene(scene, bounds, side) {
-    const picture = { image: await loadPicture(scene.image), bounds, side, scene };
+    return this.addPicture(await loadPicture(scene.image), bounds, side);
+  }
+
+  // Drapes any image or canvas over a lat/lon box.
+  addPicture(image, bounds, side, alpha = 1) {
+    const picture = { image, bounds, side, alpha };
     this.pictures = [...this.pictures, picture];
     this.tiles.setPictures(this.pictures);
     this.dirty = true;
@@ -384,7 +398,62 @@ export class Globe {
       }
     }
     for (const scene of this.highlighted) outlines.push({ ring: scene.ring, color: 'rgba(57,230,196,1)', width: 2.6 });
+    outlines.push(...this.fxZones);
     this.tiles.setOutlines(outlines);
+    this.dirty = true;
+  }
+
+  // ---------- replay effects ----------
+
+  // A point on the drawn ground (terrain included), as a vector.
+  ground(lat, lon, extra = LIFT) {
+    return toVec(lat, lon, 1 + extra + this.lift(lat, lon));
+  }
+
+  // paths: [{ points: [{ lat, lon }…], color: [r, g, b, a], closed }]
+  setEffectLines(paths) {
+    this.fxLines.set(
+      paths.map((p) => {
+        const points = p.points.map((q) => this.ground(q.lat, q.lon, p.lift ?? LIFT));
+        if (p.closed && points.length) points.push(points[0].clone());
+        return { points, color: p.color };
+      }),
+    );
+    this.dirty = true;
+  }
+
+  // items: [{ lat, lon, color: [r, g, b], size }]
+  setEffectDots(items) {
+    this.fxDots.set(items, this.lift);
+    this.dirty = true;
+  }
+
+  // Filled or outlined areas painted into the ground:
+  // [{ ring, color, fill, width, open }]
+  setEffectZones(zones) {
+    this.fxZones = zones;
+    this.drawOutlines();
+  }
+
+  // Extra dated tile layers shown on top of everything else.
+  setEffectLayers(layers) {
+    this.state.fx = layers;
+    this.applyLayers();
+  }
+
+  setVortex(at) {
+    if (!at) this.vortex.set(null);
+    else this.vortex.set(this.ground(at.lat, at.lon), at.size, at.color, at.lat < 0);
+    this.dirty = true;
+  }
+
+  clearEffects() {
+    this.animating = false;
+    this.fxLines.set([]);
+    this.fxDots.set([], this.lift);
+    this.vortex.set(null);
+    if (this.fxZones.length) this.setEffectZones([]);
+    if (this.state.fx.length) this.setEffectLayers([]);
     this.dirty = true;
   }
 
@@ -409,7 +478,7 @@ export class Globe {
 // Loads a radar preview and makes its black padding see-through, so only
 // the imaged swath covers the ground.
 const pictureCache = new Map();
-function loadPicture(url) {
+export function loadPicture(url) {
   if (!pictureCache.has(url)) {
     pictureCache.set(
       url,

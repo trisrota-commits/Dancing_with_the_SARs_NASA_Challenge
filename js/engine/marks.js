@@ -162,12 +162,13 @@ const LINE_FRAGMENT = /* glsl */ `
   }`;
 
 export class Lines {
-  constructor(scene, shared, { width = 1.5, dash = 0, order = 20 } = {}) {
+  constructor(scene, shared, { width = 1.5, dash = 0, order = 20, depthTest = true } = {}) {
     this.material = new THREE.ShaderMaterial({
       uniforms: { uViewport: shared.uViewport, uRatio: shared.uRatio, uWidth: { value: width }, uDash: { value: dash } },
       vertexShader: LINE_VERTEX,
       fragmentShader: LINE_FRAGMENT,
       transparent: true,
+      depthTest,
       depthWrite: false,
       side: THREE.DoubleSide,
     });
@@ -271,6 +272,61 @@ export class SelectionRing {
     const v = toVec(lat, lon, 1 + LIFT + lift);
     this.points.geometry.attributes.position.setXYZ(0, v.x, v.y, v.z);
     this.points.geometry.attributes.position.needsUpdate = true;
+  }
+}
+
+// ---------- spinning storm marker ----------
+
+const VORTEX_VERTEX = /* glsl */ `
+  uniform vec3 uCam;
+  uniform float uRatio;
+  uniform float uSize;
+  void main() {
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    if (dot(position, uCam) < 1.0) gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+    gl_PointSize = uSize * uRatio;
+  }`;
+
+const VORTEX_FRAGMENT = /* glsl */ `
+  uniform float uTime;
+  uniform vec3 uColor;
+  uniform float uTurn;
+  void main() {
+    vec2 p = gl_PointCoord - 0.5;
+    float r = length(p) * 2.0;
+    if (r > 1.0) discard;
+    float angle = atan(p.y, p.x) * uTurn;
+    // Two spiral arms winding into a clear eye.
+    float arms = 0.5 + 0.5 * sin(angle * 2.0 + log(r + 0.04) * 5.0 + uTime * 2.6);
+    float body = smoothstep(1.0, 0.25, r) * smoothstep(0.07, 0.16, r);
+    float alpha = body * (0.25 + 0.75 * arms);
+    gl_FragColor = vec4(mix(uColor, vec3(1.0), arms * 0.45), alpha);
+  }`;
+
+export class Vortex {
+  constructor(scene, shared) {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(3), 3));
+    this.uniforms = { uCam: shared.uCam, uRatio: shared.uRatio, uTime: shared.uTime, uSize: { value: 60 }, uColor: { value: new THREE.Vector3(1, 1, 1) }, uTurn: { value: 1 } };
+    this.points = new THREE.Points(
+      g,
+      new THREE.ShaderMaterial({ uniforms: this.uniforms, vertexShader: VORTEX_VERTEX, fragmentShader: VORTEX_FRAGMENT, transparent: true, depthTest: false, depthWrite: false }),
+    );
+    this.points.frustumCulled = false;
+    this.points.renderOrder = 28;
+    this.points.visible = false;
+    scene.add(this.points);
+  }
+
+  // vec: position; size in pixels; south: storms turn clockwise south of the equator.
+  set(vec, size, color, south) {
+    this.points.visible = !!vec;
+    if (!vec) return;
+    this.points.geometry.attributes.position.setXYZ(0, vec.x, vec.y, vec.z);
+    this.points.geometry.attributes.position.needsUpdate = true;
+    this.uniforms.uSize.value = size;
+    this.uniforms.uColor.value.set(...color);
+    this.uniforms.uTurn.value = south ? -1 : 1;
   }
 }
 
