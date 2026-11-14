@@ -88,6 +88,8 @@ from a web server.
   has no CDN dependency
 - `js/main.js` – wiring and panels
 - `docs/DATA_SOURCES.md` – survey of every data source and what is reachable
+- `docs/DATA_RULES_AND_DEMO_PLAN.md` – which data the challenge allows besides
+  NISAR, and the plan for a reliable demo
 
 ## Data and credits
 
