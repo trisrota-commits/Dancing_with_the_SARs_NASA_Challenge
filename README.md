@@ -134,6 +134,14 @@ this app's workload:
   whatever is switched on, and everything drapes over the relief.
 - All event dots are a single draw call, and so are their light beams,
   which rise as the view tilts: taller for stronger events.
+- Radar layers are thin strips on an empty globe, so the engine never asks
+  blindly: one whole-world picture a day from NASA's map service says
+  where there is anything, shows the layer from far away and stands in
+  while sharper tiles arrive. Tiles and pass pictures are kept in the
+  browser's own store between visits, and a fingerprint per day tells
+  when NASA has added data.
+- Tiles are painted and fetched from the middle of the view outwards,
+  ahead of a flying camera and ahead of a turning globe.
 - Event effects live in shaders: the earthquake front is drawn and lifted
   in the terrain shader itself, and the storm is a procedural cloud shader.
 - Effects have levels of detail and never pop: a fire is one instanced

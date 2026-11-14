@@ -97,3 +97,36 @@ test('a calibrated measurement is stated as a step in decibels, and only called 
   assert.equal(measuredStep({ ...d, change: { before: 1, after: 2 } }), null);
   assert.equal(measuredLine({ ...d, change: { before: 1, after: 2 } }), '');
 });
+
+test('the catalogue is searched without a name pattern, and the kind of product is sorted out here', async () => {
+  const asked = [];
+  const entry = (kind, minute) => ({
+    id: `G${kind}${minute}`,
+    title: `NISAR_L2_PR_${kind}_010_088_A_031_2005_DHDH_A_20261101T05${minute}00_20261101T05${minute}30_P05023_N_F_J_001`,
+    time_start: `2026-11-01T05:${minute}:00.000Z`,
+    polygons: [['10 10 10 12 12 12 12 10 10 10']],
+    links: [],
+  });
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async (url) => {
+    asked.push(String(url));
+    // The urgent-response collection mixes two kinds of product.
+    return { ok: true, json: async () => ({ feed: { entry: [entry('GCOV', '10'), entry('GSLC', '11'), entry('GCOV', '12'), entry('GSLC', '13')] } }) };
+  };
+  try {
+    const fresh = await import(`../js/nisar.js?search-test=${Date.now()}`);
+    const passes = await fresh.passesAt(11, 11, Date.UTC(2026, 9, 1), Date.UTC(2026, 10, 14));
+    assert.equal(asked.length, 1);
+    // The slow option must never come back.
+    assert.ok(!/readable_granule_name|pattern/.test(decodeURIComponent(asked[0])), asked[0]);
+    assert.deepEqual([...new Set(passes.map((s) => s.product))], ['GCOV']);
+    assert.equal(passes.length, 2);
+    // Twice as many entries are asked for when the mixed collection is searched.
+    assert.match(decodeURIComponent(asked[0]), /page_size=220/);
+    // The same question again is answered from memory.
+    await fresh.passesAt(11, 11, Date.UTC(2026, 9, 1), Date.UTC(2026, 10, 14));
+    assert.equal(asked.length, 1);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+});

@@ -72,18 +72,46 @@ function parseEntry(entry) {
   return scene;
 }
 
-async function search(shortNames, pattern, extra, pageSize) {
+// One search of NASA's catalogue for one kind of product ('GCOV' or 'GUNW').
+//
+// The catalogue can filter by a pattern in the file name, but that one
+// option makes it take seven to eight seconds where the same search without
+// it takes a third of a second. So the kind of product is sorted out here
+// instead, from the file names that come back. Only the urgent-response
+// collection holds more than one kind (about half of it is another
+// product), so twice as many entries are asked for when it is searched.
+//
+// The same question is not put twice within five minutes: an event that
+// was pointed at, or opened before, opens at once.
+const MIXED = 'NISAR_UR_L2';
+const ASKED = new Map();
+const ASK_AGAIN_MS = 5 * 60_000;
+
+function search(shortNames, product, extra, pageSize) {
   const q = new URLSearchParams();
   shortNames.forEach((s) => q.append('short_name[]', s));
-  q.append('readable_granule_name[]', pattern);
-  q.append('options[readable_granule_name][pattern]', 'true');
-  q.append('page_size', String(pageSize));
+  q.append('page_size', String(Math.min(2000, shortNames.includes(MIXED) ? pageSize * 2 + 20 : pageSize)));
   q.append('sort_key', '-start_date');
   for (const [k, v] of Object.entries(extra)) q.append(k, v);
-  const res = await fetch(`${CMR}?${q}`);
-  if (!res.ok) throw new Error(`NASA CMR answered ${res.status}`);
-  const json = await res.json();
-  return (json.feed?.entry || []).map(parseEntry).filter(Boolean);
+  const key = `${product}?${q}`;
+  const held = ASKED.get(key);
+  if (held && Date.now() - held.at < ASK_AGAIN_MS) return held.answer;
+  const answer = fetch(`${CMR}?${q}`)
+    .then((res) => {
+      if (!res.ok) throw new Error(`NASA CMR answered ${res.status}`);
+      return res.json();
+    })
+    .then((json) =>
+      (json.feed?.entry || [])
+        .map(parseEntry)
+        .filter((scene) => scene && scene.product === product)
+        .slice(0, pageSize),
+    );
+  ASKED.set(key, { at: Date.now(), answer });
+  // A search that failed is asked again next time.
+  answer.catch(() => ASKED.delete(key));
+  if (ASKED.size > 60) ASKED.delete(ASKED.keys().next().value);
+  return answer;
 }
 
 // The same pass can be published twice (urgent, then standard). Keep one.
@@ -98,7 +126,7 @@ function dedupe(scenes) {
 }
 
 export async function latestScenes(count = 200) {
-  return dedupe(await search(['NISAR_L2_GCOV_V1', 'NISAR_UR_L2'], '*_GCOV_*', {}, count));
+  return dedupe(await search(['NISAR_L2_GCOV_V1', 'NISAR_UR_L2'], 'GCOV', {}, count));
 }
 
 // How far inside a frame outline a point lies, in kilometres (0 or less
@@ -150,11 +178,15 @@ export function nextPass(scenes, now = Date.now()) {
 export async function scenesAt(lat, lon, fromMs, toMs) {
   const temporal = `${new Date(fromMs).toISOString()},${new Date(toMs).toISOString()}`;
   const at = { point: `${lon},${lat}`, temporal };
-  const [gcov, gunw] = await Promise.all([
-    search(NISAR_GCOV, '*_GCOV_*', at, 100),
-    search(NISAR_GUNW, '*_GUNW_*', at, 40).catch(() => []),
-  ]);
+  const [gcov, gunw] = await Promise.all([search(NISAR_GCOV, 'GCOV', at, 100), search(NISAR_GUNW, 'GUNW', at, 40).catch(() => [])]);
   return { backscatter: dedupe(gcov), interferograms: dedupe(gunw) };
+}
+
+// The radar passes alone, which is all an event's picture needs: the same
+// search scenesAt makes, so asking for both costs one request.
+export async function passesAt(lat, lon, fromMs, toMs) {
+  const temporal = `${new Date(fromMs).toISOString()},${new Date(toMs).toISOString()}`;
+  return dedupe(await search(NISAR_GCOV, 'GCOV', { point: `${lon},${lat}`, temporal }, 100));
 }
 
 // Every backscatter pass over a point since NISAR began science operations,
@@ -166,7 +198,7 @@ const ALL_GCOV = ['NISAR_L2_GCOV_V1', 'NISAR_L2_GCOV_PROVISIONAL_V1', 'NISAR_L2_
 
 export async function historyAt(lat, lon) {
   const temporal = `2025-10-01T00:00:00Z,${new Date().toISOString()}`;
-  const scenes = dedupe(await search(ALL_GCOV, '*_GCOV_*', { point: `${lon},${lat}`, temporal }, 500));
+  const scenes = dedupe(await search(ALL_GCOV, 'GCOV', { point: `${lon},${lat}`, temporal }, 500));
   const stacks = new Map();
   for (const s of scenes) {
     if (!stacks.has(s.stack)) stacks.set(s.stack, { stack: s.stack, track: s.track, frame: s.frame, direction: s.direction, scenes: [], unplaced: 0 });
@@ -193,13 +225,13 @@ export async function historyAt(lat, lon) {
 
 // Interferograms over a point, newest first. Each compares two passes.
 export async function interferogramsAt(lat, lon) {
-  return dedupe(await search(NISAR_GUNW, '*_GUNW_*', { point: `${lon},${lat}` }, 80)).filter((s) => s.image && s.refTime && s.secTime);
+  return dedupe(await search(NISAR_GUNW, 'GUNW', { point: `${lon},${lat}` }, 80)).filter((s) => s.image && s.refTime && s.secTime);
 }
 
 // The newest passes over a point, whatever their date: what the next-pass
 // estimate has to start from.
 export async function newestAt(lat, lon) {
-  return dedupe(await search(ALL_GCOV, '*_GCOV_*', { point: `${lon},${lat}` }, 30));
+  return dedupe(await search(ALL_GCOV, 'GCOV', { point: `${lon},${lat}` }, 30));
 }
 
 // Best before/after pair: same track and frame, closest to the event on each
@@ -245,7 +277,16 @@ export function comparisonStatus(scenes, eventTime, at = null) {
 }
 
 // Corner coordinates of a preview image, read from its KML sidecar.
-export async function imageBounds(scene) {
+const BOUNDS = new Map();
+export function imageBounds(scene) {
+  if (!BOUNDS.has(scene.id)) {
+    BOUNDS.set(scene.id, readBounds(scene));
+    if (BOUNDS.size > 400) BOUNDS.delete(BOUNDS.keys().next().value);
+  }
+  return BOUNDS.get(scene.id);
+}
+
+async function readBounds(scene) {
   const fallback = () => {
     const lats = scene.ring.map((p) => p.lat);
     const lons = scene.ring.map((p) => p.lon);
@@ -272,16 +313,22 @@ export async function imageBounds(scene) {
 // server answers every date, with a tiny see-through tile when it has
 // nothing, so the whole-world tile's size says whether a day has data.
 // NASA publishes with a delay of days, so yesterday is usually still empty.
+// The last two weeks are asked at once, not one after the other.
 export async function latestTileDate() {
-  for (let back = 1; back <= 21; back++) {
-    const date = new Date(Date.now() - back * 86400_000).toISOString().slice(0, 10);
-    const url = NISAR_TILES.url.replace('{date}', date).replace('{z}', '0').replace('{y}', '0').replace('{x}', '0');
-    try {
-      const res = await fetch(url);
-      if (res.ok && (await res.blob()).size > 300) return date;
-    } catch {
-      /* try the previous day */
-    }
-  }
-  return new Date(Date.now() - 3 * 86400_000).toISOString().slice(0, 10);
+  const days = [...Array(14)].map((_, i) => new Date(Date.now() - (i + 1) * 86400_000).toISOString().slice(0, 10));
+  const sizes = await Promise.all(
+    days.map((date) =>
+      fetch(NISAR_TILES.url.replace('{date}', date).replace('{z}', '0').replace('{y}', '0').replace('{x}', '0'))
+        .then((res) => (res.ok ? res.blob() : null))
+        .then((blob) => blob?.size || 0)
+        .catch(() => 0),
+    ),
+  );
+  const at = sizes.findIndex((size) => size > 300);
+  return at >= 0 ? days[at] : likelyTileDate();
+}
+
+// Where to start before the answer above is in: two days back.
+export function likelyTileDate() {
+  return new Date(Date.now() - 2 * 86400_000).toISOString().slice(0, 10);
 }

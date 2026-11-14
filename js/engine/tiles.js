@@ -14,24 +14,42 @@ const MIN_ZOOM = 2;
 const MAX_ZOOM = 17;
 const MAX_LEAVES = 320;
 const PARALLEL_DOWNLOADS = 28;
+const AHEAD_DOWNLOADS = 8; // of which at most this many for pictures fetched ahead of need
 // A layer marked `sparse` (radar passes: thin strips on an empty globe) is
 // mostly tiles with nothing on them, and asking the server for each of them
-// is what makes such a layer slow. So the engine works emptiness out itself:
-// - a tile the server answers with its tiny see-through picture is empty
-//   (known by the size of the answer, never decoded);
-// - a tile that does hold a picture is cut into 8 × 8 cells, and a cell
-//   with nothing in it means every tile beneath that cell, three levels
-//   down, is empty too and is never asked for.
-// One picture of the whole world per layer therefore decides everything
-// down to level 3, a level-3 tile everything down to level 6, and so on.
+// is what makes such a layer slow. So the engine never asks blindly:
+//
+// - Where the layer gives a `sheet` (one picture of the whole world, which
+//   NASA's map service draws on request), that single picture is fetched
+//   first. It is the layer as seen from far away, it stands in for any
+//   tile that is still on its way, and it says where on the globe the
+//   layer has anything at all, down to level 7.
+// - Below that, and for a layer without a sheet, a tile that holds a
+//   picture is cut into 8 × 8 cells, and a cell with nothing in it means
+//   every tile beneath it, three levels down, is empty and is never asked
+//   for.
+// - A tile the server answers with its tiny see-through picture is empty
+//   (known by the size of the answer, never decoded).
 const EMPTY_BYTES = 300;
-const PROBE_LEVELS = [0, 3, 6, 9, 12];
+const SHEET_PX = 1024; // the world picture: the level-2 tiles in one piece
+const SHEET_LEVEL = 2;
+const SHEET_CELLS = 128; // its cells: one for each tile of level 7
+const SHEET_REACH = 7;
+const PROBES_UNDER_SHEET = [7, 10, 13];
+const PROBE_LEVELS = [0, 3, 6, 9, 12]; // for a layer without a sheet
 const CELLS = 8; // 8 × 8 cells: three levels of tiles beneath
 const EMPTY_KEPT = 30000; // empty answers remembered; they cost nothing
 // Seen from far away, a sparse layer is drawn from tiles one level coarser
 // than the map beneath it: a quarter of the pictures, and thin strips on a
 // whole continent lose nothing by it.
 const COARSER_BELOW = 7;
+// NASA's server tells browsers not to keep its tiles, so a second visit
+// would fetch every radar tile again. The engine keeps them itself, in the
+// browser's own store, and trusts them only as long as that day's picture
+// of the whole world (always fetched fresh) is byte for byte what it was.
+const STORE = 'radar-tiles-1';
+const STORE_DAYS = 45; // days older than this are cleared out of the store
+const RECHECK_MS = 5 * 60_000; // how often the whole-world pictures are fetched again
 // Phones and tablets have far less memory to give a page than a laptop.
 const SMALL = !!globalThis.matchMedia?.('(pointer: coarse)').matches;
 const IMAGE_CACHE = SMALL ? 450 : 900;
@@ -291,6 +309,11 @@ export class TileGlobe {
     this.soft.width = this.soft.height = SIZE / 4;
     this.softCtx = this.soft.getContext('2d');
     this.fadeGen = 0;
+    this.focus = new THREE.Vector3(0, 0, 1);
+    this.checkedAt = performance.now();
+    // The browser's store for radar tiles; null where there is none.
+    this.store = typeof caches === 'undefined' ? Promise.resolve(null) : caches.open(STORE).catch(() => null);
+    this.store.then((store) => store && this.sweepStore(store));
     this.reader = document.createElement('canvas');
     this.reader.width = this.reader.height = SIZE;
     this.readerCtx = this.reader.getContext('2d', { willReadFrequently: true });
@@ -330,7 +353,22 @@ export class TileGlobe {
     }
     // For a sparse layer, ask for its picture of the whole world straight
     // away: one small answer says where on the globe it has anything.
-    for (const layer of layers) if (layer.sparse) this.image(layer, 0, 0, 0, null);
+    // Where that picture is already here, the level beneath it is asked for
+    // again: the queue was just emptied.
+    // World pictures of layers no longer on the globe may be let go like
+    // any other picture; those in use are held on to.
+    const inUse = new Set(layers.map((l) => l.sheet).filter(Boolean));
+    for (const entry of this.images.values()) {
+      if (!entry.sheet) continue;
+      entry.probe = inUse.has(entry.key);
+      entry.warmed = 0;
+    }
+    for (const layer of layers) {
+      if (!layer.sparse) continue;
+      if (layer.sheet) this.sheetOf(layer, null);
+      else this.image(layer, 0, 0, 0, null);
+    }
+    this.warmAt = 0;
     this.repaintAll();
   }
 
@@ -431,8 +469,13 @@ export class TileGlobe {
 
   // ---------- per-frame work ----------
 
-  update(camera, viewportHeight, moved) {
+  // `focus` is the point on the globe the camera looks at (a unit vector):
+  // what is nearest to it is painted and downloaded first.
+  update(camera, viewportHeight, moved, focus) {
     this.frame++;
+    if (focus) this.focus.copy(focus);
+    this.recheck();
+    this.warm();
     if (moved) {
       this.select(camera, viewportHeight);
       const wanted = new Set();
@@ -461,16 +504,25 @@ export class TileGlobe {
       this.changed = true;
     }
 
-    // Repaint and reshape a bounded number of tiles per frame.
-    let budget = 24;
-    const deadline = performance.now() + PAINT_MS;
+    // Reshape, then repaint a bounded number of tiles per frame: those in
+    // the middle of the view first, the edges last.
+    const stale = [];
     for (const tile of this.tiles.values()) {
       if (!tile.mesh.visible) continue;
       if (tile.shapeDirty) {
         this.shape(tile);
         this.changed = true;
       }
-      if (tile.dirty) {
+      if (tile.dirty) stale.push(tile);
+    }
+    if (stale.length) {
+      if (stale.length > 1) {
+        for (const tile of stale) tile.far = 1 - tile.mesh.position.dot(this.focus) / tile.mesh.position.length();
+        stale.sort((a, b) => a.far - b.far);
+      }
+      let budget = 24;
+      const deadline = performance.now() + PAINT_MS;
+      for (const tile of stale) {
         this.paint(tile);
         this.changed = true;
         if (--budget === 0 || performance.now() > deadline) break;
@@ -597,6 +649,10 @@ export class TileGlobe {
   // image as a stand-in when the exact tile has not arrived yet.
   drawLayer(target, tile, layer, alpha) {
     const { z, x, y } = tile;
+    const sheet = layer.sparse && layer.sheet ? this.sheetOf(layer, tile) : null;
+    const world = sheet?.state === 'ready' ? sheet : null;
+    // From far away the world picture is the layer: nothing else is fetched.
+    if (world && z <= SHEET_LEVEL + 1) return this.sheetHolds(world, z, x, y) && this.drawSheet(target, tile, world, alpha);
     const top = Math.min(layer.sparse && z > 2 && z < COARSER_BELOW ? z - 1 : z, layer.maxLevel);
     const exact = this.image(layer, top, x >> (z - top), y >> (z - top), tile);
     // Known to hold nothing: no picture, and no stand-in from above either.
@@ -620,7 +676,8 @@ export class TileGlobe {
       entry.lastUsed = this.frame;
       return true;
     }
-    return false;
+    // Nothing sharper is here yet: the world picture stands in.
+    return world ? this.drawSheet(target, tile, world, alpha) : false;
   }
 
   // Composites everything for this tile. Layers and pictures with a side
@@ -964,6 +1021,43 @@ export class TileGlobe {
     return this.url(layer, z, x, y) + (layer.keep ? `#kept${layer.tint || ''}` : '');
   }
 
+  // The picture of the whole world for a sparse layer (see the top of this
+  // file). It is kept for as long as the layer is on.
+  sheetOf(layer, tile) {
+    let entry = this.images.get(layer.sheet);
+    if (!entry) {
+      entry = { key: layer.sheet, url: layer.sheet, state: 'queued', img: null, waiting: new Set(), lastUsed: this.frame, first: true, sparse: true, sheet: true, probe: true, layer };
+      this.images.set(entry.key, entry);
+      this.queue.push(entry);
+    } else if (entry.state === 'idle') {
+      entry.state = 'queued';
+      this.queue.push(entry);
+    }
+    if (tile && (entry.state === 'queued' || entry.state === 'loading')) entry.waiting.add(tile);
+    entry.lastUsed = this.frame;
+    entry.probe = true;
+    entry.layer = layer;
+    return entry;
+  }
+
+  // Whether the world picture shows anything inside a tile of level 7 or
+  // coarser.
+  sheetHolds(sheet, z, x, y) {
+    const side = SHEET_CELLS >> z;
+    for (let j = y * side; j < (y + 1) * side; j++) for (let i = x * side; i < (x + 1) * side; i++) if (sheet.grid[j * SHEET_CELLS + i]) return true;
+    return false;
+  }
+
+  // Draws a tile's part of the world picture: all of the layer from far
+  // away, and a soft stand-in closer up while the real tiles arrive.
+  drawSheet(target, tile, sheet, alpha) {
+    const span = SHEET_PX / 2 ** tile.z;
+    target.globalAlpha = alpha;
+    target.drawImage(sheet.img, tile.x * span, tile.y * span, span, span, 0, 0, SIZE, SIZE);
+    sheet.lastUsed = this.frame;
+    return true;
+  }
+
   image(layer, z, x, y, tile) {
     const key = this.key(layer, z, x, y);
     let entry = this.images.get(key);
@@ -972,8 +1066,25 @@ export class TileGlobe {
       return entry;
     }
     if (layer.sparse) {
+      const empty = () => {
+        const none = { key, state: 'empty', img: null, waiting: new Set(), lastUsed: this.frame, sparse: true };
+        this.images.set(key, none);
+        return none;
+      };
+      let probes = PROBE_LEVELS;
+      const sheet = layer.sheet ? this.sheetOf(layer, tile) : null;
+      if (sheet) {
+        if (sheet.state === 'empty') return empty();
+        // Not here yet: the tile waits on it and is painted again when it is.
+        if (sheet.state !== 'ready' && sheet.state !== 'missing') return sheet;
+        if (sheet.state === 'ready') {
+          const up = Math.max(0, z - SHEET_REACH);
+          if (!this.sheetHolds(sheet, z - up, x >> up, y >> up)) return empty();
+          probes = z <= SHEET_REACH ? [] : PROBES_UNDER_SHEET;
+        }
+      }
       // Is there anything at all up here? The level above knows.
-      const probe = PROBE_LEVELS.filter((level) => level < z).pop();
+      const probe = probes.filter((level) => level < z).pop();
       if (probe != null) {
         const down = z - probe;
         const above = this.image(layer, probe, x >> down, y >> down, tile);
@@ -986,11 +1097,7 @@ export class TileGlobe {
           nothing = true;
           for (let j = cy; j < cy + side && nothing; j++) for (let i = cx; i < cx + side; i++) if (above.cells[j * CELLS + i]) nothing = false;
         }
-        if (nothing) {
-          entry = { key, state: 'empty', img: null, waiting: new Set(), lastUsed: this.frame, sparse: true };
-          this.images.set(key, entry);
-          return entry;
-        }
+        if (nothing) return empty();
         // Not known yet: the tile waits on the level above (it was added to
         // its waiting list) and is painted again when that arrives.
         if (above.state !== 'ready' && above.state !== 'missing') return above;
@@ -998,7 +1105,7 @@ export class TileGlobe {
     }
     if (!entry) {
       // The coarse levels of a sparse layer go first: they unblock the rest.
-      entry = { key, url: this.url(layer, z, x, y), keep: layer.keep, tint: layer.tint, state: 'queued', img: null, waiting: new Set(), lastUsed: this.frame, first: !!layer.base || (!!layer.sparse && z <= 3), sparse: !!layer.sparse, probe: !!layer.sparse && z === 0 };
+      entry = { key, url: this.url(layer, z, x, y), keep: layer.keep, tint: layer.tint, state: 'queued', img: null, waiting: new Set(), lastUsed: this.frame, first: !!layer.base || (!!layer.sparse && z <= 3), sparse: !!layer.sparse, probe: !!layer.sparse && !layer.sheet && z === 0, layer: layer.sparse ? layer : null, z, x, y };
       this.images.set(key, entry);
       this.queue.push(entry);
     } else if (entry.state === 'idle') {
@@ -1010,68 +1117,315 @@ export class TileGlobe {
     return entry;
   }
 
+  // How soon an entry in the queue is wanted: lower goes first. The ground
+  // goes before overlays; within each, what is nearest the middle of the
+  // view; then what the camera is flying towards; last, pictures fetched
+  // ahead of need.
+  urgency(entry, now) {
+    let near = 2;
+    for (const t of entry.waiting) {
+      if (t.dead || !t.mesh.visible) continue;
+      const far = 1 - t.mesh.position.dot(this.focus) / t.mesh.position.length();
+      if (far < near) near = far;
+    }
+    if (near < 2) return (entry.first ? 0 : 3) + near;
+    if (entry.pinned || entry.probe) return 0.5;
+    // Where the camera is flying to comes before overlays still on screen
+    // (it is about to leave them); what a slowly turning globe will reach
+    // next waits until the view itself is complete.
+    if (entry.ahead > now) return (entry.eager ? 2.5 : 5) + (entry.first ? 0 : 0.2);
+    if (entry.warm) return 9;
+    return Infinity; // nobody is waiting for it any more
+  }
+
   pump() {
-    // Newest requests first: what the camera looks at now beats what it
-    // left. The basemap goes ahead of overlays so the ground appears first.
-    while (this.downloading < PARALLEL_DOWNLOADS && this.queue.length) {
-      let at = this.queue.length - 1;
-      for (let i = at; i >= 0 && i > at - 400; i--) {
-        if (this.queue[i].first) {
-          at = i;
-          break;
-        }
-      }
-      const entry = this.queue.splice(at, 1)[0];
-      const alive = entry.pinned || entry.probe || [...entry.waiting].some((t) => !t.dead && t.mesh.visible);
-      if (!alive) {
+    let free = PARALLEL_DOWNLOADS - this.downloading;
+    if (free > 0 && this.queue.length) {
+      const now = performance.now();
+      for (const entry of this.queue) entry.urgent = this.urgency(entry, now);
+      // What nobody waits for any more is put down, to be asked for again
+      // if it is ever wanted.
+      this.queue = this.queue.filter((entry) => {
+        if (entry.urgent < Infinity) return true;
         entry.state = 'idle';
         entry.waiting.clear();
-        continue;
+        return false;
+      });
+      this.queue.sort((a, b) => b.urgent - a.urgent);
+      while (free-- > 0 && this.queue.length) {
+        // Pictures fetched ahead of need use only a few connections, so
+        // that what is suddenly wanted never waits behind them.
+        if (this.queue[this.queue.length - 1].urgent >= 5 && this.downloading >= AHEAD_DOWNLOADS) break;
+        this.download(this.queue.pop());
       }
-      this.downloading++;
-      entry.state = 'loading';
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      const done = (state, picture = img) => {
-        this.downloading--;
-        entry.state = state;
-        entry.img = state === 'ready' ? (entry.keep ? this.filtered(picture, entry.keep, entry.tint) : picture) : null;
-        for (const t of entry.waiting) if (!t.dead) t.dirty = true;
-        entry.waiting.clear();
-        if (entry.pinned) for (const t of this.tiles.values()) t.dirty = true;
-        this.changed = true;
-        this.wake?.();
-      };
-      if (entry.sparse) {
-        // Fetched as bytes, so an empty tile is known by its size and is
-        // never decoded, painted or looked beneath.
-        fetch(entry.url)
-          .then((res) => (res.ok ? res.blob() : Promise.reject(new Error(res.status))))
-          .then((blob) =>
-            blob.size <= EMPTY_BYTES
-              ? done('empty')
-              : createImageBitmap(blob).then((bitmap) => {
-                  entry.cells = this.cellsOf(bitmap);
-                  // A picture with nothing in any cell is as good as empty.
-                  if (!entry.cells.some(Boolean)) {
-                    bitmap.close?.();
-                    return done('empty');
-                  }
-                  done('ready', bitmap);
-                }),
-          )
-          .catch(() => done('missing'));
-        continue;
-      }
-      img.onload = () => done('ready');
-      img.onerror = () => done('missing');
-      img.src = entry.url;
     }
     // Looked at now and then, not every frame: it sorts the whole cache.
     if (this.images.size > IMAGE_CACHE && this.frame - (this.trimmedAt || 0) > 120) {
       this.trimmedAt = this.frame;
       this.trim();
     }
+  }
+
+  download(entry) {
+    this.downloading++;
+    entry.state = 'loading';
+    const done = (state, picture) => {
+      this.downloading--;
+      entry.state = state;
+      entry.img = state === 'ready' ? (entry.keep ? this.filtered(picture, entry.keep, entry.tint) : picture) : null;
+      for (const t of entry.waiting) if (!t.dead) t.dirty = true;
+      entry.waiting.clear();
+      if (entry.pinned) for (const t of this.tiles.values()) t.dirty = true;
+      // The world picture of a sparse layer has arrived: fetch the level
+      // beneath it wherever it shows anything, ahead of need. From then on
+      // any view of the globe has a picture to stand in at once, and
+      // knows what is empty three levels further down.
+      // A world picture has arrived: every tile may now show it.
+      if (entry.sheet) this.repaintAll();
+      this.changed = true;
+      this.wake?.();
+    };
+    if (entry.sparse) {
+      this.fetchSparse(entry).then(
+        (bitmap) => done(bitmap ? 'ready' : 'empty', bitmap),
+        () => done('missing'),
+      );
+      return;
+    }
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.decoding = 'async';
+    // Decoded before it is used, off the page's own thread, so painting it
+    // into a tile never stalls a frame.
+    img.onload = () => (img.decode ? img.decode().catch(() => {}) : Promise.resolve()).then(() => done('ready', img));
+    img.onerror = () => done('missing');
+    img.src = entry.url;
+  }
+
+  // Once nothing on screen is waiting any more, the level-3 tiles of every
+  // sparse layer are fetched wherever its world picture shows anything, a
+  // few at a time. After that the whole globe is sharp at the opening
+  // distance however it is turned, with nothing left to fetch.
+  warm() {
+    if (this.frame < (this.warmAt || 0) || this.awaited > 0 || this.queue.length > 4) return;
+    this.warmAt = this.frame + 20;
+    let asked = 0;
+    for (const layer of this.layers) {
+      const sheet = layer.sparse && layer.sheet ? this.images.get(layer.sheet) : null;
+      if (sheet?.state !== 'ready') continue;
+      for (let k = sheet.warmed || 0; k < 64; k++) {
+        sheet.warmed = k + 1;
+        if (!this.sheetHolds(sheet, 3, k % 8, Math.floor(k / 8))) continue;
+        const entry = this.image(layer, 3, k % 8, Math.floor(k / 8), null);
+        if (entry.state !== 'queued') continue;
+        entry.warm = true;
+        if (++asked >= 10) return;
+      }
+    }
+  }
+
+  // One tile of a sparse layer: its picture, or null when it holds nothing.
+  // Fetched as bytes, so an empty tile is known by its size and is never
+  // decoded, painted or looked beneath.
+  async fetchSparse(entry) {
+    const store = await this.store;
+    let blob = null;
+    if (entry.sheet) return this.fetchSheet(entry, store);
+    if (entry.probe) {
+      // The picture of the whole world is always fetched fresh: it is the
+      // fingerprint everything kept for that day is checked against.
+      const res = await fetch(entry.url, { cache: 'no-store' });
+      if (!res.ok) throw new Error(res.status);
+      blob = await res.blob();
+      const print = `${blob.size}:${fingerprint(await blob.arrayBuffer())}`;
+      entry.print = print;
+      if (store) {
+        const key = `${entry.url}?print=1`;
+        const kept = await store.match(key).then((r) => r?.text()).catch(() => null);
+        if (kept !== print) {
+          // New or changed data for this day: nothing kept for it holds.
+          await this.forget(store, entry.layer);
+          await store.put(key, new Response(print)).catch(() => {});
+        }
+      }
+    } else {
+      const kept = store ? await store.match(entry.url).catch(() => null) : null;
+      if (kept) blob = await kept.blob();
+      else {
+        const res = await fetch(entry.url);
+        if (!res.ok) throw new Error(res.status);
+        if (store) store.put(entry.url, res.clone()).catch(() => {});
+        blob = await res.blob();
+      }
+    }
+    if (blob.size <= EMPTY_BYTES) return null;
+    const bitmap = await createImageBitmap(blob);
+    entry.cells = this.cellsOf(bitmap);
+    // A picture with nothing in any cell is as good as empty.
+    if (!entry.cells.some(Boolean)) {
+      bitmap.close?.();
+      return null;
+    }
+    return bitmap;
+  }
+
+  // The world picture of a sparse layer, with the grid of where it shows
+  // anything. Alongside it the layer's smallest tile is fetched: a few
+  // hundred bytes that change whenever NASA adds to that day, and so the
+  // fingerprint everything kept for the day is checked against.
+  async fetchSheet(entry, store) {
+    const layer = entry.layer;
+    const smallest = fetch(this.url(layer, 0, 0, 0), { cache: 'no-store' })
+      .then((res) => (res.ok ? res.arrayBuffer() : null))
+      .then((bytes) => (bytes ? `${bytes.byteLength}:${fingerprint(bytes)}` : null))
+      .catch(() => null);
+    const res = await fetch(entry.url, { cache: 'no-store' });
+    if (!res.ok) throw new Error(res.status);
+    const bitmap = await createImageBitmap(await res.blob());
+    entry.print = await smallest;
+    if (store && entry.print) {
+      const key = `${this.url(layer, 0, 0, 0)}?print=1`;
+      const kept = await store.match(key).then((r) => r?.text()).catch(() => null);
+      if (kept !== entry.print) {
+        // New or changed data for this day: nothing kept for it holds.
+        await this.forget(store, layer);
+        await store.put(key, new Response(entry.print)).catch(() => {});
+      }
+    }
+    // Which cells of the picture hold anything. A cell next to one that
+    // does counts too: the edge of a strip can be thinner than a pixel here
+    // and still be a real picture closer up.
+    const ctx = this.sheetReader();
+    ctx.clearRect(0, 0, SHEET_PX, SHEET_PX);
+    ctx.drawImage(bitmap, 0, 0, SHEET_PX, SHEET_PX);
+    const px = ctx.getImageData(0, 0, SHEET_PX, SHEET_PX).data;
+    const seen = new Uint8Array(SHEET_CELLS * SHEET_CELLS);
+    const span = SHEET_PX / SHEET_CELLS;
+    let any = false;
+    for (let y = 0; y < SHEET_PX; y++) {
+      const row = Math.floor(y / span) * SHEET_CELLS;
+      for (let x = 0; x < SHEET_PX; x++) {
+        if (px[(y * SHEET_PX + x) * 4 + 3]) {
+          seen[row + Math.floor(x / span)] = 1;
+          any = true;
+        }
+      }
+    }
+    if (!any) {
+      bitmap.close?.();
+      return null;
+    }
+    const grid = new Uint8Array(seen);
+    for (let j = 0; j < SHEET_CELLS; j++) {
+      for (let i = 0; i < SHEET_CELLS; i++) {
+        if (!seen[j * SHEET_CELLS + i]) continue;
+        for (let dj = -1; dj <= 1; dj++) {
+          const jj = j + dj;
+          if (jj < 0 || jj >= SHEET_CELLS) continue;
+          for (let di = -1; di <= 1; di++) grid[jj * SHEET_CELLS + ((i + di + SHEET_CELLS) % SHEET_CELLS)] = 1;
+        }
+      }
+    }
+    entry.grid = grid;
+    return bitmap;
+  }
+
+  sheetReader() {
+    if (!this.sheetCtx) {
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = SHEET_PX;
+      this.sheetCtx = canvas.getContext('2d', { willReadFrequently: true });
+    }
+    return this.sheetCtx;
+  }
+
+  // Removes everything kept in the browser's store for one layer.
+  async forget(store, layer) {
+    const prefix = layer.url.split('{z}')[0];
+    const keys = await store.keys().catch(() => []);
+    await Promise.all(keys.filter((req) => req.url.startsWith(prefix)).map((req) => store.delete(req)));
+  }
+
+  // Clears days out of the store that are too old to be looked at again.
+  async sweepStore(store) {
+    const oldest = new Date(Date.now() - STORE_DAYS * 86400_000).toISOString().slice(0, 10);
+    const keys = await store.keys().catch(() => []);
+    for (const req of keys) {
+      const day = /\/(\d{4}-\d{2}-\d{2})\//.exec(req.url)?.[1];
+      if (day && day < oldest) store.delete(req).catch(() => {});
+    }
+  }
+
+  // Every few minutes the whole-world picture of each sparse layer on the
+  // globe is fetched again. If NASA has added to that day, its fingerprint
+  // differs, and everything worked out from the old one (pictures, and what
+  // was taken to be empty) is dropped and built up again from the new one.
+  recheck() {
+    const now = performance.now();
+    if (now - this.checkedAt < RECHECK_MS) return;
+    this.checkedAt = now;
+    for (const layer of this.layers) {
+      if (!layer.sparse) continue;
+      const root = this.images.get(layer.sheet || this.key(layer, 0, 0, 0));
+      if (!root || root.state === 'queued' || root.state === 'loading') continue;
+      fetch(this.url(layer, 0, 0, 0), { cache: 'no-store' })
+        .then((res) => (res.ok ? res.arrayBuffer() : Promise.reject(new Error(res.status))))
+        .then((bytes) => {
+          const print = `${bytes.byteLength}:${fingerprint(bytes)}`;
+          if (print === root.print || !this.layers.includes(layer)) return;
+          // NASA has added to this day: start it again from nothing.
+          const prefix = layer.url.split('{z}')[0];
+          for (const [key, entry] of this.images) {
+            if (!key.startsWith(prefix) && key !== layer.sheet) continue;
+            entry.img?.close?.();
+            this.images.delete(key);
+          }
+          this.queue = this.queue.filter((entry) => !entry.key.startsWith(prefix) && entry.key !== layer.sheet);
+          if (layer.sheet) this.sheetOf(layer, null);
+          else this.image(layer, 0, 0, 0, null);
+          this.repaintAll();
+          this.wake?.();
+        })
+        .catch(() => {
+          /* the server did not answer: what is here stays */
+        });
+    }
+  }
+
+  // Starts loading the map for a place the camera is about to fly to, so
+  // that it is there on arrival. `alt` is the camera's height above the
+  // ground in Earth radii.
+  // `eager` is for a place the camera has been sent to; without it, this is
+  // a guess at where a turning globe will be, and waits its turn.
+  prefetch(lat, lon, alt, eager = false) {
+    const z = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, Math.round(Math.log2(55 / Math.max(alt, 1e-4)))));
+    const until = performance.now() + 8000;
+    const X = mercatorX(lon);
+    const Y = mercatorY(lat);
+    // A block of tiles at the level the view will use, and a smaller one
+    // two levels coarser to stand in while those arrive.
+    for (const [level, reach] of [[Math.max(MIN_ZOOM, z - 2), 1], [z, 2]]) {
+      const n = 2 ** level;
+      const cx = Math.floor(X * n);
+      const cy = Math.floor(Y * n);
+      for (let dy = -reach; dy <= reach; dy++) {
+        for (let dx = -reach; dx <= reach; dx++) {
+          const y = cy + dy;
+          if (y < 0 || y >= n) continue;
+          const x = (((cx + dx) % n) + n) % n;
+          for (const layer of this.layers) {
+            if (layer.mask != null || layer.keep) continue;
+            const top = Math.min(layer.sparse && level > 2 && level < COARSER_BELOW ? level - 1 : level, layer.maxLevel);
+            const entry = this.image(layer, top, x >> (level - top), y >> (level - top), null);
+            if (entry.state === 'queued' || entry.state === 'idle') {
+              entry.ahead = until;
+              entry.eager = eager || entry.eager;
+            }
+          }
+        }
+      }
+    }
+    this.wake?.();
   }
 
   // Which of a picture's 8 × 8 cells hold anything at all.
@@ -1114,16 +1468,40 @@ export class TileGlobe {
     if (empties.length > EMPTY_KEPT) for (const entry of empties.sort((a, b) => a.lastUsed - b.lastUsed).slice(0, empties.length - EMPTY_KEPT * 0.8)) this.images.delete(entry.key);
     const held = all.length - empties.length;
     if (held <= IMAGE_CACHE) return;
-    const old = all.filter((e) => e.state !== 'empty' && !e.pinned && e.state !== 'loading' && e.state !== 'queued').sort((a, b) => a.first - b.first || a.lastUsed - b.lastUsed);
+    const old = all.filter((e) => e.state !== 'empty' && !e.pinned && !e.probe && e.state !== 'loading' && e.state !== 'queued').sort((a, b) => a.first - b.first || a.lastUsed - b.lastUsed);
     for (const entry of old.slice(0, Math.ceil(held - IMAGE_CACHE * 0.8))) {
       entry.img?.close?.(); // a decoded bitmap gives its memory back at once
       this.images.delete(entry.key);
     }
   }
 
+  // How many pictures the tiles on screen are still waiting for.
+  get awaited() {
+    let n = 0;
+    for (const entry of this.images.values()) {
+      if (entry.state !== 'queued' && entry.state !== 'loading') continue;
+      for (const t of entry.waiting) {
+        if (!t.dead && t.mesh.visible) {
+          n++;
+          break;
+        }
+      }
+    }
+    return n;
+  }
+
   get busy() {
     return this.downloading > 0 || this.queue.length > 0 || this.elevationLoading > 0 || this.elevationQueue.length > 0;
   }
+}
+
+// A short fingerprint of some bytes (FNV-1a), to tell whether a picture
+// fetched again is the one fetched before.
+function fingerprint(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let h = 0x811c9dc5;
+  for (let i = 0; i < bytes.length; i++) h = Math.imul(h ^ bytes[i], 0x01000193);
+  return (h >>> 0).toString(16);
 }
 
 const scratchA = new THREE.Vector3();
