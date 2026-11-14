@@ -302,6 +302,8 @@ function incidentHtml(inc, radar) {
     <h4>What happened here</h4>
     <div id="replay-parts"></div>
     <h4>NISAR radar over this spot</h4>
+    <h4>Preview brightness history at this pin</h4>
+    <div id="incident-history" aria-live="polite"><p class="spinner">Searching NISAR repeat passes…</p></div>
     ${lapseBox(inc.lat, inc.lon)}
     <div id="radar">${radar}</div>
     <h4>What radar can show here</h4>
@@ -402,6 +404,8 @@ async function selectIncident(inc, fly, intro = '') {
   globe.select(inc);
   if (fly) globe.flyTo(inc.lat, inc.lon);
   replay.start(inc);
+  // Independent of the replay and the shorter before/after catalogue search.
+  startIncidentHistory(inc, state.selected);
 
   let found;
   try {
@@ -743,6 +747,63 @@ function startTicker() {
 
 const LAPSE_STEP = 0.9; // seconds each pass stays on screen
 const LAPSE_DEFAULT = 14; // passes loaded unless "all" is ticked
+
+// Loads a bounded history alongside incident details, without taking ownership
+// of the replay or incrementing lookup (the radar search shares that token).
+async function startIncidentHistory(inc, selection) {
+  const box = $('incident-history');
+  const current = () => state.selected === selection && $('incident-history') === box;
+  if (!box || !current()) return;
+  try {
+    const stacks = await historyAt(inc.lat, inc.lon);
+    if (!current()) return;
+    const stack = stacks[0]; // historyAt ranks repeat stacks by number of passes.
+    if (!stack) {
+      box.innerHTML = '<p class="note">No repeat history available: the archive has fewer than two placeable previews on the same track, frame and orbit direction here.</p>';
+      return;
+    }
+    const wanted = spread(stack.scenes, LAPSE_DEFAULT);
+    const frames = [];
+    // Do not start more image requests after switching or closing the pin.
+    for (let i = 0; i < wanted.length; i += 3) {
+      box.innerHTML = `<p class="spinner">Loading preview history: ${i} of ${wanted.length} passes…</p>`;
+      frames.push(...await loadFrames(wanted.slice(i, i + 3)));
+      if (!current()) return;
+    }
+    const samples = history(frames, inc.lat, inc.lon);
+    const byId = new Map(frames.map((frame, i) => [frame.scene.id, { frame, point: samples[i] }]));
+    // Keep failed images in their original time slots so lines show gaps.
+    const points = wanted.map((scene) => byId.get(scene.id)?.point || { time: scene.time, hh: null, hv: null });
+    const usable = points.filter((p) => p.hh != null || p.hv != null).length;
+    box.innerHTML = `
+      <p class="note">${usable} usable samples from ${wanted.length} requested previews of ${stack.scenes.length} available passes. Same ${esc(stack.direction)} track ${esc(stack.track)}, frame ${esc(stack.frame)}; ${day(wanted[0].time)} to ${day(wanted[wanted.length - 1].time)}.${stack.unplaced ? ` ${stack.unplaced} other passes lack placeable previews and are omitted.` : ''}</p>
+      <div id="incident-history-chart"></div>
+      <p id="incident-history-status" class="note" role="status">${usable < 2 ? 'Insufficient data for a trend: fewer than two previews have samples at this pin. ' : ''}${wanted.length - usable} requested passes have no sample (failed image or no coverage); these are gaps, not zero brightness.</p>
+      <p class="hint">HH and HV are NASA preview brightness (0–255), not calibrated backscatter or a measurement of forest loss, area lost or ice melt. Samples average up to 5×5 preview pixels; the ground footprint varies with image resolution and coverage, not a fixed area. Click a chart date to stop the replay and show that preview on the globe.</p>`;
+    if (!usable) {
+      $('incident-history-chart').innerHTML = '<p class="note">No brightness history could be sampled from these previews.</p>';
+      return;
+    }
+    const chart = historyChart($('incident-history-chart'), points, (i) => {
+      if (!current()) return;
+      const frame = byId.get(wanted[i].id)?.frame;
+      const status = $('incident-history-status');
+      if (!frame) {
+        status.textContent = `${day(wanted[i].time)}: preview unavailable; no image to show.`;
+        return;
+      }
+      // Explicit user interaction takes over the globe; background loading never does.
+      replay.stop();
+      endCompare();
+      globe.addPicture(view(frame, 'colour'), frame.bounds);
+      globe.flyToBounds(frame.bounds);
+      chart.setActive(i);
+      status.textContent = `${day(frame.time)}: preview shown on globe.${points[i].hh == null && points[i].hv == null ? ' No sample at the exact pin.' : ''}`;
+    });
+  } catch (err) {
+    if (current()) box.innerHTML = `<p class="note">Preview history unavailable: ${esc(err.message)}</p>`;
+  }
+}
 
 function lapseBox(lat, lon) {
   return `<div id="lapse" data-lat="${lat}" data-lon="${lon}"><button id="lapse-go">▶ Play a year of NISAR passes here</button></div>`;
