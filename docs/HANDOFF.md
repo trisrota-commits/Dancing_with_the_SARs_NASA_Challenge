@@ -119,6 +119,29 @@ Changes made after going through the app as a first-time visitor:
   print follows.
 - **The timeline has a key** (the event, a NISAR pass, "drag to go back").
 
+### The awards the lead is aiming at (told 14 Nov)
+
+Space Apps gives these across all challenges: Best Use of Science, Best
+Use of Data, Galactic Impact, Most Inspirational. Weigh further work
+against them, not only against this challenge's text.
+
+- **Data** is our strongest lane: live NISAR for anywhere, no login,
+  readable by a newcomer.
+- **Science** rests on the observed / computed / hypothesis labelling and
+  on calibrated numbers, which still wait on a teammate's run of
+  `tools/measure.py`. `channelReading` in `js/narrative.js` adds a
+  rule-of-thumb reading of how the two radar channels moved between the
+  pass before an event and the one after, labelled as a hypothesis; the
+  event type plays no part in it.
+- **Inspiration** is the first ten seconds: the opening card (`#welcome`)
+  says what the app is about and offers "Start with a story".
+- **Impact** is the weakest: nothing yet says who would use this and how.
+
+Tried and dropped: a human-driver story on the GERD reservoir or on forest
+clearing in Rondônia. At the two points checked per site the pass-by-pass
+values showed no clear, one-directional change, so no story was written.
+A better point would have to be found by eye first.
+
 ## How we work
 
 - **Branch:** all our work goes on `claude/peaceful-curie-4pexs2`, then a

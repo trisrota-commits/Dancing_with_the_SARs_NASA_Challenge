@@ -47,6 +47,31 @@ const passesAround = (inc, found) => {
   return { all, before, after };
 };
 
+// What a change in the two radar channels is typical of: textbook rules of
+// thumb for L-band radar, applied to the values of two passes. The result
+// is a hypothesis and is labelled as one. The kind of event plays no part,
+// so the reading cannot simply echo what the feeds already said.
+const CLEAR_STEP = 25; // of 255: smaller differences are not read at all
+
+export function channelReading(before, after, pol) {
+  if (before.cross == null || after.cross == null || !pol?.cross) return null;
+  const co = after.co - before.co;
+  const cross = after.cross - before.cross;
+  const signed = (v) => `${v >= 0 ? '+' : '−'}${Math.abs(Math.round(v))}`;
+  const moved = `${esc(pol.co)} changed by ${signed(co)} and ${esc(pol.cross)} by ${signed(cross)}`;
+  const up = (v) => v >= CLEAR_STEP;
+  const down = (v) => v <= -CLEAR_STEP;
+  let reading;
+  if (!up(co) && !down(co) && !up(cross) && !down(cross)) return `Between these two passes ${moved}: too little to read anything into.`;
+  if (down(co) && down(cross)) reading = 'Both channels fell, which is typical of open water covering the ground, of wet snow, or of vegetation that was burnt, cut or harvested. The two values cannot tell these apart.';
+  else if (up(co) && up(cross)) reading = 'Both channels rose, which is typical of growing vegetation, wetter soil, rougher ground, or snow that froze again. The two values cannot tell these apart.';
+  else if (down(cross)) reading = `The twisted echo (${esc(pol.cross)}) fell while the straight one held, which is typical of lost leaves and branches: burning, clearing or harvest.`;
+  else if (up(cross)) reading = `The twisted echo (${esc(pol.cross)}) rose while the straight one held, which is typical of vegetation growing in.`;
+  else if (up(co)) reading = `The straight echo (${esc(pol.co)}) rose while the twisted one held, which is typical of water standing among plants or buildings, where the pulse bounces twice.`;
+  else reading = `The straight echo (${esc(pol.co)}) fell while the twisted one held, which is typical of ground that became smoother, or of calm water where plants are sparse.`;
+  return `<span class="badge computed">Hypothesis</span> ${moved}. ${reading} This is a rule of thumb applied to two preview values, not a finding.`;
+}
+
 // One line for the popup.
 export function nisarLine(inc, found) {
   if (!found) return 'Checking what NISAR has seen here…';
@@ -111,8 +136,11 @@ export function narrate(inc, { found, news, history, sizeText }) {
     h += before && after
       ? `read ${read(before)}, the last pass on this track before the event, and ${read(after)}, the first one after it. Over ${pts.length} passes it ranged from ${read(low)} to ${read(high)}.`
       : `ranged from ${read(low)} to ${read(high)} over ${pts.length} passes.`;
-    h += ` ${link('nisar', 'See every pass in the chart', 'sec-nisar')}. These are values from NASA's preview pictures, on a scale of 0 to 255, not calibrated measurements, and they do not say what caused a change.`;
+    h += ` ${link('nisar', 'See every pass in the chart', 'sec-nisar')}. These are values from NASA's preview pictures, on a scale of 0 to 255, not calibrated measurements.`;
     out.push(h);
+    // Which channel moved says something about why.
+    const reading = before && after ? channelReading(before, after, history.pols) : null;
+    if (reading) out.push(reading);
   }
 
   // Press, neighbours, and how the animation is made.

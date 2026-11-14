@@ -52,3 +52,16 @@ test('a point well inside a frame is preferred over one that grazes its edge', (
   assert.equal(nisar.bestPair([...grazing, ...covering], 15, true, at).before.track, '009');
   assert.equal(nisar.bestPair([...grazing, ...covering], 15).before.track, '001');
 });
+
+test('the two-channel reading is a labelled hypothesis and ignores small differences', async () => {
+  const { channelReading } = await import('../js/narrative.js');
+  const pol = { co: 'HH', cross: 'HV' };
+  const at = (co, cross) => ({ time: 0, co, cross });
+  assert.match(channelReading(at(180, 170), at(90, 85), pol), /Hypothesis.*Both channels fell.*cannot tell these apart/s);
+  assert.match(channelReading(at(120, 150), at(118, 90), pol), /twisted echo \(HV\) fell.*burning, clearing or harvest/s);
+  assert.match(channelReading(at(100, 80), at(160, 85), pol), /straight echo \(HH\) rose.*bounces twice/s);
+  assert.match(channelReading(at(100, 80), at(110, 70), pol), /too little to read anything into/);
+  assert.doesNotMatch(channelReading(at(100, 80), at(110, 70), pol), /Hypothesis/);
+  // One channel only: nothing to compare.
+  assert.equal(channelReading(at(100, null), at(50, null), { co: 'HH', cross: null }), null);
+});
