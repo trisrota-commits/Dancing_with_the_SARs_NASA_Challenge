@@ -334,7 +334,7 @@ export class Globe {
     const base = BASEMAPS[s.base];
     const layers = [{ url: base.url.replace('{date}', iso(Date.now() - DAY)), maxLevel: base.maxLevel, base: true }];
     for (const [key, date] of Object.entries(s.overlays)) {
-      layers.push({ url: OVERLAYS[key].url.replace('{date}', OVERLAYS[key].date || date), maxLevel: OVERLAYS[key].maxLevel, alpha: 0.85, sparse: !!OVERLAYS[key].sparse, sheet: OVERLAYS[key].sheet?.replace('{date}', OVERLAYS[key].date || date) });
+      layers.push({ url: OVERLAYS[key].url.replace('{date}', OVERLAYS[key].date || date), maxLevel: OVERLAYS[key].maxLevel, alpha: 0.85, sparse: !!OVERLAYS[key].sparse, sheet: OVERLAYS[key].sheet?.replace('{date}', OVERLAYS[key].date || date), map: OVERLAYS[key].map?.replace('{date}', OVERLAYS[key].date || date) });
     }
     // Two radar wavelengths side by side: NISAR (L-band) left of the
     // divider, Sentinel-1 (C-band) right of it, for the same days.
@@ -342,8 +342,8 @@ export class Globe {
       const end = Date.parse(s.bands.date);
       for (let i = s.bands.days - 1; i >= 0; i--) {
         const date = iso(end - i * DAY);
-        if (date >= NISAR_TILES.firstDate) layers.push({ url: NISAR_TILES.url.replace('{date}', date), sheet: NISAR_TILES.sheet.replace('{date}', date), maxLevel: NISAR_TILES.maxLevel, side: 'left', sparse: true });
-        layers.push({ url: OVERLAYS.s1.url.replace('{date}', date), sheet: OVERLAYS.s1.sheet.replace('{date}', date), maxLevel: OVERLAYS.s1.maxLevel, side: 'right', sparse: true });
+        if (date >= NISAR_TILES.firstDate) layers.push({ url: NISAR_TILES.url.replace('{date}', date), sheet: NISAR_TILES.sheet.replace('{date}', date), map: NISAR_TILES.map.replace('{date}', date), colour: true, stack: 'nisar', maxLevel: NISAR_TILES.maxLevel, side: 'left', sparse: true });
+        layers.push({ url: OVERLAYS.s1.url.replace('{date}', date), sheet: OVERLAYS.s1.sheet.replace('{date}', date), map: OVERLAYS.s1.map.replace('{date}', date), stack: 's1', maxLevel: OVERLAYS.s1.maxLevel, side: 'right', sparse: true });
       }
     }
     if (s.nisar) {
@@ -351,7 +351,7 @@ export class Globe {
       for (let i = s.nisar.days - 1; i >= 0; i--) {
         const date = iso(end - i * DAY);
         // Radar passes are thin strips on an empty globe: see `sparse` in the tile engine.
-        if (date >= NISAR_TILES.firstDate) layers.push({ url: NISAR_TILES.url.replace('{date}', date), sheet: NISAR_TILES.sheet.replace('{date}', date), maxLevel: NISAR_TILES.maxLevel, sparse: true });
+        if (date >= NISAR_TILES.firstDate) layers.push({ url: NISAR_TILES.url.replace('{date}', date), sheet: NISAR_TILES.sheet.replace('{date}', date), map: NISAR_TILES.map.replace('{date}', date), colour: true, stack: 'nisar', maxLevel: NISAR_TILES.maxLevel, sparse: true });
       }
     }
     // An event's own filled layer (flood water) steps aside while a change
@@ -506,6 +506,9 @@ export class Globe {
   // direction starts loading before it comes into view.
   lookAhead(now) {
     const c = this.controls;
+    // A camera that was sent somewhere already had its destination loaded
+    // ahead; guessing along the way would only queue what it flies past.
+    if (c.flight) return (this.turning = null);
     const was = this.turning;
     if (!was || now - was.at > 120) {
       if (was && now - was.at < 600) {

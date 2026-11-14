@@ -303,6 +303,55 @@ picture after 3.5 s, was 13 s; sharp picture after 4.8 s, was 14 s. The
 opening view complete: 8.9 s, was 9.6 s; on a second visit 6.6 s, was
 9.3 s. Not measured on a real graphics card or connection.
 
+### Damaged tiles from NASA's tile service (lead's video, 14 Nov, late)
+
+The lead filmed grey dotted and black squares flickering over Colorado
+while zooming in with the NISAR layer on. It looked like our bug. It was
+not our drawing, but it was our engine's fault to show it.
+
+- **What NASA sends.** For some days and places NASA's tile service
+  (GIBS WMTS, `epsg3857`) answers the same tile address differently on
+  every request. Seen for 6 and 7 November 2026 over Colorado at levels
+  9 to 13: of the answers for a damaged spot only about one in ten was the
+  real picture. The rest were a picture labelled as the wrong kind of PNG
+  (it decodes as transparency noise, as solid black, or as nothing at all
+  in a file of 60 kB) or a plain server error. Good tiles are the same
+  bytes every time.
+- **NASA's map service is sound.** The same areas asked from the map
+  service (GIBS WMS, the one that already gives the whole-world picture)
+  came back sound and identical on every request, in about 0.6 s. On
+  tiles where both are sound the two services show the same picture.
+- **The rule the engine now follows** (`js/engine/tiles.js`): nothing is
+  drawn that was not checked, and no failure is final.
+  1. Every radar tile is looked at before use (`inspect`): in a sound
+     tile each pixel is fully solid or fully see-through and what is solid
+     is a picture. This runs on what the browser kept, too.
+  2. A tile that fails is taken from the map service instead
+     (`fetchTile`, `mapUrl`; the layer's `map` address in `js/config.js`).
+     The sound answer is kept in the browser's store, so a damaged spot
+     is mended once, not on every visit.
+  3. If both fail the tile counts as not delivered: the picture beneath
+     stands in and the tile is asked for again at growing intervals
+     (`dueAgain`), woken by a clock because the map is drawn on demand
+     (`wakeFor`). Other layers get the same retry, three times.
+  4. The days of a radar layer are a `stack`: a day that only has a
+     blurred stand-in is drawn under the sharp tiles of the other days,
+     never over them (`drawLayers`).
+  5. A request that nothing on screen needs is put down, and the tiles
+     that had asked are marked to ask again when they return (`putDown`).
+- **Why not use the map service for everything:** it draws each picture
+  on request (0.6 s against 0.25 s, 200 kB against 60 to 170 kB) and
+  NASA asks apps to use tiles.
+- **Checked** with the same zoom-and-drag as in the video, headless: 112
+  damaged answers, 112 replaced, no tile left standing in, at 288, 55,
+  40, 15 and 8 km. `engine.faulty` and `engine.mended` count them
+  (`window.app.globe.tiles`). Not yet seen on the lead's own machine.
+- **A slip worth knowing about:** during this work one edit dropped the
+  method that loads the whole-world picture (`fetchSheet`). Nothing
+  failed loudly, because a missing world picture is a case the engine
+  handles. It was found by listing the requests marked "not delivered".
+  When the far view looks thin, look there first.
+
 ### Visual rules (lead, 14 Nov, night)
 
 The lead, after one screenshot confused them: no arbitrary colours; one
@@ -517,7 +566,8 @@ All checked from a browser origin (CORS) unless noted.
 | NASA CMR `granules.json` | NISAR scene search | No login for search. Entries are about 25 KB each uncompressed. |
 | NISAR previews (ASF) | `_LATLON.png` plus `.kml` corners per scene | Public. Passes before about mid-June 2026 mostly lack public corner files, so they cannot be placed; we leave them out and say so. Iceland is an exception with a full year. |
 | NISAR full HDF5 | Read offline by `tools/measure.py`, never by the app | Needs Earthdata login, 1 to 8 GB each; the script reads only a small window over HTTPS. Not yet run against real files. |
-| NASA GIBS (EPSG:3857 tiles) | Basemaps, daily NISAR backscatter, context layers | Raster only on this endpoint. |
+| NASA GIBS (EPSG:3857 tiles) | Basemaps, daily NISAR backscatter, context layers | Raster only on this endpoint. For freshly added NISAR days it sometimes sends damaged tiles; the engine checks each one and falls back on the map service (see "Damaged tiles"). |
+| NASA GIBS map service (WMS, EPSG:3857) | One whole-world picture per radar layer and day; any single tile the tile service sends damaged | Slower (drawn on request), but sound and the same on every request. Its empty picture is 334 bytes. |
 | NASA GIBS (EPSG:4326, `.mvt`) | VIIRS fire detections | Vector tiles are only served on the 4326 endpoint; tiles span 288°/2^z. |
 | USGS feeds, FDSN query, ShakeMap `cont_mmi.json` | Earthquakes, nearby quakes, shaking contours | Fine. |
 | NASA EONET v3 | Events and storm tracks | The full archive is 14 MB; we filter out wildfires. |

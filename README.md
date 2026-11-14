@@ -140,6 +140,10 @@ this app's workload:
   while sharper tiles arrive. Tiles and pass pictures are kept in the
   browser's own store between visits, and a fingerprint per day tells
   when NASA has added data.
+- Every radar tile is checked before it is drawn. NASA's tile service
+  sometimes sends a damaged picture for a freshly added day; the engine
+  then takes that tile from NASA's map service, which draws the same data
+  on request, and keeps the sound one.
 - Tiles are painted and fetched from the middle of the view outwards,
   ahead of a flying camera and ahead of a turning globe.
 - Event effects live in shaders: the earthquake front is drawn and lifted
