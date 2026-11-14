@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Dancing with the SARs – live Earth events and NISAR radar</title>
+    <title>Dancing with the SARs – Earth's changing surface, seen by NISAR radar</title>
     <link rel="icon" href="data:," />
     <link rel="stylesheet" href="css/style.css" />
   </head>
@@ -14,7 +14,7 @@
       <button id="menu" aria-label="Show or hide the menu" aria-expanded="true">☰</button>
       <div class="brand">
         <h1>Dancing with the SARs</h1>
-        <p>Live Earth events, cross-referenced with NISAR radar</p>
+        <p>Earth's changing surface, seen by the NISAR radar satellite</p>
       </div>
       <div id="search">
         <input id="search-box" type="search" placeholder="Search events or places…" autocomplete="off" aria-label="Search events or places" />
@@ -45,7 +45,7 @@
           </select>
         </div>
         <p class="hint" id="window-note" hidden></p>
-        <p class="hint">Bigger dot = stronger event, and in the 3D view a taller beam means the same. A white ring means NISAR imaged that spot in its latest passes. Click a dot to replay what happened.</p>
+        <p class="hint">Bigger dot = stronger event, and in the 3D view a taller beam means the same. A white ring means NISAR imaged that spot in its latest passes. Click a dot to see the event and what NISAR saw there.</p>
       </details>
 
       <details>
@@ -96,7 +96,7 @@
           </div>
           <p class="hint">Real sighting records, 2010–2025, played by month of the year. They also show where people look, so busy coasts have more.</p>
         </div>
-        <label class="check"><input type="checkbox" id="decor" checked /> Decorations: shooting stars and ocean landmarks</label>
+        <label class="check"><input type="checkbox" id="decor" /> Decorations: shooting stars and ocean landmarks</label>
         <p class="hint">The satellite, sky, sunlight and sightings are real data. Shooting stars are decoration only.</p>
       </details>
 
@@ -142,11 +142,14 @@
     </nav>
 
     <div id="replay" hidden>
-      <button id="replay-toggle" aria-label="Pause or play the replay">❚❚</button>
+      <button id="replay-toggle" aria-label="Play or pause the timeline">▶</button>
       <div class="replay-body">
         <div id="replay-caption"></div>
-        <div id="replay-bar" role="slider" aria-label="Replay position" aria-valuemin="0" aria-valuemax="100"><i id="replay-fill"></i></div>
+        <div id="replay-bar" role="slider" tabindex="0" aria-label="Timeline: drag to go back in time" aria-valuemin="0" aria-valuemax="100">
+          <i id="replay-span" title="The event"></i><i id="replay-fill"></i><span id="replay-marks" title="NISAR passes"></span><b id="replay-knob"></b>
+        </div>
       </div>
+      <button id="replay-live" title="Back to the latest state">Latest</button>
     </div>
 
     <div id="ticker" role="region" aria-label="Latest reports from the event feeds" hidden>
@@ -163,7 +166,7 @@
     <button id="here" hidden>▶ NISAR time-lapse here</button>
 
     <div id="welcome" hidden>
-      <span><b>Click a dot</b> to replay what happened · <b>Click the ground</b> for a year of radar · <b>Right-drag</b> to tilt</span>
+      <span><b>Click a dot</b> for an event and what the radar saw · <b>Click the ground</b> for a year of radar · <b>Right-drag</b> to tilt</span>
       <button id="welcome-close" aria-label="Dismiss">✕</button>
     </div>
 

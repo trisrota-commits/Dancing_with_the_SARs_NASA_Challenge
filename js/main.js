@@ -3,7 +3,7 @@
 import { CATEGORIES, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START } from './config.js';
 import { fetchFeed, fetchArchive } from './feeds.js';
 import { buildIncidents, tagNisarCoverage, pointInPolygon, distanceKm } from './incidents.js';
-import { latestScenes, scenesAt, bestPair, comparisonStatus, imageBounds, latestTileDate, historyAt, newestAt, nextPass, interferogramsAt, REPEAT_DAYS } from './nisar.js';
+import { edgeMarginKm, latestScenes, scenesAt, bestPair, comparisonStatus, imageBounds, latestTileDate, historyAt, newestAt, nextPass, interferogramsAt, REPEAT_DAYS } from './nisar.js';
 import { STORIES } from './stories.js';
 import { PLACES, PLACE_KINDS, otherHemisphere } from './places.js';
 import { loadFrames, spread, view, history, describeSeries, rankByCoverage } from './timelapse.js';
@@ -97,7 +97,17 @@ function rebuild() {
   if (state.selected?.kind === 'incident') {
     const ids = new Set(state.selected.incident.reports.map((r) => r.id));
     const again = state.incidents.find((i) => i.reports.some((r) => ids.has(r.id)));
-    if (again) state.selected.incident = again;
+    if (again) {
+      // New reports about the open event: bring its timeline up to date,
+      // without moving the camera, unless the reader is looking at the past.
+      const sel = state.selected;
+      const grew = again.endTime !== sel.incident.endTime || again.reports.length !== sel.incident.reports.length;
+      sel.incident = again;
+      if (grew && replay.timeline && replay.live) {
+        replay.start(again, { keepView: true });
+        if (sel.passes) replay.extend(sel.reach, sel.passes.map((x) => x.time));
+      }
+    }
   }
   draw();
 }
@@ -245,7 +255,7 @@ function renderCard() {
     const lines = [...new Set(inc.reports.flatMap((r) => r.detail.map((d) => `${d} (${FEEDS[r.source].label})`)))].slice(0, 4);
     body = `<p class="note">No press coverage found${lines.length ? '. The feeds report:' : '.'}</p>${lines.length ? `<ul class="plain">${lines.map((l) => `<li>${esc(l)}</li>`).join('')}</ul>` : ''}`;
   }
-  const scene = sel.found?.backscatter.find((s) => s.image);
+  const scene = sel.passes?.length;
   $('card').innerHTML = `<button id="card-close" aria-label="Close">✕</button>
     <span class="tag">${dot(inc.category)}${esc(CATEGORIES[inc.category].label)}</span>
     <h3>${esc(inc.title)}</h3>
@@ -255,7 +265,7 @@ function renderCard() {
     <p class="nisar-line">${esc(nisarLine(inc, sel.found))}</p>
     <div class="actions">
       <button class="primary" id="card-details">Show details</button>
-      ${scene ? `<button id="card-nisar" aria-pressed="${!!sel.nisarShown}">${sel.nisarShown ? 'Hide the NISAR image' : 'Show the NISAR image'}</button>` : ''}
+      ${scene ? `<button id="card-nisar" aria-pressed="${!sel.nisarOff}">${sel.nisarOff ? 'Show the NISAR image' : 'Hide the NISAR image'}</button>` : ''}
     </div>`;
 }
 
@@ -281,24 +291,13 @@ function showDetails() {
   }
 }
 
-// The newest NISAR picture over the event, on or off, from the card.
-async function toggleCardImage(button) {
+// The radar picture under the event, off or on again, from the card.
+function toggleCardImage() {
   const sel = state.selected;
-  const scene = sel?.found?.backscatter.find((s) => s.image);
-  if (!scene) return;
-  if (sel.nisarShown) {
-    sel.nisarShown = false;
-    endCompare();
-    return renderCard();
-  }
-  button.textContent = 'Loading…';
-  try {
-    await globe.addScene(scene, await imageBounds(scene));
-    if (state.selected !== sel) return;
-    sel.nisarShown = true;
-  } catch {
-    /* the button goes back to its offer */
-  }
+  if (sel?.kind !== 'incident') return;
+  sel.nisarOff = !sel.nisarOff;
+  if (replay.timeline) replay.report();
+  else syncNisar(Date.now());
   renderCard();
 }
 
@@ -332,22 +331,42 @@ function renderReplay(u) {
     bar.hidden = true;
     return;
   }
+  bar.hidden = false;
+  bar.classList.toggle('timeline', !!u.timeline);
   if (u.state === 'loading') {
-    bar.hidden = false;
+    bar.classList.add('timeline');
     $('replay-caption').textContent = 'Gathering what is known about this event…';
     $('replay-fill').style.width = '0';
+    $('replay-knob').style.left = '100%';
+    $('replay-span').style.width = '0';
+    $('replay-marks').textContent = '';
     if (list) list.innerHTML = '<p class="spinner">Loading the event history…</p>';
     return;
   }
-  if (u.state === 'none') {
-    bar.hidden = true;
-    if (list) list.innerHTML = '<p class="note">The feeds carry no history for this event beyond its location, so there is nothing to replay.</p>';
-    return;
-  }
-  bar.hidden = false;
   $('replay-toggle').textContent = u.state === 'playing' ? '❚❚' : '▶';
-  $('replay-caption').textContent = u.caption;
-  $('replay-fill').style.width = `${(u.progress * 100).toFixed(1)}%`;
+  const percent = (f) => `${(f * 100).toFixed(2)}%`;
+  $('replay-fill').style.width = percent(u.progress);
+  $('replay-bar').setAttribute('aria-valuenow', Math.round(u.progress * 100));
+  if (u.timeline) {
+    // The event's own stretch of the line, NISAR's passes as ticks, and
+    // the handle. The radar picture follows the handle.
+    $('replay-knob').style.left = percent(u.progress);
+    $('replay-span').style.left = percent(u.span[0]);
+    $('replay-span').style.width = percent(Math.max(0.006, u.span[1] - u.span[0]));
+    const marks = u.marks.map(percent).join(',');
+    if ($('replay-marks').dataset.at !== marks) {
+      $('replay-marks').dataset.at = marks;
+      $('replay-marks').innerHTML = u.marks.map((f) => `<i style="left:${percent(f)}"></i>`).join('');
+    }
+    const event = state.selected?.incident;
+    if (event) $('replay-span').style.background = CATEGORIES[event.category].color;
+    $('replay-live').classList.toggle('on', u.live);
+    $('replay-live').textContent = u.live ? '● Latest' : 'Go to latest';
+    const pass = syncNisar(u.ms);
+    $('replay-caption').textContent = `${u.live ? 'Latest' : day(u.ms)} · ${u.caption}${pass ? ` · NISAR pass of ${day(pass.time)} underneath` : ''}`;
+  } else {
+    $('replay-caption').textContent = u.caption;
+  }
   if (list && u.parts && list.partsRef !== u.parts) {
     list.partsRef = u.parts;
     list.innerHTML = `<ul class="parts">${u.parts
@@ -355,6 +374,47 @@ function renderReplay(u) {
       .join('')}</ul>
       <p class="hint">Observed = measured or catalogued. Analysis = worked out and published by an agency. Computed = drawn here by the stated rule.</p>`;
   }
+}
+
+// ---------- NISAR passes on the event timeline ----------
+
+// The passes of one repeat track over the event, oldest first: the track of
+// the best before/after pair, or else the one that holds the place best.
+function timelinePasses(inc, found) {
+  const key = (x) => `${x.stack}-${x.pol?.code}`;
+  const usable = found.backscatter.filter((x) => x.image && x.pol?.co);
+  const pair = bestPair(usable, inc.time, true, inc);
+  const best = pair ? pair.after : [...usable].sort((a, b) => edgeMarginKm(b.ring, inc.lat, inc.lon) - edgeMarginKm(a.ring, inc.lat, inc.lon))[0];
+  return best ? usable.filter((x) => key(x) === key(best)).sort((a, b) => a.time - b.time) : [];
+}
+
+// Puts the radar picture of the newest pass up to `ms` on the globe, and
+// returns that pass. Does nothing while the reader has switched it off.
+function syncNisar(ms) {
+  const sel = state.selected;
+  if (sel?.kind !== 'incident' || !sel.passes?.length) return null;
+  let i = -1;
+  if (!sel.nisarOff) sel.passes.forEach((x, k) => x.time <= ms && (i = k));
+  const pass = i >= 0 ? sel.passes[i] : null;
+  if (i === sel.passIndex) return pass;
+  sel.passIndex = i;
+  if (!pass) {
+    globe.clearScenes();
+    return null;
+  }
+  // The first picture is uncovered by the sweep; later ones cross-fade.
+  const first = !sel.passShown;
+  sel.passShown = true;
+  Promise.all([imageBounds(pass), loadPicture(pass.image)])
+    .then(([bounds, picture]) => {
+      if (state.selected !== sel || sel.passIndex !== i) return;
+      if (first) globe.sweepTo(picture, bounds, pass.direction !== 'Descending');
+      else globe.fadeTo(picture, bounds, 0.45);
+    })
+    .catch(() => {
+      /* a preview that will not load leaves the last picture up */
+    });
+  return pass;
 }
 
 function sceneCard(scene, eventTime) {
@@ -554,11 +614,19 @@ async function selectIncident(inc, fly, intro = '') {
     return;
   }
   if (token !== state.lookup) return;
-  state.selected.found = found;
+  const sel = state.selected;
+  sel.found = found;
   $('radar').innerHTML = radarHtml(inc, found);
+  // NISAR's passes go onto the event's timeline, which reaches back far
+  // enough to hold the last two before the event, and the picture of the
+  // pass the timeline stands at is shown.
+  sel.passes = timelinePasses(inc, found);
+  const earlier = sel.passes.filter((x) => x.time < inc.time);
+  sel.reach = earlier.length ? earlier[Math.max(0, earlier.length - 2)].time - DAY : null;
+  replay.extend(sel.reach, sel.passes.map((x) => x.time));
   renderCard();
   renderNarrative();
-  globe.select(inc, found.backscatter.slice(0, 1));
+  globe.select(inc, sel.passes.slice(-1));
 }
 
 function selectScene(scene, fly) {
@@ -1721,10 +1789,24 @@ async function start() {
   };
 
   $('replay-toggle').onclick = () => replay.toggle();
-  $('replay-bar').onclick = (e) => {
-    const box = e.currentTarget.getBoundingClientRect();
+  // The timeline is dragged like a slider.
+  const line = $('replay-bar');
+  const seekTo = (e) => {
+    const box = line.getBoundingClientRect();
     replay.seek((e.clientX - box.left) / box.width);
   };
+  line.onpointerdown = (e) => {
+    line.setPointerCapture(e.pointerId);
+    seekTo(e);
+    line.onpointermove = seekTo;
+  };
+  line.onpointerup = line.onpointercancel = () => (line.onpointermove = null);
+  line.onkeydown = (e) => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    e.preventDefault();
+    replay.seek(+line.getAttribute('aria-valuenow') / 100 + (e.key === 'ArrowLeft' ? -0.02 : 0.02));
+  };
+  $('replay-live').onclick = () => replay.seek(1);
 
   $('search-box').oninput = runSearch;
   $('search-box').onfocus = runSearch;
@@ -1770,7 +1852,7 @@ async function start() {
     const t = e.target;
     if (t.id === 'card-close') return closePanel();
     if (t.id === 'card-details') return showDetails();
-    if (t.id === 'card-nisar') return toggleCardImage(t);
+    if (t.id === 'card-nisar') return toggleCardImage();
   };
   // Sources named in the text: hovering explains one, clicking opens the
   // part of the panel that holds what came from it.

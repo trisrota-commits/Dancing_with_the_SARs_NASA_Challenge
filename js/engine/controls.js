@@ -25,8 +25,6 @@ export class GlobeControls {
     this.velocity = { lat: 0, lon: 0 };
     this.flight = null;
     this.spin = true;
-    this.orbit = 0; // degrees per second the view turns around its target
-    this.push = null; // { to, rate }: eases the distance towards `to`
     this.moved = true;
     this.onTap = null;
     this.pointers = new Map();
@@ -53,8 +51,6 @@ export class GlobeControls {
 
   stop() {
     this.spin = false;
-    this.orbit = 0;
-    this.push = null;
     this.flight = null;
     this.velocity.lat = this.velocity.lon = 0;
   }
@@ -171,17 +167,6 @@ export class GlobeControls {
       const drag = Math.pow(0.002, dt);
       this.velocity.lat *= drag;
       this.velocity.lon *= drag;
-      this.apply();
-    }
-    // A slow turn around the target, until the next touch.
-    if (this.orbit && !this.flight && this.pointers.size === 0) {
-      this.heading += this.orbit * dt;
-      this.apply();
-    }
-    // A slow approach, ended by the next touch too.
-    if (this.push && !this.flight && this.pointers.size === 0) {
-      this.alt += (this.push.to - this.alt) * (1 - Math.exp(-dt * this.push.rate));
-      if (Math.abs(this.alt - this.push.to) < this.push.to * 0.01) this.push = null;
       this.apply();
     }
     // Follow the ground under the target as terrain data streams in.

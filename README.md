@@ -19,7 +19,13 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
   small timeline sets the event against NISAR's passes. Everything else
   is folded away, NISAR first. The sentences are fixed templates filled
   from the data; a sentence only appears when its data has arrived.
-- **Replays what happened** when you click an event, built only from data:
+- **Shows each event on a timeline you drag**, with NISAR on it. An event
+  opens on its latest state and stands still. The timeline runs from before
+  the event to now; NISAR's passes are marked on it, and the radar picture
+  of the pass you stand at lies on the globe under the event data. So you
+  see the ground as the radar saw it before, and after. Play runs it once.
+  New reports about an open event bring it up to date.
+- **Draws what happened** from data only:
   - Earthquake: wave fronts crossing the terrain as a glow and a ripple in
     the ground, through the published shaking-intensity outlines, then the
     later quakes nearby in the order they struck.
@@ -31,8 +37,8 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
     size, reddest at its centre.
   - Flood: water the radar saw on land, fading in pass by pass, with moving
     ripples and waves along its edge whose detail grows as you zoom in.
-- While a replay plays, the map around it dims a little, the camera drifts
-  slowly closer, and a few data labels appear on the globe: the shaking
+- While an event is open, the map around it dims a little and a few data
+  labels appear on the globe: the shaking
   level on each earthquake outline, the magnitude of the strongest later
   quakes, the wind speed travelling with a storm.
 - A NISAR picture is uncovered by a line sweeping the way the satellite
@@ -118,8 +124,7 @@ this app's workload:
 - All event dots are a single draw call, and so are their light beams,
   which rise as the view tilts: taller for stronger events.
 - Replay effects live in shaders: the earthquake front is drawn and lifted
-  in the terrain shader itself, the storm is a procedural cloud shader, and
-  the camera slowly circles a replay until you touch the globe.
+  in the terrain shader itself, and the storm is a procedural cloud shader.
 - Effects have levels of detail and never pop: a fire is one instanced
   system that shows embers from afar and soft, exactly placed spots up
   close; flood

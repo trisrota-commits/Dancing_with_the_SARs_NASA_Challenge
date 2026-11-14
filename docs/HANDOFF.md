@@ -73,6 +73,36 @@ The team asked for less on screen, in a voice note the lead passed on:
   waits for "Show details", because it downloads several previews.
 - Stories, places and spots still open the panel directly.
 
+### The event timeline replaced the replay (lead's decision, 14 Nov)
+
+The looping "replay" was the least on-brief thing in the app: it drew
+other missions' data (fire detections, Sentinel-1 water, USGS) and played
+itself. The lead had it rebuilt under one question: what would a NASA
+judge of this challenge need to see?
+
+- An event opens on its **latest state and stands still**. No loop, no
+  moving camera (the orbit and push-in were removed).
+- The bar at the bottom is a **timeline in real dates**, from before the
+  event to now. Drag it, use the arrow keys, or press play to run it once.
+  "Latest" jumps back to now.
+- **NISAR's passes are ticks on that timeline** (`timelinePasses` in
+  `main.js`: one repeat track, the one of the best before/after pair). The
+  radar picture of the newest pass up to the handle is on the globe by
+  default (`syncNisar`), under the event data: the first one by the sweep,
+  later ones by cross-fade. The card's button switches it off.
+- Each template in `js/replay/replay.js` now returns `from`, `to` and
+  `timeOf(ms)` besides `draw(t, started, ms)`. The earthquake's wave
+  fronts are an `intro` played once on opening.
+- An event the feeds say nothing more about still gets a timeline
+  (`still()`), because NISAR's passes are shown on it.
+- When the feeds bring new reports for the open event and the handle is at
+  "Latest", the timeline is rebuilt without moving the camera.
+- The NISAR time-lapse for a place still uses the looping player
+  (`replay.run`); that one is NISAR's own time series and is started by
+  the reader.
+- Extras were demoted: decorations (shooting stars, ocean landmarks) are
+  off until ticked, and the page's subtitle now names the subject.
+
 ## How we work
 
 - **Branch:** all our work goes on `claude/peaceful-curie-4pexs2`, then a
