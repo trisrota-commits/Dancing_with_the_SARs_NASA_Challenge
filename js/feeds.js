@@ -21,6 +21,8 @@ const EONET_CATEGORY = {
 const GDACS_CATEGORY = { EQ: 'earthquake', TC: 'storm', FL: 'flood', VO: 'volcano', WF: 'wildfire', DR: 'drought' };
 const GDACS_ALERT = { Green: 0.3, Orange: 0.65, Red: 1 };
 // "Green" alone reads as "safe"; it is the lowest level of alert.
+// USGS's estimate of deaths and damage has four levels.
+const PAGER_RANK = { green: 'the lowest', yellow: 'the second', orange: 'the third', red: 'the highest' };
 const GDACS_RANK = { Green: 'the lowest', Orange: 'the middle', Red: 'the highest' };
 
 const clamp01 = (x) => Math.max(0, Math.min(1, x));
@@ -52,9 +54,9 @@ function fromUsgs(json) {
         detailUrl: p.detail,
         detail: [
           depth != null ? `Depth ${depth.toFixed(0)} km` : null,
-          p.alert ? `PAGER alert ${p.alert}` : null,
-          p.tsunami ? 'Tsunami message issued' : null,
-          p.felt ? `${p.felt} felt reports` : null,
+          p.alert ? `Estimated impact (PAGER): ${p.alert}${PAGER_RANK[p.alert] ? `, ${PAGER_RANK[p.alert]} of four levels` : ''}` : null,
+          p.tsunami ? 'A tsunami message was issued' : null,
+          p.felt ? `${p.felt.toLocaleString('en')} ${p.felt === 1 ? 'person' : 'people'} reported feeling it` : null,
         ].filter(Boolean),
       };
     });
@@ -115,7 +117,9 @@ function fromGdacs(json) {
         url: p.url?.report,
         geometryUrl: p.url?.geometry,
         gdacsKey: { type: p.eventtype, id: p.eventid },
-        detail: [sev.severitytext, p.country ? `Country: ${p.country}` : null, `GDACS alert level: ${p.alertlevel}${GDACS_RANK[p.alertlevel] ? ` (${GDACS_RANK[p.alertlevel]} of three levels)` : ''}`].filter(Boolean),
+        country: p.country || null,
+        // A size of zero is GDACS having no number, not a measurement.
+        detail: [sev.severity ? sev.severitytext : null, p.country ? `Country: ${p.country}` : null, `GDACS alert level: ${p.alertlevel}${GDACS_RANK[p.alertlevel] ? ` (${GDACS_RANK[p.alertlevel]} of three levels)` : ''}`].filter(Boolean),
       };
     });
 }

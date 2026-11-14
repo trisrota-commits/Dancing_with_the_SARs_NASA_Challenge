@@ -255,7 +255,8 @@ function closePanel() {
 
 // ---------- event card and plain-text account ----------
 
-// The popup for an event: what it is, the news about it, one line on what
+// The popup for an event: what it is, what the agencies report about it
+// (press only as an extra), one line on what
 // NISAR has seen, and the way into the details.
 function renderCard() {
   const sel = state.selected;
@@ -264,26 +265,28 @@ function renderCard() {
   const lasting = inc.endTime - inc.time > 6 * 3600_000;
   const when = lasting ? `${day(inc.time)} to ${day(inc.endTime)}` : `${utc(inc.time)} (${ago(inc.time)})`;
   const sized = size(inc.magnitude);
-  let body;
-  if (!sel.news) {
-    body = '<p class="spinner">Looking for news about this event…</p>';
-  } else if (sel.news.articles.length) {
-    body =
-      sel.news.articles
-        .slice(0, 3)
+  // What the agencies themselves report comes first: it is data, it is
+  // there at once, and it is about this event. Press is an extra, shown
+  // only when a headline names the place and the kind of event.
+  const lines = [...new Set(inc.reports.flatMap((r) => r.detail.map((d) => `${d} (${FEEDS[r.source].label})`)))].slice(0, 4);
+  const pages = inc.reports.filter((r) => /^https?:\/\//.test(r.url || ''));
+  let body = lines.length ? `<ul class="plain">${lines.map((l) => `<li>${esc(l)}</li>`).join('')}</ul>` : '<p class="note">The feeds give where and when, and nothing more.</p>';
+  if (pages.length) body += `<p class="hint">Official page: ${[...new Map(pages.map((r) => [r.source, r])).values()].map((r) => `<a href="${safeUrl(r.url)}" target="_blank" rel="noopener noreferrer">${esc(FEEDS[r.source].label)}</a>`).join(', ')}</p>`;
+  const press = sel.news?.articles.slice(0, 2) || [];
+  if (press.length) {
+    body +=
+      '<h4>In the press</h4>' +
+      press
         .map((a) => `<a class="headline" href="${safeUrl(a.url)}" target="_blank" rel="noopener noreferrer">${esc(a.title)}<small>${esc(a.source || '')}${Number.isFinite(a.time) ? ` · ${ago(a.time)}` : ''}</small></a>`)
-        .join('') + `<p class="hint">${sel.news.via === 'gdacs' ? 'Linked to this event by GDACS' : 'Found by a news search for the place'}; only headlines that name this kind of event are shown. Press coverage, not data.</p>`;
-  } else {
-    // No press: say what the feeds themselves report.
-    const lines = [...new Set(inc.reports.flatMap((r) => r.detail.map((d) => `${d} (${FEEDS[r.source].label})`)))].slice(0, 4);
-    body = `<p class="note">No press coverage found${lines.length ? '. The feeds report:' : '.'}</p>${lines.length ? `<ul class="plain">${lines.map((l) => `<li>${esc(l)}</li>`).join('')}</ul>` : ''}`;
+        .join('') +
+      '<p class="hint">Press coverage, not data.</p>';
   }
   const scene = sel.passes?.length;
   $('card').innerHTML = `<button id="card-close" aria-label="Close">✕</button>
     <span class="tag">${dot(inc.category)}${esc(CATEGORIES[inc.category].label)}</span>
     <h3>${esc(inc.title)}</h3>
     <p class="when">${esc(when)}${sized ? ` · ${esc(sized)}` : ''}</p>
-    <h4>In the news</h4>
+    <h4>What the agencies report</h4>
     ${body}
     <p class="nisar-line">${esc(nisarLine(inc, sel.found))}</p>
     ${sel.measured ? `<p class="nisar-line measured-line">${esc(measuredLine(sel.measured, inc.time))}</p>` : ''}
@@ -544,7 +547,7 @@ function incidentHtml(inc, radar) {
       ${lapseBox(inc.lat, inc.lon)}
     </details>
     <details class="fold" id="sec-replay"><summary>How the drawing on the globe is built</summary><div id="replay-parts"></div></details>
-    <details class="fold" id="sec-news"><summary>In the news</summary><div id="news"><p class="spinner">Looking for press coverage…</p></div></details>
+    <details class="fold" id="sec-news"><summary>In the press</summary><div id="news"><p class="spinner">Looking for press coverage…</p></div></details>
     <details class="fold" id="sec-linked"><summary>Linked events (${inc.related.length})</summary>${related}</details>
     <details class="fold" id="sec-reports"><summary>Source reports and facts</summary>
       <dl>${facts.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
@@ -1006,8 +1009,8 @@ async function loadNews(inc, selection) {
   }
   const how =
     via === 'gdacs'
-      ? 'Articles GDACS has linked to this event. Only headlines that name this kind of event are shown; one may still be about a different event of the same kind.'
-      : 'Found by searching the GDELT news index. Only headlines that name the place and this kind of event are kept; one may still be about a different event of the same kind.';
+      ? 'Articles GDACS has linked to this event. Only headlines that name the place and this kind of event are shown; one may still be about an earlier event there.'
+      : 'Found by searching the GDELT news index. Only headlines that name the place and this kind of event are kept; one may still be about an earlier event there.';
   box.innerHTML = `${articles
     .map(
       (a) => `<a class="article" href="${safeUrl(a.url)}" target="_blank" rel="noopener noreferrer">
