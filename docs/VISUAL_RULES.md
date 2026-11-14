@@ -101,7 +101,11 @@ Events are round dots; places are diamonds.
 
 Two filled patches with different meanings are never on the ground
 together: while a change map is up, the event's own water layer steps
-aside (`globe.setEffectFillsShown`).
+aside (`globe.setEffectFillsShown`). The same holds for NASA's context
+layers: six of them paint the whole land surface (`fills` in
+`js/config.js`), so switching one on switches the others off. Layers that
+only draw where they have something (rain, ice, alerts, radar strips) lie
+on top of it and can be combined.
 
 ### 4. An agency's scale stays the agency's
 

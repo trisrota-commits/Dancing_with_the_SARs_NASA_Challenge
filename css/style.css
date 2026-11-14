@@ -1766,6 +1766,24 @@ ul.plain {
 
 /* NASA's own legend for a map layer, shown while the layer is on. Its
    pictures are drawn for a light page, so they sit on a light card. */
+.layer-day {
+  display: block;
+  margin: 2px 0 6px 26px;
+  color: var(--dim);
+  font-size: 11.5px;
+  line-height: 1.35;
+}
+
+.layer-day[hidden] {
+  display: none;
+}
+
+#overlays .fills {
+  color: var(--dim);
+  font-size: 11px;
+  margin-left: 2px;
+}
+
 .layer-key {
   margin: 2px 0 8px 22px;
 }

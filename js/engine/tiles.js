@@ -1105,10 +1105,11 @@ export class TileGlobe {
 
   // When a tile that was not delivered is asked for again: soon the first
   // time, then at growing intervals. No failure is final for a radar layer,
-  // whose empty tiles are known as such. Other layers answer a place they
-  // have no data for with an error too, so those stop after a few tries.
+  // whose empty tiles are known as such. An overlay tile the server says
+  // does not exist (`gone`) is never asked for again, and any other layer
+  // stops after a few tries.
   dueAgain(entry) {
-    if (!entry.sparse && (entry.fails || 0) >= RETRIES_PLAIN) return Infinity;
+    if (entry.gone || (!entry.sparse && (entry.fails || 0) >= RETRIES_PLAIN)) return Infinity;
     return (entry.failedAt || 0) + RETRY_MS * Math.min(2 ** Math.max(0, (entry.fails || 1) - 1), RETRY_LONGEST);
   }
 
@@ -1180,7 +1181,7 @@ export class TileGlobe {
     }
     if (!entry) {
       // The coarse levels of a sparse layer go first: they unblock the rest.
-      entry = { key, url: this.url(layer, z, x, y), keep: layer.keep, tint: layer.tint, state: 'queued', img: null, waiting: new Set(), lastUsed: this.frame, first: !!layer.base || (!!layer.sparse && z <= 3), sparse: !!layer.sparse, probe: !!layer.sparse && !layer.sheet && z === 0, layer: layer.sparse ? layer : null, z, x, y };
+      entry = { key, url: this.url(layer, z, x, y), keep: layer.keep, tint: layer.tint, state: 'queued', img: null, waiting: new Set(), lastUsed: this.frame, first: !!layer.base || (!!layer.sparse && z <= 3), sparse: !!layer.sparse, overlay: !layer.base && !layer.sparse, probe: !!layer.sparse && !layer.sheet && z === 0, layer: layer.sparse ? layer : null, z, x, y };
       this.images.set(key, entry);
       this.queue.push(entry);
     } else if (entry.state === 'idle') {
@@ -1291,6 +1292,22 @@ export class TileGlobe {
         (bitmap) => done(bitmap ? 'ready' : 'empty', bitmap),
         () => done('missing'),
       );
+      return;
+    }
+    if (entry.overlay) {
+      // An overlay is fetched with its answer's status, because "there is
+      // nothing here" (the server says so) and "the server failed" need
+      // different handling: the first is final, the second is tried again.
+      fetch(entry.url)
+        .then(async (res) => {
+          if (res.status === 404 || res.status === 400 || res.status === 403) entry.gone = true;
+          if (!res.ok) throw new Error(res.status);
+          return createImageBitmap(await res.blob());
+        })
+        .then(
+          (bitmap) => done('ready', bitmap),
+          () => done('missing'),
+        );
       return;
     }
     const img = new Image();

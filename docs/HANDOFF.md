@@ -405,6 +405,36 @@ player that loaded fourteen full pictures before showing anything.
   are. Before the earthquake on the timeline they are off, like
   everything else of the event.
 
+### All context layers on at once (lead's QA, 14 Nov, night)
+
+The lead switched on every "other satellite layer" and got "a disco ball
+with glitches". Three separate causes, each fixed where it arose:
+
+- **Six layers paint the whole land surface** (soil moisture, land cover,
+  croplands, population, built-up areas, city lights; measured: 77 to
+  100 % of a tile over land is drawn). Stacked, each hides the ones under
+  it. They carry `fills: true` in `js/config.js`; switching one on
+  switches the others off, they are drawn underneath, and the partial
+  layers lie on top in the menu's order (`applyLayers` in `js/globe.js`).
+  This is rule 3 of the visual rules applied to NASA's layers.
+- **Two daily layers had no data for the chosen day.** NASA runs behind
+  on them (soil moisture two days, vegetation alerts a week), and every
+  tile of a day it does not have is an error: 280 failed requests in one
+  view, each tried again. `overlayDay` in `js/main.js` asks for one tiny
+  tile to learn whether the day exists, and otherwise takes the newest of
+  the twelve days before it; the menu says which day is shown.
+- **The population layer never worked.** NASA publishes it without a
+  date and refuses a request that names one (403). Its date is now
+  `'default'`.
+- **In the engine**, an overlay tile is fetched with its status: "does
+  not exist" (404, 400, 403) is final and never asked for again, a
+  server failure is tried again (`gone` in `download` and `dueAgain`,
+  `js/engine/tiles.js`). Before, every missing overlay tile was retried
+  three times.
+- Measured headless with everything switched on: far view complete after
+  10.6 s (was 31.5 s), failed requests 11 (was 157), no tile left
+  standing in (was all 29).
+
 ### Visual rules (lead, 14 Nov, night)
 
 The lead, after one screenshot confused them: no arbitrary colours; one
