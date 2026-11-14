@@ -1,7 +1,7 @@
 // Fetches the live event feeds and normalises them to one shape:
 // { id, source, category, title, lat, lon, time, endTime, magnitude, severity, url, detail, track }
 
-import { FEEDS } from './config.js';
+import { FEEDS, ARCHIVE } from './config.js';
 
 const EONET_CATEGORY = {
   wildfires: 'wildfire',
@@ -114,8 +114,8 @@ function fromGdacs(json) {
 
 const PARSERS = { usgs: fromUsgs, eonet: fromEonet, gdacs: fromGdacs };
 
-export async function fetchFeed(name) {
-  const batches = await Promise.all(FEEDS[name].urls.map(getJson));
+export async function fetchFeed(name, urls = FEEDS[name].urls) {
+  const batches = await Promise.all(urls.map(getJson));
   const seen = new Map();
   for (const json of batches) {
     for (const ev of PARSERS[name](json)) {
@@ -123,4 +123,11 @@ export async function fetchFeed(name) {
     }
   }
   return [...seen.values()];
+}
+
+// Larger events since NISAR's data began, from the feeds' archives. A feed
+// that fails is skipped; the others still load.
+export async function fetchArchive() {
+  const parts = await Promise.all(Object.keys(ARCHIVE).map((name) => fetchFeed(name, ARCHIVE[name]).catch(() => [])));
+  return parts.flat();
 }
