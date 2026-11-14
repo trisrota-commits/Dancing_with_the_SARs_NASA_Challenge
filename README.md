@@ -17,9 +17,9 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
   - Storm: a cloud spiral travelling the dated track above the terrain,
     turning the right way for its hemisphere, sized and spun by wind speed.
   - Wildfire: the satellite fire detections of each day as glowing embers
-    that ignite through the day and cool to coals. Zoom in and each one
-    becomes scorched ground veined with embers, with sparks and thin smoke;
-    the closer you get, the finer the detail.
+    that ignite through the day and cool to a dull red. Zoom in and each
+    one is a soft spot on the exact position of its detection, at true
+    size, reddest at its centre.
   - Flood: water the radar saw on land, fading in pass by pass, with moving
     ripples and waves along its edge whose detail grows as you zoom in.
 - While a replay plays, the map around it dims a little, the camera drifts
@@ -112,8 +112,8 @@ this app's workload:
   in the terrain shader itself, the storm is a procedural cloud shader, and
   the camera slowly circles a replay until you touch the globe.
 - Effects have levels of detail and never pop: a fire is one instanced
-  particle system that shows embers from afar and ember veins, sparks and
-  smoke up close, adding detail without enlarging anything; flood
+  system that shows embers from afar and soft, exactly placed spots up
+  close; flood
   water is a mask the terrain shader animates; radar pictures cross-fade.
 - The camera orbits a point on the ground like Google Earth: drag to pan,
   wheel or pinch to zoom, right-drag or two-finger drag to tilt and turn.
@@ -263,7 +263,7 @@ the same layout as real GCOV products.
 - Replays never draw anything between data points without saying so; the
   panel lists each element with its source and whether it is observed,
   agency analysis or computed here. Decoration is named as decoration: the
-  ember veins, sparks and smoke of a fire, the ripples and edge waves of flood
+  shape and shimmer of a fire's glow and its smoke, the ripples and edge waves of flood
   water, the height of the ground ripple and the look of the storm spiral
   follow fixed rules and are not measurements.
 - The NISAR change view is computed in the browser from NASA's 8-bit preview
