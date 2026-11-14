@@ -28,6 +28,12 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
   switch between the colour composite, HH only and HV only, and read a chart
   of both channels at that point over time.
 - Shows where NISAR looked recently, and rings every event inside a pass.
+- Estimates the **next NISAR overpass** for any event or spot, with a live
+  countdown, clearly labelled as computed from the 12-day repeat cycle.
+- A **reports bar** cycles through new and ongoing events from the feeds;
+  click one to fly there. It can be paused or hidden.
+- A **"Since NISAR data began"** time window loads larger events back to
+  17 June 2026, so older events have radar passes on both sides.
 - Drapes daily NISAR backscatter and other satellite layers over the terrain.
 - One search box for events (fuzzy match, no keyword list) and places.
 
@@ -95,7 +101,7 @@ from a web server.
 - `js/main.js` – wiring and panels
 - `docs/DATA_SOURCES.md` – survey of every data source and what is reachable
 - `docs/DATA_RULES_AND_DEMO_PLAN.md` – which data the challenge allows besides
-  NISAR, and the plan for a reliable demo
+  NISAR, and how to solve the remaining gaps
 
 ## Data and credits
 

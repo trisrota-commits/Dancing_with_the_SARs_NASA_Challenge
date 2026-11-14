@@ -891,7 +891,7 @@ dd {
 #welcome {
   position: fixed;
   left: 50%;
-  top: 70px;
+  top: 108px;
   transform: translateX(-50%);
   z-index: 3;
   display: flex;
@@ -1078,4 +1078,84 @@ dd {
 .chart-table th {
   color: var(--dim);
   font-weight: 500;
+}
+
+/* ---------- alerts ticker ---------- */
+
+#ticker {
+  position: fixed;
+  top: 62px;
+  left: 318px;
+  right: 14px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px 5px 12px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  backdrop-filter: blur(10px);
+  font-size: 13px;
+}
+
+#right:not([hidden]) ~ #ticker {
+  right: 408px;
+}
+
+#ticker .badge {
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+#ticker-text {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  border: 0;
+  background: none;
+  padding: 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#ticker-text:not(:disabled):hover {
+  color: var(--accent);
+}
+
+#ticker-count,
+#ticker-feeds {
+  color: var(--dim);
+  font-size: 11.5px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+#ticker button:not(#ticker-text) {
+  padding: 2px 8px;
+}
+
+.countdown {
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+}
+
+.card .badge {
+  display: inline-block;
+  padding: 1px 6px;
+  margin-left: 6px;
+  font-weight: 500;
+}
+
+@media (max-width: 760px) {
+  #ticker {
+    left: 8px;
+    right: 8px;
+  }
+
+  #ticker-feeds,
+  #ticker-count {
+    display: none;
+  }
 }

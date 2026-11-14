@@ -1,9 +1,9 @@
-# Data rules and demo plan
+# Data rules and remaining gaps
 
-Written on Saturday 14 November 2026, mid-hackathon. This note covers two things:
+This note covers two things:
 
-1. Which data we are allowed to use, besides NISAR.
-2. How to make sure the demo never lands on an empty radar panel.
+1. Which data we may use, besides NISAR.
+2. The gaps that remain in the app, and how to solve each one.
 
 ## 1. Which data we may use
 
@@ -35,50 +35,43 @@ backs up what NISAR shows; it never replaces it.
 ### How to keep this clear for the judges
 
 - In every event panel, show the NISAR section first.
-- Label anything else as **context**, with its sensor name (the replay
-  labels already do this well).
-- When we show Sentinel-1 next to NISAR, say why: C-band (about 5.6 cm
+- Label anything else as **context**, with its sensor name. The replay
+  labels already do this well.
+- When we show Sentinel-1 next to NISAR, say why. C-band (about 5.6 cm
   wavelength) and L-band (about 24 cm) see different things. L-band passes
-  through vegetation and dry snow further. That comparison is a strength.
+  further through vegetation and dry snow. That comparison is a strength.
 
-## 2. The demo gap
+## 2. Remaining gaps and how to solve them
 
-### The problem
+The judging criteria are Impact, Creativity, Validity, Relevance and
+Presentation. Each gap below maps to one or more of them.
 
-The event list only reaches back 14 days at most. NISAR revisits the same
-track and frame every 12 days, and products arrive hours to two days after
-acquisition. So most fresh events have a "before" scene but no "after" scene
-yet. Interferograms (GUNW) currently end around 9 October 2026 (see
-`DATA_SOURCES.md`), so recent earthquakes have none at all.
+### Gap 1: fresh events often have no "after" scene
 
-If a judge clicks a fresh event, the panel will often say there is no repeat
-pass. That is honest, but it is a weak moment in a demo.
+**The problem.** The event list reaches back 14 days at most. NISAR revisits
+the same track and frame every 12 days, and products arrive hours to two days
+after acquisition. So most fresh events have a "before" scene but no "after"
+scene yet. Interferograms (GUNW) currently end around 9 October 2026 (see
+`DATA_SOURCES.md`), so recent earthquakes have none at all. A judge clicking
+a fresh event will often see "no repeat pass". That is honest, but weak.
 
-### Fixes, in priority order
-
-#### Fix 1: a "Since NISAR data began" time window (code, highest value)
-
-Calibrated NISAR data starts on 17 June 2026. Add a time-window option that
-reaches back to that date. Most events from June to October will then have
-both a before and an after scene, and older earthquakes will have
-interferograms.
-
-The live feeds only cover recent days, so this needs their archive versions:
+**Fix 1a: a "Since NISAR data began" time window.** Calibrated NISAR data
+starts on 17 June 2026. Add a time-window option that reaches back to that
+date. Most events from June to October will then have both scenes, and older
+earthquakes will have interferograms. The live feeds only cover recent days,
+so this needs their archive versions:
 
 - USGS: the FDSN event query API takes `starttime`, `endtime` and
   `minmagnitude` (for example M6+ to keep the globe readable).
 - NASA EONET v3: `events` accepts `start`, `end` and `status=all`.
 - GDACS: the `SEARCH` endpoint accepts from and to dates.
 
-**Check first** that each archive endpoint answers from the browser
-(CORS), the same way `DATA_SOURCES.md` checked the live ones.
+Check first that each archive endpoint answers from the browser (CORS), as
+`DATA_SOURCES.md` did for the live ones.
 
-#### Fix 2: predict the next NISAR pass (code, small change)
-
-Turn the dead end into something useful. NISAR repeats each track every
-12 days, so we can estimate the next pass from the scenes we already find.
-
-Logic:
+**Fix 1b: predict the next NISAR pass.** Turn the dead end into something
+useful. NISAR repeats each track every 12 days, so the next pass can be
+estimated from the scenes already found:
 
 1. Group the scenes over the event by track, direction and frame (the
    existing `stack` field).
@@ -95,63 +88,108 @@ Suggested panel text:
 > NISAR revisits each spot every 12 days. Not every planned pass is
 > acquired, so this date is an estimate.
 
-This shows the judges we understand how the mission works.
-
-#### Fix 3: show Sentinel-1 while we wait (wording, mostly done)
-
-The OPERA Sentinel-1 layers are already in the app. When there is no NISAR
-"after" scene, offer them in the panel. For example:
+**Fix 1c: offer Sentinel-1 while we wait.** The OPERA Sentinel-1 layers are
+already in the app. When there is no NISAR "after" scene, offer them in the
+panel:
 
 > Sentinel-1 (C-band) imaged this area on 12 Nov. NISAR (L-band) is expected
 > around 20 Nov.
 
-#### Fix 4: curated showcase events (science, Madhura)
+### Gap 2: the change view is a guide, not a measurement
 
-Pick three or four past events where we know the NISAR data is good, and give
-each a short, careful explanation. Candidates to check in ASF Vertex:
+**The problem.** The change view works on NASA's 8-bit preview images. The
+README already says this honestly. But a SAR expert on the judging panel will
+still ask whether the brightness differences are real backscatter change.
+This affects the Validity score.
+
+**Fix 2a: full-resolution analysis for a few showcase events.** For three or
+four events (see Gap 3), process the full GCOV files offline:
+
+1. Download the before and after GCOV HDF5 files from ASF (free Earthdata
+   login).
+2. Read the HHHH and HVHV covariance layers, which are calibrated backscatter.
+3. Convert to decibels: `10 * log10(value)`.
+4. Apply a speckle filter (for example a 5×5 boxcar or Lee filter).
+5. Compute the difference in dB (after minus before), per polarization.
+6. Export the result as a PNG with its lat/lon bounds, in the same format the
+   app already uses for previews.
+
+Then the showcase can say, for example, "HV dropped by 6 dB over the burn
+scar". That is a real, checkable measurement.
+
+**Fix 2b: state the method in the app.** Next to each processed result, add a
+short line: product, dates, polarization, filter, threshold. Judges trust
+teams that show their method.
+
+### Gap 3: the app shows data but does not yet explain it
+
+**The problem.** The brief asks teams to "hypothesize the physical drivers
+behind what you see (or don't see) in the SAR data". It also asks which
+polarizations highlight the changes. The app's radar notes are good, but they
+are general. No event yet has a specific, worked explanation. This affects
+Impact, Relevance and Validity.
+
+**Fix 3a: curated showcase events.** Pick three or four past events with good
+NISAR data, each a different kind of change. Candidates to check in ASF
+Vertex:
 
 - **Venezuela earthquakes, 24 June 2026.** NASA has published NISAR ground
   displacement for these, so a GUNW interferogram should span the event.
 - **A flood** between June and October with a clean before/after pair. Open
   water should darken, and flooded vegetation should brighten (double bounce).
-- **A wildfire scar.** HV backscatter should drop where the canopy burned.
+- **A wildfire scar.** HV backscatter should drop where the canopy burned,
+  while HH changes less.
 - **Optional, cryosphere:** the Greenland melt season (June to October). Wet
   snow absorbs the signal, so backscatter drops during melt and recovers on
   refreeze.
 
-For each showcase event, the panel should answer the questions in the brief:
+**Fix 3b: answer the brief's questions for each showcase event.** Each
+showcase panel should cover:
 
-1. What changed?
+1. What changed, with numbers where possible (from Fix 2a)?
 2. What is the physical driver?
 3. Which polarization shows it best (HH or HV), and why?
-4. Who is affected, and what could NISAR be used for next?
+4. What did NISAR see that optical imagery could not (cloud, smoke, night)?
+5. Who is affected, and what could NISAR be used for next?
 
-If time allows, process the full-resolution GCOV files for the showcase
-events offline (calibrated values in dB) instead of the 8-bit previews. Then
-the showcase change maps are real measurements, not just a guide to where to
-look.
+**Fix 3c: a "Showcase" entry point.** Add a button or menu that flies to each
+showcase event in turn. This gives the demo a reliable path and makes the
+science easy to find for anyone using the app after the hackathon.
 
-#### Fix 5: script the demo (everyone)
+### Gap 4: the demo itself
 
-Do not click random live dots in front of the judges. Suggested order:
+**The problem.** A live app depends on live feeds and venue internet. Clicking
+random dots in front of judges is risky.
 
-1. **About 20 seconds:** the live globe, spinning, with events arriving. This
-   is the wow moment.
+**Fix: script and rehearse the demo.**
+
+1. **About 20 seconds:** the live globe, with events arriving. This is the
+   wow moment.
 2. **About 30 seconds:** click one fresh event. Show the before scene, the
    next-pass prediction and the Sentinel-1 context.
-3. **The rest:** a showcase event with a full before/after, the change view
+3. **The rest:** a showcase event with the before/after, the measured change
    and the explanation.
 
-Rehearse it at least twice, and record a backup video in case the
-venue's internet is slow.
+Rehearse it at least twice. Record a backup video in case the internet is
+slow.
+
+### Optional: make the name pay off
+
+"Dancing with the SARs" fits the brief's music theme ("wherever the music
+calls you"). Nothing in the app plays on it yet. One idea, only if time
+allows: in the showcase, play a backscatter time series as sound, so a melt
+season or a flood has an audible rhythm. The Web Audio API is enough for this.
 
 ## Checklist
 
-- [ ] Fix 1: archive endpoints checked for CORS
-- [ ] Fix 1: "Since NISAR data began" window added
-- [ ] Fix 2: next-pass prediction in the event panel
-- [ ] Fix 3: Sentinel-1 offer in the panel when there is no after scene
-- [ ] Fix 4: showcase events chosen and data checked in Vertex
-- [ ] Fix 4: explanation written for each showcase event
-- [ ] Fix 5: demo script rehearsed, backup video recorded
+- [ ] 1a: archive endpoints checked for CORS
+- [ ] 1a: "Since NISAR data began" window added
+- [ ] 1b: next-pass prediction in the event panel
+- [ ] 1c: Sentinel-1 offer when there is no after scene
+- [ ] 2a: full-resolution dB difference maps for the showcase events
+- [ ] 2b: method line next to each processed result
+- [ ] 3a: showcase events chosen and data checked in Vertex
+- [ ] 3b: explanation written for each showcase event
+- [ ] 3c: showcase button or menu
+- [ ] 4: demo script rehearsed, backup video recorded
 - [ ] README: short "Data we use and why" section linking to this file

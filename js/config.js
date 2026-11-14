@@ -38,6 +38,18 @@ export const FEEDS = {
   },
 };
 
+// NISAR's calibrated science data starts here; the archive window reaches
+// back to it so that older events have radar scenes on both sides.
+export const NISAR_START = Date.UTC(2026, 5, 17);
+const since = new Date(NISAR_START).toISOString().slice(0, 10);
+
+// Larger events only, to keep five months of history readable on the globe.
+export const ARCHIVE = {
+  usgs: [`https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=${since}&minmagnitude=6&orderby=time`],
+  eonet: [`https://eonet.gsfc.nasa.gov/api/v3/events?start=${since}&status=all&category=floods,severeStorms,volcanoes,seaLakeIce,drought,landslides`],
+  gdacs: [`https://www.gdacs.org/gdacsapi/api/events/geteventlist/SEARCH?eventlist=EQ,TC,FL,VO,WF,DR&fromDate=${since}&alertlevel=Orange;Red`],
+};
+
 export const CMR = 'https://cmr.earthdata.nasa.gov/search/granules.json';
 export const NISAR_GCOV = ['NISAR_L2_GCOV_V1', 'NISAR_L2_GCOV_PROVISIONAL_V1', 'NISAR_UR_L2'];
 export const NISAR_GUNW = ['NISAR_L2_GUNW_V1', 'NISAR_L2_GUNW_PROVISIONAL_V1'];

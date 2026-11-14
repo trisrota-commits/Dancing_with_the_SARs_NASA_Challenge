@@ -81,6 +81,29 @@ export async function latestScenes(count = 200) {
   return dedupe(await search(['NISAR_L2_GCOV_V1', 'NISAR_UR_L2'], '*_GCOV_*', {}, count));
 }
 
+// NISAR flies an exact repeat orbit: the same track comes round every 12 days.
+export const REPEAT_DAYS = 12;
+
+// Estimates the next overpass from archived passes: for each repeat track,
+// the newest pass plus whole 12-day cycles until the result is in the future.
+// It is an estimate only: an overpass is not a guaranteed acquisition.
+export function nextPass(scenes, now = Date.now()) {
+  const newest = new Map();
+  for (const s of scenes) {
+    if (!Number.isFinite(s.time)) continue;
+    if (!newest.has(s.stack) || newest.get(s.stack).time < s.time) newest.set(s.stack, s);
+  }
+  let best = null;
+  for (const last of newest.values()) {
+    const cycle = REPEAT_DAYS * 86400_000;
+    const cycles = Math.max(1, Math.ceil((now - last.time) / cycle));
+    const time = last.time + cycles * cycle;
+    // Cycles beyond the first are expected passes that never reached the archive.
+    if (!best || time < best.time) best = { time, last, missed: cycles - 1 };
+  }
+  return best;
+}
+
 export async function scenesAt(lat, lon, fromMs, toMs) {
   const temporal = `${new Date(fromMs).toISOString()},${new Date(toMs).toISOString()}`;
   const at = { point: `${lon},${lat}`, temporal };
@@ -110,6 +133,12 @@ export async function historyAt(lat, lon) {
   const list = [...stacks.values()];
   for (const st of list) st.scenes.sort((a, b) => a.time - b.time);
   return list.filter((st) => st.scenes.length >= 2).sort((a, b) => b.scenes.length - a.scenes.length);
+}
+
+// The newest passes over a point, whatever their date: what the next-pass
+// estimate has to start from.
+export async function newestAt(lat, lon) {
+  return dedupe(await search(ALL_GCOV, '*_GCOV_*', { point: `${lon},${lat}` }, 30));
 }
 
 // Best before/after pair: same track and frame, closest to the event on each side.
