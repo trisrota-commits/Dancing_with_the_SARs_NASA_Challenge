@@ -654,6 +654,7 @@ export class Replay {
       progress: at(this.intro ? plan.from : this.ms),
       span: [at(plan.from), at(Math.max(plan.to, plan.from))],
       marks: this.marks.map(at),
+      range: this.range,
       live: this.live,
       parts: plan.parts,
       plan,

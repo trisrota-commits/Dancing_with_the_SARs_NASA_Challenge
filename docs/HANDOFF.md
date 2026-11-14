@@ -103,6 +103,22 @@ judge of this challenge need to see?
 - Extras were demoted: decorations (shooting stars, ocean landmarks) are
   off until ticked, and the page's subtitle now names the subject.
 
+### Ease of understanding (judge's walkthrough, 14 Nov)
+
+Changes made after going through the app as a first-time visitor:
+
+- **A key on the globe** (`setLegend` in `main.js`, `#legend`) whenever a
+  radar picture, an interferogram or a change picture is up: what it is,
+  what the colours mean, in plain words, with the channel names in small
+  print. It follows the polarisation mode of the picture shown.
+- **"Show what changed" on the event card** when two comparable passes
+  exist: the change colours go over the newer radar picture and the
+  timeline stays (`toggleCardChange`).
+- **Stories put the data right after "What to look at"**, and the
+  time-lapse box leads with the picture controls and the chart; the fine
+  print follows.
+- **The timeline has a key** (the event, a NISAR pass, "drag to go back").
+
 ## How we work
 
 - **Branch:** all our work goes on `claude/peaceful-curie-4pexs2`, then a
