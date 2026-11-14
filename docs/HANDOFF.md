@@ -62,6 +62,29 @@ radar overlays easily, need a paid key and show one fixed date).
   So far the lead has asked every time.
 - **Report honestly.** Say what was tested and how, and what was not.
 
+### Practical notes for an AI session
+
+- The project lead tests on a Mac and wants a fresh zip of `main` after
+  each batch (`index.html css js vendor docs tests tools README.md LICENSE
+  .nojekyll start.bat start.sh start.command`), sent as a file, plus a few
+  screenshots of what changed.
+- The lead writes casually and trusts our judgement; keep replies plain,
+  lead with the result, and always say what was not verified.
+- This session can push only to `claude/peaceful-curie-4pexs2`. It cannot
+  delete branches; merged teammate branches were flagged in PR comments for
+  someone to delete by hand.
+- The merge tool needs the full 40-character commit ID of the branch head.
+- After merging a teammate's branch into ours and landing it, their PR shows
+  as merged on its own; if they pushed again in the meantime, merge again.
+- The local server (`python3 -m http.server 8765`) stops when the container
+  restarts; start it again before running `tools/smoke.js`.
+- Headless tests need `--use-gl=swiftshader` and the proxy setting; both are
+  in `tools/smoke.js`. A page-level `history` name clash once broke share
+  links, so run the smoke test after touching `js/main.js`.
+- Charts follow the dataviz rules: one axis, validated series colours
+  (`#d55181` co-polarised, `#0ca30c` cross-polarised on the dark panel),
+  crosshair tooltip, direct labels, table view.
+
 ## How to run and test
 
 - No build step. Serve the folder and open it: `start.command` (macOS),
