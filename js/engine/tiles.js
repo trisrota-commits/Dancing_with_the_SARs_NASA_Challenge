@@ -141,6 +141,8 @@ export class TileGlobe {
     };
     this.frustum = new THREE.Frustum();
     this.matrix = new THREE.Matrix4();
+    this.scratch = document.createElement('canvas');
+    this.scratch.width = this.scratch.height = SIZE;
     this.reader = document.createElement('canvas');
     this.reader.width = this.reader.height = SIZE;
     this.readerCtx = this.reader.getContext('2d', { willReadFrequently: true });
@@ -151,7 +153,10 @@ export class TileGlobe {
     this.changed = true;
   }
 
-  // Tile layers: [{ url: 'https://…/{z}/{y}/{x}.png', maxLevel, alpha, base }]
+  // Tile layers: [{ url: 'https://…/{z}/{y}/{x}.png', maxLevel, alpha, base, bounds }]
+  // A layer with bounds is only fetched and drawn for tiles inside that box.
+  // A layer with keep(r, g, b) has every other pixel made see-through, and
+  // tint recolours what is kept. landOnly layers are wiped over the sea.
   setLayers(layers) {
     this.layers = layers;
     for (const entry of this.queue) {
@@ -419,27 +424,49 @@ export class TileGlobe {
   // Draws every layer into the tile's canvas, using a coarser cached image
   // as a stand-in wherever the exact tile has not arrived yet.
   paint(tile) {
-    const { ctx, z, x, y } = tile;
+    const { z, x, y } = tile;
+    const ctx = tile.ctx;
     tile.dirty = false;
     ctx.globalAlpha = 1;
     ctx.fillStyle = '#0a1826';
     ctx.fillRect(0, 0, SIZE, SIZE);
 
+    // Land-only layers are gathered on a scratch canvas so the sea can be
+    // wiped from all of them at once.
+    let land = null;
+    const waitForHeights = this.terrain && tile.heightLevel < 0;
     for (const layer of this.layers) {
+      const b = layer.bounds;
+      if (b && !(b.east > tile.west && b.west < tile.east && b.north > tile.south && b.south < tile.north)) continue;
+      if (layer.landOnly && waitForHeights) continue;
+      let target = tile.ctx;
+      if (layer.landOnly) {
+        if (!land) {
+          land = this.scratch.getContext('2d');
+          land.globalAlpha = 1;
+          land.clearRect(0, 0, SIZE, SIZE);
+        }
+        target = land;
+      }
       const top = Math.min(z, layer.maxLevel);
       const exact = this.image(layer, top, x >> (z - top), y >> (z - top), tile);
       if (exact.state === 'missing' && !layer.base) continue;
       for (let level = top; level >= 0; level--) {
         const shift = z - level;
-        const entry = level === top ? exact : this.images.get(this.url(layer, level, x >> shift, y >> shift));
+        const entry = level === top ? exact : this.images.get(this.key(layer, level, x >> shift, y >> shift));
         if (!entry || entry.state !== 'ready') continue;
         const scale = 2 ** shift;
         const span = SIZE / scale;
-        ctx.globalAlpha = layer.alpha ?? 1;
-        ctx.drawImage(entry.img, (x % scale) * span, (y % scale) * span, span, span, 0, 0, SIZE, SIZE);
+        target.globalAlpha = layer.landOnly ? 1 : (layer.alpha ?? 1);
+        target.drawImage(entry.img, (x % scale) * span, (y % scale) * span, span, span, 0, 0, SIZE, SIZE);
         entry.lastUsed = this.frame;
         break;
       }
+    }
+    if (land) {
+      if (this.terrain) this.wipeSea(land, tile);
+      tile.ctx.globalAlpha = 0.62;
+      tile.ctx.drawImage(this.scratch, 0, 0);
     }
     ctx.globalAlpha = 1;
 
@@ -468,6 +495,22 @@ export class TileGlobe {
     }
     tile.mesh.material.uniforms.uUseB.value = sided ? 1 : 0;
     tile.texture.needsUpdate = true;
+  }
+
+  // Clears every grid cell that touches sea level, which also removes the
+  // ragged strip of sea along the coast.
+  wipeSea(ctx, tile) {
+    const h = tile.mesh.geometry.attributes.aHeight.array;
+    const cols = tile.cols;
+    const n = cols - 1;
+    const first = tile.y === 0 ? 1 : 0;
+    const cell = SIZE / n;
+    for (let j = 0; j < n; j++) {
+      for (let i = 0; i < n; i++) {
+        const a = (first + j) * cols + i;
+        if (h[a] < 0.5 || h[a + 1] < 0.5 || h[a + cols] < 0.5 || h[a + cols + 1] < 0.5) ctx.clearRect(i * cell, j * cell, cell, cell);
+      }
+    }
   }
 
   // Lays a plain lat/lon image into this Mercator tile, in thin horizontal
@@ -518,8 +561,8 @@ export class TileGlobe {
           if (i) ctx.lineTo(px, py);
           else ctx.moveTo(px, py);
         });
-        ctx.closePath();
-        if (o.fill) {
+        if (!o.open) ctx.closePath();
+        if (o.fill && !o.open) {
           ctx.fillStyle = o.fill;
           ctx.fill();
         }
@@ -589,6 +632,8 @@ export class TileGlobe {
       s[rows * cols + k] = s[from];
     });
     height.needsUpdate = shade.needsUpdate = true;
+    // Land-only layers were waiting to learn where the sea is.
+    if (this.layers.some((l) => l.landOnly)) tile.dirty = true;
   }
 
   heights(z, x, y, tile) {
@@ -663,12 +708,17 @@ export class TileGlobe {
     return layer.url.replace('{z}', z).replace('{x}', x).replace('{y}', y);
   }
 
+  // Cache key: the same picture filtered differently is a different entry.
+  key(layer, z, x, y) {
+    return this.url(layer, z, x, y) + (layer.keep ? '#kept' : '');
+  }
+
   image(layer, z, x, y, tile) {
-    const url = this.url(layer, z, x, y);
-    let entry = this.images.get(url);
+    const key = this.key(layer, z, x, y);
+    let entry = this.images.get(key);
     if (!entry) {
-      entry = { url, state: 'queued', img: null, waiting: new Set(), lastUsed: this.frame, first: !!layer.base };
-      this.images.set(url, entry);
+      entry = { key, url: this.url(layer, z, x, y), keep: layer.keep, tint: layer.tint, state: 'queued', img: null, waiting: new Set(), lastUsed: this.frame, first: !!layer.base };
+      this.images.set(key, entry);
       this.queue.push(entry);
     } else if (entry.state === 'idle') {
       entry.state = 'queued';
@@ -704,7 +754,7 @@ export class TileGlobe {
       const done = (state) => {
         this.downloading--;
         entry.state = state;
-        entry.img = state === 'ready' ? img : null;
+        entry.img = state === 'ready' ? (entry.keep ? this.filtered(img, entry.keep, entry.tint) : img) : null;
         for (const t of entry.waiting) if (!t.dead) t.dirty = true;
         entry.waiting.clear();
         if (entry.pinned) for (const t of this.tiles.values()) t.dirty = true;
@@ -718,9 +768,26 @@ export class TileGlobe {
     if (this.images.size > IMAGE_CACHE) this.trim();
   }
 
+  // A copy of the image with only the pixels `keep` accepts.
+  filtered(img, keep, tint) {
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = SIZE;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(img, 0, 0, SIZE, SIZE);
+    const data = ctx.getImageData(0, 0, SIZE, SIZE);
+    const px = data.data;
+    for (let i = 0; i < px.length; i += 4) {
+      if (!keep(px[i], px[i + 1], px[i + 2])) px[i + 3] = 0;
+      else if (tint) [px[i], px[i + 1], px[i + 2]] = tint;
+    }
+    ctx.putImageData(data, 0, 0);
+    return canvas;
+  }
+
   trim() {
-    const old = [...this.images.values()].filter((e) => !e.pinned && e.state !== 'loading' && e.state !== 'queued').sort((a, b) => a.lastUsed - b.lastUsed);
-    for (const entry of old.slice(0, this.images.size - IMAGE_CACHE * 0.8)) this.images.delete(entry.url);
+    // Overlay tiles go before basemap tiles, then the least recently used.
+    const old = [...this.images.values()].filter((e) => !e.pinned && e.state !== 'loading' && e.state !== 'queued').sort((a, b) => a.first - b.first || a.lastUsed - b.lastUsed);
+    for (const entry of old.slice(0, this.images.size - IMAGE_CACHE * 0.8)) this.images.delete(entry.key);
   }
 
   get busy() {

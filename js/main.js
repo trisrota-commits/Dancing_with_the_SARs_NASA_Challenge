@@ -2,9 +2,12 @@
 
 import { CATEGORIES, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS } from './config.js';
 import { fetchFeed } from './feeds.js';
-import { buildIncidents, tagNisarCoverage, pointInPolygon } from './incidents.js';
+import { buildIncidents, tagNisarCoverage, pointInPolygon, distanceKm } from './incidents.js';
 import { latestScenes, scenesAt, bestPair, imageBounds, latestTileDate } from './nisar.js';
-import { Globe } from './globe.js';
+import { Globe, loadPicture } from './globe.js';
+import { Replay } from './replay/replay.js';
+import { changeMap, CHANGE_THRESHOLD } from './change.js';
+import { searchEvents, searchPlaces } from './search.js';
 
 const DAY = 86400_000;
 const $ = (id) => document.getElementById(id);
@@ -27,6 +30,7 @@ const state = {
 };
 
 const globe = new Globe('globe');
+const replay = new Replay(globe, renderReplay);
 
 // ---------- formatting ----------
 
@@ -191,7 +195,46 @@ function closePanel() {
   state.lookup++;
   $('right').hidden = true;
   globe.select(null);
+  replay.stop();
   endCompare();
+}
+
+// ---------- replay ----------
+
+const BADGE = { observed: 'Observed', analysis: 'Analysis', computed: 'Computed', note: 'Note' };
+
+// Keeps the replay bar and the "what this is made of" list in step with
+// the player.
+function renderReplay(u) {
+  const bar = $('replay');
+  const list = $('replay-parts');
+  if (u.state === 'off') {
+    bar.hidden = true;
+    return;
+  }
+  if (u.state === 'loading') {
+    bar.hidden = false;
+    $('replay-caption').textContent = 'Gathering what is known about this event…';
+    $('replay-fill').style.width = '0';
+    if (list) list.innerHTML = '<p class="spinner">Loading the event history…</p>';
+    return;
+  }
+  if (u.state === 'none') {
+    bar.hidden = true;
+    if (list) list.innerHTML = '<p class="note">The feeds carry no history for this event beyond its location, so there is nothing to replay.</p>';
+    return;
+  }
+  bar.hidden = false;
+  $('replay-toggle').textContent = u.state === 'playing' ? '❚❚' : '▶';
+  $('replay-caption').textContent = u.caption;
+  $('replay-fill').style.width = `${(u.progress * 100).toFixed(1)}%`;
+  if (list && list.partsRef !== u.parts) {
+    list.partsRef = u.parts;
+    list.innerHTML = `<ul class="parts">${u.parts
+      .map((p) => `<li><span class="badge ${p.kind}">${BADGE[p.kind]}</span><span>${esc(p.text)}${p.source ? ` <small>· ${esc(p.source)}</small>` : ''}</span></li>`)
+      .join('')}</ul>
+      <p class="hint">Observed = measured or catalogued. Analysis = worked out and published by an agency. Computed = drawn here by the stated rule.</p>`;
+  }
 }
 
 function sceneCard(scene, eventTime) {
@@ -248,6 +291,8 @@ function incidentHtml(inc, radar) {
   return `<span class="tag">${dot(inc.category)}${esc(cat.label)}</span>
     <h3>${esc(inc.title)}</h3>
     <dl>${facts.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
+    <h4>What happened here</h4>
+    <div id="replay-parts"></div>
     <h4>NISAR radar over this spot</h4>
     <div id="radar">${radar}</div>
     <h4>What radar can show here</h4>
@@ -267,9 +312,13 @@ function radarHtml(inc, found) {
   const before = backscatter.filter((s) => s.time < inc.time).length;
   let html = `<p class="note">${backscatter.length} backscatter scenes (${before} before, ${backscatter.length - before} after) and ${interferograms.length} interferograms.</p>`;
   if (pair) {
-    html += `<div class="card pair"><div class="src">Before / after pair</div>
-      <p>${day(pair.before.time)} → ${day(pair.after.time)}, same track and frame, ${Math.round(pair.span / DAY)} days apart.</p>
-      <button class="primary" id="compare">Compare on globe</button></div>`;
+    html += `<div class="card pair"><div class="src">What NISAR saw change</div>
+      <p>Two passes on the same track and frame: ${day(pair.before.time)} and ${day(pair.after.time)}, ${Math.round(pair.span / DAY)} days apart.</p>
+      <div class="actions">
+        <button class="primary" id="changes">Show what changed</button>
+        <button id="compare">Compare the source images</button>
+      </div>
+      <div id="change-out"></div></div>`;
   } else if (backscatter.length) {
     html += `<p class="note">No repeat pass after the event yet, so there is no before/after pair. The next pass on the same track comes 12 days after the last one.</p>`;
   }
@@ -288,6 +337,7 @@ async function selectIncident(inc, fly) {
   openPanel(incidentHtml(inc, '<p class="spinner">Searching the NISAR archive…</p>'));
   globe.select(inc);
   if (fly) globe.flyTo(inc.lat, inc.lon);
+  replay.start(inc);
 
   let found;
   try {
@@ -304,6 +354,7 @@ async function selectIncident(inc, fly) {
 
 function selectScene(scene, fly) {
   endCompare();
+  replay.stop();
   state.lookup++;
   state.selected = { kind: 'scene', scene, found: { backscatter: [scene], interferograms: [] } };
   const inside = visibleIncidents().filter((i) => pointInPolygon(i.lat, i.lon, scene.ring));
@@ -330,6 +381,7 @@ function selectScene(scene, fly) {
 }
 
 function choose(found) {
+  replay.stop();
   state.selected = { kind: 'choice', found };
   state.lookup++;
   openPanel(`<h3>${found.length} things overlap here</h3>
@@ -369,6 +421,7 @@ async function compare(button) {
   const pair = bestPair(state.selected.found.backscatter, inc.time);
   if (!pair) return;
   endCompare();
+  replay.stop();
   button.textContent = 'Loading…';
   try {
     const [b1, b2] = await Promise.all([imageBounds(pair.before), imageBounds(pair.after)]);
@@ -379,7 +432,7 @@ async function compare(button) {
     $('split-after').textContent = `After · ${day(pair.after.time)}`;
     $('split').hidden = false;
     setSplit(0.5);
-    button.textContent = 'Comparing – drag the white bar';
+    button.textContent = 'Comparing: drag the white bar';
   } catch {
     button.textContent = 'Preview failed';
   }
@@ -394,6 +447,138 @@ function setSplit(fraction) {
 function endCompare() {
   $('split').hidden = true;
   globe.clearScenes();
+  state.change = null;
+  const out = $('change-out');
+  if (out) out.innerHTML = '';
+}
+
+// The friendly view: colours only where the radar echo changed between the
+// two passes, with the source image available underneath as proof.
+async function showChanges(button) {
+  const inc = state.selected.incident;
+  const pair = bestPair(state.selected.found.backscatter, inc.time);
+  if (!pair) return;
+  endCompare();
+  replay.stop();
+  button.textContent = 'Comparing the two passes…';
+  try {
+    const [b1, b2, before, after] = await Promise.all([imageBounds(pair.before), imageBounds(pair.after), loadPicture(pair.before.image), loadPicture(pair.after.image)]);
+    const result = changeMap(before, b1, after, b2);
+    if (!result) throw new Error('The two passes do not overlap');
+    state.change = { result, after, afterBounds: b2, pair };
+    drapeChanges(false);
+    globe.flyToBounds(result.bounds);
+    globe.select(inc, [pair.after]);
+    const km = (v) => (v >= 100 ? Math.round(v).toLocaleString('en') : v.toFixed(1));
+    const pct = (v) => `${(v * 100).toFixed(1)}%`;
+    $('change-out').innerHTML = `
+      <ul class="legend">
+        <li><i style="--c:#40aaff"></i><span><b>Echo got weaker</b> on ${km(result.weakerKm2)} km² (${pct(result.weakerShare)}). Typical causes: new open water, burnt or cleared vegetation, smoother ground.</span></li>
+        <li><i style="--c:#ffaa3c"></i><span><b>Echo got stronger</b> on ${km(result.strongerKm2)} km² (${pct(result.strongerShare)}). Typical causes: flooded vegetation, wetter or rougher ground, new structures.</span></li>
+      </ul>
+      <label class="check"><input type="checkbox" id="under" /> Show the radar image underneath</label>
+      <p class="hint">Computed in your browser from NASA's preview images of both passes over ${km(result.comparedKm2)} km². A pixel is coloured where the combined HH + HV brightness moved by more than ${Math.round((CHANGE_THRESHOLD / 255) * 100)}% of full scale. Differences that a shift of up to two pixels between the images would explain are ignored. Previews are 8-bit and reduced in resolution, so treat this as where to look, not a measurement. Open sea changes with the wind between passes. The causes listed are the usual ones, not a diagnosis.</p>`;
+    button.textContent = 'Changes shown';
+  } catch (err) {
+    button.textContent = 'Could not compare';
+    $('change-out').innerHTML = `<p class="note">${esc(err.message)}</p>`;
+  }
+}
+
+function drapeChanges(withSource) {
+  const c = state.change;
+  if (!c) return;
+  globe.clearScenes();
+  if (withSource) globe.addPicture(c.after, c.afterBounds);
+  globe.addPicture(c.result.canvas, c.result.bounds, undefined, 0.9);
+}
+
+// ---------- search ----------
+
+let searchRun = 0;
+let searchHits = [];
+let searchAt = -1;
+
+function renderSearch(events, places, pending) {
+  searchHits = [...events.map((incident) => ({ incident })), ...places.map((place) => ({ place }))];
+  searchAt = searchHits.length ? 0 : -1;
+  const box = $('search-results');
+  let n = 0;
+  let html = '';
+  if (events.length) {
+    html += '<h5>Events on the map</h5>' + events.map((i) => `<div class="hit" data-n="${n++}">${dot(i.category)}<span>${esc(i.title)}</span><small>${ago(i.endTime)}</small></div>`).join('');
+  }
+  if (places.length) {
+    html += '<h5>Places</h5>' + places.map((p) => `<div class="hit" data-n="${n++}"><span>${esc(p.label)}</span><small>${esc(p.kind)}</small></div>`).join('');
+  }
+  if (!html) html = `<p>${pending ? 'Searching…' : 'Nothing found. Try a place name or an event type.'}</p>`;
+  box.innerHTML = html;
+  box.hidden = false;
+  markHit();
+}
+
+function markHit() {
+  $('search-results')
+    .querySelectorAll('.hit')
+    .forEach((el) => el.classList.toggle('on', +el.dataset.n === searchAt));
+}
+
+function runSearch() {
+  const query = $('search-box').value.trim();
+  const run = ++searchRun;
+  if (query.length < 2) {
+    $('search-results').hidden = true;
+    return;
+  }
+  const events = searchEvents(query, state.incidents);
+  renderSearch(events, [], true);
+  // Place names come from the network, so wait for a pause in typing.
+  setTimeout(async () => {
+    if (run !== searchRun) return;
+    const places = await searchPlaces(query).catch(() => []);
+    if (run === searchRun) renderSearch(events, places, false);
+  }, 280);
+}
+
+function pickHit(n) {
+  const hit = searchHits[n];
+  if (!hit) return;
+  $('search-results').hidden = true;
+  $('search-box').blur();
+  if (hit.incident) {
+    state.hidden.delete(hit.incident.category);
+    draw();
+    return selectIncident(hit.incident, true);
+  }
+  goToPlace(hit.place);
+}
+
+// Lands on a place and lists the events around it.
+function goToPlace(place) {
+  endCompare();
+  replay.stop();
+  state.lookup++;
+  const b = place.bounds;
+  const reach = Math.max(250, b ? distanceKm({ lat: b.north, lon: b.west }, { lat: b.south, lon: b.east }) / 2 : 0);
+  if (b && b.east > b.west) globe.flyToBounds(b);
+  else globe.flyTo(place.lat, place.lon, 400_000);
+  const near = visibleIncidents()
+    .map((incident) => ({ incident, km: distanceKm(place, incident) }))
+    .filter((x) => x.km <= reach)
+    .sort((a, c) => a.km - c.km)
+    .slice(0, 30);
+  state.selected = { kind: 'place', near };
+  globe.select(null);
+  openPanel(`<span class="tag">Place</span>
+    <h3>${esc(place.label)}</h3>
+    <dl><dt>Where</dt><dd>${where(place.lat, place.lon)}</dd></dl>
+    <h4>Events within ${Math.round(reach)} km (${near.length})</h4>
+    ${
+      near.length
+        ? `<ul class="links">${near.map((x, n) => `<li data-near="${n}">${dot(x.incident.category)}<span>${esc(x.incident.title)}</span><span class="km">${Math.round(x.km)} km</span></li>`).join('')}</ul>`
+        : '<p class="note">No tracked event near this place in the current time window.</p>'
+    }
+    <p class="hint">Turn on "NISAR radar picture on the globe" in the menu to see what the radar recorded here.</p>`);
 }
 
 // ---------- layer controls ----------
@@ -476,6 +661,55 @@ async function start() {
     $('nav-tilt').textContent = view.pitch > 5 ? '2D' : '3D';
   };
   $('close').onclick = closePanel;
+  $('chips-all').onclick = () => {
+    state.hidden.clear();
+    draw();
+  };
+  $('chips-none').onclick = () => {
+    Object.keys(CATEGORIES).forEach((c) => state.hidden.add(c));
+    draw();
+  };
+
+  $('replay-toggle').onclick = () => replay.toggle();
+  $('replay-bar').onclick = (e) => {
+    const box = e.currentTarget.getBoundingClientRect();
+    replay.seek((e.clientX - box.left) / box.width);
+  };
+
+  $('search-box').oninput = runSearch;
+  $('search-box').onfocus = runSearch;
+  $('search-box').onkeydown = (e) => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (searchHits.length) searchAt = (searchAt + (e.key === 'ArrowDown' ? 1 : -1) + searchHits.length) % searchHits.length;
+      markHit();
+    } else if (e.key === 'Enter') pickHit(searchAt);
+    else if (e.key === 'Escape') $('search-results').hidden = true;
+  };
+  $('search-results').onclick = (e) => {
+    const hit = e.target.closest('.hit');
+    if (hit) pickHit(+hit.dataset.n);
+  };
+  document.addEventListener('pointerdown', (e) => {
+    if (!e.target.closest('#search')) $('search-results').hidden = true;
+  });
+
+  // One-time hint for first-time visitors.
+  let seen = false;
+  try {
+    seen = localStorage.getItem('sars-welcome') === '1';
+  } catch {
+    /* storage unavailable: just show the hint */
+  }
+  $('welcome').hidden = seen;
+  $('welcome-close').onclick = () => {
+    $('welcome').hidden = true;
+    try {
+      localStorage.setItem('sars-welcome', '1');
+    } catch {
+      /* nothing to remember it with */
+    }
+  };
   $('menu').onclick = () => {
     const closed = $('left').classList.toggle('closed');
     $('menu').setAttribute('aria-expanded', String(!closed));
@@ -488,10 +722,13 @@ async function start() {
     if (!sel) return;
     if (t.dataset.show) return showScene(t.dataset.show, t);
     if (t.id === 'compare') return compare(t);
+    if (t.id === 'changes') return showChanges(t);
+    if (t.id === 'under') return drapeChanges(t.checked);
     const li = t.closest('li');
     if (!li) return;
     if (li.dataset.rel) return selectIncident(sel.incident.related[+li.dataset.rel].incident, true);
     if (li.dataset.in) return selectIncident(sel.inside[+li.dataset.in], true);
+    if (li.dataset.near) return selectIncident(sel.near[+li.dataset.near].incident, true);
     if (li.dataset.pick) {
       const f = sel.found[+li.dataset.pick];
       return f.kind === 'incident' ? selectIncident(f.incident, false) : selectScene(f.scene, false);
@@ -532,6 +769,6 @@ async function start() {
 }
 
 // Handy in the browser console while developing.
-window.app = { state, globe };
+window.app = { state, globe, replay };
 
 start();

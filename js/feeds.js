@@ -42,6 +42,7 @@ function fromUsgs(json) {
         magnitude: { value: p.mag, unit: 'M' },
         severity: clamp01((p.mag - 4) / 4),
         url: p.url,
+        detailUrl: p.detail,
         detail: [
           depth != null ? `Depth ${depth.toFixed(0)} km` : null,
           p.alert ? `PAGER alert ${p.alert}` : null,
@@ -77,7 +78,10 @@ function fromEonet(json) {
       severity,
       url: ev.sources?.[0]?.url || ev.link,
       detail: [ev.description, ev.categories?.[0]?.title].filter(Boolean),
-      track: points.length > 1 ? points.map((g) => ({ lon: g.coordinates[0], lat: g.coordinates[1], time: Date.parse(g.date) })) : null,
+      track:
+        points.length > 1
+          ? points.map((g) => ({ lon: g.coordinates[0], lat: g.coordinates[1], time: Date.parse(g.date), value: g.magnitudeValue ?? null, unit: g.magnitudeUnit || '' }))
+          : null,
     });
   }
   return out;
@@ -102,6 +106,7 @@ function fromGdacs(json) {
         magnitude: sev.severity ? { value: sev.severity, unit: sev.severityunit || '' } : null,
         severity: GDACS_ALERT[p.alertlevel] ?? 0.3,
         url: p.url?.report,
+        geometryUrl: p.url?.geometry,
         detail: [sev.severitytext, p.country ? `Country: ${p.country}` : null, `GDACS alert level: ${p.alertlevel}`].filter(Boolean),
       };
     });

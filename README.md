@@ -8,17 +8,24 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
 ## What it does
 
 - Plots earthquakes, wildfires, floods, storms and other events from three
-  live feeds (USGS, NASA EONET, GDACS) and merges reports of the same event
-  into one dot.
-- Shows NISAR's latest radar passes as footprints, and rings every event that
-  falls inside one.
-- On click, searches the NISAR archive for scenes over that spot, lists them
-  with previews, and offers a before/after comparison on the globe with a
-  draggable divider when a repeat pass exists.
-- Draws arcs to other events nearby in space and time.
-- Drapes daily NISAR backscatter tiles on the globe, with a play button that
-  steps through days, plus context layers (surface water, Sentinel-1
-  backscatter, vegetation disturbance, soil moisture).
+  live feeds (USGS, NASA EONET, GDACS) on a 3D globe with real terrain, and
+  merges reports of the same event into one dot.
+- **Replays what happened** when you click an event, built only from data:
+  - Earthquake: wave fronts spreading through the published shaking-intensity
+    outlines, then the later quakes nearby in the order they struck.
+  - Storm: a vortex travelling the dated track, sized by wind speed.
+  - Wildfire: the satellite fire detections of each day, building up.
+  - Flood: water the radar saw on land, pass by pass, inside the affected area.
+- Labels every part of a replay as **observed** (measured or catalogued),
+  **analysis** (worked out and published by an agency) or **computed** (drawn
+  here by a stated rule), with its source.
+- Searches the NISAR archive over the event and shows **what NISAR saw
+  change** between two passes in plain colours (echo got weaker / stronger),
+  with the source radar image one tick box underneath and a before/after
+  divider for the raw images.
+- Shows where NISAR looked recently, and rings every event inside a pass.
+- Drapes daily NISAR backscatter and other satellite layers over the terrain.
+- One search box for events (fuzzy match, no keyword list) and places.
 
 ## The engine
 
@@ -65,6 +72,12 @@ from a web server.
 - `js/feeds.js` – fetches and normalises the event feeds
 - `js/incidents.js` – merges duplicate reports, links nearby events
 - `js/nisar.js` – NISAR scene search and preview handling
+- `js/change.js` – what changed between two NISAR passes
+- `js/replay/replay.js` – event replay templates and player
+- `js/replay/sources.js` – per-event data: shaking contours, nearby quakes,
+  agency outlines, daily fire detections
+- `js/replay/mvt.js` – small vector-tile reader for the fire detections
+- `js/search.js` – fuzzy event search and place lookup
 - `js/globe.js` – the globe the app talks to
 - `js/engine/` – our own globe engine on three.js
   - `tiles.js` – streams map tiles, shapes terrain, composites layers
@@ -80,4 +93,16 @@ from a web server.
 
 NISAR data: NASA/ISRO, distributed by the Alaska Satellite Facility DAAC.
 Tiles: NASA GIBS. Events: USGS, NASA EONET, GDACS. Basemap: Esri World Imagery.
-Elevation: Mapzen Terrain Tiles (AWS Open Data). Rendering: three.js.
+Fire detections: VIIRS on NOAA-20 via NASA GIBS. Surface water: OPERA DSWx.
+Elevation: Mapzen Terrain Tiles (AWS Open Data). Place search: Photon
+(OpenStreetMap). Rendering: three.js.
+
+## How honest the pictures are
+
+- Replays never draw anything between data points without saying so; the
+  panel lists each element with its source and whether it is observed,
+  agency analysis or computed here.
+- The NISAR change view is computed in the browser from NASA's 8-bit preview
+  images, not the full-resolution products. It ignores differences that a
+  two-pixel offset between the images would explain, and it marks where to
+  look rather than measuring anything. The source images stay one click away.
