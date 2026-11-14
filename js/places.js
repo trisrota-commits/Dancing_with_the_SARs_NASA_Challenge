@@ -3,7 +3,8 @@
 // seasons. Each place opens the NISAR time-lapse for that spot.
 //
 // The "story" text is long-term background, not something NISAR measured
-// here; the panel labels it as context. The "look" text says what NISAR's
+// here; the panel labels it as context. "animals" says how wildlife
+// follows the water there, which NISAR maps. The "look" text says what NISAR's
 // first months of data (from June 2026) can show.
 
 export const PLACE_KINDS = {
@@ -236,6 +237,7 @@ export const PLACES = [
     lat: -19.3,
     lon: 22.9,
     story: 'Rain in the Angolan highlands arrives months later as a flood pulse, which peaks in the middle of the year, in the dry season.',
+    animals: 'Elephants, buffalo and zebra move towards the delta as the flood arrives in the dry season.',
   },
   {
     id: 'pantanal',
@@ -245,6 +247,7 @@ export const PLACES = [
     lat: -17.5,
     lon: -57.0,
     story: 'The world’s largest tropical wetland. It floods and dries every year, and recent droughts and fires have hit it hard.',
+    animals: 'Fish, birds and caimans gather in the shrinking pools as the floods recede in the dry season.',
   },
   {
     id: 'sundarbans',
@@ -254,6 +257,7 @@ export const PLACES = [
     lat: 21.9,
     lon: 89.2,
     story: 'The largest mangrove forest on Earth, shaped by tides, rivers and cyclones, and threatened by sea-level rise.',
+    animals: 'Home to Bengal tigers, and a winter stop for many migrating birds.',
   },
   {
     id: 'sudd',
@@ -263,6 +267,7 @@ export const PLACES = [
     lat: 7.0,
     lon: 30.5,
     story: 'A vast swamp on the White Nile. Its extent swells and shrinks with the rains, and recent years brought major floods.',
+    animals: 'White-eared kob and other antelopes move across the Sudd floodplains with the seasons, in one of the largest land mammal migrations.',
   },
 
   // ---------- forest loss ----------
