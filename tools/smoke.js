@@ -29,7 +29,8 @@ const proxy = process.env.HTTPS_PROXY ? { server: process.env.HTTPS_PROXY, bypas
   await page.goto(URL, { waitUntil: 'domcontentloaded' });
   await step('feeds load', async () => {
     await page.waitForFunction(() => +document.getElementById('event-count').textContent > 0, null, { timeout: 60000 });
-    return `${await page.locator('#event-count').innerText()} events`;
+    // The menu may be folded, so the count is read from the page itself.
+    return `${await page.evaluate(() => document.getElementById('event-count').textContent)} events`;
   });
   await page.locator('#welcome-close').click().catch(() => {});
   // A stylesheet slip once left these rules applying on phones only.
@@ -67,7 +68,8 @@ const proxy = process.env.HTTPS_PROXY ? { server: process.env.HTTPS_PROXY, bypas
   await step('archive window', async () => {
     await page.selectOption('#window', 'nisar');
     await page.waitForFunction(() => /Events since/.test(document.getElementById('window-note').textContent), null, { timeout: 60000 });
-    return `${await page.locator('#event-count').innerText()} events`;
+    // The menu may be folded, so the count is read from the page itself.
+    return `${await page.evaluate(() => document.getElementById('event-count').textContent)} events`;
   });
   await step('search', async () => {
     await page.fill('#search-box', 'earthquake');
