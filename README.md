@@ -163,12 +163,17 @@ servers at runtime.
   because the file was downloaded; right-click it, choose Open, then Open.
 - Linux: run `./start.sh`.
 
-Either one serves the folder and opens http://localhost:8765. To do it by
-hand:
+Each one serves the folder and opens it in the browser, normally at
+http://localhost:8765. To do it by hand:
 
 ```bash
-python3 -m http.server 8765
+python3 tools/serve.py
 ```
+
+That small server tells the browser never to keep the app's files, so a
+changed file always shows, and if an older copy of the app is still running
+on that port it moves to the next free one and says so. The version of the
+app that is running is written at the end of the credits line, bottom left.
 
 Opening `index.html` directly from disk does not work; the page has to come
 from a web server.

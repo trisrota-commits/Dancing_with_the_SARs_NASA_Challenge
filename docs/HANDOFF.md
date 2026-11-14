@@ -367,10 +367,16 @@ A better point would have to be found by eye first.
 
 ### Practical notes for an AI session
 
-- The project lead tests on a Mac and wants a fresh zip of `main` after
-  each batch (`index.html css js vendor data docs tests tools README.md
-  LICENSE .nojekyll start.bat start.sh start.command`), sent as a file, plus
-  a few screenshots of what changed.
+- The project lead tests on a Mac and on a Windows PC, and wants a fresh
+  zip of `main` after each batch, sent as a file, plus a few screenshots
+  of what changed. Make the zip with `tools/pack.sh <path>`: it stamps
+  the app with the time (shown at the end of the credits line as "Version
+  …"), runs the unit tests and zips. Commit the stamped `js/main.js`.
+- **Always tell the lead the version stamp of a zip**, and ask for it when
+  something looks old. On 14 Nov the lead tested a new zip and saw the
+  old app: an older copy was still being served on the same port, or the
+  browser kept old files. The launchers now run `tools/serve.py`, which
+  forbids the browser to keep files and moves to a free port.
 - The lead writes casually and trusts our judgement; keep replies plain,
   lead with the result, and always say what was not verified.
 - This session can push only to `claude/peaceful-curie-4pexs2`. It cannot
@@ -392,7 +398,8 @@ A better point would have to be found by eye first.
 
 - No build step. Serve the folder and open it: `start.command` (macOS),
   `start.bat` (Windows), `./start.sh` (Linux), or
-  `python3 -m http.server 8765` then `http://localhost:8765`.
+  `python3 tools/serve.py`. A plain `python3 -m http.server 8765` works
+  too, but lets the browser keep old files.
 - Opening `index.html` from disk does not work (ES modules need a server).
 - `node --test tests/*.test.mjs` runs the unit tests (15).
 - `python tests/test_measure.py` checks the measurement script on simulated

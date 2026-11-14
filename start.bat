@@ -1,16 +1,14 @@
 @echo off
 cd /d "%~dp0"
-echo Dancing with the SARs is starting on http://localhost:8765
-echo Keep this window open while you use it. Close it to stop.
-start "" cmd /c "timeout /t 2 >nul & start http://localhost:8765"
+rem The server opens the browser itself, on the port it really got.
 where py >nul 2>nul
 if not errorlevel 1 (
-  py -m http.server 8765
+  py tools\serve.py
   goto :eof
 )
 where python >nul 2>nul
 if not errorlevel 1 (
-  python -m http.server 8765
+  python tools\serve.py
   goto :eof
 )
 echo.
