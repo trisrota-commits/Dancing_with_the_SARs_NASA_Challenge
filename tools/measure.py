@@ -19,7 +19,9 @@ full-resolution product, not from the preview images.
 
 Usage:
     pip install earthaccess h5py numpy pyproj pillow
-    python tools/measure.py                  # every site in the list
+    python tools/measure.py                  # every site in the list, and
+                                             # every event picked by
+                                             # tools/pick_events.mjs
     python tools/measure.py aletsch okavango # only these sites
     python tools/measure.py --list aletsch   # show the tracks found (no login)
     python tools/measure.py --local DIR site # use .h5 files already in DIR
@@ -57,6 +59,8 @@ from pyproj import Transformer
 
 ROOT = Path(__file__).resolve().parent.parent
 SITES_FILE = ROOT / "tools" / "measure_sites.json"
+# Events picked by tools/pick_events.mjs; measured along with the places.
+EVENTS_FILE = ROOT / "tools" / "measure_events.json"
 OUT_DIR = ROOT / "data" / "measured"
 
 GRID = "/science/LSAR/GCOV/grids/frequencyA"
@@ -545,6 +549,8 @@ def main() -> None:
             save_site(sites[0])
     else:
         sites = json.loads(SITES_FILE.read_text())["sites"]
+        if EVENTS_FILE.exists():
+            sites += json.loads(EVENTS_FILE.read_text())["sites"]
         if args.sites:
             unknown = set(args.sites) - {s["id"] for s in sites}
             if unknown:

@@ -58,8 +58,8 @@ The team asked for less on screen, in a voice note the lead passed on:
 - **Open the app:** globe and event points, little else. The left menu
   now opens with only Stories and Events unfolded.
 - **Click an event:** a small card (`#card`, `renderCard` in `main.js`):
-  title, when, size, the news about it (or what the feeds report when
-  there is no press), one computed NISAR line, "Show details" and "Show
+  title, when, size, what the agencies report about it (press was
+  removed, see below), one computed NISAR line, "Show details" and "Show
   the NISAR image". The image is not shown automatically: it is about
   1 MB and would cover the replay.
 - **Show details:** the right panel. It starts with one plain text
@@ -175,23 +175,29 @@ say what it shows without us.
   water. `main.js` adds the dashed lines to neighbouring events and the
   teal frame of a radar pass (`setEventKey`, `drawLegend`). The measured
   change map has its own key. A new mark on the globe needs a line there.
-- **News must be about the event.** A restaurant review ("a fiery yet
-  refined Indian feast") showed up under a forest fire in India. Headlines
-  are now kept only when they name the kind of event (`ON_TOPIC` in
-  `js/news.js`), for both GDACS and the GDELT search. Fewer headlines,
-  none of them absurd; with none left the card shows what the feeds report.
-- **The card leads with what the agencies report** (lead, 14 Nov, late):
-  depth, estimated impact, felt reports, burnt hectares, alert level, each
-  with its source and a link to the official page. Press is an extra, at
-  most two headlines, and only when one passes the filter above. The lead
-  asked for a curated "catastrophe board" instead of press: ReliefWeb (UN)
-  is the one that exists, but since its API version 2 it only answers
-  apps with an approved name, which has to be requested from them.
-- **The Earthdata token cannot live in the website.** Everything a static
-  site ships can be read by anyone who opens it. A secret needs a machine
-  of ours that runs the measuring script on a schedule and publishes only
-  the results. The lead has been given the options (GitHub's scheduler
-  with an encrypted secret, or a server of our own) and has not chosen.
+- **Press is gone; the agencies are the signal** (lead, 14 Nov, late).
+  Press headlines kept being about something else (a restaurant under a
+  forest fire, Bangkok under a flood in France), and they are not part of
+  the challenge. `js/news.js` and everything that showed press were
+  removed. The card leads with what the agencies report: depth, estimated
+  impact, felt reports, burnt hectares, alert level, each with its source
+  and a link to the official page. Do not bring press back. A curated
+  board exists (ReliefWeb, UN), but its API only answers apps with an
+  approved name, which has to be requested from them.
+- **The live way in.** The opening card names the strongest recent event
+  that NISAR has flown over since it began (`spotlight()` in `main.js`,
+  from the feeds and NISAR's newest footprints) with one button to go
+  there. The lead's idea: the agency report is the signal that something
+  happened, the pass is the reason to look.
+- **The Earthdata token cannot live in the website**, because everything
+  a static site ships can be read by anyone. The lead chose GitHub's
+  scheduler (free for a public repository): `.github/workflows/measure.yml`
+  runs twice a day, picks events with `tools/pick_events.mjs`, measures
+  with `tools/measure.py` and commits `data/measured/`. **It does nothing
+  until a repository admin stores the secret `EARTHDATA_TOKEN`** (steps at
+  the top of the workflow file). The picker was run against the live feeds
+  and archive and found events; the measuring step has never run on real
+  data, so the first run needs watching. A token lasts 60 days.
 
 ### Visual rules (lead, 14 Nov, night)
 
@@ -321,7 +327,6 @@ time; there is no backend and there are no keys.
 | `js/replay/sources.js` | Per-event data: shaking contours, nearby quakes, agency outlines, fire detections |
 | `js/replay/mvt.js` | Vector-tile reader for the fire detections |
 | `js/search.js` | Fuzzy event search and place lookup |
-| `js/news.js` | Press coverage per event |
 | `js/narrative.js` | Plain-text account of an event with source links, one-line NISAR summary, event timeline |
 | `js/sound.js` | Plays a time-lapse as notes |
 | `js/orbit.js` | NISAR's live position, track and swath edges from public orbit elements (teammate) |
@@ -405,10 +410,9 @@ All checked from a browser origin (CORS) unless noted.
 | NASA GIBS (EPSG:4326, `.mvt`) | VIIRS fire detections | Vector tiles are only served on the 4326 endpoint; tiles span 288°/2^z. |
 | USGS feeds, FDSN query, ShakeMap `cont_mmi.json` | Earthquakes, nearby quakes, shaking contours | Fine. |
 | NASA EONET v3 | Events and storm tracks | The full archive is 14 MB; we filter out wildfires. |
-| GDACS | Alerts, per-event shapes, per-event news | List returns at most 100 events. |
+| GDACS | Alerts, per-event shapes | List returns at most 100 events. |
 | Mapzen Terrarium (AWS) | Elevation | Fine. |
 | Photon (komoot) | Place search | Sometimes refuses; the app falls back to event matches. |
-| GDELT doc API | News fallback | One request per 5 seconds; loose queries return unrelated news, so we keep only headlines naming the place. |
 | NISAR observation plan (`NISAR_COP`) | Not used | Exists in CMR but files need a login, so the next-pass time is a labelled estimate. |
 
 ### Radar facts the code depends on
@@ -434,7 +438,6 @@ All checked from a browser origin (CORS) unless noted.
   guaranteed acquisition.
 - Stories and places label hand-written background as hypothesis or context.
 - The reports bar says it is not an official warning service.
-- News is labelled as press coverage, not data, and says how it was matched.
 
 ## Status
 
@@ -447,8 +450,8 @@ changed" view; interferogram cards for earthquakes; NISAR time-lapse for any
 spot with channel views, chart, computed facts and optional sound; five
 stories; 33 changing places; search; reports bar; next-pass countdown;
 archive time window back to 17 June 2026; Sentinel-1 offer; event history
-chart; a "Why might this have changed?" explainer per event type; news per
-event; share links; 12 grouped context layers; L-band
+chart; a "Why might this have changed?" explainer per event type; agency
+facts per event; share links; 12 grouped context layers; L-band
 versus C-band divider; launchers for macOS, Windows and Linux; thirteen
 event types (landslides, snow, dust and haze, extreme heat or cold and
 human-made events have their own category); a "Measured with NISAR" card

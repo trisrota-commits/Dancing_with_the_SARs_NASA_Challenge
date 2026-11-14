@@ -7,7 +7,6 @@ import { edgeMarginKm, latestScenes, scenesAt, bestPair, comparisonStatus, image
 import { STORIES } from './stories.js';
 import { PLACES, PLACE_KINDS, otherHemisphere } from './places.js';
 import { loadFrames, spread, view, history, describeSeries, rankByCoverage } from './timelapse.js';
-import { newsFor } from './news.js';
 import { playPass } from './sound.js';
 import { measuredById, measuredNear, measuredHtml, measuredChart, measuredLine, changeImageUrl } from './measured.js';
 import { fetchElements, positionAt, groundTrack, swathEdges, elementsEpoch } from './orbit.js';
@@ -120,6 +119,7 @@ function draw() {
   renderFeed();
   $('event-count').textContent = shown.length;
   refreshTicker();
+  renderSpotlight();
   $('scene-count').textContent = state.scenes.length ? `(${state.scenes.length})` : '';
 }
 
@@ -265,22 +265,13 @@ function renderCard() {
   const lasting = inc.endTime - inc.time > 6 * 3600_000;
   const when = lasting ? `${day(inc.time)} to ${day(inc.endTime)}` : `${utc(inc.time)} (${ago(inc.time)})`;
   const sized = size(inc.magnitude);
-  // What the agencies themselves report comes first: it is data, it is
-  // there at once, and it is about this event. Press is an extra, shown
-  // only when a headline names the place and the kind of event.
+  // What the agencies themselves report: data, there at once, and about
+  // this event. (Press headlines were tried and removed: they were noise,
+  // and they are not part of what the app is for.)
   const lines = [...new Set(inc.reports.flatMap((r) => r.detail.map((d) => `${d} (${FEEDS[r.source].label})`)))].slice(0, 4);
   const pages = inc.reports.filter((r) => /^https?:\/\//.test(r.url || ''));
   let body = lines.length ? `<ul class="plain">${lines.map((l) => `<li>${esc(l)}</li>`).join('')}</ul>` : '<p class="note">The feeds give where and when, and nothing more.</p>';
   if (pages.length) body += `<p class="hint">Official page: ${[...new Map(pages.map((r) => [r.source, r])).values()].map((r) => `<a href="${safeUrl(r.url)}" target="_blank" rel="noopener noreferrer">${esc(FEEDS[r.source].label)}</a>`).join(', ')}</p>`;
-  const press = sel.news?.articles.slice(0, 2) || [];
-  if (press.length) {
-    body +=
-      '<h4>In the press</h4>' +
-      press
-        .map((a) => `<a class="headline" href="${safeUrl(a.url)}" target="_blank" rel="noopener noreferrer">${esc(a.title)}<small>${esc(a.source || '')}${Number.isFinite(a.time) ? ` · ${ago(a.time)}` : ''}</small></a>`)
-        .join('') +
-      '<p class="hint">Press coverage, not data.</p>';
-  }
   const scene = sel.passes?.length;
   $('card').innerHTML = `<button id="card-close" aria-label="Close">✕</button>
     <span class="tag">${dot(inc.category)}${esc(CATEGORIES[inc.category].label)}</span>
@@ -298,11 +289,11 @@ function renderCard() {
 }
 
 // The account of the event in the details panel, and its timeline. Both
-// are redrawn as the news, the NISAR search and the history arrive.
+// are redrawn as the NISAR search and the history arrive.
 function renderNarrative() {
   const sel = state.selected;
   if (sel?.kind !== 'incident' || !$('story-text')) return;
-  $('story-text').innerHTML = narrate(sel.incident, { found: sel.found, news: sel.news, history: sel.history, measured: sel.measured, sizeText: size(sel.incident.magnitude) });
+  $('story-text').innerHTML = narrate(sel.incident, { found: sel.found, history: sel.history, measured: sel.measured, sizeText: size(sel.incident.magnitude) });
   $('timeline').innerHTML = timeline(sel.incident, sel.found);
 }
 
@@ -547,7 +538,6 @@ function incidentHtml(inc, radar) {
       ${lapseBox(inc.lat, inc.lon)}
     </details>
     <details class="fold" id="sec-replay"><summary>How the drawing on the globe is built</summary><div id="replay-parts"></div></details>
-    <details class="fold" id="sec-news"><summary>In the press</summary><div id="news"><p class="spinner">Looking for press coverage…</p></div></details>
     <details class="fold" id="sec-linked"><summary>Linked events (${inc.related.length})</summary>${related}</details>
     <details class="fold" id="sec-reports"><summary>Source reports and facts</summary>
       <dl>${facts.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
@@ -664,7 +654,6 @@ async function selectIncident(inc, fly, intro = '') {
   replay.start(inc);
   // Independent of the replay and the shorter before/after catalogue search.
   if (detailed) startIncidentHistory(inc, state.selected);
-  loadNews(inc, state.selected);
   setLink(`event=${encodeURIComponent(inc.id)}`);
 
   let found;
@@ -994,34 +983,6 @@ function drapeChanges(withSource) {
   globe.fadeToAll([...(withSource ? [{ image: c.after, bounds: c.afterBounds, alpha: 1 }] : []), { image: c.result.canvas, bounds: c.result.bounds, alpha: 0.9 }], 0.9);
 }
 
-// ---------- press coverage ----------
-
-async function loadNews(inc, selection) {
-  const { articles, via } = await newsFor(inc).catch(() => ({ articles: [], via: 'gdelt' }));
-  const box = $('news');
-  if (state.selected !== selection || !box) return;
-  selection.news = { articles, via };
-  renderCard();
-  renderNarrative();
-  if (!articles.length) {
-    box.innerHTML = '<p class="note">No press coverage found for this event. Small or remote events often go unreported.</p>';
-    return;
-  }
-  const how =
-    via === 'gdacs'
-      ? 'Articles GDACS has linked to this event. Only headlines that name the place and this kind of event are shown; one may still be about an earlier event there.'
-      : 'Found by searching the GDELT news index. Only headlines that name the place and this kind of event are kept; one may still be about an earlier event there.';
-  box.innerHTML = `${articles
-    .map(
-      (a) => `<a class="article" href="${safeUrl(a.url)}" target="_blank" rel="noopener noreferrer">
-        ${a.image ? `<img src="${safeUrl(a.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()" />` : ''}
-        <span><b>${esc(a.title)}</b><small>${esc(a.source || '')}${Number.isFinite(a.time) ? ` · ${ago(a.time)}` : ''}</small></span>
-      </a>`,
-    )
-    .join('')}
-    <p class="hint">Press coverage, not data: written by news outlets and not checked by this app. ${how}</p>`;
-}
-
 // ---------- share links ----------
 
 // The address bar always points at what is open, so it can be copied.
@@ -1158,6 +1119,31 @@ async function openStory(id) {
 const NEW_MS = 6 * 3600_000;
 const RECENT_MS = 24 * 3600_000;
 const ticker = { items: [], at: 0, paused: false, dismissed: false };
+
+// The strongest recent event that NISAR has flown over since it began: the
+// agencies' report is the signal that something happened, the pass is the
+// reason to go and look. Null when no reported event has a later pass yet.
+function spotlight() {
+  const seen = visibleIncidents()
+    .map((incident) => ({ incident, pass: incident.nisarScenes.filter((s) => s.time > incident.time).sort((a, b) => a.time - b.time)[0] }))
+    .filter((x) => x.pass);
+  return seen.sort((a, b) => b.incident.severity - a.incident.severity || b.incident.time - a.incident.time)[0] || null;
+}
+
+function renderSpotlight() {
+  const box = $('spotlight');
+  const pick = spotlight();
+  state.spotlight = pick;
+  box.hidden = !pick;
+  // With something live to show, that is the way in; the story comes second.
+  $('welcome-story').classList.toggle('primary', !pick);
+  if (!pick) return;
+  const { incident } = pick;
+  $('spotlight-title').innerHTML = `${dot(incident.category)}${esc(CATEGORIES[incident.category].label)}: ${esc(incident.title)}`;
+  // No day count here: this only knows NISAR's newest passes, and the
+  // event's own card searches the whole archive and may find an earlier one.
+  $('spotlight-text').textContent = `It began ${ago(incident.time)}. NISAR has flown over it since, so there is a radar picture from after it.`;
+}
 
 function tickerItems() {
   const now = Date.now();
@@ -2154,6 +2140,11 @@ async function start() {
   $('welcome-story').onclick = () => {
     $('welcome-close').click();
     openStory(STORIES[0].id);
+  };
+  $('spotlight-go').onclick = () => {
+    const pick = state.spotlight;
+    $('welcome-close').click();
+    if (pick) selectIncident(pick.incident, true);
   };
   $('welcome-close').onclick = () => {
     $('welcome').hidden = true;
