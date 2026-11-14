@@ -15,6 +15,10 @@ import { gdacsShapes, shakeContours, quakesNear, fireDetections, dateRange } fro
 const DAY = 86400_000;
 const HOLD = 2.5; // seconds the final picture stays before the loop restarts
 const ORBIT = 2.5; // degrees per second the camera circles a replay
+const PUSH_IN = 0.6; // how much closer the camera drifts while a replay plays
+
+// Shaking intensity is written in Roman numerals by convention.
+const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
 const RAD = Math.PI / 180;
 
 const day = (ms) => new Date(ms).toISOString().slice(0, 10);
@@ -122,6 +126,18 @@ async function quake(inc, globe) {
   const dot = (q, color, pop) => ({ lat: q.lat, lon: q.lon, color, size: 4 + Math.max(0, q.mag - 2.5) * 3.2, pop });
   // When each later quake first showed, so it can pop in once.
   const popped = [];
+  // Labels: the shaking level on one outline of each whole level, and the
+  // magnitude of the strongest later quakes (those only from closer in).
+  const levelLabels = [];
+  for (const z of zones) {
+    if (Number.isInteger(z.value) && ROMAN[z.value] && !levelLabels.some((l) => l.value === z.value)) {
+      const top = z.paint.ring.reduce((a, b) => (b.lat > a.lat ? b : a));
+      levelLabels.push({ value: z.value, km: z.km, lat: top.lat, lon: top.lon, text: `Shaking ${ROMAN[z.value]}`, color: intensityColor(z.value) });
+    }
+  }
+  const named = new Set([...after].sort((a, b) => b.mag - a.mag).slice(0, 4).filter((q) => q.mag >= 4));
+  const closer = (rmax * 1.3 * 3.4) / 6371 * 0.8;
+  let shownLabels = '';
   let shownZones = -1;
   let shownAfter = -1;
 
@@ -174,6 +190,15 @@ async function quake(inc, globe) {
       }
       this.now = now;
       this.count = nAfter;
+      const labels = [
+        ...levelLabels.filter((l) => t >= WAVE || l.km <= s),
+        ...after.slice(0, nAfter).filter((q) => named.has(q)).map((q) => ({ lat: q.lat, lon: q.lon, text: `M ${q.mag.toFixed(1)}`, color: '#ffb066', within: closer })),
+      ];
+      const key = labels.map((l) => l.text + l.lat).join('|');
+      if (key !== shownLabels) {
+        shownLabels = key;
+        globe.setLabels(labels);
+      }
     },
     caption(t) {
       if (t < WAVE) return `Seismic waves spreading from the epicentre · ${Math.round((Math.min(1, t / WAVE) * rmax) / 3.5)} s after the quake`;
@@ -225,7 +250,10 @@ async function storm(inc, globe) {
       ]);
       // Bigger and brighter with stronger wind.
       const strength = at.value ? Math.min(1, at.value / 140) : 0.4;
-      globe.setVortex({ lat: at.lat, lon: at.lon, radiusKm: 120 + strength * 380, color, power: strength });
+      const radiusKm = 120 + strength * 380;
+      globe.setVortex({ lat: at.lat, lon: at.lon, radiusKm, color, power: strength });
+      // The wind speed travels with the storm, at the rim of the spiral.
+      globe.setLabels(at.value ? [{ lat: Math.min(89, at.lat + radiusKm / 111), lon: at.lon, text: `${Math.round(at.value * 1.852)} km/h · ${stormClass(at.value)}`, color: '#d9c6ff' }] : []);
     },
     caption() {
       const a = this.at;
@@ -338,6 +366,7 @@ async function generic(inc, globe) {
     plan.draw = (t) => {
       draw(t);
       globe.setVortex(null);
+      globe.setLabels([]);
       globe.setEffectDots([{ lat: plan.at.lat, lon: plan.at.lon, color: [1, 1, 1], size: 9 }]);
     };
     return plan;
@@ -396,6 +425,8 @@ export class Replay {
     const focus = plan.focus || incident;
     this.globe.flyTo(focus.lat, focus.lon, Math.min(9_000_000, plan.frameKm * 1000 * 3.4), { pitch: plan.frameKm < 400 ? 40 : 15 });
     this.globe.setOrbit(ORBIT);
+    this.globe.pushIn(PUSH_IN);
+    this.globe.setFocus({ lat: focus.lat, lon: focus.lon, radiusKm: plan.frameKm * 1.15 });
     this.last = performance.now();
     requestAnimationFrame((now) => this.tick(now, this.loop));
   }

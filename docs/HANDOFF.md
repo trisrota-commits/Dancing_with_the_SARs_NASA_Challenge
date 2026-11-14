@@ -179,6 +179,23 @@ time; there is no backend and there are no keys.
   - `globe.fadeTo` cross-fades radar pictures using the second tile canvas;
     each tile times its own fade from when it was repainted (`uFadeAt`).
   - Later quakes pop in through the `pop` time on a dot.
+- Added after the lead's answers on 14 Nov (keep these small; the lead
+  warned against feature creep and deviating from the current style):
+  - `globe.setLabels` / `js/engine/labels.js`: a few HTML data labels
+    pinned to the globe (shaking level per outline, magnitude of the top
+    later quakes from closer in, wind speed with a storm). Data only.
+  - `globe.setFocus`: the tile shader dims and greys the map outside a
+    replay's scene, mildly. Day and night shading eases back to a quarter
+    while a replay or a radar picture is up (`globe.night`), because
+    everything painted into the ground, radar included, was being dimmed
+    on the night side.
+  - `globe.pushIn`: the camera drifts to 0.6 of its distance during a
+    replay; any touch ends it, like the orbit.
+  - `globe.sweepTo`: a single NISAR picture is uncovered along latitude in
+    the pass direction (`uSweep`); `globe.fadeToAll` fades a stack of
+    pictures, used for the "what changed" view.
+  - Fire: no flame shapes. Close-up veins stay thin and get sparser with
+    zoom so the view is never flooded.
 
 ## Data sources and what we learnt about them
 
@@ -281,12 +298,11 @@ that appears on a place, or an event nearby, once results exist.
 
 1. **More and better event animation, in the agreed look (see above).**
    Done so far: earthquake shock front, storm spiral, fire (embers to ember
-   veins, sparks, smoke), flood water, picture cross-fades. Ideas not yet
-   built, none of them confirmed by the lead: a radar pass revealed by a
-   sweep along the satellite's track, "what changed" areas growing in,
-   dimming the map around a playing replay, a camera push-in during a
-   replay, small in-world labels close up, closer detail for storms and
-   quakes.
+   veins, sparks, smoke), flood water, picture cross-fades, radar sweep
+   reveal, focus dimming, camera push-in, data labels. The lead's rule for
+   anything further: stay in the current style, do not overdo it, and ask
+   whether it serves "an easy to understand, easy to use visualization of
+   data" for this challenge before building it.
 2. **Hosting.** The repo has `.nojekyll`, and every path is relative, so
    GitHub Pages works with one setting by a repo admin: Settings → Pages →
    Deploy from a branch → `main` / root. The address would be

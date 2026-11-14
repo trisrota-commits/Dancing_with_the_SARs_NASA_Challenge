@@ -21,7 +21,7 @@ import { toVec } from './geo.js';
 const EARTH_RADIUS_M = 6_371_000;
 const FOOT = 187.5 / EARTH_RADIUS_M; // half of a 375 m detection pixel
 const GROUND_CLEARANCE = 25 / EARTH_RADIUS_M;
-const BUDGET = 42000; // most particles drawn for one fire
+const BUDGET = 26000; // most particles drawn for one fire
 
 const VERTEX = /* glsl */ `
   attribute vec3 aOffset;
@@ -117,8 +117,8 @@ const VERTEX = /* glsl */ `
         float climb = min(FOOT * (2.2 + 2.4 * hash(id * 8.9)), (90.0 + 110.0 * hash(id * 8.9)) * px);
         local += up * (life * climb) + (east * sin(id) + north * cos(id)) * life * life * min(FOOT * 0.8, 40.0 * px);
         size = min(FOOT * (0.6 + 1.7 * life), (26.0 + 60.0 * life) * px);
-        color = mix(vec3(0.5, 0.24, 0.1) * (0.5 + 0.5 * heat) + vec3(0.12), vec3(mix(0.26, 0.48, life)), smoothstep(0.0, 0.35, life));
-        alpha = appear * smoulder * lod * joined * 0.5 * sin(3.14159 * pow(life, 0.7));
+        color = mix(vec3(0.5, 0.26, 0.12) * (0.5 + 0.5 * heat) + vec3(0.2), vec3(mix(0.4, 0.6, life)), smoothstep(0.0, 0.35, life));
+        alpha = appear * smoulder * lod * joined * 0.3 * sin(3.14159 * pow(life, 0.7));
       }
     }
     vColor = color;
@@ -171,16 +171,21 @@ const FRAGMENT = /* glsl */ `
       vec2 at = vUv + vSeed * 20.0;
       float ragged = noise(at * 3.0);
       float bed = smoothstep(0.72, 0.3, r + (ragged - 0.5) * 0.35);
+      // The veins stay thin on screen, and fewer of them are lit the closer
+      // the camera is: a close view shows a few fine glowing seams on dark
+      // ground, in proportion with the middle view, never a flood of them.
       float level = log2(max(vFoot, 12.0) / 34.0);
+      float near = clamp(log2(max(vFoot, 34.0) / 34.0) / 3.5, 0.0, 1.0);
       float scale = exp2(floor(level)) * 3.0;
       float vein = mix(veins(at * scale), veins(at * scale * 2.0), fract(level));
       // Fewer veins stay lit as the ground cools, and they breathe slowly.
       float lit = noise(at * 2.2 + vec2(uTime * 0.06, 0.0)) + 0.12 * sin(uTime * 1.3 + vSeed * 30.0);
-      float embers = vein * smoothstep(0.72 - 0.5 * vHeat, 0.98 - 0.5 * vHeat, lit);
+      float cut = 0.72 - 0.5 * vHeat + 0.3 * near;
+      float embers = vein * smoothstep(cut, cut + 0.26, lit) * mix(1.0, 0.8, near);
       vec3 scorch = (vec3(0.035, 0.022, 0.018) + vColor * (embers * 1.5 + 0.1 * vHeat)) * bed;
       // Heat lighting the ground around the burning pixel.
       vec3 warmth = vColor * exp(-r * r * 2.6) * 0.2 * vHeat;
-      gl_FragColor = vec4(mix(glow, scorch + warmth, vLod) * vAlpha, bed * 0.55 * vLod * vAlpha);
+      gl_FragColor = vec4(mix(glow, scorch + warmth, vLod) * vAlpha, bed * mix(0.55, 0.38, near) * mix(0.6, 1.0, vHeat) * vLod * vAlpha);
     } else if (vKind < 1.5) {
       // Soft glow: light, not a shape.
       float a = exp(-r * r * 3.2) * (1.0 - r) * vAlpha;
@@ -238,10 +243,10 @@ export class Fire {
     const origin = toVec(centre.lat, centre.lon);
     this.uniforms.uCentre.value.copy(origin);
     // A large fire gets fewer particles for each detection.
-    const share = Math.max(0, Math.min(1, (BUDGET / items.length - 10) / 35));
-    const glows = Math.round(5 + 19 * share);
-    const sparks = Math.round(3 + 11 * share);
-    const puffs = Math.round(2 + 4 * share);
+    const share = Math.max(0, Math.min(1, (BUDGET / items.length - 9) / 19));
+    const glows = Math.round(4 + 10 * share);
+    const sparks = Math.round(2 + 6 * share);
+    const puffs = Math.round(2 + 3 * share);
     const hot = { offset: [], born: [], seed: [], kind: [] };
     const smoke = { offset: [], born: [], seed: [], kind: [] };
     const v = new THREE.Vector3();
