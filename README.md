@@ -23,6 +23,10 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
   change** between two passes in plain colours (echo got weaker / stronger),
   with the source radar image one tick box underneath and a before/after
   divider for the raw images.
+- Plays a **NISAR time-lapse for any spot on Earth**: click the ground (or
+  search a place) to step through every placeable pass of one repeat track,
+  switch between the colour composite, HH only and HV only, and read a chart
+  of both channels at that point over time.
 - Shows where NISAR looked recently, and rings every event inside a pass.
 - Drapes daily NISAR backscatter and other satellite layers over the terrain.
 - One search box for events (fuzzy match, no keyword list) and places.
@@ -73,6 +77,8 @@ from a web server.
 - `js/incidents.js` – merges duplicate reports, links nearby events
 - `js/nisar.js` – NISAR scene search and preview handling
 - `js/change.js` – what changed between two NISAR passes
+- `js/timelapse.js` – loads the passes of one repeat track, splits HH and HV
+- `js/chart.js` – the HH/HV history chart
 - `js/replay/replay.js` – event replay templates and player
 - `js/replay/sources.js` – per-event data: shaking contours, nearby quakes,
   agency outlines, daily fire detections
@@ -88,6 +94,8 @@ from a web server.
   has no CDN dependency
 - `js/main.js` – wiring and panels
 - `docs/DATA_SOURCES.md` – survey of every data source and what is reachable
+- `docs/DATA_RULES_AND_DEMO_PLAN.md` – which data the challenge allows besides
+  NISAR, and the plan for a reliable demo
 
 ## Data and credits
 

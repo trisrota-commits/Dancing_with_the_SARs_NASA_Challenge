@@ -91,6 +91,27 @@ export async function scenesAt(lat, lon, fromMs, toMs) {
   return { backscatter: dedupe(gcov), interferograms: dedupe(gunw) };
 }
 
+// Every backscatter pass over a point since NISAR began science operations,
+// grouped by repeat track ("stack"). Passes on one stack line up exactly, so
+// they can be played as a time-lapse. Stacks with the most passes come first.
+const ALL_GCOV = ['NISAR_L2_GCOV_V1', 'NISAR_L2_GCOV_PROVISIONAL_V1', 'NISAR_L2_GCOV_BETA_V1', 'NISAR_UR_L2'];
+
+export async function historyAt(lat, lon) {
+  const temporal = `2025-10-01T00:00:00Z,${new Date().toISOString()}`;
+  const scenes = dedupe(await search(ALL_GCOV, '*_GCOV_*', { point: `${lon},${lat}`, temporal }, 500));
+  const stacks = new Map();
+  for (const s of scenes) {
+    if (!stacks.has(s.stack)) stacks.set(s.stack, { stack: s.stack, track: s.track, frame: s.frame, direction: s.direction, scenes: [], unplaced: 0 });
+    // Early passes were published without public corner coordinates for
+    // their preview, so they cannot be laid on the map accurately.
+    if (s.image) stacks.get(s.stack).scenes.push(s);
+    else stacks.get(s.stack).unplaced++;
+  }
+  const list = [...stacks.values()];
+  for (const st of list) st.scenes.sort((a, b) => a.time - b.time);
+  return list.filter((st) => st.scenes.length >= 2).sort((a, b) => b.scenes.length - a.scenes.length);
+}
+
 // Best before/after pair: same track and frame, closest to the event on each side.
 export function bestPair(scenes, eventTime) {
   const byStack = new Map();

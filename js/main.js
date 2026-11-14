@@ -3,7 +3,9 @@
 import { CATEGORIES, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS } from './config.js';
 import { fetchFeed } from './feeds.js';
 import { buildIncidents, tagNisarCoverage, pointInPolygon, distanceKm } from './incidents.js';
-import { latestScenes, scenesAt, bestPair, imageBounds, latestTileDate } from './nisar.js';
+import { latestScenes, scenesAt, bestPair, imageBounds, latestTileDate, historyAt } from './nisar.js';
+import { loadFrames, spread, view, history } from './timelapse.js';
+import { historyChart } from './chart.js';
 import { Globe, loadPicture } from './globe.js';
 import { Replay } from './replay/replay.js';
 import { changeMap, CHANGE_THRESHOLD } from './change.js';
@@ -228,7 +230,7 @@ function renderReplay(u) {
   $('replay-toggle').textContent = u.state === 'playing' ? '❚❚' : '▶';
   $('replay-caption').textContent = u.caption;
   $('replay-fill').style.width = `${(u.progress * 100).toFixed(1)}%`;
-  if (list && list.partsRef !== u.parts) {
+  if (list && u.parts && list.partsRef !== u.parts) {
     list.partsRef = u.parts;
     list.innerHTML = `<ul class="parts">${u.parts
       .map((p) => `<li><span class="badge ${p.kind}">${BADGE[p.kind]}</span><span>${esc(p.text)}${p.source ? ` <small>· ${esc(p.source)}</small>` : ''}</span></li>`)
@@ -294,6 +296,7 @@ function incidentHtml(inc, radar) {
     <h4>What happened here</h4>
     <div id="replay-parts"></div>
     <h4>NISAR radar over this spot</h4>
+    ${lapseBox(inc.lat, inc.lon)}
     <div id="radar">${radar}</div>
     <h4>What radar can show here</h4>
     <p class="note">${esc(RADAR_NOTES[inc.category])}</p>
@@ -493,6 +496,141 @@ function drapeChanges(withSource) {
   globe.addPicture(c.result.canvas, c.result.bounds, undefined, 0.9);
 }
 
+// ---------- NISAR time-lapse ----------
+
+const LAPSE_STEP = 0.9; // seconds each pass stays on screen
+const LAPSE_DEFAULT = 14; // passes loaded unless "all" is ticked
+
+function lapseBox(lat, lon) {
+  return `<div id="lapse" data-lat="${lat}" data-lon="${lon}"><button id="lapse-go">▶ Play a year of NISAR passes here</button></div>`;
+}
+
+// Finds every pass over the point, loads one repeat track of them and
+// plays them in order, with a history chart for the point itself.
+async function startLapse(stackIndex = 0, all = false) {
+  const box = $('lapse');
+  if (!box) return;
+  const lat = +box.dataset.lat;
+  const lon = +box.dataset.lon;
+  const token = ++state.lookup;
+  endCompare();
+  replay.stop();
+  box.innerHTML = '<p class="spinner">Searching a year of NISAR passes…</p>';
+  let stacks = state.lapse?.lat === lat && state.lapse?.lon === lon ? state.lapse.stacks : null;
+  try {
+    stacks = stacks || (await historyAt(lat, lon));
+  } catch (err) {
+    box.innerHTML = `<p class="note">NISAR search failed: ${esc(err.message)}</p>`;
+    return;
+  }
+  if (token !== state.lookup || !$('lapse')) return;
+  if (!stacks.length) {
+    box.innerHTML = '<p class="note">NISAR has not imaged this spot at least twice on the same track yet. Open ocean is mostly not imaged.</p>';
+    return;
+  }
+  const stack = stacks[stackIndex];
+  const wanted = all ? stack.scenes : spread(stack.scenes, LAPSE_DEFAULT);
+  const frames = await loadFrames(wanted, (done, total) => {
+    if (token === state.lookup && $('lapse')) box.innerHTML = `<p class="spinner">Loading pass ${done} of ${total}…</p>`;
+  });
+  if (token !== state.lookup || !$('lapse')) return;
+  if (frames.length < 2) {
+    box.innerHTML = '<p class="note">The preview images for these passes could not be loaded.</p>';
+    return;
+  }
+
+  const lapse = { lat, lon, stacks, stackIndex, all, frames, mode: 'colour', chart: null };
+  state.lapse = lapse;
+  const names = { colour: 'HH + HV colour', hh: 'HH only', hv: 'HV only' };
+  const plan = {
+    duration: frames.length * LAPSE_STEP,
+    parts: null,
+    index: -1,
+    draw(t) {
+      const i = Math.max(0, Math.min(frames.length - 1, Math.floor(t / LAPSE_STEP)));
+      if (i === this.index && this.mode === lapse.mode) return;
+      this.index = i;
+      this.mode = lapse.mode;
+      globe.clearScenes();
+      globe.addPicture(view(frames[i], lapse.mode), frames[i].bounds);
+      lapse.chart?.setActive(i);
+    },
+    caption() {
+      const i = Math.max(0, this.index);
+      return `${day(frames[i].time)} · pass ${i + 1} of ${frames.length} · ${names[lapse.mode]}`;
+    },
+    teardown() {
+      globe.clearScenes();
+    },
+  };
+  lapse.plan = plan;
+
+  box.innerHTML = `
+    <p class="note">${frames.length} of ${stack.scenes.length} passes on ${esc(stack.direction.toLowerCase())} track ${esc(stack.track)}, frame ${esc(stack.frame)}, ${day(frames[0].time)} to ${day(frames[frames.length - 1].time)}.${stack.unplaced ? ` ${stack.unplaced} earlier passes are left out: their previews were published without public corner coordinates, so they cannot be placed on the map accurately.` : ''}</p>
+    <div class="actions seg" role="group" aria-label="Which radar channel to show">
+      <button data-mode="colour" class="on">Colour</button>
+      <button data-mode="hh">HH only</button>
+      <button data-mode="hv">HV only</button>
+    </div>
+    ${stacks.length > 1 ? `<label class="row"><span>Track</span><select id="lapse-stack">${stacks.map((st, n) => `<option value="${n}" ${n === stackIndex ? 'selected' : ''}>${esc(st.direction)} ${esc(st.track)} (${st.scenes.length} passes)</option>`).join('')}</select></label>` : ''}
+    ${stack.scenes.length > frames.length || all ? `<label class="check"><input type="checkbox" id="lapse-all" ${all ? 'checked' : ''} /> Load all ${stack.scenes.length} passes (about ${stack.scenes.length} MB)</label>` : ''}
+    <h4>Brightness at ${where(lat, lon)}</h4>
+    <div id="lapse-chart"></div>
+    <p class="hint">Each pass is NASA's preview of a NISAR backscatter scene. HH is the echo that comes back in the polarisation that was sent; HV is the part that came back twisted, which mostly happens inside vegetation. Values are the 0–255 preview brightness averaged over 5×5 pixels, not calibrated radar units. Click the chart to jump to a pass.</p>`;
+  const series = history(frames, lat, lon);
+  if (series.some((p) => p.hh != null)) lapse.chart = historyChart($('lapse-chart'), series, (i) => replay.seek((i + 0.01) / frames.length));
+  else $('lapse-chart').innerHTML = '<p class="note">These passes do not cover the exact point, so there is no history to chart.</p>';
+
+  replay.run(plan);
+  globe.select(state.selected?.incident || null, [stack.scenes[stack.scenes.length - 1]]);
+  globe.flyToBounds(frames[frames.length - 1].bounds);
+}
+
+function setLapseMode(mode) {
+  const lapse = state.lapse;
+  if (!lapse?.plan || replay.plan !== lapse.plan) return;
+  lapse.mode = mode;
+  $('lapse')
+    .querySelectorAll('[data-mode]')
+    .forEach((b) => b.classList.toggle('on', b.dataset.mode === mode));
+  replay.seek(Math.min(0.999, replay.time / lapse.plan.duration));
+}
+
+// A click on bare ground offers a time-lapse there.
+function offerHere(at, screen) {
+  const here = $('here');
+  here.hidden = false;
+  here.style.left = `${screen.x}px`;
+  here.style.top = `${screen.y}px`;
+  here.onclick = () => {
+    here.hidden = true;
+    selectSpot(at);
+  };
+}
+
+async function selectSpot(at) {
+  endCompare();
+  replay.stop();
+  state.lookup++;
+  state.selected = { kind: 'spot' };
+  globe.select(null);
+  openPanel(`<span class="tag">Place</span>
+    <h3 id="spot-name">${where(at.lat, at.lon)}</h3>
+    <dl><dt>Where</dt><dd>${where(at.lat, at.lon)}</dd></dl>
+    <h4>NISAR radar over this spot</h4>
+    ${lapseBox(at.lat, at.lon)}`);
+  startLapse();
+  // A name for the spot, if the geocoder knows one.
+  try {
+    const res = await fetch(`https://photon.komoot.io/reverse?lat=${at.lat}&lon=${at.lon}&lang=en`);
+    const p = (await res.json()).features?.[0]?.properties;
+    const name = p && [p.name || p.city || p.county, p.state, p.country].filter(Boolean).join(', ');
+    if (name && $('spot-name')) $('spot-name').textContent = name;
+  } catch {
+    /* coordinates are a fine title */
+  }
+}
+
 // ---------- search ----------
 
 let searchRun = 0;
@@ -578,7 +716,8 @@ function goToPlace(place) {
         ? `<ul class="links">${near.map((x, n) => `<li data-near="${n}">${dot(x.incident.category)}<span>${esc(x.incident.title)}</span><span class="km">${Math.round(x.km)} km</span></li>`).join('')}</ul>`
         : '<p class="note">No tracked event near this place in the current time window.</p>'
     }
-    <p class="hint">Turn on "NISAR radar picture on the globe" in the menu to see what the radar recorded here.</p>`);
+    <h4>NISAR radar over this place</h4>
+    ${lapseBox(place.lat, place.lon)}`);
 }
 
 // ---------- layer controls ----------
@@ -723,6 +862,8 @@ async function start() {
     if (t.dataset.show) return showScene(t.dataset.show, t);
     if (t.id === 'compare') return compare(t);
     if (t.id === 'changes') return showChanges(t);
+    if (t.id === 'lapse-go') return startLapse();
+    if (t.dataset.mode) return setLapseMode(t.dataset.mode);
     if (t.id === 'under') return drapeChanges(t.checked);
     const li = t.closest('li');
     if (!li) return;
@@ -735,8 +876,17 @@ async function start() {
     }
   };
 
-  globe.onPick((found) => {
-    if (!found.length) return;
+  $('detail').onchange = (e) => {
+    if (e.target.id === 'lapse-stack') startLapse(+e.target.value, false);
+    if (e.target.id === 'lapse-all') startLapse(state.lapse?.stackIndex || 0, e.target.checked);
+  };
+
+  globe.onPick((found, at, screen) => {
+    $('here').hidden = true;
+    if (!found.length) {
+      if (at) offerHere(at, screen);
+      return;
+    }
     // Dots win over the footprints they sit on, unless several dots overlap.
     const incidents = found.filter((f) => f.kind === 'incident');
     if (incidents.length === 1) return selectIncident(incidents[0].incident, false);
