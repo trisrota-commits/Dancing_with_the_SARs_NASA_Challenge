@@ -2064,13 +2064,22 @@ body:has(#welcome:not([hidden])) #menu {
   width: min(680px, calc(100vw - 440px));
 }
 
-/* A time-lapse inside an event offers the way back to its timeline. */
-#replay.back #replay-live {
+/* The passes of a place, opened inside an event, offer the way back to
+   the event's own timeline. */
+#replay-back {
+  display: none;
+}
+
+#replay.back #replay-back {
   display: block;
   flex: none;
   font-size: 12px;
   padding: 4px 9px;
   white-space: nowrap;
+}
+
+#replay-key-event[hidden] {
+  display: none;
 }
 
 #legend summary {

@@ -64,10 +64,12 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
   The places and explanations are ours; every number is computed live.
 - Features **interferograms**: any earthquake with a pair of passes either
   side of it gets a "Show ground movement" card.
-- Plays a **NISAR time-lapse for any spot on Earth**: click the ground (or
-  search a place) to step through every placeable pass of one repeat track,
-  switch between the colour composite, HH only and HV only, and read a chart
-  of both channels at that point over time.
+- Shows **NISAR's passes over any spot on Earth** on the same timeline as
+  an event: click the ground (or search a place) and the newest pass is on
+  the globe at once, every pass of the repeat track is a mark on the line,
+  dragging goes back and play runs through them once. Switch between the
+  colour composite, HH only and HV only, and read a chart of both channels
+  at that point over time, which fills in as the passes are read.
 - Marks **changing places** with diamonds: slow changes that no event feed
   reports. There are 13 glaciers around the world (Greenland, Alaska, Canada,
   Iceland, the Alps, the Himalaya, Patagonia, New Zealand and Antarctica),

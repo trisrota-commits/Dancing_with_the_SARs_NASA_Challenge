@@ -25,7 +25,6 @@ import { rgb, lonDelta } from '../engine/geo.js';
 import { gdacsShapes, shakeContours, quakesNear, fireDetections, dateRange, useSignal } from './sources.js';
 
 const DAY = 86400_000;
-const HOLD = 2.5; // seconds the final picture stays before the loop restarts
 const PLAY_SECONDS = 14; // how long "play" takes to run the whole timeline
 
 // Shaking intensity is written in Roman numerals by convention.
@@ -528,8 +527,9 @@ const TEMPLATES = { earthquake: quake, storm, wildfire: fire, flood };
 
 export class Replay {
   // onUpdate receives { state: 'loading' | 'playing' | 'paused' | 'off',
-  // caption, progress, parts } and, for an event timeline, also
-  // { timeline: true, ms, range, span, marks, live }.
+  // caption, progress, parts, timeline: true, ms, range, span, marks,
+  // live }. `span` is the event's own stretch of the line, or null on the
+  // timeline of a place.
   constructor(globe, onUpdate) {
     this.globe = globe;
     this.onUpdate = onUpdate;
@@ -555,7 +555,7 @@ export class Replay {
   // open and has new reports: its plan is rebuilt behind the one on screen
   // and swapped in, without touching the camera or showing "loading".
   async start(incident, { keepView = false } = {}) {
-    const refresh = keepView && this.plan && this.timeline;
+    const refresh = keepView && this.plan && this.timeline && !this.plan.lapse;
     const held = refresh ? { from: this.range.from, marks: this.marks } : null;
     if (!refresh) {
       this.stop();
@@ -610,17 +610,27 @@ export class Replay {
     this.report();
   }
 
-  // Plays a plan built elsewhere, in a loop (the NISAR time-lapse).
-  run(plan) {
+  // Opens a timeline built elsewhere: NISAR's passes over a place. It
+  // behaves like an event's: it stands on the latest state, the reader
+  // drags it back, and play runs through it once. `plan.from` is where the
+  // bar starts; `marks` are the times of the passes.
+  open(plan, marks = []) {
     this.stop();
+    this.pending = null;
     this.plan = plan;
-    this.timeline = false;
+    this.timeline = true;
+    this.range = { from: plan.from, to: Date.now() };
+    this.marks = marks;
+    this.ms = this.range.to;
+    this.intro = false;
     this.time = 0;
-    this.playing = true;
+    this.playing = false;
     plan.setup?.();
     this.loop = ++this.loops;
     this.last = performance.now();
+    this.show();
     requestAnimationFrame((now) => this.tick(now, this.loop));
+    this.report();
   }
 
   // Makes the timeline reach back to `from` and puts marks on it. Works
@@ -655,32 +665,28 @@ export class Replay {
       this.show();
       return this.report();
     }
-    if (this.timeline) {
-      // Play runs once, from wherever the handle is; from the end it
-      // starts over at the beginning.
-      if (!this.playing && this.live) this.ms = this.range.from;
-      this.playing = !this.playing;
-    } else {
-      this.playing = !this.playing;
-    }
+    // Play runs once, from wherever the handle is; from the end it starts
+    // over at the beginning.
+    if (!this.playing && this.live) this.ms = this.range.from;
+    this.playing = !this.playing;
     this.last = performance.now();
     this.report();
   }
 
-  // Jumps to a fraction (0..1) of the timeline or of the looping plan.
+  // Jumps to a fraction (0..1) of the timeline.
   seek(fraction) {
     if (!this.plan) return;
     const f = Math.max(0, Math.min(1, fraction));
-    if (this.timeline) {
-      this.intro = false;
-      this.playing = false;
-      this.ms = this.range.from + f * (this.range.to - this.range.from);
-      this.show();
-    } else {
-      this.time = f * this.plan.duration;
-      this.plan.draw(this.time);
-    }
+    this.intro = false;
+    this.playing = false;
+    this.ms = this.range.from + f * (this.range.to - this.range.from);
+    this.show();
     this.report();
+  }
+
+  // Jumps to a moment on the timeline.
+  seekTo(ms) {
+    if (this.plan) this.seek((ms - this.range.from) / (this.range.to - this.range.from));
   }
 
   stop() {
@@ -706,11 +712,7 @@ export class Replay {
     const dt = Math.max(0, Math.min(0.1, (now - this.last) / 1000));
     this.last = now;
     if (!this.playing) return;
-    if (!this.timeline) {
-      this.time += dt;
-      if (this.time > plan.duration + HOLD) this.time = 0;
-      plan.draw(Math.min(this.time, plan.duration));
-    } else if (this.intro) {
+    if (this.intro) {
       // The opening moment, once; then the latest state.
       this.time += dt;
       plan.draw(Math.min(this.time, plan.intro), true, plan.from);
@@ -734,10 +736,6 @@ export class Replay {
   report() {
     const plan = this.plan;
     if (!plan) return;
-    if (!this.timeline) {
-      const t = Math.min(this.time, plan.duration);
-      return this.onUpdate({ state: this.playing ? 'playing' : 'paused', caption: plan.caption(t), progress: t / plan.duration, parts: plan.parts, plan });
-    }
     const { from, to } = this.range;
     const at = (ms) => Math.max(0, Math.min(1, (ms - from) / (to - from)));
     const caption = this.intro ? plan.caption(Math.min(this.time, plan.intro)) : this.ms < plan.from ? 'Before the event' : plan.caption(plan.timeOf(this.ms));
@@ -747,7 +745,8 @@ export class Replay {
       caption,
       ms: this.intro ? plan.from : this.ms,
       progress: at(this.intro ? plan.from : this.ms),
-      span: [at(plan.from), at(Math.max(plan.to, plan.from))],
+      // A place has no event on its line, only passes.
+      span: plan.lapse ? null : [at(plan.from), at(Math.max(plan.to, plan.from))],
       marks: this.marks.map(at),
       range: this.range,
       live: this.live,
