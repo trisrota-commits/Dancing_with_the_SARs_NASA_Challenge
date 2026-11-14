@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Dancing with the SARs – Earth's changing surface, seen by NISAR radar</title>
     <link rel="icon" href="data:," />
+    <!-- The connections to the data servers are opened while the page itself
+         is still loading, so the first requests do not wait for them. -->
+    <link rel="preconnect" href="https://services.arcgisonline.com" crossorigin />
+    <link rel="preconnect" href="https://gibs.earthdata.nasa.gov" crossorigin />
+    <link rel="preconnect" href="https://s3.amazonaws.com" crossorigin />
+    <link rel="preconnect" href="https://cmr.earthdata.nasa.gov" crossorigin />
+    <link rel="preconnect" href="https://nisar.asf.earthdatacloud.nasa.gov" crossorigin />
+    <link rel="preconnect" href="https://earthquake.usgs.gov" crossorigin />
+    <link rel="preconnect" href="https://eonet.gsfc.nasa.gov" crossorigin />
+    <link rel="preconnect" href="https://www.gdacs.org" crossorigin />
+    <link rel="modulepreload" href="js/main.js" />
+    <link rel="modulepreload" href="vendor/three.module.min.js" />
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>

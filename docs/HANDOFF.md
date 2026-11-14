@@ -247,6 +247,62 @@ What the lead found in ten minutes of use, and what was done:
   background and their options a dark one. Found by a search of the whole
   app for the same pattern; all four dropdowns were affected.
 
+### Speed: what was found and how the engine stays fast (14 Nov, late)
+
+The lead asked for a globe with "zero latency", for new data and old alike.
+Measured first, then fixed. Do not undo these without measuring again
+(`tools/` has no speed script; the method is in the pull request).
+
+- **NASA's catalogue search took 7 to 8 seconds, now 0.3.** The one option
+  `options[readable_granule_name][pattern]` (a wildcard on the file name)
+  costs that much. `search()` in `js/nisar.js` no longer sends it; the
+  kind of product is read from the file names that come back. Only the
+  urgent-response collection mixes kinds, so twice as many entries are
+  asked for when it is searched. Answers are remembered for five minutes.
+  A unit test fails if the pattern comes back.
+- **A pass has a 15 KB thumbnail and a 5 MB picture.** The thumbnail goes
+  up first and the picture replaces it (`syncNisar`). Pictures are decoded
+  and cleaned on a worker thread (`loadPicture` in `js/globe.js`), so the
+  globe does not freeze while they arrive.
+- **An event's radar picture no longer waits for the event's history.**
+  The passes are searched for alone first (`passesAt`), and the picture
+  goes up as soon as they are known (`placePasses`), not when fire
+  detections or water maps have also loaded.
+- **Events are got ready before they are clicked**: the one the pointer
+  rests on, and the one the opening card offers (`warmIncident`).
+- **Radar map layers start from one whole-world picture a day.** NASA's
+  map service (WMS) draws the level-2 tiles as one 1,024-pixel picture in
+  one request (`gibsSheet` in `js/config.js`). The tile engine fetches it
+  first for every `sparse` layer (`sheetOf`): it is the layer from far
+  away, it stands in for any tile still on its way, and its grid says
+  where the layer has anything, down to level 7, so empty tiles are never
+  asked for. Twelve days of NISAR are twelve requests for the whole
+  globe. Read the comment at the top of `js/engine/tiles.js`.
+- **Three tiers of keeping.** Painted tiles stay as they are when they
+  leave the view (420 of them). Decoded pictures stay in memory. And the
+  bytes of radar tiles and pass pictures are kept in the browser's own
+  store (the Cache API: `radar-tiles-1`, `radar-pictures-1`), because
+  NASA's servers tell browsers not to keep them. A second visit reads
+  them from disk.
+- **How new data is noticed.** Each day's smallest tile (a few hundred
+  bytes) is the day's fingerprint. It is fetched fresh on every visit and
+  again every five minutes (`recheck`). When it differs, everything kept
+  for that day, in memory and on disk, is dropped and built up again. The
+  newest day with data is looked for again every ten minutes.
+- **Order of work.** Tiles are painted and downloaded from the middle of
+  the view outwards (`urgency`). Where the camera has been sent comes
+  next (`prefetch`, called by `flyTo`), then where a turning globe will be
+  in a second (`lookAhead`), and last the level-3 tiles of the whole
+  globe (`warm`), a few at a time once nothing on screen is waiting.
+- **Connections are opened early** (`preconnect` in `index.html`).
+
+Measured in a headless browser with software rendering on a slow, proxied
+connection, so the absolute numbers are far worse than on a real machine;
+the comparison is what counts. Opening the offered event: first radar
+picture after 3.5 s, was 13 s; sharp picture after 4.8 s, was 14 s. The
+opening view complete: 8.9 s, was 9.6 s; on a second visit 6.6 s, was
+9.3 s. Not measured on a real graphics card or connection.
+
 ### Visual rules (lead, 14 Nov, night)
 
 The lead, after one screenshot confused them: no arbitrary colours; one

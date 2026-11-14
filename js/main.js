@@ -3,7 +3,7 @@
 import { CATEGORIES, FAMILIES, PALETTE, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START } from './config.js';
 import { fetchFeed, fetchArchive } from './feeds.js';
 import { buildIncidents, tagNisarCoverage, pointInPolygon, distanceKm } from './incidents.js';
-import { edgeMarginKm, latestScenes, scenesAt, bestPair, comparisonStatus, imageBounds, latestTileDate, historyAt, newestAt, nextPass, interferogramsAt, REPEAT_DAYS } from './nisar.js';
+import { edgeMarginKm, latestScenes, scenesAt, passesAt, bestPair, comparisonStatus, imageBounds, latestTileDate, likelyTileDate, historyAt, newestAt, nextPass, interferogramsAt, REPEAT_DAYS } from './nisar.js';
 import { STORIES } from './stories.js';
 import { PLACES, PLACE_KINDS, otherHemisphere } from './places.js';
 import { loadFrames, spread, view, history, describeSeries, rankByCoverage } from './timelapse.js';
@@ -459,19 +459,51 @@ function syncNisar(ms) {
   const first = !sel.passShown;
   sel.passShown = true;
   const token = stage.token;
-  Promise.all([imageBounds(pass), loadPicture(pass.image)])
-    .then(([bounds, picture]) => {
-      if (state.selected !== sel || sel.passIndex !== i || token !== stage.token) return;
-      if (first) globe.sweepTo(picture, bounds, pass.direction !== 'Descending');
-      else globe.fadeTo(picture, bounds, 0.45);
-      setLegend('radar', { pol: pass.pol, time: pass.time });
-      sel.passLoaded = i;
-      if (replay.timeline) replay.report();
-    })
-    .catch(() => {
-      /* a preview that will not load leaves the last picture up */
-    });
+  const current = () => state.selected === sel && sel.passIndex === i && token === stage.token;
+  // The pass has a 15 KB thumbnail and a 5 MB picture of the same area. The
+  // thumbnail goes up the moment it is here; the picture replaces it when
+  // it has arrived, and is all that shows if it wins the race.
+  let up = null; // 'quick' or 'sharp'
+  const put = (picture, bounds, sharp) => {
+    if (!current() || up === 'sharp' || (up && !sharp)) return;
+    if (up) globe.fadeTo(picture, bounds, 0.3);
+    else if (first) globe.sweepTo(picture, bounds, pass.direction !== 'Descending');
+    else globe.fadeTo(picture, bounds, 0.45);
+    up = sharp ? 'sharp' : 'quick';
+    setLegend('radar', { pol: pass.pol, time: pass.time });
+    sel.passLoaded = i;
+    if (replay.timeline) replay.report();
+  };
+  const bounds = imageBounds(pass);
+  // A preview that will not load leaves the last picture up.
+  if (pass.thumb) Promise.all([bounds, loadPicture(pass.thumb)]).then(([b, picture]) => put(picture, b, false), () => {});
+  Promise.all([bounds, loadPicture(pass.image)]).then(([b, picture]) => put(picture, b, true), () => {});
   return null;
+}
+
+// Gets an event ready before it is opened: the search for its passes, and
+// the small picture of the pass that would show. Called for the event the
+// pointer rests on and for the one the opening card offers, so that a click
+// finds the answers already here. `fully` also fetches the large picture.
+function warmIncident(inc, fully = false) {
+  passesAt(inc.lat, inc.lon, inc.time - NISAR_LOOKBACK_DAYS * DAY, Math.min(Date.now(), inc.endTime + 75 * DAY))
+    .then((backscatter) => {
+      const pass = timelinePasses(inc, { backscatter }).pop();
+      if (!pass) return;
+      imageBounds(pass);
+      if (pass.thumb) loadPicture(pass.thumb).catch(() => {});
+      // The large picture is 5 MB: it waits until the map on screen has
+      // finished loading, so it never slows that down.
+      if (fully) whenSettled(() => loadPicture(pass.image).catch(() => {}));
+    })
+    .catch(() => {});
+}
+
+// Runs something once the tiles on screen have all arrived (or after ten
+// seconds, whichever comes first).
+function whenSettled(run, since = performance.now()) {
+  if (globe.tiles.awaited === 0 || performance.now() - since > 10_000) return run();
+  setTimeout(() => whenSettled(run, since), 400);
 }
 
 function sceneCard(scene, eventTime) {
@@ -659,13 +691,25 @@ async function selectIncident(inc, fly, intro = '') {
   if (detailed) startIncidentHistory(inc, state.selected);
   setLink(`event=${encodeURIComponent(inc.id)}`);
 
+  // The passes come first and alone: they are all the radar picture and the
+  // timeline need, so those appear without waiting for the rest.
+  const from = inc.time - NISAR_LOOKBACK_DAYS * DAY;
+  const to = Math.min(Date.now(), inc.endTime + 75 * DAY);
+  const rest = Promise.all([scenesAt(inc.lat, inc.lon, from, to), newestAt(inc.lat, inc.lon).catch(() => [])]);
+  rest.catch(() => {});
+  passesAt(inc.lat, inc.lon, from, to)
+    .then((backscatter) => {
+      if (token !== state.lookup || opened.found) return;
+      opened.found = { backscatter, interferograms: [], newest: [], partial: true };
+      placePasses(inc, opened);
+    })
+    .catch(() => {});
+
   let found;
   try {
-    // Scenes around the event, plus the newest ones for the next-pass estimate.
-    const [around, newest] = await Promise.all([
-      scenesAt(inc.lat, inc.lon, inc.time - NISAR_LOOKBACK_DAYS * DAY, Math.min(Date.now(), inc.endTime + 75 * DAY)),
-      newestAt(inc.lat, inc.lon).catch(() => []),
-    ]);
+    // Then everything: interferograms, and the newest passes for the
+    // next-pass estimate. The passes above are not asked for twice.
+    const [around, newest] = await rest;
     found = { ...around, newest };
   } catch (err) {
     if (token !== state.lookup) return;
@@ -678,15 +722,28 @@ async function selectIncident(inc, fly, intro = '') {
   }
   if (token !== state.lookup) return;
   const sel = state.selected;
+  const placed = !!sel.passes;
   sel.found = found;
   $('radar').innerHTML = radarHtml(inc, found);
-  // NISAR's passes go onto the event's timeline, which reaches back far
-  // enough to hold the last two before the event, and the picture of the
-  // pass the timeline stands at is shown.
-  sel.passes = timelinePasses(inc, found);
+  if (placed) {
+    renderCard();
+    renderNarrative();
+  } else placePasses(inc, sel);
+}
+
+// NISAR's passes go onto the event's timeline, which reaches back far
+// enough to hold the last two before the event, and the picture of the
+// pass the timeline stands at is shown.
+function placePasses(inc, sel) {
+  sel.passes = timelinePasses(inc, sel.found);
   const earlier = sel.passes.filter((x) => x.time < inc.time);
   sel.reach = earlier.length ? earlier[Math.max(0, earlier.length - 2)].time - DAY : null;
   replay.extend(sel.reach, sel.passes.map((x) => x.time));
+  // The newest pass goes up now, without waiting for the event's own history
+  // (fire detections, water maps) to arrive: the timeline will find it
+  // already there. An earthquake opens on its wave and on the pass before
+  // it, so there the timeline decides.
+  if (!replay.timeline && inc.category !== 'earthquake') syncNisar(Date.now());
   renderCard();
   renderNarrative();
   globe.select(inc, sel.passes.slice(-1));
@@ -1142,6 +1199,11 @@ function renderSpotlight() {
   $('welcome-story').classList.toggle('primary', !pick);
   if (!pick) return;
   const { incident } = pick;
+  // Most first visits start here: have it ready before the button is pressed.
+  if (state.warmed !== incident.id) {
+    state.warmed = incident.id;
+    warmIncident(incident, true);
+  }
   $('spotlight-title').innerHTML = `${dot(incident.category)}${esc(CATEGORIES[incident.category].label)}: ${esc(incident.title)}`;
   // No day count here: this only knows NISAR's newest passes, and the
   // event's own card searches the whole archive and may find an earlier one.
@@ -2256,6 +2318,12 @@ async function start() {
     if (e.target.id === 'lapse-all') startLapse(state.lapse?.stackIndex || 0, e.target.checked);
   };
 
+  // An event the pointer rests on for a moment is got ready for a click.
+  let restTimer = 0;
+  globe.onRest = (incident) => {
+    clearTimeout(restTimer);
+    if (incident) restTimer = setTimeout(() => warmIncident(incident), 140);
+  };
   $('here-x').onclick = hideHere;
   globe.el.addEventListener('pointerdown', hideHere);
   globe.el.addEventListener('wheel', hideHere, { passive: true });
@@ -2293,13 +2361,27 @@ async function start() {
   setInterval(refreshNisar, NISAR_LATEST_EVERY_MS);
 
   openLink();
-  const latest = await latestTileDate();
-  $('date').max = latest;
-  $('date').min = '2026-04-01';
-  $('date').value = latest;
   // NISAR's map layer is on from the start, a full 12-day cycle ending on
-  // the newest day NASA has published.
+  // the newest day NASA has published. That day has to be asked for, so the
+  // layer starts on the likely one and moves if the answer differs: eleven
+  // of the twelve days are then already here.
+  $('date').min = '2026-04-01';
+  $('date').max = $('date').value = likelyTileDate();
   applyLayers();
+  const refreshDate = async () => {
+    const latest = await latestTileDate();
+    if (latest === $('date').max) return;
+    // Someone looking at the newest day keeps looking at the newest day.
+    const follow = $('date').value === $('date').max;
+    $('date').max = latest;
+    if (follow || $('date').value > latest) {
+      $('date').value = latest;
+      applyLayers();
+    }
+  };
+  refreshDate();
+  // NASA adds days and fills in recent ones; look again now and then.
+  setInterval(refreshDate, 10 * 60_000);
 }
 
 // Handy in the browser console while developing.

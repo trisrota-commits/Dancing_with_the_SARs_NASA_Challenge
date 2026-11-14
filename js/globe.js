@@ -159,7 +159,10 @@ export class Globe {
     // Tiles stamp the start of a cross-fade with this clock while painting.
     this.shared.uTime.value = seconds;
     const moved = this.controls.update(dt);
-    const tilesChanged = this.tiles.update(this.camera, this.height, moved);
+    // What the camera looks at, for the tile engine's priorities.
+    if (moved || !this.focusVec) this.focusVec = toVec(this.controls.lat, this.controls.lon, 1, this.focusVec || new THREE.Vector3());
+    if (moved) this.lookAhead(now);
+    const tilesChanged = this.tiles.update(this.camera, this.height, moved, this.focusVec);
     // New terrain arrived: settle the dots back onto the ground.
     if (this.tiles.elevationVersion !== this.liftedAt && this.tiles.frame % 30 === 0) {
       this.liftedAt = this.tiles.elevationVersion;
@@ -299,6 +302,12 @@ export class Globe {
       this.dotsAt(x, y, 3, this.animalDots)[0] ||
       this.dotsAt(x, y, 3, this.poiDots)[0];
     this.renderer.domElement.style.cursor = hit ? 'pointer' : 'grab';
+    // An event under the pointer may well be clicked next: tell the app.
+    const resting = hit?.item.incident || null;
+    if (resting !== this.resting) {
+      this.resting = resting;
+      this.onRest?.(resting);
+    }
     this.tooltip.hidden = !hit;
     if (hit) {
       const place = hit.item.place;
@@ -325,7 +334,7 @@ export class Globe {
     const base = BASEMAPS[s.base];
     const layers = [{ url: base.url.replace('{date}', iso(Date.now() - DAY)), maxLevel: base.maxLevel, base: true }];
     for (const [key, date] of Object.entries(s.overlays)) {
-      layers.push({ url: OVERLAYS[key].url.replace('{date}', OVERLAYS[key].date || date), maxLevel: OVERLAYS[key].maxLevel, alpha: 0.85, sparse: !!OVERLAYS[key].sparse });
+      layers.push({ url: OVERLAYS[key].url.replace('{date}', OVERLAYS[key].date || date), maxLevel: OVERLAYS[key].maxLevel, alpha: 0.85, sparse: !!OVERLAYS[key].sparse, sheet: OVERLAYS[key].sheet?.replace('{date}', OVERLAYS[key].date || date) });
     }
     // Two radar wavelengths side by side: NISAR (L-band) left of the
     // divider, Sentinel-1 (C-band) right of it, for the same days.
@@ -333,8 +342,8 @@ export class Globe {
       const end = Date.parse(s.bands.date);
       for (let i = s.bands.days - 1; i >= 0; i--) {
         const date = iso(end - i * DAY);
-        if (date >= NISAR_TILES.firstDate) layers.push({ url: NISAR_TILES.url.replace('{date}', date), maxLevel: NISAR_TILES.maxLevel, side: 'left', sparse: true });
-        layers.push({ url: OVERLAYS.s1.url.replace('{date}', date), maxLevel: OVERLAYS.s1.maxLevel, side: 'right', sparse: true });
+        if (date >= NISAR_TILES.firstDate) layers.push({ url: NISAR_TILES.url.replace('{date}', date), sheet: NISAR_TILES.sheet.replace('{date}', date), maxLevel: NISAR_TILES.maxLevel, side: 'left', sparse: true });
+        layers.push({ url: OVERLAYS.s1.url.replace('{date}', date), sheet: OVERLAYS.s1.sheet.replace('{date}', date), maxLevel: OVERLAYS.s1.maxLevel, side: 'right', sparse: true });
       }
     }
     if (s.nisar) {
@@ -342,7 +351,7 @@ export class Globe {
       for (let i = s.nisar.days - 1; i >= 0; i--) {
         const date = iso(end - i * DAY);
         // Radar passes are thin strips on an empty globe: see `sparse` in the tile engine.
-        if (date >= NISAR_TILES.firstDate) layers.push({ url: NISAR_TILES.url.replace('{date}', date), maxLevel: NISAR_TILES.maxLevel, sparse: true });
+        if (date >= NISAR_TILES.firstDate) layers.push({ url: NISAR_TILES.url.replace('{date}', date), sheet: NISAR_TILES.sheet.replace('{date}', date), maxLevel: NISAR_TILES.maxLevel, sparse: true });
       }
     }
     // An event's own filled layer (flood water) steps aside while a change
@@ -490,6 +499,38 @@ export class Globe {
 
   flyTo(lat, lon, height = 1_800_000, view) {
     this.controls.flyTo(lat, lon, height / EARTH_RADIUS_M, 1.6, view);
+    this.loadAhead(lat, lon, height / EARTH_RADIUS_M);
+  }
+
+  // While the globe is being turned, the map a second further on in that
+  // direction starts loading before it comes into view.
+  lookAhead(now) {
+    const c = this.controls;
+    const was = this.turning;
+    if (!was || now - was.at > 120) {
+      if (was && now - was.at < 600) {
+        const dt = (now - was.at) / 1000;
+        const dLat = (c.lat - was.lat) / dt;
+        const dLon = ((((c.lon - was.lon + 540) % 360) - 180) / dt);
+        const speed = Math.hypot(dLat, dLon * Math.cos(c.lat * RAD)); // degrees a second
+        if (speed > 1.5 && now - (this.aheadAt || 0) > 300) {
+          this.aheadAt = now;
+          this.tiles.prefetch(Math.max(-84, Math.min(84, c.lat + dLat * 0.9)), c.lon + dLon * 0.9, c.alt);
+        }
+      }
+      this.turning = { at: now, lat: c.lat, lon: c.lon };
+    }
+  }
+
+  // The map for where the camera is going starts loading as it sets off.
+  // Asked three times on the way, because a radar layer finds its tiles
+  // level by level.
+  loadAhead(lat, lon, alt) {
+    clearTimeout(this.aheadTimer1);
+    clearTimeout(this.aheadTimer2);
+    this.tiles.prefetch(lat, lon, alt, true);
+    this.aheadTimer1 = setTimeout(() => this.tiles.prefetch(lat, lon, alt, true), 450);
+    this.aheadTimer2 = setTimeout(() => this.tiles.prefetch(lat, lon, alt, true), 1000);
   }
 
   flyToBounds(b) {
@@ -497,7 +538,9 @@ export class Globe {
     const tall = (b.north - b.south) * RAD;
     const wide = (b.east - b.west) * RAD * Math.cos(lat * RAD);
     const fit = Math.max(tall, wide / this.camera.aspect) * 1.5;
-    this.controls.flyTo(lat, (b.west + b.east) / 2, fit / 2 / Math.tan((this.camera.fov * RAD) / 2), 1.6, { pitch: 0, heading: 0 });
+    const alt = fit / 2 / Math.tan((this.camera.fov * RAD) / 2);
+    this.controls.flyTo(lat, (b.west + b.east) / 2, alt, 1.6, { pitch: 0, heading: 0 });
+    this.loadAhead(lat, (b.west + b.east) / 2, alt);
   }
 
   zoom(factor) {
@@ -820,36 +863,143 @@ export class Globe {
 
 // Loads a radar preview and makes its black padding see-through, so only
 // the imaged swath covers the ground.
-const pictureCache = new Map();
-export function loadPicture(url) {
-  if (!pictureCache.has(url)) {
-    pictureCache.set(
-      url,
-      new Promise((resolve, reject) => {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onerror = () => {
-          pictureCache.delete(url);
-          reject(new Error('Preview image failed to load'));
-        };
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          canvas.width = img.width;
-          canvas.height = img.height;
-          const ctx = canvas.getContext('2d', { willReadFrequently: true });
-          ctx.drawImage(img, 0, 0);
-          const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          const px = data.data;
-          for (let i = 0; i < px.length; i += 4) if (px[i] < 4 && px[i + 1] < 4 && px[i + 2] < 4) px[i + 3] = 0;
-          ctx.putImageData(data, 0, 0);
-          resolve(canvas);
-        };
-        img.src = url;
-      }),
-    );
-    if (pictureCache.size > 12) pictureCache.delete(pictureCache.keys().next().value);
+//
+// A full preview is about 2,000 pixels a side and 5 MB. Decoding it and
+// going through its four million pixels used to freeze the globe for a
+// moment each time, so both now happen on a second thread (a worker); the
+// page only copies the finished picture onto a canvas. Where a browser
+// cannot do that, the old way is used.
+//
+// A pass's picture never changes once published, so its bytes are also kept
+// in the browser's own store: opening the same event again, today or next
+// week, reads 5 MB from disk and not from NASA. The store holds the last
+// eighty pictures and thumbnails.
+const WORKER_SOURCE = `
+  const KEPT = 80;
+  const store = typeof caches === 'undefined' ? Promise.resolve(null) : caches.open('radar-pictures-1').catch(() => null);
+  async function bytes(url) {
+    const kept = await store;
+    const hit = kept ? await kept.match(url).catch(() => null) : null;
+    if (hit) return hit.blob();
+    const res = await fetch(url, { mode: 'cors' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    if (kept) {
+      kept.put(url, res.clone()).then(async () => {
+        const keys = await kept.keys();
+        for (const key of keys.slice(0, Math.max(0, keys.length - KEPT))) kept.delete(key);
+      }).catch(() => {});
+    }
+    return res.blob();
   }
-  return pictureCache.get(url);
+  self.onmessage = async (e) => {
+    const { id, url } = e.data;
+    try {
+      const bitmap = await createImageBitmap(await bytes(url));
+      const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(bitmap, 0, 0);
+      bitmap.close();
+      const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const px = data.data;
+      for (let i = 0; i < px.length; i += 4) if (px[i] < 4 && px[i + 1] < 4 && px[i + 2] < 4) px[i + 3] = 0;
+      ctx.putImageData(data, 0, 0);
+      const out = canvas.transferToImageBitmap();
+      self.postMessage({ id, bitmap: out }, [out]);
+    } catch (err) {
+      self.postMessage({ id, error: String(err && err.message || err) });
+    }
+  };`;
+
+let pictureWorker;
+let pictureJobs = 0;
+const picturePending = new Map();
+function viaWorker(url) {
+  if (pictureWorker === undefined) {
+    try {
+      if (typeof OffscreenCanvas === 'undefined' || typeof createImageBitmap === 'undefined') throw new Error('no off-screen canvas');
+      pictureWorker = new Worker(URL.createObjectURL(new Blob([WORKER_SOURCE], { type: 'text/javascript' })));
+      pictureWorker.onmessage = (e) => {
+        const job = picturePending.get(e.data.id);
+        picturePending.delete(e.data.id);
+        if (!job) return;
+        if (e.data.error) return job.reject(new Error(e.data.error));
+        const canvas = document.createElement('canvas');
+        canvas.width = e.data.bitmap.width;
+        canvas.height = e.data.bitmap.height;
+        canvas.getContext('2d', { willReadFrequently: true }).drawImage(e.data.bitmap, 0, 0);
+        e.data.bitmap.close();
+        job.resolve(canvas);
+      };
+      pictureWorker.onerror = () => {
+        // The worker itself failed: everything waiting falls back.
+        for (const job of picturePending.values()) job.reject(new Error('worker failed'));
+        picturePending.clear();
+        pictureWorker = null;
+      };
+    } catch {
+      pictureWorker = null;
+    }
+  }
+  if (!pictureWorker) return Promise.reject(new Error('no worker'));
+  return new Promise((resolve, reject) => {
+    const id = ++pictureJobs;
+    picturePending.set(id, { resolve, reject });
+    pictureWorker.postMessage({ id, url });
+  });
+}
+
+function onThisThread(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onerror = () => reject(new Error('Preview image failed to load'));
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(img, 0, 0);
+      const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const px = data.data;
+      for (let i = 0; i < px.length; i += 4) if (px[i] < 4 && px[i + 1] < 4 && px[i + 2] < 4) px[i + 3] = 0;
+      ctx.putImageData(data, 0, 0);
+      resolve(canvas);
+    };
+    img.src = url;
+  });
+}
+
+// Decoded pictures kept ready in memory. A full preview is about 16 MB once
+// decoded, so they are counted by size, and the one used longest ago goes
+// first. Whatever is dropped here is still in the store on disk.
+const PICTURE_MEMORY = 180e6;
+const pictureCache = new Map();
+const pictureSizes = new Map();
+export function loadPicture(url) {
+  const held = pictureCache.get(url);
+  if (held) {
+    // Used again: move it to the fresh end.
+    pictureCache.delete(url);
+    pictureCache.set(url, held);
+    return held;
+  }
+  const picture = viaWorker(url).catch(() => onThisThread(url));
+  pictureCache.set(url, picture);
+  picture.then(
+    (canvas) => {
+      pictureSizes.set(url, canvas.width * canvas.height * 4);
+      let total = 0;
+      for (const size of pictureSizes.values()) total += size;
+      for (const key of [...pictureCache.keys()]) {
+        if (total <= PICTURE_MEMORY || key === url) break;
+        total -= pictureSizes.get(key) || 0;
+        pictureSizes.delete(key);
+        pictureCache.delete(key);
+      }
+    },
+    () => pictureCache.delete(url),
+  );
+  return picture;
 }
 
 const scratch = new THREE.Vector3();
