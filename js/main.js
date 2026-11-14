@@ -355,7 +355,10 @@ function renderReplay(u) {
   const changeUp = stage.owner === 'change' || stage.owner === 'measured';
   setEventKey(
     event
-      ? [...(u.plan.key || []).filter((row) => !(changeUp && row.mark === 'fill')), ...(event.related.length ? [{ mark: 'dash', color: PALETTE.context, text: 'Dashed lines: other events nearby in place and time' }] : [])]
+      ? [
+          ...(u.plan.key || []).filter((row) => !(changeUp && row.mark === 'fill')),
+          // NASA's map layer shows around the event's own picture, in other colours.
+          ...($('nisar-tiles').checked ? [{ mark: 'bands', color: 'linear-gradient(90deg,#4fbf2f,#d8a030,#1c3f7a)', text: "Green, orange and blue strips: NASA's NISAR map layer of the last days, in its own colours (NISAR radar in the menu explains them)" }] : []), ...(event.related.length ? [{ mark: 'dash', color: PALETTE.context, text: 'Dashed lines: other events nearby in place and time' }] : [])]
       : null,
   );
   if (u.state === 'off') {
@@ -1424,15 +1427,27 @@ function setLapseMode(mode) {
 }
 
 // A click on bare ground offers a time-lapse there.
+// A click on bare ground offers a year of radar there. Only on land (NISAR
+// images almost no open sea), and it goes away again by itself: after a few
+// seconds, on its ✕, on Escape, or as soon as the globe is touched.
+let hereTimer = 0;
+function hideHere() {
+  clearTimeout(hereTimer);
+  $('here').hidden = true;
+}
+
 function offerHere(at, screen) {
+  if (globe.tiles.landAt(at.lat, at.lon) === false) return hideHere();
   const here = $('here');
   here.hidden = false;
   here.style.left = `${screen.x}px`;
   here.style.top = `${screen.y}px`;
-  here.onclick = () => {
-    here.hidden = true;
+  $('here-go').onclick = () => {
+    hideHere();
     selectSpot(at);
   };
+  clearTimeout(hereTimer);
+  hereTimer = setTimeout(hideHere, 7000);
 }
 
 async function selectSpot(at) {
@@ -2023,6 +2038,7 @@ async function start() {
   };
   $('close').onclick = stepBack;
   document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') hideHere();
     if (e.key === 'Escape' && state.selected && !e.target.closest('#search')) stepBack();
     // Rows that act as buttons answer to the keyboard too.
     if ((e.key === 'Enter' || e.key === ' ') && e.target.matches?.('li[role="button"]')) {
@@ -2240,8 +2256,11 @@ async function start() {
     if (e.target.id === 'lapse-all') startLapse(state.lapse?.stackIndex || 0, e.target.checked);
   };
 
+  $('here-x').onclick = hideHere;
+  globe.el.addEventListener('pointerdown', hideHere);
+  globe.el.addEventListener('wheel', hideHere, { passive: true });
   globe.onPick((found, at, screen) => {
-    $('here').hidden = true;
+    hideHere();
     if (!found.length) {
       if (at) offerHere(at, screen);
       return;
@@ -2278,6 +2297,9 @@ async function start() {
   $('date').max = latest;
   $('date').min = '2026-04-01';
   $('date').value = latest;
+  // NISAR's map layer is on from the start, a full 12-day cycle ending on
+  // the newest day NASA has published.
+  applyLayers();
 }
 
 // Handy in the browser console while developing.

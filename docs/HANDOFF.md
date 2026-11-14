@@ -206,6 +206,47 @@ say what it shows without us.
   and archive and found events; the measuring step has never run on real
   data, so the first run needs watching. A token lasts 60 days.
 
+### First hands-on test by the lead (14 Nov, evening, Windows PC)
+
+What the lead found in ten minutes of use, and what was done:
+
+- **Black triangles at the farthest zoom.** A dark sphere sits just under
+  the map so gaps never show space. Tiles at level 2 used a 16-cell mesh,
+  flat enough between vertices to dip under that sphere, which then
+  showed through the middle of every cell. Level-2 tiles now use the full
+  32 cells and the sphere sits lower (0.997). Not seen in software
+  rendering before or after; the cause is geometric, so it should hold.
+- **NISAR's map layer has to be prominent, fast and there at every zoom.**
+  It is now on from the start with a full 12-day cycle, its menu section
+  is second and open, and the opening card says what the strips are. The
+  date starts on the newest day NASA really has data for
+  (`latestTileDate` now looks at the size of the answer: the server
+  answers every date, with an empty tile when it has nothing; NASA
+  publishes about a week late, so "the last 3 days" was nearly empty).
+- **Sparse layers** (`sparse: true`; see the top of `js/engine/tiles.js`).
+  Twelve daily layers meant twelve requests per tile, nearly all for empty
+  tiles. The engine now knows emptiness without asking: an empty answer is
+  recognised by its size, and each picture's 8 × 8 cells say which tiles
+  beneath it are empty, three levels down. One whole-world picture per
+  day decides everything to level 3. Far away, a sparse layer is drawn
+  one level coarser. Measured on the test connection: the opening view
+  went from 459 requests and 22 s to 106 and 6 s; a zoom to South America
+  from 462 and 39 s to 90 and 5 s.
+- **The grey and white strips in the lead's screenshots were the
+  Sentinel-1 layer**, not NISAR: the same strips appear with only that
+  layer on. NISAR's map layer is green, orange and blue.
+- **The click-anywhere offer** ("a year of NISAR radar here") appeared on
+  every click, also at sea, and would not go away. It now shows on land
+  only (`tiles.landAt`), and leaves after seven seconds, on its ✕, on
+  Escape, or when the globe is touched.
+- **The key folds upward**: it hangs from the top left now, so its title
+  stays put when it is folded.
+- **Dropdown lists were pale grey on white** on Windows. The page now
+  declares a dark colour scheme for everything the browser draws itself
+  (lists, tick boxes, date picker, scrollbars), dropdowns have a solid
+  background and their options a dark one. Found by a search of the whole
+  app for the same pattern; all four dropdowns were affected.
+
 ### Visual rules (lead, 14 Nov, night)
 
 The lead, after one screenshot confused them: no arbitrary colours; one

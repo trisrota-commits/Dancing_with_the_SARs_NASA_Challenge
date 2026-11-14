@@ -13,7 +13,25 @@ const GRID = 32;
 const MIN_ZOOM = 2;
 const MAX_ZOOM = 17;
 const MAX_LEAVES = 320;
-const PARALLEL_DOWNLOADS = 14;
+const PARALLEL_DOWNLOADS = 28;
+// A layer marked `sparse` (radar passes: thin strips on an empty globe) is
+// mostly tiles with nothing on them, and asking the server for each of them
+// is what makes such a layer slow. So the engine works emptiness out itself:
+// - a tile the server answers with its tiny see-through picture is empty
+//   (known by the size of the answer, never decoded);
+// - a tile that does hold a picture is cut into 8 × 8 cells, and a cell
+//   with nothing in it means every tile beneath that cell, three levels
+//   down, is empty too and is never asked for.
+// One picture of the whole world per layer therefore decides everything
+// down to level 3, a level-3 tile everything down to level 6, and so on.
+const EMPTY_BYTES = 300;
+const PROBE_LEVELS = [0, 3, 6, 9, 12];
+const CELLS = 8; // 8 × 8 cells: three levels of tiles beneath
+const EMPTY_KEPT = 30000; // empty answers remembered; they cost nothing
+// Seen from far away, a sparse layer is drawn from tiles one level coarser
+// than the map beneath it: a quarter of the pictures, and thin strips on a
+// whole continent lose nothing by it.
+const COARSER_BELOW = 7;
 // Phones and tablets have far less memory to give a page than a laptop.
 const SMALL = !!globalThis.matchMedia?.('(pointer: coarse)').matches;
 const IMAGE_CACHE = SMALL ? 450 : 900;
@@ -222,7 +240,7 @@ export class TileGlobe {
     this.group = new THREE.Group();
     scene.add(this.group);
     // Dark sphere just under the tiles, so nothing ever shows space through.
-    this.group.add(new THREE.Mesh(new THREE.SphereGeometry(0.9985, 96, 64), new THREE.MeshBasicMaterial({ color: 0x08121d })));
+    this.group.add(new THREE.Mesh(new THREE.SphereGeometry(0.997, 96, 64), new THREE.MeshBasicMaterial({ color: 0x08121d })));
 
     this.layers = [];
     this.pictures = [];
@@ -310,6 +328,9 @@ export class TileGlobe {
         for (let i = 0; i < 4 ** z; i++) this.image(base, z, i % 2 ** z, Math.floor(i / 2 ** z), null).pinned = true;
       }
     }
+    // For a sparse layer, ask for its picture of the whole world straight
+    // away: one small answer says where on the globe it has anything.
+    for (const layer of layers) if (layer.sparse) this.image(layer, 0, 0, 0, null);
     this.repaintAll();
   }
 
@@ -464,8 +485,12 @@ export class TileGlobe {
 
   build(leaf, key) {
     const { z, x, y } = leaf;
-    // Relief is invisible on continent-sized tiles; spend fewer triangles there.
-    const n = z <= 4 ? GRID / 2 : GRID;
+    // Relief is invisible on continent-sized tiles; spend fewer triangles
+    // there. Not on the very largest, though: a quarter-of-the-globe tile
+    // with few cells is flat enough between its corners to dip under the
+    // dark sphere behind the map, which then shows through as a dark patch
+    // in every cell.
+    const n = z <= 2 || z > 4 ? GRID : GRID / 2;
     const edge = 2 ** z - 1;
     // Rows from north to south; the outermost tiles reach on to the pole.
     const rows = [];
@@ -572,8 +597,10 @@ export class TileGlobe {
   // image as a stand-in when the exact tile has not arrived yet.
   drawLayer(target, tile, layer, alpha) {
     const { z, x, y } = tile;
-    const top = Math.min(z, layer.maxLevel);
+    const top = Math.min(layer.sparse && z > 2 && z < COARSER_BELOW ? z - 1 : z, layer.maxLevel);
     const exact = this.image(layer, top, x >> (z - top), y >> (z - top), tile);
+    // Known to hold nothing: no picture, and no stand-in from above either.
+    if (exact.state === 'empty') return false;
     // A tile the server would not give may be a gap in the data or a server
     // hiccup: ask for the tile one level coarser and use what is at hand.
     if (exact.state === 'missing' && !layer.base && top > 0) this.image(layer, top - 1, x >> (z - top + 1), y >> (z - top + 1), tile);
@@ -583,6 +610,8 @@ export class TileGlobe {
     for (let level = top; level >= lowest; level--) {
       const shift = z - level;
       const entry = level === top ? exact : this.images.get(this.key(layer, level, x >> shift, y >> shift));
+      // Nothing here at a coarser level means nothing here at all.
+      if (entry && entry.state === 'empty') return false;
       if (!entry || entry.state !== 'ready') continue;
       const scale = 2 ** shift;
       const span = SIZE / scale;
@@ -907,6 +936,23 @@ export class TileGlobe {
     return 0;
   }
 
+  // Whether a point is on land, from the terrain: true, false, or null when
+  // the heights there have not arrived (or terrain is off). Land that lies
+  // at or below sea level reads as sea.
+  landAt(lat, lon) {
+    if (!this.terrain) return null;
+    const X = mercatorX(lon);
+    const Y = mercatorY(lat);
+    for (let z = ELEVATION_MAX; z >= 0; z--) {
+      const n = 2 ** z;
+      const x = Math.min(n - 1, Math.floor(X * n));
+      const y = Math.min(n - 1, Math.floor(Y * n));
+      const entry = this.elevation.get(`${z}/${x}/${y}`);
+      if (entry?.state === 'ready') return sample(entry.h, (X * n - x) * SIZE - 0.5, (Y * n - y) * SIZE - 0.5) > 0.5;
+    }
+    return null;
+  }
+
   // ---------- image loading ----------
 
   url(layer, z, x, y) {
@@ -921,15 +967,45 @@ export class TileGlobe {
   image(layer, z, x, y, tile) {
     const key = this.key(layer, z, x, y);
     let entry = this.images.get(key);
+    if (entry && (entry.state === 'ready' || entry.state === 'empty' || entry.state === 'missing')) {
+      entry.lastUsed = this.frame;
+      return entry;
+    }
+    if (layer.sparse) {
+      // Is there anything at all up here? The level above knows.
+      const probe = PROBE_LEVELS.filter((level) => level < z).pop();
+      if (probe != null) {
+        const down = z - probe;
+        const above = this.image(layer, probe, x >> down, y >> down, tile);
+        let nothing = above.state === 'empty';
+        if (above.state === 'ready' && above.cells) {
+          // The cells of the picture above that this tile lies in.
+          const side = CELLS >> down;
+          const cx = (x - ((x >> down) << down)) * side;
+          const cy = (y - ((y >> down) << down)) * side;
+          nothing = true;
+          for (let j = cy; j < cy + side && nothing; j++) for (let i = cx; i < cx + side; i++) if (above.cells[j * CELLS + i]) nothing = false;
+        }
+        if (nothing) {
+          entry = { key, state: 'empty', img: null, waiting: new Set(), lastUsed: this.frame, sparse: true };
+          this.images.set(key, entry);
+          return entry;
+        }
+        // Not known yet: the tile waits on the level above (it was added to
+        // its waiting list) and is painted again when that arrives.
+        if (above.state !== 'ready' && above.state !== 'missing') return above;
+      }
+    }
     if (!entry) {
-      entry = { key, url: this.url(layer, z, x, y), keep: layer.keep, tint: layer.tint, state: 'queued', img: null, waiting: new Set(), lastUsed: this.frame, first: !!layer.base };
+      // The coarse levels of a sparse layer go first: they unblock the rest.
+      entry = { key, url: this.url(layer, z, x, y), keep: layer.keep, tint: layer.tint, state: 'queued', img: null, waiting: new Set(), lastUsed: this.frame, first: !!layer.base || (!!layer.sparse && z <= 3), sparse: !!layer.sparse, probe: !!layer.sparse && z === 0 };
       this.images.set(key, entry);
       this.queue.push(entry);
     } else if (entry.state === 'idle') {
       entry.state = 'queued';
       this.queue.push(entry);
     }
-    if (tile && entry.state !== 'ready' && entry.state !== 'missing') entry.waiting.add(tile);
+    if (tile) entry.waiting.add(tile);
     entry.lastUsed = this.frame;
     return entry;
   }
@@ -946,7 +1022,7 @@ export class TileGlobe {
         }
       }
       const entry = this.queue.splice(at, 1)[0];
-      const alive = entry.pinned || [...entry.waiting].some((t) => !t.dead && t.mesh.visible);
+      const alive = entry.pinned || entry.probe || [...entry.waiting].some((t) => !t.dead && t.mesh.visible);
       if (!alive) {
         entry.state = 'idle';
         entry.waiting.clear();
@@ -956,21 +1032,61 @@ export class TileGlobe {
       entry.state = 'loading';
       const img = new Image();
       img.crossOrigin = 'anonymous';
-      const done = (state) => {
+      const done = (state, picture = img) => {
         this.downloading--;
         entry.state = state;
-        entry.img = state === 'ready' ? (entry.keep ? this.filtered(img, entry.keep, entry.tint) : img) : null;
+        entry.img = state === 'ready' ? (entry.keep ? this.filtered(picture, entry.keep, entry.tint) : picture) : null;
         for (const t of entry.waiting) if (!t.dead) t.dirty = true;
         entry.waiting.clear();
         if (entry.pinned) for (const t of this.tiles.values()) t.dirty = true;
         this.changed = true;
         this.wake?.();
       };
+      if (entry.sparse) {
+        // Fetched as bytes, so an empty tile is known by its size and is
+        // never decoded, painted or looked beneath.
+        fetch(entry.url)
+          .then((res) => (res.ok ? res.blob() : Promise.reject(new Error(res.status))))
+          .then((blob) =>
+            blob.size <= EMPTY_BYTES
+              ? done('empty')
+              : createImageBitmap(blob).then((bitmap) => {
+                  entry.cells = this.cellsOf(bitmap);
+                  // A picture with nothing in any cell is as good as empty.
+                  if (!entry.cells.some(Boolean)) {
+                    bitmap.close?.();
+                    return done('empty');
+                  }
+                  done('ready', bitmap);
+                }),
+          )
+          .catch(() => done('missing'));
+        continue;
+      }
       img.onload = () => done('ready');
       img.onerror = () => done('missing');
       img.src = entry.url;
     }
-    if (this.images.size > IMAGE_CACHE) this.trim();
+    // Looked at now and then, not every frame: it sorts the whole cache.
+    if (this.images.size > IMAGE_CACHE && this.frame - (this.trimmedAt || 0) > 120) {
+      this.trimmedAt = this.frame;
+      this.trim();
+    }
+  }
+
+  // Which of a picture's 8 × 8 cells hold anything at all.
+  cellsOf(picture) {
+    const ctx = this.readerCtx;
+    ctx.clearRect(0, 0, SIZE, SIZE);
+    ctx.drawImage(picture, 0, 0, SIZE, SIZE);
+    const px = ctx.getImageData(0, 0, SIZE, SIZE).data;
+    const cells = new Uint8Array(CELLS * CELLS);
+    const span = SIZE / CELLS;
+    for (let y = 0; y < SIZE; y++) {
+      const row = Math.floor(y / span) * CELLS;
+      for (let x = 0; x < SIZE; x++) if (px[(y * SIZE + x) * 4 + 3]) cells[row + Math.floor(x / span)] = 1;
+    }
+    return cells;
   }
 
   // A copy of the image with only the pixels `keep` accepts.
@@ -991,8 +1107,18 @@ export class TileGlobe {
 
   trim() {
     // Overlay tiles go before basemap tiles, then the least recently used.
-    const old = [...this.images.values()].filter((e) => !e.pinned && e.state !== 'loading' && e.state !== 'queued').sort((a, b) => a.first - b.first || a.lastUsed - b.lastUsed);
-    for (const entry of old.slice(0, this.images.size - IMAGE_CACHE * 0.8)) this.images.delete(entry.key);
+    // Empty answers hold no picture: they are kept far longer than pictures,
+    // because forgetting one means asking the server again.
+    const all = [...this.images.values()];
+    const empties = all.filter((e) => e.state === 'empty');
+    if (empties.length > EMPTY_KEPT) for (const entry of empties.sort((a, b) => a.lastUsed - b.lastUsed).slice(0, empties.length - EMPTY_KEPT * 0.8)) this.images.delete(entry.key);
+    const held = all.length - empties.length;
+    if (held <= IMAGE_CACHE) return;
+    const old = all.filter((e) => e.state !== 'empty' && !e.pinned && e.state !== 'loading' && e.state !== 'queued').sort((a, b) => a.first - b.first || a.lastUsed - b.lastUsed);
+    for (const entry of old.slice(0, Math.ceil(held - IMAGE_CACHE * 0.8))) {
+      entry.img?.close?.(); // a decoded bitmap gives its memory back at once
+      this.images.delete(entry.key);
+    }
   }
 
   get busy() {

@@ -32,6 +32,38 @@
       </details>
 
       <details open>
+        <summary>NISAR radar</summary>
+        <label class="check"><input type="checkbox" id="footprints" checked /> Where NISAR looked recently <span id="scene-count" class="count"></span></label>
+        <p class="hint">Teal frames: the newest are bold, and they fade over four days.</p>
+        <label class="check"><input type="checkbox" id="nisar-tiles" checked /> NISAR radar picture on the globe</label>
+        <label class="check"><input type="checkbox" id="bands" /> Compare with Sentinel-1: L-band left, C-band right</label>
+        <div class="row date">
+          <button id="date-prev" aria-label="Previous day">◀</button>
+          <input type="date" id="date" aria-label="Imagery date" />
+          <button id="date-next" aria-label="Next day">▶</button>
+          <button id="date-play" aria-label="Play through days">Play</button>
+        </div>
+        <label class="row">
+          <span>Days stacked</span>
+          <select id="stack">
+            <option value="1">1 day</option>
+            <option value="3">3 days</option>
+            <option value="6">6 days</option>
+            <option value="12" selected>12 days (full cycle)</option>
+          </select>
+        </label>
+        <div class="layer-key" id="nisar-tiles-key">
+          <ul class="legend">
+            <li><i style="--c: #4fbf2f"></i>Green: vegetation</li>
+            <li><i style="--c: #d8a030"></i>Orange or yellow: towns and thinly vegetated ground</li>
+            <li><i style="--c: #1c3f7a"></i>Blue: calm water, dry sand, frozen ground</li>
+            <li><i style="--c: #c8402c"></i>Red: rough water</li>
+          </ul>
+          <small>NASA's colours for this map layer, as its archive describes them (ASF, NISAR in Worldview). The single radar pictures shown for an event use NASA's other rendering, magenta and green, explained in the key beside them.</small>
+        </div>
+      </details>
+
+      <details open>
         <summary>Events on the map <span id="event-count" class="count"></span></summary>
         <div id="chips"></div>
         <div class="row">
@@ -61,38 +93,6 @@
         <div id="place-chips"></div>
         <ul id="place-list" class="links"></ul>
         <p class="hint">Diamonds mark slow changes that no event feed reports: glacier loss, sinking cities, wetland floods, forest clearing, farming seasons, volcanoes, moving slopes and a filling reservoir. Click one to play NISAR’s passes over it.</p>
-      </details>
-
-      <details>
-        <summary>NISAR radar</summary>
-        <label class="check"><input type="checkbox" id="footprints" checked /> Where NISAR looked recently <span id="scene-count" class="count"></span></label>
-        <p class="hint">Teal frames: the newest are bold, and they fade over four days.</p>
-        <label class="check"><input type="checkbox" id="nisar-tiles" /> NISAR radar picture on the globe</label>
-        <label class="check"><input type="checkbox" id="bands" /> Compare with Sentinel-1: L-band left, C-band right</label>
-        <div class="row date">
-          <button id="date-prev" aria-label="Previous day">◀</button>
-          <input type="date" id="date" aria-label="Imagery date" />
-          <button id="date-next" aria-label="Next day">▶</button>
-          <button id="date-play" aria-label="Play through days">Play</button>
-        </div>
-        <label class="row">
-          <span>Days stacked</span>
-          <select id="stack">
-            <option value="1">1 day</option>
-            <option value="3" selected>3 days</option>
-            <option value="6">6 days</option>
-            <option value="12">12 days (full cycle)</option>
-          </select>
-        </label>
-        <div class="layer-key" id="nisar-tiles-key" hidden>
-          <ul class="legend">
-            <li><i style="--c: #4fbf2f"></i>Green: vegetation</li>
-            <li><i style="--c: #d8a030"></i>Orange or yellow: towns and thinly vegetated ground</li>
-            <li><i style="--c: #1c3f7a"></i>Blue: calm water, dry sand, frozen ground</li>
-            <li><i style="--c: #c8402c"></i>Red: rough water</li>
-          </ul>
-          <small>NASA's colours for this map layer, as its archive describes them (ASF, NISAR in Worldview). The single radar pictures shown for an event use NASA's other rendering, magenta and green, explained in the key beside them.</small>
-        </div>
       </details>
 
       <details>
@@ -177,11 +177,14 @@
       <button id="ticker-close" aria-label="Hide the reports bar">✕</button>
     </div>
 
-    <button id="here" hidden>▶ NISAR time-lapse here</button>
+    <div id="here" hidden>
+      <button id="here-go">▶ A year of NISAR radar here</button>
+      <button id="here-x" aria-label="Dismiss">✕</button>
+    </div>
 
     <div id="welcome" role="dialog" aria-labelledby="welcome-title" hidden>
       <h2 id="welcome-title">Earth's surface never holds still.</h2>
-      <p>Every 12 days the NISAR radar satellite images the planet's land and ice again, through cloud and at night. This globe shows what it sees change, next to the events being reported on the ground right now.</p>
+      <p>Every 12 days the NISAR radar satellite images the planet's land and ice again, through cloud and at night. This globe shows what it sees change, next to the events being reported on the ground right now. The coloured strips on the globe are its radar passes of the last 12 days.</p>
       <!-- Filled in from the live feeds: the strongest recent event that
            NISAR has flown over since it began. -->
       <div id="spotlight" hidden>

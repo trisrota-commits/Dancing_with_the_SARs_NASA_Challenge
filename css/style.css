@@ -737,6 +737,53 @@ body:has(#ticker:not([hidden])) #split-handle span {
   display: none !important;
 }
 
+/* ---------- native controls on a dark page ---------- */
+
+/* Everything the browser draws itself (dropdown lists, tick boxes, the
+   date picker, the search field's own parts, scrollbars) follows the dark
+   theme, so light text never lands on a white native background. */
+:root {
+  color-scheme: dark;
+}
+
+/* A dropdown's list takes the dropdown's background: it must be solid. */
+select {
+  background-color: #141b27;
+}
+
+option,
+optgroup {
+  background-color: #0f1622;
+  color: var(--text);
+}
+
+::placeholder {
+  color: var(--dim);
+  opacity: 1;
+}
+
+input[type='checkbox'] {
+  accent-color: var(--accent);
+}
+
+* {
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+}
+
+button:disabled {
+  color: var(--dim);
+  cursor: default;
+}
+
+/* Labels on the globe and the credits stay readable over bright ground. */
+.glabels span {
+  background: rgba(10, 16, 26, 0.9);
+}
+
+#credits {
+  text-shadow: 0 0 3px #000, 0 0 2px #000;
+}
+
 /* ---------- small screens ---------- */
 
 @media (max-width: 760px) {
@@ -1089,13 +1136,29 @@ body:has(#ticker:not([hidden])) #split-handle span {
   position: fixed;
   z-index: 3;
   transform: translate(-50%, -135%);
+  display: flex;
+  border-radius: 99px;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+}
+
+#here[hidden] {
+  display: none;
+}
+
+#here button {
   background: var(--accent);
-  border-color: var(--accent);
+  border: 0;
+  border-radius: 0;
   color: #04221c;
   font-weight: 600;
-  border-radius: 99px;
-  padding: 6px 14px;
+  padding: 6px 12px;
   white-space: nowrap;
+}
+
+#here #here-x {
+  padding: 6px 11px 6px 9px;
+  border-left: 1px solid rgba(4, 34, 28, 0.25);
 }
 
 #lapse {
@@ -1655,7 +1718,10 @@ ul.plain {
 #legend {
   position: fixed;
   left: 318px;
-  bottom: 96px;
+  /* From the top down: folded, its title stays where it was. */
+  top: 108px;
+  max-height: calc(100vh - 108px - 124px);
+  overflow-y: auto;
   width: 262px;
   padding: 10px 12px;
   background: var(--bg);
@@ -1812,10 +1878,7 @@ ul.plain {
   border-top: 1px solid var(--line);
 }
 
-#legend {
-  max-height: calc(100vh - 230px);
-  overflow-y: auto;
-}
+
 
 #left.closed ~ #legend {
   left: 14px;
