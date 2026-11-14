@@ -308,7 +308,8 @@ export class Globe {
             ? `${it.poi.name} · point of interest`
             : place
               ? `${place.name} · ${place.region}`
-              : it.incident.title;
+              : // The kind of event in words: its colour alone must never have to say it.
+                `${CATEGORIES[it.incident.category].label} · ${it.incident.title}`;
       this.tooltip.style.left = `${x + 14}px`;
       this.tooltip.style.top = `${y + 12}px`;
     }
