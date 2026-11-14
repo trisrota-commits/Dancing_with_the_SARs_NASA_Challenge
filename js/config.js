@@ -174,6 +174,18 @@ export const OVERLAYS = {
   },
 };
 
+// Possible mechanisms, not conclusions inferred from the preview comparison.
+export const CHANGE_EXPLANATIONS = {
+  earthquake: 'Shaking can trigger landslides or alter buildings and surface roughness, which may change radar brightness. Rainfall and soil moisture can also change the return. Brightness alone cannot measure ground displacement or confirm earthquake damage; that needs other evidence, such as validated interferometric analysis.',
+  wildfire: 'Fire can alter vegetation structure and moisture, changing the radar return in either direction. Rainfall, soil moisture and seasonal vegetation changes can also affect brightness. This comparison alone cannot confirm a burn scar or measure fire severity.',
+  flood: 'Calm open water often returns less radar energy and may appear darker, while water around trees or buildings can produce a stronger return. Wind, surface roughness and soil moisture can also change brightness. Neither dark nor bright pixels alone confirm flooding or measure flood depth.',
+  storm: 'Storms can change surface water, soil moisture and vegetation structure. Calm new water may look darker, while wind-roughened water can look brighter. Seasonal changes and differences between acquisitions can look similar; this comparison alone cannot confirm storm damage.',
+  volcano: 'Fresh lava or ash can change surface roughness and radar brightness. Rainfall, vegetation changes and viewing geometry can also affect the image. Brightness alone cannot confirm an eruption or measure volcanic deformation; deformation requires separate analysis.',
+  ice: 'Changes in ice roughness, snow wetness or open water can alter radar brightness. Temperature, season and viewing geometry also matter. A brightness change alone cannot establish ice loss, melt volume or ice motion.',
+  drought: 'Drying soil and changing vegetation moisture or structure can alter the radar return. Rainfall, harvesting and seasonal growth can produce similar changes. Brightness alone cannot confirm drought or quantify crop loss.',
+  other: 'Changes in water, vegetation, soil moisture or surface roughness can alter radar brightness. Weather, season and differences between acquisitions can produce similar patterns. Compare independent observations before attributing a change to a particular event.',
+};
+
 // What L-band radar is expected to show for each kind of event.
 export const RADAR_NOTES = {
   earthquake:
