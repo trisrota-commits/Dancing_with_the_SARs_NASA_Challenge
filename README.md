@@ -11,10 +11,13 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
   live feeds (USGS, NASA EONET, GDACS) on a 3D globe with real terrain, and
   merges reports of the same event into one dot.
 - **Replays what happened** when you click an event, built only from data:
-  - Earthquake: wave fronts spreading through the published shaking-intensity
-    outlines, then the later quakes nearby in the order they struck.
-  - Storm: a vortex travelling the dated track, sized by wind speed.
-  - Wildfire: the satellite fire detections of each day, building up.
+  - Earthquake: wave fronts crossing the terrain as a glow and a ripple in
+    the ground, through the published shaking-intensity outlines, then the
+    later quakes nearby in the order they struck.
+  - Storm: a cloud spiral travelling the dated track above the terrain,
+    turning the right way for its hemisphere, sized and spun by wind speed.
+  - Wildfire: the satellite fire detections of each day as glowing embers at
+    the sensor's true pixel size, cooling to coals as the days pass.
   - Flood: water the radar saw on land, pass by pass, inside the affected area.
 - Labels every part of a replay as **observed** (measured or catalogued),
   **analysis** (worked out and published by an agency) or **computed** (drawn
@@ -80,7 +83,11 @@ this app's workload:
 - Every active layer, radar preview and footprint outline is composited into
   one small canvas per tile, so the GPU draws one textured mesh per tile
   whatever is switched on, and everything drapes over the relief.
-- All event dots are a single draw call.
+- All event dots are a single draw call, and so are their light beams,
+  which rise as the view tilts: taller for stronger events.
+- Replay effects live in shaders: the earthquake front is drawn and lifted
+  in the terrain shader itself, the storm is a procedural cloud shader, and
+  the camera slowly circles a replay until you touch the globe.
 - The camera orbits a point on the ground like Google Earth: drag to pan,
   wheel or pinch to zoom, right-drag or two-finger drag to tilt and turn.
 - A frame is drawn only when something changed; an idle globe costs nothing.
@@ -217,7 +224,9 @@ the same layout as real GCOV products.
 
 - Replays never draw anything between data points without saying so; the
   panel lists each element with its source and whether it is observed,
-  agency analysis or computed here.
+  agency analysis or computed here. Decoration is named as decoration: the
+  ember flicker, the height of the ground ripple and the look of the storm
+  spiral follow fixed rules and are not measurements.
 - The NISAR change view is computed in the browser from NASA's 8-bit preview
   images, not the full-resolution products. It ignores differences that a
   two-pixel offset between the images would explain, and it marks where to

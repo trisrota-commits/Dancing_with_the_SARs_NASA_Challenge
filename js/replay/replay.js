@@ -14,6 +14,8 @@ import { gdacsShapes, shakeContours, quakesNear, fireDetections, dateRange } fro
 
 const DAY = 86400_000;
 const HOLD = 2.5; // seconds the final picture stays before the loop restarts
+const FIRE_PIXEL_KM = 0.375; // ground size of one VIIRS fire detection
+const ORBIT = 2.5; // degrees per second the camera circles a replay
 const RAD = Math.PI / 180;
 
 const day = (ms) => new Date(ms).toISOString().slice(0, 10);
@@ -130,7 +132,7 @@ async function quake(inc, globe) {
       zones.length
         ? { kind: 'analysis', text: `Shaking intensity outlines, levels ${Math.min(...zones.map((z) => z.value))} to ${Math.max(...zones.map((z) => z.value))}`, source: zoneSource }
         : { kind: 'note', text: 'No shaking map has been published for this earthquake.' },
-      { kind: 'computed', text: `Wave fronts at typical crust speeds (P 6 km/s, S 3.5 km/s), played ${speedup}× faster than real time` },
+      { kind: 'computed', text: `Wave fronts at typical crust speeds (P 6 km/s, S 3.5 km/s), played ${speedup}× faster than real time. The glow and ripple on the ground mark where the fronts are; their brightness and height are not to scale.` },
       { kind: 'observed', text: `${after.length} later and ${before.length} earlier quakes of M2.5+ within ${radius} km (30 days back)`, source: 'USGS catalogue' },
     ],
     draw(t) {
@@ -143,6 +145,17 @@ async function quake(inc, globe) {
       }
       if (lines.length || this.hadLines) globe.setEffectLines(lines);
       this.hadLines = lines.length > 0;
+      // The same two fronts, drawn into the terrain itself.
+      const fade = Math.max(0, Math.min(1, 1 - (t - WAVE)));
+      globe.setShockwave(
+        fade > 0
+          ? { ...centre, sKm: Math.max(1, s), pKm: Math.max(1, Math.min(s * (6 / 3.5), rmax * 1.72)), widthKm: rmax * 0.03, strength: fade, rippleKm: rmax * 0.1, heightM: rmax * 8 }
+          : null,
+      );
+      // A flash at the epicentre as the rupture starts.
+      const flash = Math.max(0, 1 - t / 1.4);
+      if (flash > 0 || this.hadFlash) globe.setEffectGlow(flash > 0 ? [{ ...centre, color: [flash, 0.55 * flash, 0.3 * flash], size: 10 + mag * 4 }] : []);
+      this.hadFlash = flash > 0;
 
       const nZones = t >= WAVE ? zones.length : zones.filter((z) => z.km <= s).length;
       if (nZones !== shownZones) {
@@ -192,6 +205,7 @@ async function storm(inc, globe) {
     parts: [
       { kind: timing, text: timing === 'observed' ? `${track.length} dated position fixes${peak ? ` with wind speed (peak ${Math.round(peak)} kt)` : ''}` : 'Track line, with timing spread evenly along it', source: timing === 'observed' ? 'NASA EONET' : 'GDACS' },
       { kind: 'computed', text: 'Position between fixes is a straight blend' },
+      { kind: 'computed', text: 'Cloud spiral: its radius (120 to 500 km) and spin follow the wind speed by a fixed rule. It is not a satellite image or the storm\'s measured extent.' },
       ...(zones.length ? [{ kind: 'analysis', text: 'Wind-speed zones (green, orange, red)', source: 'GDACS' }] : []),
     ],
     setup() {
@@ -207,7 +221,7 @@ async function storm(inc, globe) {
       ]);
       // Bigger and brighter with stronger wind.
       const strength = at.value ? Math.min(1, at.value / 140) : 0.4;
-      globe.setVortex({ lat: at.lat, lon: at.lon, size: 46 + strength * 70, color });
+      globe.setVortex({ lat: at.lat, lon: at.lon, radiusKm: 120 + strength * 380, color, power: strength });
     },
     caption() {
       const a = this.at;
@@ -236,7 +250,7 @@ async function fire(inc, globe) {
         ? { kind: 'observed', text: `${total} active-fire detections over ${days.length} days within ${Math.round(radius)} km`, source: 'VIIRS on NOAA-20, NASA GIBS' }
         : { kind: 'note', text: `No satellite fire detections within ${Math.round(radius)} km in the last ${days.length} days.` },
       ...(burnt.length ? [{ kind: 'analysis', text: 'Burnt-area outline', source: 'GDACS / GWIS' }] : []),
-      { kind: 'computed', text: 'Older detections fade from yellow to dark red; nothing is drawn between detections' },
+      { kind: 'computed', text: 'The newest detections glow at the sensor\'s 375 m pixel size and older ones cool to dark red. The flicker is decoration. Nothing is drawn between detections.' },
     ],
     setup() {
       globe.setEffectZones(burnt.map((b) => ({ ring: b.ring, color: 'rgba(255,166,43,0.95)', fill: 'rgba(255,166,43,0.07)', width: 2 })));
@@ -246,14 +260,18 @@ async function fire(inc, globe) {
       this.index = index;
       if (index === shown) return;
       shown = index;
-      const items = [];
+      const coals = [];
+      const embers = [];
       for (let i = 0; i <= index; i++) {
         const age = index - i;
-        // Today's detections glow; earlier ones cool down like embers.
-        const color = age === 0 ? [1, 0.95, 0.55] : age <= 2 ? [1, 0.55, 0.15] : [0.62, 0.14, 0.08];
-        for (const p of days[i].points) items.push({ lat: p.lat, lon: p.lon, color, size: age === 0 ? 5.5 : 3.6 });
+        // That day's detections burn bright; earlier ones cool down to coals.
+        for (const p of days[i].points) {
+          if (age > 2) coals.push({ lat: p.lat, lon: p.lon, color: [0.42, 0.09, 0.05], size: 3 });
+          else embers.push({ lat: p.lat, lon: p.lon, color: age === 0 ? [1, 0.74, 0.3] : [0.9, 0.3, 0.07], size: age === 0 ? 4.5 : 3, km: FIRE_PIXEL_KM, flicker: age === 0 });
+        }
       }
-      globe.setEffectDots(items);
+      globe.setEffectDots(coals);
+      globe.setEffectGlow(embers);
     },
     caption() {
       const d = days[this.index ?? 0];
@@ -375,6 +393,7 @@ export class Replay {
     this.loop = ++this.loops;
     const focus = plan.focus || incident;
     this.globe.flyTo(focus.lat, focus.lon, Math.min(9_000_000, plan.frameKm * 1000 * 3.4), { pitch: plan.frameKm < 400 ? 40 : 15 });
+    this.globe.setOrbit(ORBIT);
     this.last = performance.now();
     requestAnimationFrame((now) => this.tick(now, this.loop));
   }
