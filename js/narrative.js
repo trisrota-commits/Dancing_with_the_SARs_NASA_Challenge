@@ -37,7 +37,7 @@ export const SOURCE_NOTES = {
   nisar: 'The NASA-ISRO radar satellite. Passes and preview images come live from NASA’s archive at the Alaska Satellite Facility.',
   news: 'Press articles: written by news outlets, not checked by this app.',
   linked: 'Other events from the same feeds, close in place and time.',
-  replay: 'Every element of the animation, with its source and whether it is observed, agency analysis or computed here.',
+  replay: 'Every part of what is drawn on the globe for this event, with its source and whether it is observed, agency analysis or computed here.',
 };
 
 const passesAround = (inc, found) => {
@@ -75,6 +75,7 @@ export function channelReading(before, after, pol) {
 // One line for the popup.
 export function nisarLine(inc, found) {
   if (!found) return 'Checking what NISAR has seen here…';
+  if (found.failed) return 'The NISAR archive could not be searched just now.';
   const { all, before, after } = passesAround(inc, found);
   if (!all.length) return 'NISAR has not imaged this spot around the event.';
   if (before.length && after.length) return `NISAR imaged this place ${span(inc.time - before[0].time)} before and ${span(after[0].time - inc.time)} after.`;
@@ -105,6 +106,8 @@ export function narrate(inc, { found, news, history, sizeText }) {
   const nisar = link('nisar', 'NISAR', 'sec-nisar');
   if (!found) {
     out.push(`Searching the ${nisar} archive for passes over this place…`);
+  } else if (found.failed) {
+    out.push(`The ${nisar} archive could not be searched just now, so nothing can be said here about what the radar saw. Selecting the event again repeats the search.`);
   } else {
     const { all, before, after } = passesAround(inc, found);
     let n;
@@ -156,7 +159,7 @@ export function narrate(inc, { found, news, history, sizeText }) {
     }
   }
   if (inc.related.length) rest.push(`${many(inc.related.length, 'other event')} ${inc.related.length === 1 ? 'lies' : 'lie'} within ${RELATED_KM} km and ${RELATED_DAYS} days; ${link('linked', 'see them', 'sec-linked')}.`);
-  rest.push(`The animation on the globe is built only from data; ${link('replay', 'see how', 'sec-replay')}.`);
+  rest.push(`What is drawn on the globe for this event comes only from data; ${link('replay', 'see what each part is', 'sec-replay')}.`);
   out.push(rest.join(' '));
 
   // Who this is for. Ours to say, and marked so.

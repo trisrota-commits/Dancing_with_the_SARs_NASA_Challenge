@@ -20,6 +20,8 @@ const EONET_CATEGORY = {
 
 const GDACS_CATEGORY = { EQ: 'earthquake', TC: 'storm', FL: 'flood', VO: 'volcano', WF: 'wildfire', DR: 'drought' };
 const GDACS_ALERT = { Green: 0.3, Orange: 0.65, Red: 1 };
+// "Green" alone reads as "safe"; it is the lowest level of alert.
+const GDACS_RANK = { Green: 'the lowest', Orange: 'the middle', Red: 'the highest' };
 
 const clamp01 = (x) => Math.max(0, Math.min(1, x));
 
@@ -113,7 +115,7 @@ function fromGdacs(json) {
         url: p.url?.report,
         geometryUrl: p.url?.geometry,
         gdacsKey: { type: p.eventtype, id: p.eventid },
-        detail: [sev.severitytext, p.country ? `Country: ${p.country}` : null, `GDACS alert level: ${p.alertlevel}`].filter(Boolean),
+        detail: [sev.severitytext, p.country ? `Country: ${p.country}` : null, `GDACS alert level: ${p.alertlevel}${GDACS_RANK[p.alertlevel] ? ` (${GDACS_RANK[p.alertlevel]} of three levels)` : ''}`].filter(Boolean),
       };
     });
 }

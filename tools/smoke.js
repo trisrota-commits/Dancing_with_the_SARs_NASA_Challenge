@@ -56,9 +56,13 @@ const proxy = process.env.HTTPS_PROXY ? { server: process.env.HTTPS_PROXY, bypas
   await step('menu folds and returns', async () => {
     // The left menu steps aside while something is selected.
     if (await page.locator('#left').isVisible()) throw new Error('the menu stayed open over a selection');
+    // ✕ on the details steps back to the card; ✕ on the card lets go.
     await page.click('#close');
+    await page.waitForSelector('#card:not([hidden])', { timeout: 5000 });
+    if (await page.locator('#right').isVisible()) throw new Error('the details stayed open');
+    await page.click('#card-close');
     await page.waitForSelector('#left', { state: 'visible', timeout: 5000 });
-    return 'folded while selected, back after closing';
+    return 'folded while selected, card after closing details, menu back after closing the card';
   });
   await step('archive window', async () => {
     await page.selectOption('#window', 'nisar');
