@@ -154,7 +154,11 @@ the repository.
 The whole team did the research: reading the challenge brief and its
 resource list, NISAR's product documentation, and the feeds and map
 services of each agency, and deciding which of them the app may rely on.
-[Team: one or two sentences on who looked into what, in your own words.]
+All three of us worked in the same repository, each on our own branches,
+and every part went into the app through a pull request (see "Team" at
+the end for who brought what).
+[Team: add a sentence on research that left no trace in the repository,
+if you want it named.]
 
 The team set the rules the app follows (accuracy first, proof one click
 away, nothing unexplained on screen), decided what to build and what to
@@ -171,7 +175,8 @@ direction; see the next section.
 We used AI to build this project and we say so plainly.
 
 - **What we used.** Claude Code, an AI coding assistant made by
-  Anthropic. [Team: add any other AI tool anyone used, for example for
+  Anthropic, used by members of the team in their own sessions.
+  [Team: add any other AI tool anyone used, for example for
   research, the video or the slides, and what for. If none, delete this
   bracket.]
 - **What it did.** It wrote most of the code, the tests and the
@@ -328,4 +333,29 @@ Our own code is published under the MIT licence.
 
 ## Team
 
-[Team: names and roles as they should appear.]
+Three people built this, all in the public repository. What each brought
+in is taken from its pull requests and issues.
+
+- **LucidPaths**, project lead. Set the direction and the rules the app
+  follows, decided what was built and what was cut, and tested every
+  version by hand on a Windows PC and a Mac. Brought in the globe engine,
+  the live events and their merging, the event timeline and the event
+  animations, the NISAR time-lapse for any spot, the stories, the change
+  view, the visual rules and the speed work, and integrated the
+  teammates' branches.
+- **trisrota-commits**, repository owner. Opened the repository.
+  Contributed the check of whether a before-and-after comparison is
+  possible for an event, the radar history that loads when an event is
+  selected, and the explanations of radar change by kind of event.
+  Proposed the countdown to NISAR's next pass and the live reports bar,
+  both of which are in the app.
+- **MadhuraSaha02**. Wrote up which data the challenge allows besides
+  NISAR and the plan for the remaining gaps. Contributed the changing
+  places (glaciers worldwide and other slow changes), the calibrated
+  measuring tool and its display, more kinds of events, and the live
+  NISAR satellite with its orbit, the real star sky and the wildlife
+  sightings.
+
+[Team: replace the GitHub names with the names you want on the project
+page, correct anything above that is not how you see it, and add anyone
+who took part without a GitHub account.]
