@@ -44,6 +44,49 @@ body {
   pointer-events: none;
 }
 
+#nav {
+  position: fixed;
+  right: 14px;
+  bottom: 22px;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Step aside when the detail panel is open. */
+#right:not([hidden]) ~ #nav {
+  right: 408px;
+}
+
+#nav button {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 10px;
+  background: var(--bg);
+  backdrop-filter: blur(10px);
+  font-weight: 600;
+  font-size: 15px;
+}
+
+#nav button.on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #04221c;
+}
+
+#needle {
+  display: inline-block;
+  color: #ff5a4f;
+}
+
+input[type='range'] {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--accent);
+}
+
 #credits {
   position: fixed;
   left: 318px;
@@ -572,6 +615,10 @@ dd {
   #credits {
     left: 10px;
     right: 10px;
+  }
+
+  #right:not([hidden]) ~ #nav {
+    display: none;
   }
 
   #left {
