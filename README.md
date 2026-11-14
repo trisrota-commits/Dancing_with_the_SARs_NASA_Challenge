@@ -48,6 +48,17 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
   17 June 2026, so older events have radar passes on both sides.
 - Drapes daily NISAR backscatter and other satellite layers over the terrain.
 - One search box for events (fuzzy match, no keyword list) and places.
+- **Press coverage** per event: articles GDACS has linked to it, or a
+  place-and-type search of the GDELT news index, labelled as unverified.
+- **Share links:** the address bar always points at the open event, story,
+  place or spot, with a "Copy link" button.
+- **Two radar wavelengths side by side:** NISAR (L-band) left of a divider,
+  Sentinel-1 (C-band) right of it.
+- Twelve context layers in three groups: radar and water, weather and ice,
+  land and people (population, built-up areas, croplands, land cover, city
+  lights).
+- A time-lapse can be **played as sound**: pitch follows the brightness at
+  the chosen point.
 
 ## The engine
 
@@ -87,6 +98,25 @@ python3 -m http.server 8765
 Opening `index.html` directly from disk does not work; the page has to come
 from a web server.
 
+### Hosting
+
+The site is static with relative paths, so GitHub Pages can serve it as is:
+Settings → Pages → Deploy from a branch → `main` / root. `.nojekyll` is
+already in place.
+
+### Tests
+
+```bash
+node --test tests/nisar.test.mjs
+```
+
+```bash
+node tools/smoke.js
+```
+
+The second one needs Playwright and the local server running; it loads the
+app in headless Chromium against the live services.
+
 ## Layout
 
 - `index.html`, `css/style.css` – page and styling
@@ -105,6 +135,10 @@ from a web server.
   agency outlines, daily fire detections
 - `js/replay/mvt.js` – small vector-tile reader for the fire detections
 - `js/search.js` – fuzzy event search and place lookup
+- `js/news.js` – press coverage per event
+- `js/sound.js` – plays a time-lapse as notes
+- `tools/smoke.js` – browser smoke test against the live services
+- `docs/HANDOFF.md` – where the project stands and how to continue it
 - `js/globe.js` – the globe the app talks to
 - `js/engine/` – our own globe engine on three.js
   - `tiles.js` – streams map tiles, shapes terrain, composites layers

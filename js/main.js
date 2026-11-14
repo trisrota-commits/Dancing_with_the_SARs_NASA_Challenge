@@ -6,7 +6,9 @@ import { buildIncidents, tagNisarCoverage, pointInPolygon, distanceKm } from './
 import { latestScenes, scenesAt, bestPair, comparisonStatus, imageBounds, latestTileDate, historyAt, newestAt, nextPass, interferogramsAt, REPEAT_DAYS } from './nisar.js';
 import { STORIES } from './stories.js';
 import { PLACES, PLACE_KINDS, otherHemisphere } from './places.js';
-import { loadFrames, spread, view, history, describeSeries } from './timelapse.js';
+import { loadFrames, spread, view, history, describeSeries, rankByCoverage } from './timelapse.js';
+import { newsFor } from './news.js';
+import { playPass } from './sound.js';
 import { historyChart } from './chart.js';
 import { Globe, loadPicture } from './globe.js';
 import { Replay } from './replay/replay.js';
@@ -199,6 +201,7 @@ function openPanel(html) {
 }
 
 function closePanel() {
+  setLink('');
   state.selected = null;
   state.lookup++;
   $('right').hidden = true;
@@ -310,6 +313,8 @@ function incidentHtml(inc, radar) {
     <p class="note">${esc(RADAR_NOTES[inc.category])}</p>
     <h4>Linked events (${inc.related.length})</h4>
     ${related}
+    <h4>In the news</h4>
+    <div id="news"><p class="spinner">Looking for press coverage…</p></div>
     <h4>Source reports</h4>
     ${reports}`;
 }
@@ -406,6 +411,8 @@ async function selectIncident(inc, fly, intro = '') {
   replay.start(inc);
   // Independent of the replay and the shorter before/after catalogue search.
   startIncidentHistory(inc, state.selected);
+  loadNews(inc, state.selected);
+  setLink(`event=${encodeURIComponent(inc.id)}`);
 
   let found;
   try {
@@ -520,8 +527,10 @@ function setSplit(fraction) {
 }
 
 function endCompare() {
-  $('split').hidden = true;
   globe.clearScenes();
+  // The divider stays up while the two radar wavelengths are being compared.
+  if (state.bands) showBandSplit();
+  else $('split').hidden = true;
   state.change = null;
   const out = $('change-out');
   if (out) out.innerHTML = '';
@@ -570,6 +579,70 @@ function drapeChanges(withSource) {
   globe.addPicture(c.result.canvas, c.result.bounds, undefined, 0.9);
 }
 
+// ---------- press coverage ----------
+
+async function loadNews(inc, selection) {
+  const { articles, via } = await newsFor(inc).catch(() => ({ articles: [], via: 'gdelt' }));
+  const box = $('news');
+  if (state.selected !== selection || !box) return;
+  if (!articles.length) {
+    box.innerHTML = '<p class="note">No press coverage found for this event. Small or remote events often go unreported.</p>';
+    return;
+  }
+  const how =
+    via === 'gdacs'
+      ? 'Articles GDACS has linked to this event.'
+      : 'Found by searching the GDELT news index for the place and event type; only headlines naming the place are kept, but some may still be about something else.';
+  box.innerHTML = `${articles
+    .map(
+      (a) => `<a class="article" href="${safeUrl(a.url)}" target="_blank" rel="noopener noreferrer">
+        ${a.image ? `<img src="${safeUrl(a.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()" />` : ''}
+        <span><b>${esc(a.title)}</b><small>${esc(a.source || '')}${Number.isFinite(a.time) ? ` · ${ago(a.time)}` : ''}</small></span>
+      </a>`,
+    )
+    .join('')}
+    <p class="hint">Press coverage, not data: written by news outlets and not checked by this app. ${how}</p>`;
+}
+
+// ---------- share links ----------
+
+// The address bar always points at what is open, so it can be copied.
+function setLink(hash) {
+  // window.history, because this file also imports a function called history.
+  window.history.replaceState(null, '', hash ? `#${hash}` : location.pathname + location.search);
+}
+
+// Opens whatever a shared link points at. Events may need a moment, or the
+// archive, before they are loaded.
+async function openLink() {
+  const [key, raw] = location.hash.slice(1).split('=');
+  const value = decodeURIComponent(raw || '');
+  if (!key || !value) return;
+  if (key === 'story') return openStory(value);
+  if (key === 'place' && placeById(value)) return selectPlace(placeById(value), true);
+  if (key === 'spot') {
+    const [lat, lon] = value.split(',').map(Number);
+    if (Number.isFinite(lat) && Number.isFinite(lon)) {
+      globe.flyTo(lat, lon, 400_000);
+      return selectSpot({ lat, lon });
+    }
+    return;
+  }
+  if (key !== 'event') return;
+  const find = () => state.incidents.find((i) => i.reports.some((r) => r.id === value));
+  for (let tries = 0; tries < 20 && !find(); tries++) await new Promise((r) => setTimeout(r, 700));
+  if (!find() && !state.archive) {
+    $('window').value = 'nisar';
+    await $('window').onchange({ target: $('window') });
+  }
+  const incident = find();
+  if (incident) {
+    state.hidden.delete(incident.category);
+    draw();
+    selectIncident(incident, true);
+  }
+}
+
 // ---------- stories ----------
 
 function storyHtml(story) {
@@ -598,6 +671,7 @@ async function openStory(id) {
   state.lookup++;
   state.selected = { kind: 'story', story };
   globe.select(null);
+  setLink(`story=${story.id}`);
 
   if (story.action === 'lapse') {
     openPanel(`${storyHtml(story)}<h4>NISAR time-lapse at this point</h4>${lapseBox(story.lat, story.lon)}`);
@@ -644,6 +718,7 @@ async function openStory(id) {
   state.hidden.delete(incident.category);
   draw();
   await selectIncident(incident, false, storyHtml(story));
+  setLink(`story=${story.id}`);
   // The story is about the ground movement, so show it straight away.
   if (token + 1 === state.lookup) $('igram-go')?.click();
 }
@@ -756,9 +831,9 @@ async function startIncidentHistory(inc, selection) {
   const current = () => state.selected === selection && $('incident-history') === box;
   if (!box || !current()) return;
   try {
-    const stacks = await historyAt(inc.lat, inc.lon);
+    const stacks = await rankByCoverage(await historyAt(inc.lat, inc.lon), inc.lat, inc.lon);
     if (!current()) return;
-    const stack = stacks[0]; // historyAt ranks repeat stacks by number of passes.
+    const stack = stacks[0]; // tracks that cover the pin first, then by number of passes
     if (!stack) {
       box.innerHTML = '<p class="note">No repeat history available: the archive has fewer than two placeable previews on the same track, frame and orbit direction here.</p>';
       return;
@@ -827,7 +902,8 @@ async function startLapse(stackIndex = 0, all = false) {
   box.innerHTML = '<p class="spinner">Searching a year of NISAR passes…</p>';
   let stacks = state.lapse?.lat === lat && state.lapse?.lon === lon ? state.lapse.stacks : null;
   try {
-    stacks = stacks || (await historyAt(lat, lon));
+    // Tracks whose picture really covers the point go first.
+    stacks = stacks || (await rankByCoverage(await historyAt(lat, lon), lat, lon));
   } catch (err) {
     box.innerHTML = `<p class="note">NISAR search failed: ${esc(err.message)}</p>`;
     return;
@@ -864,6 +940,7 @@ async function startLapse(stackIndex = 0, all = false) {
       globe.clearScenes();
       globe.addPicture(view(frames[i], lapse.mode), frames[i].bounds);
       lapse.chart?.setActive(i);
+      if (lapse.sound && replay.playing) playPass(lapse.series?.[i]);
     },
     caption() {
       const i = Math.max(0, this.index);
@@ -884,10 +961,12 @@ async function startLapse(stackIndex = 0, all = false) {
     </div>
     ${stacks.length > 1 ? `<label class="row"><span>Track</span><select id="lapse-stack">${stacks.map((st, n) => `<option value="${n}" ${n === stackIndex ? 'selected' : ''}>${esc(st.direction)} ${esc(st.track)} (${st.scenes.length} passes)</option>`).join('')}</select></label>` : ''}
     ${stack.scenes.length > frames.length || all ? `<label class="check"><input type="checkbox" id="lapse-all" ${all ? 'checked' : ''} /> Load all ${stack.scenes.length} passes (about ${stack.scenes.length} MB)</label>` : ''}
+    <label class="check"><input type="checkbox" id="lapse-sound" /> ♪ Play it as sound: pitch follows the brightness at this point</label>
     <h4>Brightness at ${where(lat, lon)}</h4>
     <div id="lapse-chart"></div>
     <p class="hint">Each pass is NASA's preview of a NISAR backscatter scene, recorded here in ${pol.cross ? `dual polarisation. ${esc(pol.co)} is the echo that comes back in the polarisation that was sent; ${esc(pol.cross)} is the part that came back twisted, which mostly happens inside vegetation` : `single polarisation (${esc(pol.co)}), so there is no cross-polarised channel`}. Values are the 0–255 preview brightness averaged over 5×5 pixels, not calibrated radar units. Click the chart to jump to a pass.</p>`;
   const series = history(frames, lat, lon);
+  lapse.series = series;
   if (series.some((p) => p.co != null)) {
     lapse.chart = historyChart($('lapse-chart'), series, pol, (i) => replay.seek((i + 0.01) / frames.length));
     // What the numbers say, worked out from the series by fixed rules.
@@ -929,6 +1008,7 @@ async function selectSpot(at) {
   state.lookup++;
   state.selected = { kind: 'spot' };
   globe.select(null);
+  setLink(`spot=${at.lat.toFixed(4)},${at.lon.toFixed(4)}`);
   openPanel(`<span class="tag">Place</span>
     <h3 id="spot-name">${where(at.lat, at.lon)}</h3>
     <dl><dt>Where</dt><dd>${where(at.lat, at.lon)}</dd></dl>
@@ -974,6 +1054,7 @@ async function selectPlace(place, fly) {
   replay.stop();
   const kind = PLACE_KINDS[place.kind];
   state.selected = { kind: 'site', place, incident: { lat: place.lat, lon: place.lon, related: [] } };
+  setLink(`place=${place.id}`);
   globe.select(state.selected.incident);
   if (fly) globe.flyTo(place.lat, place.lon, 300_000);
 
@@ -1117,6 +1198,18 @@ function applyLayers() {
   for (const key of Object.keys(OVERLAYS)) {
     globe.setOverlay(key, $(`ov-${key}`).checked, date);
   }
+  // Two wavelengths side by side, for the same days.
+  state.bands = $('bands').checked;
+  globe.setBandCompare(state.bands, date, Math.min(3, +$('stack').value));
+  if (state.bands) showBandSplit();
+  else if (!globe.pictures.some((p) => p.side)) $('split').hidden = true;
+}
+
+function showBandSplit() {
+  $('split-before').textContent = 'NISAR · L-band, 24 cm';
+  $('split-after').textContent = 'Sentinel-1 · C-band, 5.6 cm';
+  $('split').hidden = false;
+  setSplit(0.5);
 }
 
 function shiftDate(days) {
@@ -1149,8 +1242,16 @@ async function start() {
   $('basemap').innerHTML = Object.entries(BASEMAPS)
     .map(([k, b]) => `<option value="${k}">${b.label}</option>`)
     .join('');
-  $('overlays').innerHTML = Object.entries(OVERLAYS)
-    .map(([k, o]) => `<label class="check"><input type="checkbox" id="ov-${k}" /> ${o.label}</label>`)
+  const groups = [...new Set(Object.values(OVERLAYS).map((o) => o.group))];
+  $('overlays').innerHTML = groups
+    .map(
+      (group) =>
+        `<h5>${group}</h5>` +
+        Object.entries(OVERLAYS)
+          .filter(([, o]) => o.group === group)
+          .map(([k, o]) => `<label class="check"><input type="checkbox" id="ov-${k}" /> ${o.label}</label>`)
+          .join(''),
+    )
     .join('');
   globe.setBasemap('esri');
   renderStatus();
@@ -1178,7 +1279,7 @@ async function start() {
     state.hidden.has(cat) ? state.hidden.delete(cat) : state.hidden.add(cat);
     draw();
   };
-  ['nisar-tiles', 'stack', 'date'].forEach((id) => ($(id).onchange = applyLayers));
+  ['nisar-tiles', 'stack', 'date', 'bands'].forEach((id) => ($(id).onchange = applyLayers));
   $('overlays').onchange = applyLayers;
   $('date-prev').onclick = () => shiftDate(-1);
   $('date-next').onclick = () => shiftDate(1);
@@ -1198,6 +1299,15 @@ async function start() {
     $('nav-tilt').textContent = view.pitch > 5 ? '2D' : '3D';
   };
   $('close').onclick = closePanel;
+  $('share').onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(location.href);
+      $('share').textContent = 'Link copied';
+    } catch {
+      $('share').textContent = 'Copy the address bar';
+    }
+    setTimeout(() => ($('share').textContent = 'Copy link'), 2000);
+  };
   $('stories').innerHTML = STORIES.map((x) => `<button data-story="${x.id}"><small>${esc(x.kind)}</small>${esc(x.title)}</button>`).join('');
   $('stories').onclick = (e) => {
     const b = e.target.closest('[data-story]');
@@ -1302,6 +1412,7 @@ async function start() {
   };
 
   $('detail').onchange = (e) => {
+    if (e.target.id === 'lapse-sound' && state.lapse) state.lapse.sound = e.target.checked;
     if (e.target.id === 'lapse-stack') startLapse(+e.target.value, false);
     if (e.target.id === 'lapse-all') startLapse(state.lapse?.stackIndex || 0, e.target.checked);
   };
@@ -1341,6 +1452,7 @@ async function start() {
   refreshNisar();
   setInterval(refreshNisar, NISAR_LATEST_EVERY_MS);
 
+  openLink();
   const latest = await latestTileDate();
   $('date').max = latest;
   $('date').min = '2026-04-01';

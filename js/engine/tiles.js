@@ -421,10 +421,30 @@ export class TileGlobe {
 
   // ---------- painting ----------
 
-  // Draws every layer into the tile's canvas, using a coarser cached image
-  // as a stand-in wherever the exact tile has not arrived yet.
-  paint(tile) {
+  // Draws one tile layer for this tile onto a canvas, using a coarser cached
+  // image as a stand-in when the exact tile has not arrived yet.
+  drawLayer(target, tile, layer, alpha) {
     const { z, x, y } = tile;
+    const top = Math.min(z, layer.maxLevel);
+    const exact = this.image(layer, top, x >> (z - top), y >> (z - top), tile);
+    if (exact.state === 'missing' && !layer.base) return;
+    for (let level = top; level >= 0; level--) {
+      const shift = z - level;
+      const entry = level === top ? exact : this.images.get(this.key(layer, level, x >> shift, y >> shift));
+      if (!entry || entry.state !== 'ready') continue;
+      const scale = 2 ** shift;
+      const span = SIZE / scale;
+      target.globalAlpha = alpha;
+      target.drawImage(entry.img, (x % scale) * span, (y % scale) * span, span, span, 0, 0, SIZE, SIZE);
+      entry.lastUsed = this.frame;
+      return;
+    }
+  }
+
+  // Composites everything for this tile. Layers and pictures with a side
+  // ('left' or 'right') only show on that side of the divider, which needs
+  // a second canvas for what the left side should show.
+  paint(tile) {
     const ctx = tile.ctx;
     tile.dirty = false;
     ctx.globalAlpha = 1;
@@ -435,45 +455,36 @@ export class TileGlobe {
     // wiped from all of them at once.
     let land = null;
     const waitForHeights = this.terrain && tile.heightLevel < 0;
+    const sidedLayers = [];
     for (const layer of this.layers) {
       const b = layer.bounds;
       if (b && !(b.east > tile.west && b.west < tile.east && b.north > tile.south && b.south < tile.north)) continue;
-      if (layer.landOnly && waitForHeights) continue;
-      let target = tile.ctx;
+      if (layer.side) {
+        sidedLayers.push(layer);
+        continue;
+      }
       if (layer.landOnly) {
+        if (waitForHeights) continue;
         if (!land) {
           land = this.scratch.getContext('2d');
           land.globalAlpha = 1;
           land.clearRect(0, 0, SIZE, SIZE);
         }
-        target = land;
-      }
-      const top = Math.min(z, layer.maxLevel);
-      const exact = this.image(layer, top, x >> (z - top), y >> (z - top), tile);
-      if (exact.state === 'missing' && !layer.base) continue;
-      for (let level = top; level >= 0; level--) {
-        const shift = z - level;
-        const entry = level === top ? exact : this.images.get(this.key(layer, level, x >> shift, y >> shift));
-        if (!entry || entry.state !== 'ready') continue;
-        const scale = 2 ** shift;
-        const span = SIZE / scale;
-        target.globalAlpha = layer.landOnly ? 1 : (layer.alpha ?? 1);
-        target.drawImage(entry.img, (x % scale) * span, (y % scale) * span, span, span, 0, 0, SIZE, SIZE);
-        entry.lastUsed = this.frame;
-        break;
+        this.drawLayer(land, tile, layer, 1);
+      } else {
+        this.drawLayer(ctx, tile, layer, layer.alpha ?? 1);
       }
     }
     if (land) {
       if (this.terrain) this.wipeSea(land, tile);
-      tile.ctx.globalAlpha = 0.62;
-      tile.ctx.drawImage(this.scratch, 0, 0);
+      ctx.globalAlpha = 0.62;
+      ctx.drawImage(this.scratch, 0, 0);
     }
     ctx.globalAlpha = 1;
 
     const here = this.pictures.filter((p) => p.bounds.east > tile.west && p.bounds.west < tile.east && p.bounds.north > tile.south && p.bounds.south < tile.north);
-    const sided = here.some((p) => p.side);
+    const sided = sidedLayers.length > 0 || here.some((p) => p.side);
     if (sided) {
-      // A second canvas holds what the left of the divider should show.
       if (!tile.canvasB) {
         tile.canvasB = document.createElement('canvas');
         tile.canvasB.width = tile.canvasB.height = SIZE;
@@ -484,6 +495,9 @@ export class TileGlobe {
       tile.ctxB.globalAlpha = 1;
       tile.ctxB.drawImage(tile.canvas, 0, 0);
     }
+    for (const layer of sidedLayers) this.drawLayer(layer.side === 'left' ? tile.ctxB : ctx, tile, layer, layer.alpha ?? 1);
+    ctx.globalAlpha = 1;
+    if (sided) tile.ctxB.globalAlpha = 1;
     for (const picture of here) {
       if (picture.side !== 'left') this.drape(ctx, tile, picture);
       if (sided && picture.side !== 'right') this.drape(tile.ctxB, tile, picture);

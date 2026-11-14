@@ -107,6 +107,7 @@ function fromGdacs(json) {
         severity: GDACS_ALERT[p.alertlevel] ?? 0.3,
         url: p.url?.report,
         geometryUrl: p.url?.geometry,
+        gdacsKey: { type: p.eventtype, id: p.eventid },
         detail: [sev.severitytext, p.country ? `Country: ${p.country}` : null, `GDACS alert level: ${p.alertlevel}`].filter(Boolean),
       };
     });

@@ -234,7 +234,17 @@ export class Globe {
     const base = BASEMAPS[s.base];
     const layers = [{ url: base.url.replace('{date}', iso(Date.now() - DAY)), maxLevel: base.maxLevel, base: true }];
     for (const [key, date] of Object.entries(s.overlays)) {
-      layers.push({ url: OVERLAYS[key].url.replace('{date}', date), maxLevel: OVERLAYS[key].maxLevel, alpha: 0.85 });
+      layers.push({ url: OVERLAYS[key].url.replace('{date}', OVERLAYS[key].date || date), maxLevel: OVERLAYS[key].maxLevel, alpha: 0.85 });
+    }
+    // Two radar wavelengths side by side: NISAR (L-band) left of the
+    // divider, Sentinel-1 (C-band) right of it, for the same days.
+    if (s.bands) {
+      const end = Date.parse(s.bands.date);
+      for (let i = s.bands.days - 1; i >= 0; i--) {
+        const date = iso(end - i * DAY);
+        if (date >= NISAR_TILES.firstDate) layers.push({ url: NISAR_TILES.url.replace('{date}', date), maxLevel: NISAR_TILES.maxLevel, side: 'left' });
+        layers.push({ url: OVERLAYS.s1.url.replace('{date}', date), maxLevel: OVERLAYS.s1.maxLevel, side: 'right' });
+      }
     }
     if (s.nisar) {
       const end = Date.parse(s.nisar.date);
@@ -271,6 +281,13 @@ export class Globe {
     const next = on && endDate ? { date: endDate, days } : null;
     if (JSON.stringify(next) === JSON.stringify(this.state.nisar)) return;
     this.state.nisar = next;
+    this.applyLayers();
+  }
+
+  setBandCompare(on, endDate, days) {
+    const next = on && endDate ? { date: endDate, days } : null;
+    if (JSON.stringify(next) === JSON.stringify(this.state.bands ?? null)) return;
+    this.state.bands = next;
     this.applyLayers();
   }
 

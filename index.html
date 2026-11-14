@@ -59,6 +59,7 @@
         <summary>NISAR radar</summary>
         <label class="check"><input type="checkbox" id="footprints" checked /> Where NISAR looked recently <span id="scene-count" class="count"></span></label>
         <label class="check"><input type="checkbox" id="nisar-tiles" /> NISAR radar picture on the globe</label>
+        <label class="check"><input type="checkbox" id="bands" /> Compare with Sentinel-1: L-band left, C-band right</label>
         <div class="row date">
           <button id="date-prev" aria-label="Previous day">◀</button>
           <input type="date" id="date" aria-label="Imagery date" />
@@ -110,6 +111,7 @@
 
     <aside id="right" hidden>
       <button id="close" aria-label="Close details">✕</button>
+      <button id="share" title="Copy a link to what is open here">Copy link</button>
       <div id="detail"></div>
     </aside>
 
@@ -146,7 +148,7 @@
       <button id="welcome-close" aria-label="Dismiss">✕</button>
     </div>
 
-    <footer id="credits">Imagery: Esri, Maxar, Earthstar Geographics · NASA GIBS · NISAR: NASA/ISRO, ASF DAAC · Elevation: Mapzen Terrain Tiles · Places: Photon, OpenStreetMap</footer>
+    <footer id="credits">Imagery: Esri, Maxar, Earthstar Geographics · NASA GIBS · NISAR: NASA/ISRO, ASF DAAC · Elevation: Mapzen Terrain Tiles · Places: Photon, OpenStreetMap · News: GDACS, GDELT</footer>
 
     <div id="split" hidden>
       <div id="split-handle"><span id="split-before"></span><span id="split-after"></span></div>

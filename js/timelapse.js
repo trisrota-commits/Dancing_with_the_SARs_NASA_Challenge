@@ -140,3 +140,30 @@ export function describeSeries(series, pol) {
   }
   return lines;
 }
+
+// Does this pass's picture have data at the point? Checked on its small
+// thumbnail, which costs a few kilobytes instead of a megabyte.
+async function covers(scene, lat, lon) {
+  if (!scene.thumb) return false;
+  const [img, b] = await Promise.all([loadImage(scene.thumb), imageBounds(scene)]);
+  const canvas = document.createElement('canvas');
+  canvas.width = img.width;
+  canvas.height = img.height;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(img, 0, 0);
+  const x = Math.round(((lon - b.west) / (b.east - b.west)) * img.width);
+  const y = Math.round(((b.north - lat) / (b.north - b.south)) * img.height);
+  if (x < 1 || y < 1 || x >= img.width - 1 || y >= img.height - 1) return false;
+  const px = ctx.getImageData(x - 1, y - 1, 3, 3).data;
+  for (let i = 0; i < px.length; i += 4) if (px[i + 3] > 0 && px[i] + px[i + 1] + px[i + 2] > 12) return true;
+  return false;
+}
+
+// Puts the repeat tracks whose newest picture really covers the point first.
+// A track can list a point inside its frame outline while the imaged strip
+// misses it, so the track with the most passes is not always the best.
+export async function rankByCoverage(stacks, lat, lon) {
+  const head = stacks.slice(0, 4);
+  const seen = await Promise.all(head.map((st) => covers(st.scenes[st.scenes.length - 1], lat, lon).catch(() => false)));
+  return [...head.filter((_, i) => seen[i]), ...head.filter((_, i) => !seen[i]), ...stacks.slice(4)];
+}
