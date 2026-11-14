@@ -6,6 +6,7 @@ made-up values: a "glacier" that loses 8 dB in HH during July, on a
 background that stays the same. Run with: python tests/test_measure.py
 """
 
+import json
 import sys
 import tempfile
 from datetime import datetime, timezone
@@ -71,6 +72,40 @@ def main() -> None:
         assert b["west"] < LON < b["east"] and b["south"] < LAT < b["north"]
         print("series (dB):", got)
         print("summary:", result["summary"])
+
+        # A second run with the first result at hand reads nothing again.
+        opened = []
+        real_open = measure.open_pass
+        measure.open_pass = lambda p: (opened.append(p["name"]), real_open(p))[1]
+        again = measure.measure(site, measure.local_passes(tmp), result)
+        assert opened == [], opened
+        assert again["series"] == result["series"] and again["change"]["before"] == result["change"]["before"]
+
+        # A new pass arrives: only that one is read, and the series grows.
+        make_file(tmp, "20260820T053000", -15.0)
+        grown = measure.measure(site, measure.local_passes(tmp), result)
+        assert len(opened) == 1 and "20260820" in opened[0], opened
+        assert len(grown["series"]) == 6 and abs(grown["series"][-1]["hh"] + 15.0) < 0.6
+
+        # Moving the point makes the earlier values worthless: all are read again.
+        opened.clear()
+        moved = measure.measure({**site, "lat": LAT + 0.001}, measure.local_passes(tmp), result)
+        assert len(opened) >= 6 and moved["series"], opened
+        measure.open_pass = real_open
+
+        # An event: the map compares the last pass before it with the first after.
+        hit = measure.measure({**site, "id": "event", "event": "2026-07-10"}, measure.local_passes(tmp))
+        day = lambda ms: datetime.fromtimestamp(ms / 1000, timezone.utc).strftime("%Y-%m-%d")
+        assert hit["change"]["spansEvent"] and day(hit["change"]["before"]) == "2026-07-03" and day(hit["change"]["after"]) == "2026-07-15", hit["change"]
+        assert hit["summary"].startswith("Across the event of 2026-07-10"), hit["summary"]
+        print("event summary:", hit["summary"])
+        # An event no pass has followed yet still gets its series, and says so.
+        early = measure.measure({**site, "id": "early", "event": "2026-12-01"}, measure.local_passes(tmp))
+        assert early and not early["change"]["spansEvent"] and "does not have a pass on both sides" in early["method"]
+
+        measure.write_index()
+        index = json.loads((measure.OUT_DIR / "index.json").read_text())
+        assert index == [], index  # nothing was written to disk as a site file here
         print("ok")
 
 

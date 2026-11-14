@@ -70,3 +70,30 @@ test('every kind of event says who could use NISAR there', async () => {
   const config = await import('../js/config.js');
   for (const category of Object.keys(config.CATEGORIES)) assert.ok(config.WHO_USES[category]?.length > 30, category);
 });
+
+test('a calibrated measurement is stated as a step in decibels, and only called "across the event" when it is', async () => {
+  const { measuredStep, measuredLine } = await import('../js/measured.js');
+  const DAYMS = 86400_000;
+  const t0 = Date.UTC(2026, 9, 29);
+  const d = {
+    pols: ['HH', 'HV'],
+    series: [
+      { time: t0 - 12 * DAYMS, hh: -8.1, hv: -14.9 },
+      { time: t0, hh: -8.0, hv: -15.0 },
+      { time: t0 + 12 * DAYMS, hh: -12.2, hv: -19.5 },
+    ],
+    change: { before: t0, after: t0 + 12 * DAYMS },
+  };
+  const during = measuredStep(d, t0 + 7 * DAYMS);
+  assert.ok(Math.abs(during.db + 4.2) < 1e-9 && Math.abs(during.crossDb + 4.5) < 1e-9);
+  assert.equal(during.acrossEvent, true);
+  // An event before both passes, or after both, is not "across".
+  assert.equal(measuredStep(d, t0 - DAYMS).acrossEvent, false);
+  assert.equal(measuredStep(d, t0 + 20 * DAYMS).acrossEvent, false);
+  assert.equal(measuredStep(d).acrossEvent, false);
+  assert.match(measuredLine(d, t0 + 7 * DAYMS), /HH echo fell by 4\.2 dB between 2026-10-29 and 2026-11-10, the passes on either side of the event\./);
+  assert.doesNotMatch(measuredLine(d), /either side/);
+  // A pass missing from the series gives no statement at all, never a guess.
+  assert.equal(measuredStep({ ...d, change: { before: 1, after: 2 } }), null);
+  assert.equal(measuredLine({ ...d, change: { before: 1, after: 2 } }), '');
+});

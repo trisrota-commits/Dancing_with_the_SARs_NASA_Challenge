@@ -1574,6 +1574,13 @@ ul.plain {
   line-height: 1.4;
 }
 
+/* The calibrated value, when there is one, sits right under it. */
+.nisar-line + .measured-line {
+  margin-top: -4px;
+  border-left-color: #f2c14e;
+  background: rgba(242, 193, 78, 0.08);
+}
+
 .prose p {
   margin: 0 0 10px;
   line-height: 1.55;
