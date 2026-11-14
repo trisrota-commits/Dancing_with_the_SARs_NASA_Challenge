@@ -36,7 +36,9 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
 - **Draws what happened** from data only:
   - Earthquake: wave fronts crossing the terrain as a glow and a ripple in
     the ground, through the published shaking-intensity outlines, then the
-    later quakes nearby in the order they struck.
+    later quakes nearby in the order they struck. The two wave rings then
+    rest, labelled with the seconds after the quake they stand for, for as
+    long as the event is open.
   - Storm: a cloud spiral travelling the dated track above the terrain,
     turning the right way for its hemisphere, sized and spun by wind speed.
   - Wildfire: the satellite fire detections of each day as glowing embers
@@ -102,7 +104,9 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
 - Estimates the **next NISAR overpass** for any event or spot, with a live
   countdown, clearly labelled as computed from the 12-day repeat cycle.
 - A **reports bar** cycles through new and ongoing events from the feeds;
-  click one to fly there. It can be paused or hidden.
+  click one to fly there. It can be paused or hidden. The same events
+  signal on the globe: every dot first reported in the last 24 hours sends
+  out one soft ring every five seconds.
 - A **"Since NISAR data began"** time window loads larger events back to
   17 June 2026, so older events have radar passes on both sides.
 - Drapes daily NISAR backscatter and other satellite layers over the terrain.
@@ -156,7 +160,8 @@ this app's workload:
   water is a mask the terrain shader animates; radar pictures cross-fade.
 - The camera orbits a point on the ground like Google Earth: drag to pan,
   wheel or pinch to zoom, right-drag or two-finger drag to tilt and turn.
-- A frame is drawn only when something changed; an idle globe costs nothing.
+- A frame is drawn only when something changed. An idle globe draws only
+  while the soft rings of recent events are spreading, about half the time.
 
 ## Run it
 

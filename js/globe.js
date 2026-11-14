@@ -9,13 +9,19 @@ import { pointInPolygon } from './incidents.js';
 import { RAD, EARTH_RADIUS_M, toVec, toLatLon, greatCircle, sunDirection, rgb } from './engine/geo.js';
 import { GlobeControls } from './engine/controls.js';
 import { TileGlobe } from './engine/tiles.js';
-import { Dots, Lines, SelectionRing, RING_SECONDS, Vortex, Glow, Beams, LIFT, atmosphere } from './engine/marks.js';
+import { Dots, Lines, SelectionRing, RING_SECONDS, PING_EVERY, PING_LASTS, PING_SPREAD, Vortex, Glow, Beams, LIFT, atmosphere } from './engine/marks.js';
 import { Fire } from './engine/fire.js';
 import { Labels } from './engine/labels.js';
 import { Sky } from './sky.js';
 
 const DAY = 86400_000;
 const iso = (ms) => new Date(ms).toISOString().slice(0, 10);
+// A small number from a text, the same every time.
+const hash = (text) => {
+  let h = 0;
+  for (let i = 0; i < text.length; i++) h = (h * 31 + text.charCodeAt(i)) >>> 0;
+  return h;
+};
 
 // NISAR's teal as "r,g,b" for canvas colours.
 const NISAR_RGB = rgb(PALETTE.nisar).map((v) => Math.round(v * 255)).join(',');
@@ -187,7 +193,10 @@ export class Globe {
     const skyBusy = this.skyView.update(date, seconds, this.camera.quaternion, sun);
     const water = this.tiles.uniforms.uWater.value;
     const alive = this.fire.hot.visible || this.vortex.mesh.visible || this.glowFlickers || seconds < this.popUntil || seconds < this.ringUntil || (water.y > 0 && water.x > -0.15 && this.tiles.masked);
-    const animating = alive || seconds < this.pulseUntil || seconds < this.animalPulseUntil || skyBusy || this.skyBusy || this.fadeEnd > 0 || this.focus !== this.focusTarget;
+    // Recent events send out a soft ring every few seconds; frames are
+    // drawn while one is spreading, and one more to clear it.
+    const pinging = this.pinging && seconds % PING_EVERY < PING_LASTS + PING_SPREAD + 0.1;
+    const animating = alive || pinging || seconds < this.pulseUntil || seconds < this.animalPulseUntil || skyBusy || this.skyBusy || this.fadeEnd > 0 || this.focus !== this.focusTarget;
     this.skyBusy = skyBusy;
     // A finished cross-fade is tidied up: one picture, no second canvas.
     if (this.fadeEnd && seconds > this.fadeEnd) this.settle();
@@ -567,10 +576,14 @@ export class Globe {
 
   // ---------- data ----------
 
-  renderIncidents(list, freshIds) {
+  // freshIds: events that arrived while the page was open (a quick pulse
+  // for a minute and a half). recentIds: events of the last day (one soft
+  // ring every few seconds).
+  renderIncidents(list, freshIds, recentIds = new Set()) {
     const seconds = (performance.now() - this.started) / 1000;
     for (const id of freshIds) if (!this.born.has(id)) this.born.set(id, seconds);
     let pulseUntil = 0;
+    this.pinging = false;
     const tracks = [];
     const items = list.map((inc) => {
       const color = rgb(CATEGORIES[inc.category].color);
@@ -589,6 +602,9 @@ export class Globe {
         size: 8 + inc.severity * 11 + (inc.reports.length > 1 ? 2 : 0),
         ring: inc.nisarScenes.length > 0,
         born,
+        // Each dot starts a little apart from the others, always the same
+        // for the same event, so the globe does not blink as one.
+        ping: recentIds.has(inc.id) ? ((this.pinging = true), ((hash(String(inc.id)) % 100) / 100) * PING_SPREAD) : undefined,
       };
     });
     this.pulseUntil = pulseUntil;

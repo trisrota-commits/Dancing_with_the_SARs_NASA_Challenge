@@ -5,7 +5,7 @@
 // still showing an older copy.
 const BUILD = '2026-11-14 22:50 UTC';
 
-import { CATEGORIES, FAMILIES, PALETTE, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START } from './config.js';
+import { CATEGORIES, FAMILIES, PALETTE, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START, RECENT_MS } from './config.js';
 import { fetchFeed, fetchArchive } from './feeds.js';
 import { buildIncidents, tagNisarCoverage, pointInPolygon, distanceKm } from './incidents.js';
 import { edgeMarginKm, latestScenes, scenesAt, passesAt, bestPair, comparisonStatus, imageBounds, latestTileDate, likelyTileDate, historyAt, newestAt, nextPass, interferogramsAt, REPEAT_DAYS } from './nisar.js';
@@ -118,7 +118,9 @@ function rebuild() {
 
 function draw() {
   const shown = visibleIncidents();
-  globe.renderIncidents(shown, state.fresh);
+  // Reports of the last day keep signalling on the globe (see RECENT_MS).
+  const now = Date.now();
+  globe.renderIncidents(shown, state.fresh, new Set(shown.filter((i) => now - i.time < RECENT_MS).map((i) => i.id)));
   globe.renderFootprints(state.scenes, $('footprints').checked);
   renderChips();
   renderFeed();
@@ -1179,7 +1181,6 @@ async function openStory(id) {
 // from the last 24 hours follow as "Earlier today". Long-running events that
 // a feed updated in the last 6 hours are "Ongoing", at most three of them.
 const NEW_MS = 6 * 3600_000;
-const RECENT_MS = 24 * 3600_000;
 const ticker = { items: [], at: 0, paused: false, dismissed: false };
 
 // The strongest recent event that NISAR has flown over since it began: the

@@ -69,6 +69,10 @@ export const FAMILIES = {
   human: 'Human-made, and other',
 };
 
+// An event first reported within this time counts as recent: the reports
+// bar lists it, and its dot sends out a soft ring every few seconds.
+export const RECENT_MS = 24 * 3600_000;
+
 // Events of different kinds this close in space and time are shown as related.
 export const RELATED_KM = 250;
 export const RELATED_DAYS = 14;
