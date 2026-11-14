@@ -1,16 +1,17 @@
-// A small two-line history chart: HH and HV preview brightness at one point
-// across the passes of a time-lapse. One shared 0–255 axis, a crosshair
-// tooltip that reads out both series, direct labels at the line ends, and a
-// table view of the same numbers.
+// A small history chart: co- and cross-polarised preview brightness at one
+// point across the passes of a time-lapse (one line for single-polarisation
+// passes). One shared 0–255 axis, a crosshair tooltip that reads out every
+// series, direct labels at the line ends, and a table view of the numbers.
 
 const NS = 'http://www.w3.org/2000/svg';
 const W = 340;
 const H = 176;
 const BOX = { left: 30, right: 36, top: 10, bottom: 24 };
 const SURFACE = '#0a101a';
-const SERIES = [
-  { key: 'hh', short: 'HH', name: 'HH, same polarisation', color: '#d55181' },
-  { key: 'hv', short: 'HV', name: 'HV, cross polarisation', color: '#0ca30c' },
+// Colours validated for colour-blind separation on the dark panel surface.
+const seriesFor = (pol) => [
+  { key: 'co', short: pol.co, name: `${pol.co}, same polarisation`, color: '#d55181' },
+  ...(pol.cross ? [{ key: 'cross', short: pol.cross, name: `${pol.cross}, cross polarisation`, color: '#0ca30c' }] : []),
 ];
 
 const el = (name, attrs = {}, text) => {
@@ -28,10 +29,11 @@ const html = (name, className, text) => {
 const day = (ms) => new Date(ms).toISOString().slice(0, 10);
 const month = (ms) => new Date(ms).toLocaleDateString('en', { month: 'short', year: 'numeric', timeZone: 'UTC' });
 
-// points: [{ time, hh, hv }] with null where a pass missed the point.
-// onPick(index) fires when a pass is clicked.
-export function historyChart(container, points, onPick) {
+// points: [{ time, co, cross }] with null where a pass missed the point.
+// pol: { co: 'HH', cross: 'HV' | null }. onPick(index) fires on a click.
+export function historyChart(container, points, pol, onPick) {
   container.textContent = '';
+  const SERIES = seriesFor(pol);
   const t0 = points[0].time;
   const t1 = points[points.length - 1].time;
   const x = (t) => BOX.left + ((t - t0) / Math.max(1, t1 - t0)) * (W - BOX.left - BOX.right);
@@ -46,9 +48,10 @@ export function historyChart(container, points, onPick) {
     item.append(key, s.name);
     legend.append(item);
   }
-  root.append(legend);
+  // One line needs no legend: the heading already says what it is.
+  if (SERIES.length > 1) root.append(legend);
 
-  const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': 'HH and HV brightness at this point for each NISAR pass' });
+  const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `${SERIES.map((x) => x.short).join(' and ')} brightness at this point for each NISAR pass` });
   for (const v of [0, 85, 170, 255]) {
     svg.append(el('line', { x1: BOX.left, x2: W - BOX.right, y1: y(v), y2: y(v), class: 'grid' }));
     svg.append(el('text', { x: BOX.left - 6, y: y(v) + 3.5, 'text-anchor': 'end', class: 'tick' }, v));
@@ -139,11 +142,11 @@ export function historyChart(container, points, onPick) {
   details.append(html('summary', '', 'Show as table'));
   const table = html('table');
   const head = html('tr');
-  head.append(html('th', '', 'Pass'), html('th', '', 'HH'), html('th', '', 'HV'));
+  head.append(html('th', '', 'Pass'), ...SERIES.map((x) => html('th', '', x.short)));
   table.append(head);
   for (const p of points) {
     const row = html('tr');
-    row.append(html('td', '', day(p.time)), html('td', '', p.hh == null ? '–' : Math.round(p.hh)), html('td', '', p.hv == null ? '–' : Math.round(p.hv)));
+    row.append(html('td', '', day(p.time)), ...SERIES.map((x) => html('td', '', p[x.key] == null ? '–' : Math.round(p[x.key]))));
     table.append(row);
   }
   details.append(table);

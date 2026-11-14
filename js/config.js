@@ -38,8 +38,10 @@ export const FEEDS = {
   },
 };
 
-// NISAR's calibrated science data starts here; the archive window reaches
-// back to it so that older events have radar scenes on both sides.
+// Start of the archive time window. Our team's notes give 17 June 2026 as
+// the start of calibrated NISAR data, and most scenes with map-ready
+// previews in the archive date from about then. Reaching back this far
+// gives older events radar scenes on both sides.
 export const NISAR_START = Date.UTC(2026, 5, 17);
 const since = new Date(NISAR_START).toISOString().slice(0, 10);
 
