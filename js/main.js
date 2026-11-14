@@ -1,6 +1,6 @@
 // App wiring: polls the feeds, keeps the globe in sync and fills the panels.
 
-import { CATEGORIES, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START } from './config.js';
+import { CATEGORIES, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START } from './config.js';
 import { fetchFeed, fetchArchive } from './feeds.js';
 import { buildIncidents, tagNisarCoverage, pointInPolygon, distanceKm } from './incidents.js';
 import { latestScenes, scenesAt, bestPair, comparisonStatus, imageBounds, latestTileDate, historyAt, newestAt, nextPass, interferogramsAt, REPEAT_DAYS } from './nisar.js';
@@ -364,8 +364,13 @@ function radarHtml(inc, found) {
   let html = `<p class="note">${backscatter.length} backscatter scenes (${before} before, ${backscatter.length - before} after) and ${interferograms.length} interferograms.</p>`;
   html += nextPassHtml(found.newest?.length ? found.newest : backscatter);
   if (pair) {
+    const explanation = Object.hasOwn(CHANGE_EXPLANATIONS, inc.category) ? CHANGE_EXPLANATIONS[inc.category] : CHANGE_EXPLANATIONS.other;
     html += `<div class="card pair"><div class="src">What NISAR saw change</div>
       <p>Two passes on the same track and frame: ${day(pair.before.time)} and ${day(pair.after.time)}, ${Math.round(pair.span / DAY)} days apart.</p>
+      <details><summary>Why might this have changed?</summary>
+        <p>${esc(explanation)}</p>
+        <p class="hint">Possible explanations, not a diagnosis. These comparisons use preview brightness, not calibrated radar measurements. Image scaling and alignment can also affect the apparent change. The event category selects this guidance; it is not a classification of the images or proof that the event caused a change.</p>
+      </details>
       <div class="actions">
         <button class="primary" id="changes">Show what changed</button>
         <button id="compare">Compare the source images</button>
