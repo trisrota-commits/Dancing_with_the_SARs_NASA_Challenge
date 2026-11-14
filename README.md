@@ -20,11 +20,23 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
   steps through days, plus context layers (surface water, Sentinel-1
   backscatter, vegetation disturbance, soil moisture).
 
+## The engine
+
+The globe is a small custom engine rather than an off-the-shelf one, built for
+this app's workload:
+
+- A quadtree picks only the map tiles the camera needs, at the detail the
+  screen can show.
+- Every active layer is composited into one small canvas per tile, so the GPU
+  draws one textured mesh per tile whether one layer or thirteen are on.
+- All event dots are a single draw call, as are all radar footprints.
+- A frame is drawn only when something changed; an idle globe costs nothing.
+
 ## Run it
 
 It is a static site with no build step and no keys. It needs Python 3 to
-serve the files and internet access, because the globe library and all data
-load from public servers at runtime.
+serve the files and internet access, because all imagery and data load from public
+servers at runtime.
 
 - Windows: double-click `start.bat`.
 - macOS or Linux: run `./start.sh`.
@@ -46,7 +58,14 @@ from a web server.
 - `js/feeds.js` – fetches and normalises the event feeds
 - `js/incidents.js` – merges duplicate reports, links nearby events
 - `js/nisar.js` – NISAR scene search and preview handling
-- `js/globe.js` – the CesiumJS globe
+- `js/globe.js` – the globe the app talks to
+- `js/engine/` – our own globe engine on three.js
+  - `tiles.js` – streams map tiles onto the sphere and composites layers
+  - `marks.js` – event dots, lines, radar image patches, atmosphere, stars
+  - `controls.js` – drag, zoom, pinch and fly-to camera
+  - `geo.js` – coordinate maths
+- `vendor/three.module.min.js` – three.js r170 (MIT), bundled so the engine
+  has no CDN dependency
 - `js/main.js` – wiring and panels
 - `docs/DATA_SOURCES.md` – survey of every data source and what is reachable
 
@@ -54,4 +73,4 @@ from a web server.
 
 NISAR data: NASA/ISRO, distributed by the Alaska Satellite Facility DAAC.
 Tiles: NASA GIBS. Events: USGS, NASA EONET, GDACS. Basemap: Esri World Imagery.
-Globe: CesiumJS.
+Rendering: three.js.

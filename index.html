@@ -5,12 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Dancing with the SARs – live Earth events and NISAR radar</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cesium/1.147.0/Widgets/widgets.css" />
     <link rel="stylesheet" href="css/style.css" />
-    <script>
-      window.CESIUM_BASE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/cesium/1.147.0/';
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cesium/1.147.0/Cesium.js"></script>
   </head>
   <body>
     <div id="globe"></div>
@@ -82,6 +77,8 @@
       <button id="close" aria-label="Close details">✕</button>
       <div id="detail"></div>
     </aside>
+
+    <footer id="credits">Imagery: Esri, Maxar, Earthstar Geographics · NASA GIBS · NISAR: NASA/ISRO, ASF DAAC</footer>
 
     <div id="split" hidden>
       <div id="split-handle"><span id="split-before"></span><span id="split-after"></span></div>
