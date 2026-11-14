@@ -107,7 +107,7 @@ already in place.
 ### Tests
 
 ```bash
-node --test tests/nisar.test.mjs
+node --test tests/*.test.mjs
 ```
 
 ```bash

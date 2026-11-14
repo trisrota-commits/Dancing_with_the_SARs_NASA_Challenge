@@ -68,8 +68,7 @@ radar overlays easily, need a paid key and show one fixed date).
   `start.bat` (Windows), `./start.sh` (Linux), or
   `python3 -m http.server 8765` then `http://localhost:8765`.
 - Opening `index.html` from disk does not work (ES modules need a server).
-- `node --test tests/nisar.test.mjs` runs the unit tests (4, from a
-  teammate).
+- `node --test tests/*.test.mjs` runs the unit tests (7, from a teammate).
 - `node tools/smoke.js` loads the app in headless Chromium against the live
   services and checks the main paths. It needs Playwright and a server on
   port 8765. In a proxied cloud container set `HTTPS_PROXY`; headless
@@ -174,7 +173,8 @@ changed" view; interferogram cards for earthquakes; NISAR time-lapse for any
 spot with channel views, chart, computed facts and optional sound; five
 stories; 27 changing places; search; reports bar; next-pass countdown;
 archive time window back to 17 June 2026; Sentinel-1 offer; event history
-chart; news per event; share links; 12 grouped context layers; L-band
+chart; a "Why might this have changed?" explainer per event type; news per
+event; share links; 12 grouped context layers; L-band
 versus C-band divider; launchers for macOS, Windows and Linux.
 
 ### Known problems
