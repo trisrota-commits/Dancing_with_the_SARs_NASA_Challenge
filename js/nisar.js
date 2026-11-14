@@ -268,13 +268,17 @@ export async function imageBounds(scene) {
 }
 
 // Newest day for which the daily NISAR tile layer has been published.
+// The newest day for which NASA's NISAR map layer shows anything. The
+// server answers every date, with a tiny see-through tile when it has
+// nothing, so the whole-world tile's size says whether a day has data.
+// NASA publishes with a delay of days, so yesterday is usually still empty.
 export async function latestTileDate() {
-  for (let back = 1; back <= 14; back++) {
+  for (let back = 1; back <= 21; back++) {
     const date = new Date(Date.now() - back * 86400_000).toISOString().slice(0, 10);
     const url = NISAR_TILES.url.replace('{date}', date).replace('{z}', '0').replace('{y}', '0').replace('{x}', '0');
     try {
-      const res = await fetch(url, { method: 'GET' });
-      if (res.ok) return date;
+      const res = await fetch(url);
+      if (res.ok && (await res.blob()).size > 300) return date;
     } catch {
       /* try the previous day */
     }

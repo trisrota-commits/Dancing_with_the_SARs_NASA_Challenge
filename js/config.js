@@ -171,6 +171,7 @@ export const OVERLAYS = {
     group: 'Radar and water',
     label: 'C-band backscatter (OPERA, Sentinel-1)',
     url: gibs('OPERA_L2_Radiometric_Terrain_Corrected_SAR_Sentinel-1', 'png', 12),
+    sparse: true,
     note: 'A radar picture from Sentinel-1 (C-band). Bright: rough ground, buildings, vegetation. Dark: calm water and smooth ground.',
     maxLevel: 12,
   },
