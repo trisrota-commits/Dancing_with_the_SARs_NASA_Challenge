@@ -44,7 +44,9 @@ serve the files and internet access, because all imagery and data load from publ
 servers at runtime.
 
 - Windows: double-click `start.bat`.
-- macOS or Linux: run `./start.sh`.
+- macOS: double-click `start.command`. The first time, macOS may refuse
+  because the file was downloaded; right-click it, choose Open, then Open.
+- Linux: run `./start.sh`.
 
 Either one serves the folder and opens http://localhost:8765. To do it by
 hand:
