@@ -1930,6 +1930,10 @@ body:has(#replay:not([hidden])) #nav {
   font-weight: 600;
 }
 
+#spotlight-title .dot {
+  margin-right: 7px;
+}
+
 #spotlight button {
   justify-self: start;
   margin-top: 6px;
