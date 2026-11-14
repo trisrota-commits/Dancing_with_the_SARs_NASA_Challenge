@@ -945,8 +945,7 @@ async function startLapse(stackIndex = 0, all = false) {
       if (i === this.index && this.mode === lapse.mode) return;
       this.index = i;
       this.mode = lapse.mode;
-      globe.clearScenes();
-      globe.addPicture(view(frames[i], lapse.mode), frames[i].bounds);
+      globe.fadeTo(view(frames[i], lapse.mode), frames[i].bounds, 0.45);
       lapse.chart?.setActive(i);
       if (lapse.sound && replay.playing) playPass(lapse.series?.[i]);
     },

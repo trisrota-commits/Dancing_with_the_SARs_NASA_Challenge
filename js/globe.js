@@ -10,6 +10,7 @@ import { RAD, EARTH_RADIUS_M, toVec, toLatLon, greatCircle, sunDirection, rgb } 
 import { GlobeControls } from './engine/controls.js';
 import { TileGlobe } from './engine/tiles.js';
 import { Dots, Lines, SelectionRing, Vortex, Glow, Beams, LIFT, atmosphere, stars } from './engine/marks.js';
+import { Fire } from './engine/fire.js';
 
 const DAY = 86400_000;
 const iso = (ms) => new Date(ms).toISOString().slice(0, 10);
@@ -49,6 +50,7 @@ export class Globe {
     this.fxDots = new Dots(this.scene, this.shared);
     this.fxDots.points.renderOrder = 27;
     this.fxGlow = new Glow(this.scene, this.shared);
+    this.fire = new Fire(this.scene, this.shared);
     this.vortex = new Vortex(this.scene, this.shared);
     // Light beams on the event dots: taller for stronger events.
     this.beams = new Beams(this.scene, this.shared);
@@ -75,6 +77,7 @@ export class Globe {
     this.selected = null;
     this.born = new Map();
     this.pick = null;
+    this.fadeEnd = 0;
     this.dirty = true;
     this.liftedAt = 0;
     this.started = performance.now();
@@ -124,6 +127,8 @@ export class Globe {
     this.last = now;
     const seconds = (now - this.started) / 1000;
 
+    // Tiles stamp the start of a cross-fade with this clock while painting.
+    this.shared.uTime.value = seconds;
     const moved = this.controls.update(dt);
     const tilesChanged = this.tiles.update(this.camera, this.el.clientHeight, moved);
     // New terrain arrived: settle the dots back onto the ground.
@@ -134,17 +139,19 @@ export class Globe {
       this.fxDots.relift();
       this.beams.set(this.beamItems, this.lift);
       if (this.fxGlow.items.length) this.fxGlow.set(this.fxGlow.items, this.lift);
+      this.fire.relift();
       if (this.selected) this.ring.set(this.selected.lat, this.selected.lon, this.lift(this.selected.lat, this.selected.lon));
       this.dirty = true;
     }
     // Pulsing dots and the selection ring are the only things that animate
     // on their own; without them an idle globe costs nothing.
-    const animating = this.animating || this.ring.points.visible || seconds < this.pulseUntil;
+    const animating = this.animating || this.ring.points.visible || seconds < this.pulseUntil || this.fadeEnd > 0;
+    // A finished cross-fade is tidied up: one picture, no second canvas.
+    if (this.fadeEnd && seconds > this.fadeEnd) this.settle();
     if (!(moved || tilesChanged || animating || this.dirty)) return;
     this.dirty = false;
 
     const alt = this.controls.alt;
-    this.shared.uTime.value = seconds;
     this.shared.uScale.value = 0.75 + 0.75 * Math.max(0, Math.min(1, 1 - Math.log10(alt / 0.12) / 1.5));
     this.glow.uniforms.uStrength.value = Math.max(0, Math.min(1, (alt - 0.2) / 0.6));
     // Beams stand up as the view tilts, or far out where the Earth's edge
@@ -325,6 +332,8 @@ export class Globe {
   // ---------- radar pictures ----------
 
   clearScenes() {
+    this.fadeEnd = 0;
+    this.tiles.uniforms.uFadeDur.value = 0;
     if (!this.pictures.length) return;
     this.pictures = [];
     this.tiles.setPictures([]);
@@ -332,14 +341,41 @@ export class Globe {
     this.dirty = true;
   }
 
+  // Shows a picture by cross-fading from whatever picture (or bare ground)
+  // is there now. Used for the time-lapse and for single radar scenes.
+  fadeTo(image, bounds, seconds = 0.5) {
+    const shown = this.pictures.filter((p) => p.side !== 'left').pop();
+    const next = { image, bounds, side: 'right', alpha: 1 };
+    this.pictures = shown ? [{ ...shown, side: 'left' }, next] : [next];
+    this.tiles.fadeGen++;
+    this.tiles.uniforms.uFadeDur.value = seconds;
+    this.tiles.setPictures(this.pictures);
+    // Tiles repaint over a few frames, each starting its own fade.
+    this.fadeEnd = (performance.now() - this.started) / 1000 + seconds + 0.8;
+    this.dirty = true;
+    return next;
+  }
+
+  settle() {
+    this.fadeEnd = 0;
+    this.tiles.uniforms.uFadeDur.value = 0;
+    const shown = this.pictures.filter((p) => p.side === 'right').pop();
+    if (!shown) return;
+    this.pictures = [{ ...shown, side: undefined }];
+    this.tiles.setPictures(this.pictures);
+    this.dirty = true;
+  }
+
   // Drapes a radar preview over the terrain. side: 'left', 'right' or
   // undefined for the whole screen.
   async addScene(scene, bounds, side) {
-    return this.addPicture(await loadPicture(scene.image), bounds, side);
+    const image = await loadPicture(scene.image);
+    return side ? this.addPicture(image, bounds, side) : this.fadeTo(image, bounds, 0.9);
   }
 
   // Drapes any image or canvas over a lat/lon box.
   addPicture(image, bounds, side, alpha = 1) {
+    if (this.fadeEnd) this.settle();
     const picture = { image, bounds, side, alpha };
     this.pictures = [...this.pictures, picture];
     this.tiles.setPictures(this.pictures);
@@ -469,7 +505,12 @@ export class Globe {
     this.dirty = true;
   }
 
-  // items: [{ lat, lon, color: [r, g, b], size }]
+  // Seconds on the clock the shaders run on, for timing entrances.
+  get clock() {
+    return this.shared.uTime.value;
+  }
+
+  // items: [{ lat, lon, color: [r, g, b], size, pop }]
   setEffectDots(items) {
     this.fxDots.set(items, this.lift);
     this.dirty = true;
@@ -491,6 +532,19 @@ export class Globe {
   // Glowing points: [{ lat, lon, color: [r, g, b], size, km, flicker }]
   setEffectGlow(items) {
     this.fxGlow.set(items, this.lift);
+    this.dirty = true;
+  }
+
+  // A fire built from detections [{ lat, lon, born }] around a centre, or
+  // null to put it out. born is on the replay clock (see setFireTime).
+  setFire(items, centre) {
+    this.fire.set(items || [], centre, this.lift);
+    this.dirty = true;
+  }
+
+  // The replay clock for the fire: now, and how many seconds make one day.
+  setFireTime(now, step) {
+    this.fire.time(now, step);
     this.dirty = true;
   }
 
@@ -523,6 +577,13 @@ export class Globe {
     this.dirty = true;
   }
 
+  // Flood water: `now` is the replay step (it may be between steps) and
+  // `steps` how many there are. The water itself comes from mask layers.
+  setWater(now, steps) {
+    this.tiles.uniforms.uWater.value.set(now, steps, 0);
+    this.dirty = true;
+  }
+
   // Turns the view slowly around its target until the next touch.
   setOrbit(degreesPerSecond) {
     this.controls.orbit = reducedMotion.matches ? 0 : degreesPerSecond;
@@ -533,6 +594,7 @@ export class Globe {
     this.fxLines.set([]);
     this.fxDots.set([], this.lift);
     this.fxGlow.set([], this.lift);
+    this.fire.set([]);
     this.vortex.set(null);
     this.setShockwave(null);
     this.controls.orbit = 0;

@@ -152,6 +152,20 @@ time; there is no backend and there are no keys.
   dots, scaled by `shared.uBeam` from camera tilt and distance;
   `controls.orbit` turns the camera slowly during a replay. Only the
   orbit honours "prefers reduced motion" so far.
+- Level of detail and smooth build-up (added 14 Nov, evening). The lead's
+  rule: effects gain detail as you zoom in, and nothing pops.
+  - `js/engine/fire.js`: one instanced particle system per fire. Each
+    detection has a `born` time on the replay clock; the shader fades it
+    in, burns it and cools it, so scrubbing needs no new buffers. Detail
+    is chosen in the vertex shader from the on-screen size of the 375 m
+    detection pixel: ember, then burning ground, flames, sparks, smoke.
+  - Flood water: layers with a `mask` step are painted into a per-tile
+    mask (`paintMask`; red = water, green = step first seen). The tile
+    shader animates ripples (two wave sizes picked from screen-space
+    derivatives, so detail follows zoom), edge waves and the fade-in.
+  - `globe.fadeTo` cross-fades radar pictures using the second tile canvas;
+    each tile times its own fade from when it was repainted (`uFadeAt`).
+  - Later quakes pop in through the `pop` time on a dot.
 
 ## Data sources and what we learnt about them
 
@@ -227,6 +241,14 @@ that appears on a place, or an event nearby, once results exist.
   sample of 8). Needs a per-pass coverage check.
 - **The new effects have only been seen in software rendering**, as
   still frames. Their motion, and their cost on a real GPU, are unchecked.
+- **Flood water vanishes on land at sea level.** To keep the open sea out,
+  the mask is wiped wherever terrain height is under half a metre, which
+  also removes river deltas and coastal plains (Bangladesh, for one). This
+  predates the animated water. A proper land/sea mask would fix it.
+- **The radar water product (OPERA DSWx-S1) has gaps:** no data over large
+  regions, and NASA's tile server sometimes answers 500 for single tiles.
+  The engine then falls back one level coarser. A flood replay loads up to
+  11 dates of tiles at once, which is slow on a weak connection.
 - **Nothing has been tried by hand.** All testing is scripted, in a
   container without a GPU. The feel of the camera, real frame rates, the
   Windows and macOS launchers, keyboard use and the sound are unverified.

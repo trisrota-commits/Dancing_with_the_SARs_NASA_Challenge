@@ -14,6 +14,7 @@ const DOT_VERTEX = /* glsl */ `
   attribute float aSize;
   attribute float aRing;
   attribute float aBorn;
+  attribute float aPop;
   uniform vec3 uCam;
   uniform float uScale;
   uniform float uRatio;
@@ -28,7 +29,12 @@ const DOT_VERTEX = /* glsl */ `
     vRing = aRing;
     float age = uTime - aBorn;
     vPulse = age < 90.0 ? fract(age / 1.8) : -1.0;
-    vDisc = aSize * uScale * uRatio;
+    // A mark with a pop time swells into place and sends out one ring.
+    float popped = uTime - aPop;
+    float grow = clamp(popped / 0.4, 0.0, 1.0);
+    grow = 1.0 - pow(1.0 - grow, 3.0);
+    if (popped < 1.1) vPulse = max(0.0, popped / 1.1);
+    vDisc = aSize * uScale * uRatio * mix(0.2, 1.0, grow);
     vSprite = vDisc + (vPulse >= 0.0 ? 52.0 : 26.0) * uRatio;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
     // Hide dots on the far side of the Earth.
@@ -91,9 +97,10 @@ export class Dots {
     this.items = [];
   }
 
-  // items: [{ lat, lon, color: [r,g,b], size, ring, born }]; ring is true for
-  // a white ring, or 2 for a diamond. lift(lat, lon)
-  // gives the ground height there, in Earth radii.
+  // items: [{ lat, lon, color: [r,g,b], size, ring, born, pop }]; ring is
+  // true for a white ring, or 2 for a diamond. born starts a long pulse
+  // (new arrivals), pop a short entrance. lift(lat, lon) gives the ground
+  // height there, in Earth radii.
   set(items, lift) {
     this.items = items;
     this.lift = lift;
@@ -103,8 +110,10 @@ export class Dots {
     const size = new Float32Array(n);
     const ring = new Float32Array(n);
     const born = new Float32Array(n);
+    const pop = new Float32Array(n);
     const v = new THREE.Vector3();
     items.forEach((it, i) => {
+      pop[i] = it.pop ?? -1e6;
       toVec(it.lat, it.lon, 1 + LIFT + (lift ? lift(it.lat, it.lon) : 0), v);
       it.vec = v.clone();
       position.set([v.x, v.y, v.z], i * 3);
@@ -119,6 +128,7 @@ export class Dots {
     g.setAttribute('aSize', new THREE.BufferAttribute(size, 1));
     g.setAttribute('aRing', new THREE.BufferAttribute(ring, 1));
     g.setAttribute('aBorn', new THREE.BufferAttribute(born, 1));
+    g.setAttribute('aPop', new THREE.BufferAttribute(pop, 1));
     this.points.geometry.dispose();
     this.points.geometry = g;
   }

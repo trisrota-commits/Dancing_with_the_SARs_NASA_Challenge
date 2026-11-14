@@ -54,8 +54,14 @@ const VERTEX = /* glsl */ `
 const FRAGMENT = /* glsl */ `
   uniform sampler2D map;
   uniform sampler2D mapB;
+  uniform sampler2D mapW;
   uniform float uUseB;
+  uniform float uUseW;
   uniform float uSplit;
+  uniform float uFadeDur;
+  uniform float uFadeAt;
+  uniform float uTime;
+  uniform vec3 uWater;
   uniform vec2 uViewport;
   uniform vec3 uSun;
   uniform float uNight;
@@ -65,11 +71,57 @@ const FRAGMENT = /* glsl */ `
   varying vec2 vUv;
   varying vec3 vNormal;
   varying float vShade;
+  float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+  float noise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);
+  }
+  // Two sheets of ripples sliding over each other, 0..1.
+  float ripples(vec2 p) {
+    return noise(p + vec2(uTime * 0.33, uTime * 0.21)) * 0.6 + noise(p * 1.9 - vec2(uTime * 0.29, -uTime * 0.26)) * 0.4;
+  }
   void main() {
-    // Left of the divider shows the "before" picture when one is loaded.
-    bool left = uUseB > 0.5 && gl_FragCoord.x / uViewport.x < uSplit;
-    vec3 color = left ? texture2D(mapB, vUv).rgb : texture2D(map, vUv).rgb;
+    vec3 color = texture2D(map, vUv).rgb;
+    if (uUseB > 0.5) {
+      vec3 other = texture2D(mapB, vUv).rgb;
+      if (uFadeDur > 0.0) {
+        // Cross-fade from the previous picture, timed from when this tile
+        // was painted with the new one.
+        float f = clamp((uTime - uFadeAt) / uFadeDur, 0.0, 1.0);
+        color = mix(other, color, f * f * (3.0 - 2.0 * f));
+      } else if (gl_FragCoord.x / uViewport.x < uSplit) {
+        // Left of the divider shows the "before" picture.
+        color = other;
+      }
+    }
     color *= mix(1.0, vShade, uRelief);
+    // Flood water, from a mask painted for this tile: red is how much of the
+    // spot is water, green is the replay step at which it was first seen.
+    if (uUseW > 0.5) {
+      vec4 mask = texture2D(mapW, vUv);
+      vec3 n = normalize(vNormal);
+      vec2 km = vec2(atan(n.x, n.z), asin(n.y)) * 6371.0;
+      // Ripples keep about the same size on screen, so detail grows as the
+      // camera comes closer: two neighbouring wave sizes, blended.
+      float kmPerPixel = max(length(dFdx(km)), length(dFdy(km)));
+      float level = log2(max(kmPerPixel, 1e-6) * 26.0);
+      float size = exp2(floor(level));
+      float wave = mix(ripples(km / size), ripples(km / (size * 2.0)), fract(level));
+      float cover = mask.r;
+      float arrive = smoothstep(-0.15, 0.85, uWater.x - mask.g * uWater.y);
+      float wet = smoothstep(0.1, 0.5, cover) * arrive;
+      vec3 water = mix(vec3(0.24, 0.6, 0.84), vec3(0.05, 0.27, 0.5), smoothstep(0.35, 0.95, cover)) * (0.8 + 0.4 * wave);
+      color = mix(color, water, wet * 0.8);
+      color += vec3(0.85, 0.95, 1.0) * smoothstep(0.66, 0.9, wave) * wet * 0.3;
+      // Waves lapping along the edge of the water.
+      float shore = smoothstep(0.06, 0.28, cover) * (1.0 - smoothstep(0.3, 0.72, cover)) * arrive;
+      float lap = 0.5 + 0.5 * sin(cover * 13.0 - uTime * 1.9 + wave * 5.0);
+      color += vec3(0.8, 0.93, 1.0) * shore * smoothstep(0.5, 1.0, lap) * 0.55;
+      // Water that is just arriving lights up for a moment.
+      color += vec3(0.45, 0.75, 1.0) * arrive * (1.0 - arrive) * smoothstep(0.1, 0.5, cover) * 1.3;
+    }
     float lit = smoothstep(-0.12, 0.18, dot(normalize(vNormal), uSun));
     color *= mix(1.0, mix(0.13, 1.0, lit), uNight);
     // Shock fronts glow on the ground: the slower, stronger wave in red
@@ -159,6 +211,12 @@ export class TileGlobe {
       uExaggeration: { value: 2 },
       uRelief: { value: 1 },
       uSplit: { value: 0.5 },
+      // Above zero, a tile with two pictures cross-fades between them over
+      // this many seconds instead of splitting at the divider.
+      uFadeDur: { value: 0 },
+      uTime: shared.uTime,
+      // Flood water: the replay step now, and the number of steps.
+      uWater: { value: new THREE.Vector3(0, 1, 0) },
       // Shock front: centre, then S radius, P radius, glow width (radians)
       // and strength; ripple width (radians) and height (metres).
       uWaveC: { value: new THREE.Vector3(0, 1, 0) },
@@ -170,6 +228,11 @@ export class TileGlobe {
     this.matrix = new THREE.Matrix4();
     this.scratch = document.createElement('canvas');
     this.scratch.width = this.scratch.height = SIZE;
+    // A quarter-size canvas used to soften the edges of the water mask.
+    this.soft = document.createElement('canvas');
+    this.soft.width = this.soft.height = SIZE / 4;
+    this.softCtx = this.soft.getContext('2d');
+    this.fadeGen = 0;
     this.reader = document.createElement('canvas');
     this.reader.width = this.reader.height = SIZE;
     this.readerCtx = this.reader.getContext('2d', { willReadFrequently: true });
@@ -183,7 +246,9 @@ export class TileGlobe {
   // Tile layers: [{ url: 'https://…/{z}/{y}/{x}.png', maxLevel, alpha, base, bounds }]
   // A layer with bounds is only fetched and drawn for tiles inside that box.
   // A layer with keep(r, g, b) has every other pixel made see-through, and
-  // tint recolours what is kept. landOnly layers are wiped over the sea.
+  // tint recolours what is kept. A layer with a mask step (0, 1, 2…) is not
+  // drawn as a picture: it marks water first seen at that step, which the
+  // shader animates. Its tint must be [255, step code, 0].
   setLayers(layers) {
     this.layers = layers;
     for (const entry of this.queue) {
@@ -399,7 +464,7 @@ export class TileGlobe {
     canvas.width = canvas.height = SIZE;
     const texture = this.texture(canvas);
     const material = new THREE.ShaderMaterial({
-      uniforms: { ...this.uniforms, map: { value: texture }, mapB: { value: texture }, uUseB: { value: 0 } },
+      uniforms: { ...this.uniforms, map: { value: texture }, mapB: { value: texture }, mapW: { value: texture }, uUseB: { value: 0 }, uUseW: { value: 0 }, uFadeAt: { value: -1e6 } },
       vertexShader: VERTEX,
       fragmentShader: FRAGMENT,
       side: THREE.DoubleSide,
@@ -442,6 +507,7 @@ export class TileGlobe {
     tile.mesh.material.dispose();
     tile.texture.dispose();
     tile.textureB?.dispose();
+    tile.textureW?.dispose();
     tile.dead = true;
     this.tiles.delete(key);
   }
@@ -454,8 +520,13 @@ export class TileGlobe {
     const { z, x, y } = tile;
     const top = Math.min(z, layer.maxLevel);
     const exact = this.image(layer, top, x >> (z - top), y >> (z - top), tile);
-    if (exact.state === 'missing' && !layer.base) return;
-    for (let level = top; level >= 0; level--) {
+    // A tile the server would not give may be a gap in the data or a server
+    // hiccup: ask for the tile one level coarser and use what is at hand.
+    if (exact.state === 'missing' && !layer.base && top > 0) this.image(layer, top - 1, x >> (z - top + 1), y >> (z - top + 1), tile);
+    // A much coarser stand-in is fine for a picture but would smear a water
+    // mask over the whole tile, so masks only reach two levels down.
+    const lowest = layer.mask != null ? Math.max(0, top - 2) : 0;
+    for (let level = top; level >= lowest; level--) {
       const shift = z - level;
       const entry = level === top ? exact : this.images.get(this.key(layer, level, x >> shift, y >> shift));
       if (!entry || entry.state !== 'ready') continue;
@@ -478,35 +549,16 @@ export class TileGlobe {
     ctx.fillStyle = '#0a1826';
     ctx.fillRect(0, 0, SIZE, SIZE);
 
-    // Land-only layers are gathered on a scratch canvas so the sea can be
-    // wiped from all of them at once.
-    let land = null;
-    const waitForHeights = this.terrain && tile.heightLevel < 0;
     const sidedLayers = [];
+    const maskLayers = [];
     for (const layer of this.layers) {
       const b = layer.bounds;
       if (b && !(b.east > tile.west && b.west < tile.east && b.north > tile.south && b.south < tile.north)) continue;
-      if (layer.side) {
-        sidedLayers.push(layer);
-        continue;
-      }
-      if (layer.landOnly) {
-        if (waitForHeights) continue;
-        if (!land) {
-          land = this.scratch.getContext('2d');
-          land.globalAlpha = 1;
-          land.clearRect(0, 0, SIZE, SIZE);
-        }
-        this.drawLayer(land, tile, layer, 1);
-      } else {
-        this.drawLayer(ctx, tile, layer, layer.alpha ?? 1);
-      }
+      if (layer.mask != null) maskLayers.push(layer);
+      else if (layer.side) sidedLayers.push(layer);
+      else this.drawLayer(ctx, tile, layer, layer.alpha ?? 1);
     }
-    if (land) {
-      if (this.terrain) this.wipeSea(land, tile);
-      ctx.globalAlpha = 0.62;
-      ctx.drawImage(this.scratch, 0, 0);
-    }
+    this.paintMask(tile, maskLayers);
     ctx.globalAlpha = 1;
 
     const here = this.pictures.filter((p) => p.bounds.east > tile.west && p.bounds.west < tile.east && p.bounds.north > tile.south && p.bounds.south < tile.north);
@@ -522,6 +574,11 @@ export class TileGlobe {
       tile.ctxB.globalAlpha = 1;
       tile.ctxB.drawImage(tile.canvas, 0, 0);
     }
+    // A new cross-fade starts on this tile once it holds both pictures.
+    if (sided && this.uniforms.uFadeDur.value > 0 && tile.fadeGen !== this.fadeGen) {
+      tile.fadeGen = this.fadeGen;
+      tile.mesh.material.uniforms.uFadeAt.value = this.uniforms.uTime.value;
+    }
     for (const layer of sidedLayers) this.drawLayer(layer.side === 'left' ? tile.ctxB : ctx, tile, layer, layer.alpha ?? 1);
     ctx.globalAlpha = 1;
     if (sided) tile.ctxB.globalAlpha = 1;
@@ -536,6 +593,39 @@ export class TileGlobe {
     }
     tile.mesh.material.uniforms.uUseB.value = sided ? 1 : 0;
     tile.texture.needsUpdate = true;
+  }
+
+  // The water mask for this tile: every mask layer gathered on one canvas,
+  // the sea wiped out (the mask is about water on land), edges softened.
+  paintMask(tile, layers) {
+    const use = tile.mesh.material.uniforms.uUseW;
+    // The sea can only be told from land once the heights are known.
+    if (!layers.length || (this.terrain && tile.heightLevel < 0)) {
+      use.value = 0;
+      return;
+    }
+    const scratch = this.scratch.getContext('2d');
+    scratch.globalAlpha = 1;
+    scratch.clearRect(0, 0, SIZE, SIZE);
+    // Latest step first, so the earliest sighting of each spot ends up on top.
+    for (const layer of [...layers].sort((a, b) => b.mask - a.mask)) this.drawLayer(scratch, tile, layer, 1);
+    if (this.terrain) this.wipeSea(scratch, tile);
+    if (!tile.canvasW) {
+      tile.canvasW = document.createElement('canvas');
+      tile.canvasW.width = tile.canvasW.height = SIZE;
+      tile.ctxW = tile.canvasW.getContext('2d');
+      tile.textureW = this.texture(tile.canvasW);
+      tile.mesh.material.uniforms.mapW.value = tile.textureW;
+    }
+    // Shrinking and stretching blurs the mask, which gives the shader a soft
+    // edge to run waves along. Dry ground reads "no water, latest step".
+    const s = SIZE / 4;
+    this.softCtx.fillStyle = 'rgb(0,255,0)';
+    this.softCtx.fillRect(0, 0, s, s);
+    this.softCtx.drawImage(this.scratch, 0, 0, s, s);
+    tile.ctxW.drawImage(this.soft, 0, 0, s, s, 0, 0, SIZE, SIZE);
+    tile.textureW.needsUpdate = true;
+    use.value = 1;
   }
 
   // Clears every grid cell that touches sea level, which also removes the
@@ -673,8 +763,8 @@ export class TileGlobe {
       s[rows * cols + k] = s[from];
     });
     height.needsUpdate = shade.needsUpdate = true;
-    // Land-only layers were waiting to learn where the sea is.
-    if (this.layers.some((l) => l.landOnly)) tile.dirty = true;
+    // The water mask was waiting to learn where the sea is.
+    if (this.layers.some((l) => l.mask != null)) tile.dirty = true;
   }
 
   heights(z, x, y, tile) {
@@ -751,7 +841,7 @@ export class TileGlobe {
 
   // Cache key: the same picture filtered differently is a different entry.
   key(layer, z, x, y) {
-    return this.url(layer, z, x, y) + (layer.keep ? '#kept' : '');
+    return this.url(layer, z, x, y) + (layer.keep ? `#kept${layer.tint || ''}` : '');
   }
 
   image(layer, z, x, y, tile) {

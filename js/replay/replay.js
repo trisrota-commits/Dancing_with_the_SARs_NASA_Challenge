@@ -14,7 +14,6 @@ import { gdacsShapes, shakeContours, quakesNear, fireDetections, dateRange } fro
 
 const DAY = 86400_000;
 const HOLD = 2.5; // seconds the final picture stays before the loop restarts
-const FIRE_PIXEL_KM = 0.375; // ground size of one VIIRS fire detection
 const ORBIT = 2.5; // degrees per second the camera circles a replay
 const RAD = Math.PI / 180;
 
@@ -120,7 +119,9 @@ async function quake(inc, globe) {
   const WAVE = 5.5;
   const AFTER = after.length ? 8 : 0;
   const speedup = Math.round(rmax / 3.5 / WAVE);
-  const dot = (q, color, born) => ({ lat: q.lat, lon: q.lon, color, size: 4 + Math.max(0, q.mag - 2.5) * 3.2, born });
+  const dot = (q, color, pop) => ({ lat: q.lat, lon: q.lon, color, size: 4 + Math.max(0, q.mag - 2.5) * 3.2, pop });
+  // When each later quake first showed, so it can pop in once.
+  const popped = [];
   let shownZones = -1;
   let shownAfter = -1;
 
@@ -165,8 +166,11 @@ async function quake(inc, globe) {
       const now = AFTER ? inc.time + (Math.max(0, t - WAVE - 0.5) / AFTER) * span : inc.time;
       const nAfter = after.filter((q) => q.time <= now).length;
       if (nAfter !== shownAfter) {
+        // Jumping back in time forgets the entrances from there on.
+        if (nAfter < shownAfter) popped.length = nAfter;
+        for (let i = popped.length; i < nAfter; i++) popped[i] = globe.clock;
         shownAfter = nAfter;
-        globe.setEffectDots([...before.map((q) => dot(q, [0.62, 0.66, 0.72])), ...after.slice(0, nAfter).map((q) => dot(q, [1, 0.62, 0.2]))]);
+        globe.setEffectDots([...before.map((q) => dot(q, [0.62, 0.66, 0.72])), ...after.slice(0, nAfter).map((q, i) => dot(q, [1, 0.62, 0.2], popped[i]))]);
       }
       this.now = now;
       this.count = nAfter;
@@ -240,7 +244,6 @@ async function fire(inc, globe) {
   const days = await fireDetections(inc.lat, inc.lon, radius, dates);
   const total = days.reduce((n, d) => n + d.points.length, 0);
   const STEP = 1.1;
-  let shown = -1;
 
   return {
     duration: days.length * STEP,
@@ -250,28 +253,26 @@ async function fire(inc, globe) {
         ? { kind: 'observed', text: `${total} active-fire detections over ${days.length} days within ${Math.round(radius)} km`, source: 'VIIRS on NOAA-20, NASA GIBS' }
         : { kind: 'note', text: `No satellite fire detections within ${Math.round(radius)} km in the last ${days.length} days.` },
       ...(burnt.length ? [{ kind: 'analysis', text: 'Burnt-area outline', source: 'GDACS / GWIS' }] : []),
-      { kind: 'computed', text: 'The newest detections glow at the sensor\'s 375 m pixel size and older ones cool to dark red. The flicker is decoration. Nothing is drawn between detections.' },
+      { kind: 'computed', text: 'Each detection glows at the sensor\'s 375 m pixel size, fades in during its day (the satellite gives the day, not the hour) and cools to dark red over about three days. Nothing is drawn between detections.' },
+      { kind: 'computed', text: 'Zoom in for flames, sparks and smoke on each detection. They are animation: their size and movement are not measured, and the smoke rises straight up because the feeds carry no wind.' },
     ],
     setup() {
       globe.setEffectZones(burnt.map((b) => ({ ring: b.ring, color: 'rgba(255,166,43,0.95)', fill: 'rgba(255,166,43,0.07)', width: 2 })));
+      // Every detection is handed over once, with the moment it ignites on
+      // the replay clock: spread through the first part of its day, in an
+      // order fixed by its position.
+      const items = [];
+      days.forEach((d, i) => {
+        for (const p of d.points) {
+          const h = Math.sin(p.lat * 269.5 + p.lon * 183.3) * 43758.5453;
+          items.push({ lat: p.lat, lon: p.lon, born: (i + (h - Math.floor(h)) * 0.55) * STEP });
+        }
+      });
+      globe.setFire(items, centre);
     },
     draw(t) {
-      const index = Math.min(days.length - 1, Math.floor(t / STEP));
-      this.index = index;
-      if (index === shown) return;
-      shown = index;
-      const coals = [];
-      const embers = [];
-      for (let i = 0; i <= index; i++) {
-        const age = index - i;
-        // That day's detections burn bright; earlier ones cool down to coals.
-        for (const p of days[i].points) {
-          if (age > 2) coals.push({ lat: p.lat, lon: p.lon, color: [0.42, 0.09, 0.05], size: 3 });
-          else embers.push({ lat: p.lat, lon: p.lon, color: age === 0 ? [1, 0.74, 0.3] : [0.9, 0.3, 0.07], size: age === 0 ? 4.5 : 3, km: FIRE_PIXEL_KM, flicker: age === 0 });
-        }
-      }
-      globe.setEffectDots(coals);
-      globe.setEffectGlow(embers);
+      this.index = Math.min(days.length - 1, Math.floor(t / STEP));
+      globe.setFireTime(t, STEP);
     },
     caption() {
       const d = days[this.index ?? 0];
@@ -289,7 +290,6 @@ async function flood(inc, globe) {
   const dates = dateRange(Math.max(inc.time - 4 * DAY, Date.now() - 22 * DAY), Date.now(), 22).filter((_, i, all) => (all.length - 1 - i) % 2 === 0);
   const water = OVERLAYS.water;
   const STEP = 1.1;
-  let shown = -1;
   // Only fetch water tiles around the event, not for the whole view.
   const pts = area.length ? area.flatMap((a) => a.ring) : [centre];
   const pad = area.length ? 0.3 : 1.5;
@@ -307,16 +307,18 @@ async function flood(inc, globe) {
       { kind: 'observed', text: `Water the radar saw on land (blue), building up pass by pass from ${dates[0]}. Rivers and lakes that are always there show too.`, source: 'OPERA DSWx, Sentinel-1' },
       ...(area.length ? [{ kind: 'analysis', text: 'Affected-area outline', source: 'GDACS' }] : []),
       { kind: 'note', text: 'Radar passes come every few days, so water appears in strips as each pass arrives.' },
+      { kind: 'computed', text: 'Each patch of water fades in at the first pass that saw it. The ripples and the waves along its edge are animation: the radar gives where water was on each pass, not how it moved.' },
     ],
     setup() {
       globe.setEffectZones(area.map((a) => ({ ring: a.ring, color: 'rgba(63,167,255,0.95)', fill: 'rgba(63,167,255,0.06)', width: 2 })));
+      // Every pass is handed over once, marked with its step; the terrain
+      // shader then lets the water arrive as the replay clock passes it.
+      globe.setWater(0, dates.length);
+      globe.setEffectLayers(dates.map((date, i) => ({ url: water.url.replace('{date}', date), maxLevel: water.maxLevel, bounds, keep: isWater, tint: [255, Math.round((255 * i) / dates.length), 0], mask: i })));
     },
     draw(t) {
-      const index = Math.min(dates.length - 1, Math.floor(t / STEP));
-      this.index = index;
-      if (index === shown) return;
-      shown = index;
-      globe.setEffectLayers(dates.slice(0, index + 1).map((date) => ({ url: water.url.replace('{date}', date), maxLevel: water.maxLevel, bounds, keep: isWater, tint: [70, 170, 255], landOnly: true })));
+      this.index = Math.min(dates.length - 1, Math.floor(t / STEP));
+      globe.setWater(t / STEP, dates.length);
     },
     caption() {
       return `Water seen by radar up to ${dates[this.index ?? 0]}`;
