@@ -412,10 +412,20 @@ that appears on a place, or an event nearby, once results exist.
 
 ### Known problems
 
-- **No calibrated measurements exist yet.** `tools/measure.py` has only run
-  on simulated files. Someone with an Earthdata login has to run it and
-  commit `data/measured/`; until then the card never shows. See "Measuring
-  with NISAR" in the README.
+- **No calibrated measurements exist yet.** `tools/measure.py` has only
+  read simulated files; its search has been run against the real archive
+  (it finds 30 passes over the Aletsch site without a login), but reading
+  needs an Earthdata login nobody has supplied yet. Everything else is in
+  place (14 Nov, night): the login is taken from `EARTHDATA_TOKEN`;
+  `--point LAT LON --name … --event DATE` measures any event across its
+  date; a site measured before only reads its new passes; and the app
+  leads with the result by itself (a line on the event card, a "Measured"
+  sentence in the text, the series and map in the details; see
+  `measuredStep` in `js/measured.js`). So the remaining step is one
+  command and one commit. A GitHub Actions workflow that does this daily
+  was drafted but not added: it would push to `main` by itself and needs a
+  repository secret, which is the lead's decision. Never commit simulated
+  results to `data/measured/`.
 - **Event history chart: fixed 14 Nov.** It was often empty because the
   track with the most passes was chosen even when the place sat in the
   empty strip along the frame edge. `historyAt` now puts tracks that hold

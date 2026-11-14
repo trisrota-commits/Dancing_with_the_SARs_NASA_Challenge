@@ -22,6 +22,33 @@ const cache = new Map();
 const day = (ms) => new Date(ms).toISOString().slice(0, 10);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
+// The calibrated change between the two passes of the change map, as a
+// plain statement: { co, db, before, after, acrossEvent }. `eventTime`, when
+// given, tells whether those two passes lie on either side of that event.
+export function measuredStep(d, eventTime) {
+  const at = (t) => d.series.find((s) => s.time === t);
+  const a = at(d.change.before);
+  const b = at(d.change.after);
+  if (!a || !b || a.hh == null || b.hh == null) return null;
+  return {
+    co: d.pols?.[0] || 'HH',
+    cross: d.pols?.[1] || null,
+    db: b.hh - a.hh,
+    crossDb: a.hv != null && b.hv != null ? b.hv - a.hv : null,
+    before: a.time,
+    after: b.time,
+    acrossEvent: eventTime != null && a.time < eventTime && b.time >= eventTime,
+  };
+}
+
+// One line for the event card.
+export function measuredLine(d, eventTime) {
+  const m = measuredStep(d, eventTime);
+  if (!m) return '';
+  const moved = Math.abs(m.db) < 0.5 ? 'stayed within half a decibel' : `${m.db < 0 ? 'fell' : 'rose'} by ${Math.abs(m.db).toFixed(1)} dB`;
+  return `Measured (calibrated): the ${m.co} echo ${moved} between ${day(m.before)} and ${day(m.after)}${m.acrossEvent ? ', the passes on either side of the event' : ''}.`;
+}
+
 // Measured sites; an empty list when none have been made yet.
 export async function measuredIndex() {
   if (!index) {
@@ -37,12 +64,15 @@ export async function measuredById(id) {
   return entry ? load(entry) : null;
 }
 
-// The nearest measured site within its match radius of a point, if any.
-export async function measuredNear(lat, lon) {
+// The measured site for a point, if one lies within its match radius. A
+// measurement made for an event at about `eventTime` comes before one that
+// merely lies nearer.
+export async function measuredNear(lat, lon, eventTime) {
+  const made = (e) => (eventTime != null && e.event != null && Math.abs(e.event - eventTime) < 30 * 86400_000 ? 0 : 1);
   const near = (await measuredIndex())
     .map((e) => ({ e, km: distanceKm({ lat, lon }, e) }))
     .filter((x) => x.km <= x.e.radiusKm)
-    .sort((a, b) => a.km - b.km)[0];
+    .sort((a, b) => made(a.e) - made(b.e) || a.km - b.km)[0];
   return near ? load(near.e) : null;
 }
 

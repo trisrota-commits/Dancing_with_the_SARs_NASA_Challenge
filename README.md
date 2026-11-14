@@ -263,13 +263,36 @@ To run it, you need a free NASA Earthdata login
 
 ```bash
 pip install earthaccess h5py numpy pyproj pillow
-python tools/measure.py --list aletsch     # which tracks cover the site
+python tools/measure.py --list aletsch     # which tracks cover the site (no login needed)
 python tools/measure.py aletsch perito-moreno
 ```
 
 Then commit the new files in `data/measured/`. Check each change map in the
 app: if the measurement point is not on the feature (ice, water, a field),
 move it in `tools/measure_sites.json` and run the site again.
+
+**Any event, not only the listed places.** Give a point and the event's
+date; the change map then compares the last pass before the event with the
+first one after it:
+
+```bash
+python tools/measure.py --point 22.28 79.86 --name "Forest fires in India" --event 2026-11-05 --save
+```
+
+`--save` adds the point to the site list, so later runs keep it up to date.
+In the app, the result shows on every event within 25 km: one line on the
+event's card, a sentence in its text and the full series and map in the
+details. Nothing else has to be changed.
+
+**Login without typing.** The script takes the login from `EARTHDATA_TOKEN`
+(made on the Earthdata site under "Generate Token", valid 60 days), or from
+`EARTHDATA_USERNAME` and `EARTHDATA_PASSWORD`, or from `~/.netrc`, and only
+asks on a terminal when none of these exist. Only reading the data needs a
+login; searching does not.
+
+**Runs again cheaply.** A site measured before is brought up to date: the
+passes already in its file are kept and only new ones are read. Moving the
+point or changing a radius reads everything again, as does `--fresh`.
 
 `python tests/test_measure.py` checks the script on simulated files with
 the same layout as real GCOV products.

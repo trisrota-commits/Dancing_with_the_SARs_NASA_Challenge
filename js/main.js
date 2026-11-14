@@ -9,7 +9,7 @@ import { PLACES, PLACE_KINDS, otherHemisphere } from './places.js';
 import { loadFrames, spread, view, history, describeSeries, rankByCoverage } from './timelapse.js';
 import { newsFor } from './news.js';
 import { playPass } from './sound.js';
-import { measuredById, measuredNear, measuredHtml, measuredChart, changeImageUrl } from './measured.js';
+import { measuredById, measuredNear, measuredHtml, measuredChart, measuredLine, changeImageUrl } from './measured.js';
 import { fetchElements, positionAt, groundTrack, swathEdges, elementsEpoch } from './orbit.js';
 import { SPECIES, MONTHS, POIS, loadSightings } from './wildlife.js';
 import { historyChart } from './chart.js';
@@ -286,6 +286,7 @@ function renderCard() {
     <h4>In the news</h4>
     ${body}
     <p class="nisar-line">${esc(nisarLine(inc, sel.found))}</p>
+    ${sel.measured ? `<p class="nisar-line measured-line">${esc(measuredLine(sel.measured, inc.time))}</p>` : ''}
     <div class="actions">
       <button class="primary" id="card-details">Show details</button>
       ${sel.found && bestPair(sel.found.backscatter, inc.time, true, inc) ? `<button id="card-change" aria-pressed="${stage.owner === 'change'}">${stage.owner === 'change' ? 'Back to the radar picture' : 'Show what changed'}</button>` : ''}
@@ -298,7 +299,7 @@ function renderCard() {
 function renderNarrative() {
   const sel = state.selected;
   if (sel?.kind !== 'incident' || !$('story-text')) return;
-  $('story-text').innerHTML = narrate(sel.incident, { found: sel.found, news: sel.news, history: sel.history, sizeText: size(sel.incident.magnitude) });
+  $('story-text').innerHTML = narrate(sel.incident, { found: sel.found, news: sel.news, history: sel.history, measured: sel.measured, sizeText: size(sel.incident.magnitude) });
   $('timeline').innerHTML = timeline(sel.incident, sel.found);
 }
 
@@ -646,7 +647,7 @@ async function selectIncident(inc, fly, intro = '') {
   renderCard();
   renderNarrative();
   const opened = state.selected;
-  showMeasured(() => state.selected === opened, measuredNear(inc.lat, inc.lon));
+  showMeasured(() => state.selected === opened, measuredNear(inc.lat, inc.lon, inc.time));
   globe.select(inc);
   if (fly) globe.flyTo(inc.lat, inc.lon);
   replay.start(inc);
@@ -1624,6 +1625,9 @@ async function showMeasured(stillHere, pending, findCompare) {
   state.selected.measured = d;
   $('measured-slot').innerHTML = `<h4>Measured with NISAR</h4>${measuredHtml(d, compare)}`;
   measuredChart($('measured-chart'), d, compare);
+  // An event's card and text lead with the calibrated value once it is here.
+  renderCard();
+  renderNarrative();
 }
 
 async function showMeasuredMap(button) {

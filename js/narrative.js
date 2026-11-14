@@ -8,6 +8,7 @@
 
 import { CATEGORIES, FEEDS, RELATED_KM, RELATED_DAYS, WHO_USES } from './config.js';
 import { nextPass, bestPair, REPEAT_DAYS } from './nisar.js';
+import { measuredStep } from './measured.js';
 
 const DAY = 86400_000;
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -31,6 +32,7 @@ const link = (source, label, section) => `<a href="#${section}" class="src" data
 
 // What each source is, for the hover box.
 export const SOURCE_NOTES = {
+  measured: "Read from NASA's full-resolution NISAR product (terrain-corrected backscatter, in decibels) by this project's measurement script, not from the preview pictures.",
   usgs: 'U.S. Geological Survey. Earthquake time, place, magnitude and shaking maps, updated every minute.',
   eonet: "NASA's Earth Observatory Natural Event Tracker. Curated natural events and storm tracks.",
   gdacs: 'Global Disaster Alert and Coordination System, run by the UN and the EU. Alert levels, affected areas and linked news.',
@@ -87,7 +89,7 @@ export function nisarLine(inc, found) {
 
 // The text for the details panel, as HTML paragraphs.
 // given: { found, news, history, sizeText }; each may still be missing.
-export function narrate(inc, { found, news, history, sizeText }) {
+export function narrate(inc, { found, news, history, measured, sizeText }) {
   const out = [];
 
   // What happened, when, and who says so.
@@ -126,6 +128,18 @@ export function narrate(inc, { found, news, history, sizeText }) {
     if (est) n += ` The next overpass is expected around ${date(est.time)}; that is an estimate from the ${REPEAT_DAYS}-day repeat cycle, not a schedule.`;
     out.push(n);
   }
+  // A calibrated measurement, when one has been made here, comes before
+  // anything read off the preview pictures.
+  const step = measured ? measuredStep(measured, inc.time) : null;
+  if (step) {
+    const moved = (db) => (Math.abs(db) < 0.5 ? 'stayed within half a decibel' : `${db < 0 ? 'fell' : 'rose'} by ${Math.abs(db).toFixed(1)} dB`);
+    let m = `<span class="badge">Measured</span> In NISAR's full-resolution, calibrated data the ${esc(step.co)} echo at ${esc(measured.name)} ${moved(step.db)}`;
+    if (step.crossDb != null) m += ` and the ${esc(step.cross)} echo ${moved(step.crossDb)}`;
+    m += ` between ${shortDate(step.before)} and ${shortDate(step.after)}`;
+    m += step.acrossEvent ? ', the passes on either side of this event.' : '.';
+    m += ` Three decibels is a halving or doubling of the echo's power. ${link('measured', 'See the measured series and map', 'sec-nisar')}.`;
+    out.push(m);
+  }
   if (history) {
     // The pass just before the event against the first one after it, when
     // this track has both; otherwise the range over all its passes.
@@ -139,7 +153,7 @@ export function narrate(inc, { found, news, history, sizeText }) {
     h += before && after
       ? `read ${read(before)}, the last pass on this track before the event, and ${read(after)}, the first one after it. Over ${pts.length} passes it ranged from ${read(low)} to ${read(high)}.`
       : `ranged from ${read(low)} to ${read(high)} over ${pts.length} passes.`;
-    h += ` ${link('nisar', 'See every pass in the chart', 'sec-nisar')}. These are values from NASA's preview pictures, on a scale of 0 to 255, not calibrated measurements.`;
+    h += ` ${link('nisar', 'See every pass in the chart', 'sec-nisar')}. These are values from NASA's preview pictures, on a scale of 0 to 255, not calibrated measurements${step ? '; the measured values above are' : ''}.`;
     out.push(h);
     // Which channel moved says something about why.
     const reading = before && after ? channelReading(before, after, history.pols) : null;
