@@ -180,6 +180,13 @@ say what it shows without us.
   are now kept only when they name the kind of event (`ON_TOPIC` in
   `js/news.js`), for both GDACS and the GDELT search. Fewer headlines,
   none of them absurd; with none left the card shows what the feeds report.
+- **The card leads with what the agencies report** (lead, 14 Nov, late):
+  depth, estimated impact, felt reports, burnt hectares, alert level, each
+  with its source and a link to the official page. Press is an extra, at
+  most two headlines, and only when one passes the filter above. The lead
+  asked for a curated "catastrophe board" instead of press: ReliefWeb (UN)
+  is the one that exists, but since its API version 2 it only answers
+  apps with an approved name, which has to be requested from them.
 - **The Earthdata token cannot live in the website.** Everything a static
   site ships can be read by anyone who opens it. A secret needs a machine
   of ours that runs the measuring script on a schedule and publishes only

@@ -96,19 +96,29 @@ export async function newsFor(incident) {
   const key = incident.reports.find((r) => r.gdacsKey)?.gdacsKey;
   if (key) {
     const articles = await fromGdacs(key).catch(() => []);
-    const fitting = dedupe(articles, ON_TOPIC[incident.category]);
+    const fitting = dedupe(articles, ON_TOPIC[incident.category], placesOf(incident));
     if (fitting.length) return { articles: fitting, via: 'gdacs' };
   }
   const articles = await fromGdelt(incident).catch(() => []);
-  return { articles: dedupe(articles, ON_TOPIC[incident.category]), via: 'gdelt' };
+  return { articles: dedupe(articles, ON_TOPIC[incident.category], placesOf(incident)), via: 'gdelt' };
 }
 
-// One entry per headline, newest first, and only headlines that name the
-// kind of event (when there is a word list for it).
-export function dedupe(articles, onTopic) {
+// The places an event is in, as the feeds name them: the place in its
+// title and the countries GDACS lists.
+export function placesOf(incident) {
+  const names = [placeWord(incident.title), ...incident.reports.flatMap((r) => (r.country || '').split(','))];
+  return [...new Set(names.map((n) => (n || '').trim().toLowerCase()).filter((n) => n.length >= 3))];
+}
+
+// One entry per headline, newest first. A headline is kept only when it
+// names the kind of event (when there is a word list for it) and, when
+// `places` is given, one of those places: a flood in Bangkok is not news
+// about a flood in France. With no place known, nothing is kept.
+export function dedupe(articles, onTopic, places) {
   const seen = new Set();
+  const here = (title) => !places || places.some((p) => title.toLowerCase().includes(p));
   return articles
-    .filter((a) => a.title && /^https?:\/\//.test(a.url || '') && (!onTopic || onTopic.test(a.title)) && !seen.has(a.title) && seen.add(a.title))
+    .filter((a) => a.title && /^https?:\/\//.test(a.url || '') && (!onTopic || onTopic.test(a.title)) && here(a.title) && !seen.has(a.title) && seen.add(a.title))
     .sort((a, b) => (b.time || 0) - (a.time || 0))
     .slice(0, 8);
 }
