@@ -144,6 +144,14 @@ time; there is no backend and there are no keys.
   serves an 8×8 block of map tiles. Sea floor is flattened to sea level.
 - A frame is only drawn when something changed (`globe.dirty`, tile
   changes, camera moves, or `globe.animating`).
+- Replay effects (added 14 Nov, afternoon): `globe.setShockwave` drives
+  uniforms in the tile shader (glow per pixel, ripple per vertex);
+  `Vortex` is a world-sized quad with a procedural cloud shader, floating
+  at cloud-top height; `Glow` is additive points with a true ground size
+  (fire embers, the epicentre flash); `Beams` are the light beams on event
+  dots, scaled by `shared.uBeam` from camera tilt and distance;
+  `controls.orbit` turns the camera slowly during a replay. Only the
+  orbit honours "prefers reduced motion" so far.
 
 ## Data sources and what we learnt about them
 
@@ -217,6 +225,8 @@ that appears on a place, or an event nearby, once results exist.
   their frame outline while the imaged strip misses it. Ranking tracks by
   thumbnail coverage (`rankByCoverage`) did not fix the test case (1 usable
   sample of 8). Needs a per-pass coverage check.
+- **The new effects have only been seen in software rendering**, as
+  still frames. Their motion, and their cost on a real GPU, are unchecked.
 - **Nothing has been tried by hand.** All testing is scripted, in a
   container without a GPU. The feel of the camera, real frame rates, the
   Windows and macOS launchers, keyboard use and the sound are unverified.

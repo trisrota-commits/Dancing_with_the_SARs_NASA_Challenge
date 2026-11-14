@@ -30,6 +30,9 @@ const VERTEX = /* glsl */ `
   attribute float aDrop;
   attribute float aShade;
   uniform float uExaggeration;
+  uniform vec3 uWaveC;
+  uniform vec4 uWave;
+  uniform vec2 uRipple;
   varying vec2 vUv;
   varying vec3 vNormal;
   varying float vShade;
@@ -37,7 +40,14 @@ const VERTEX = /* glsl */ `
     vUv = uv;
     vNormal = normal;
     vShade = aShade;
-    vec3 p = position + normal * ((aHeight * uExaggeration - aDrop) / ${EARTH_RADIUS_M.toFixed(1)});
+    float h = aHeight * uExaggeration - aDrop;
+    // A passing shock front lifts the ground in a ripple (see setShockwave).
+    if (uWave.w > 0.0) {
+      float d = 2.0 * asin(min(1.0, length(normal - uWaveC) * 0.5));
+      float x = (d - uWave.x) / uRipple.x;
+      h += uWave.w * uRipple.y * exp(-x * x) * cos(x * 2.5);
+    }
+    vec3 p = position + normal * (h / ${EARTH_RADIUS_M.toFixed(1)});
     gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
   }`;
 
@@ -50,6 +60,8 @@ const FRAGMENT = /* glsl */ `
   uniform vec3 uSun;
   uniform float uNight;
   uniform float uRelief;
+  uniform vec3 uWaveC;
+  uniform vec4 uWave;
   varying vec2 vUv;
   varying vec3 vNormal;
   varying float vShade;
@@ -60,6 +72,16 @@ const FRAGMENT = /* glsl */ `
     color *= mix(1.0, vShade, uRelief);
     float lit = smoothstep(-0.12, 0.18, dot(normalize(vNormal), uSun));
     color *= mix(1.0, mix(0.13, 1.0, lit), uNight);
+    // Shock fronts glow on the ground: the slower, stronger wave in red
+    // with a fading wake behind it, the faster one ahead of it in white.
+    if (uWave.w > 0.0) {
+      float d = 2.0 * asin(min(1.0, length(normalize(vNormal) - uWaveC) * 0.5));
+      float s = (d - uWave.x) / uWave.z;
+      float p = (d - uWave.y) / uWave.z;
+      float wake = d < uWave.x ? exp((d - uWave.x) / (uWave.z * 7.0)) * 0.3 : 0.0;
+      color += vec3(1.0, 0.34, 0.2) * (exp(-s * s) + wake) * uWave.w;
+      color += vec3(0.8, 0.9, 1.0) * exp(-p * p * 3.0) * uWave.w * 0.4;
+    }
     gl_FragColor = vec4(color, 1.0);
   }`;
 
@@ -137,6 +159,11 @@ export class TileGlobe {
       uExaggeration: { value: 2 },
       uRelief: { value: 1 },
       uSplit: { value: 0.5 },
+      // Shock front: centre, then S radius, P radius, glow width (radians)
+      // and strength; ripple width (radians) and height (metres).
+      uWaveC: { value: new THREE.Vector3(0, 1, 0) },
+      uWave: { value: new THREE.Vector4(0, 0, 1, 0) },
+      uRipple: { value: new THREE.Vector2(1, 0) },
       uViewport: shared.uViewport,
     };
     this.frustum = new THREE.Frustum();

@@ -9,7 +9,7 @@ import { pointInPolygon } from './incidents.js';
 import { RAD, EARTH_RADIUS_M, toVec, toLatLon, greatCircle, sunDirection, rgb } from './engine/geo.js';
 import { GlobeControls } from './engine/controls.js';
 import { TileGlobe } from './engine/tiles.js';
-import { Dots, Lines, SelectionRing, Vortex, LIFT, atmosphere } from './engine/marks.js';
+import { Dots, Lines, SelectionRing, Vortex, Glow, Beams, LIFT, atmosphere } from './engine/marks.js';
 import { Sky } from './sky.js';
 
 const DAY = 86400_000;
@@ -38,6 +38,7 @@ export class Globe {
       uRatio: { value: 1 },
       uTime: { value: 0 },
       uViewport: { value: new THREE.Vector2(1, 1) },
+      uBeam: { value: 0 },
     };
 
     this.tiles = new TileGlobe(this.scene, this.shared);
@@ -49,12 +50,16 @@ export class Globe {
     this.fxLines = new Lines(this.scene, this.shared, { width: 2.4, order: 26, depthTest: false });
     this.fxDots = new Dots(this.scene, this.shared);
     this.fxDots.points.renderOrder = 27;
+    this.fxGlow = new Glow(this.scene, this.shared);
     this.vortex = new Vortex(this.scene, this.shared);
+    // Light beams on the event dots: taller for stronger events.
+    this.beams = new Beams(this.scene, this.shared);
+    this.beamItems = [];
     this.fxZones = [];
     this.animating = false;
-    this.dots = new Dots(this.scene, this.shared);
+    this.dots = new Dots(this.scene, this.shared, { halo: true });
     // Changing places (glaciers, sinking cities…), drawn as diamonds.
-    this.placeDots = new Dots(this.scene, this.shared);
+    this.placeDots = new Dots(this.scene, this.shared, { halo: true });
     this.placeDots.points.renderOrder = 29;
     // Wildlife sightings and points of interest.
     this.animalDots = new Dots(this.scene, this.shared);
@@ -143,6 +148,8 @@ export class Globe {
       this.animalDots.relift();
       this.poiDots.relift();
       this.fxDots.relift();
+      this.beams.set(this.beamItems, this.lift);
+      if (this.fxGlow.items.length) this.fxGlow.set(this.fxGlow.items, this.lift);
       if (this.selected) this.ring.set(this.selected.lat, this.selected.lon, this.lift(this.selected.lat, this.selected.lon));
       this.dirty = true;
     }
@@ -161,6 +168,10 @@ export class Globe {
     this.shared.uTime.value = seconds;
     this.shared.uScale.value = 0.75 + 0.75 * Math.max(0, Math.min(1, 1 - Math.log10(alt / 0.12) / 1.5));
     this.glow.uniforms.uStrength.value = Math.max(0, Math.min(1, (alt - 0.2) / 0.6));
+    // Beams stand up as the view tilts, or far out where the Earth's edge
+    // shows them from the side. Seen straight down they would only smear.
+    const ease = (x) => Math.max(0, Math.min(1, x)) ** 2 * (3 - 2 * Math.max(0, Math.min(1, x)));
+    this.shared.uBeam.value = Math.min(0.17 * alt, 0.075) * Math.max(ease((this.controls.pitch - 4) / 26), ease((alt - 1.5) / 1.5));
     if (this.tiles.uniforms.uNight.value) this.tiles.uniforms.uSun.value.copy(sun);
 
     this.skyCamera.quaternion.copy(this.camera.quaternion);
@@ -440,6 +451,8 @@ export class Globe {
     });
     this.pulseUntil = pulseUntil;
     this.dots.set(items, this.lift);
+    this.beamItems = list.map((inc) => ({ lat: inc.lat, lon: inc.lon, color: rgb(CATEGORIES[inc.category].color), height: 0.25 + 0.75 * inc.severity }));
+    this.beams.set(this.beamItems, this.lift);
     this.trackLines.set(tracks);
     this.dirty = true;
   }
@@ -584,17 +597,54 @@ export class Globe {
     this.applyLayers();
   }
 
+  // Glowing points: [{ lat, lon, color: [r, g, b], size, km, flicker }]
+  setEffectGlow(items) {
+    this.fxGlow.set(items, this.lift);
+    this.dirty = true;
+  }
+
+  // A cloud spiral: { lat, lon, radiusKm, color: [r, g, b], power: 0..1 }.
+  // It floats at cloud-top height, stretched like the terrain is.
   setVortex(at) {
     if (!at) this.vortex.set(null);
-    else this.vortex.set(this.ground(at.lat, at.lon), at.size, at.color, at.lat < 0);
+    else {
+      const lift = this.lift(at.lat, at.lon) + (14_000 * this.tiles.uniforms.uExaggeration.value) / EARTH_RADIUS_M;
+      this.vortex.set({ lat: at.lat, lon: at.lon, radius: (at.radiusKm * 1000) / EARTH_RADIUS_M, lift, color: at.color, power: at.power });
+    }
     this.dirty = true;
+  }
+
+  // A shock front crossing the terrain, or null to end it:
+  // { lat, lon, sKm, pKm, widthKm, strength, rippleKm, heightM }.
+  // sKm and pKm are the radii of the two fronts; the ground glows there and
+  // rises in a ripple rippleKm wide and heightM tall at the slower front.
+  setShockwave(wave) {
+    const u = this.tiles.uniforms;
+    if (!wave) {
+      if (u.uWave.value.w === 0) return;
+      u.uWave.value.w = 0;
+    } else {
+      const km = 1000 / EARTH_RADIUS_M;
+      toVec(wave.lat, wave.lon, 1, u.uWaveC.value);
+      u.uWave.value.set(wave.sKm * km, wave.pKm * km, wave.widthKm * km, wave.strength);
+      u.uRipple.value.set(wave.rippleKm * km, wave.heightM);
+    }
+    this.dirty = true;
+  }
+
+  // Turns the view slowly around its target until the next touch.
+  setOrbit(degreesPerSecond) {
+    this.controls.orbit = reducedMotion.matches ? 0 : degreesPerSecond;
   }
 
   clearEffects() {
     this.animating = false;
     this.fxLines.set([]);
     this.fxDots.set([], this.lift);
+    this.fxGlow.set([], this.lift);
     this.vortex.set(null);
+    this.setShockwave(null);
+    this.controls.orbit = 0;
     if (this.fxZones.length) this.setEffectZones([]);
     if (this.state.fx.length) this.setEffectLayers([]);
     this.dirty = true;
@@ -652,6 +702,7 @@ export function loadPicture(url) {
   return pictureCache.get(url);
 }
 
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const scratch = new THREE.Vector3();
 const raycaster = new THREE.Raycaster();
 const ball = new THREE.Sphere(new THREE.Vector3(), 1);
