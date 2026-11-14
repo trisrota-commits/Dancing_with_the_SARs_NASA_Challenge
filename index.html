@@ -35,8 +35,10 @@
             <option value="3">Last 3 days</option>
             <option value="7" selected>Last 7 days</option>
             <option value="14">Last 14 days</option>
+            <option value="nisar">Since NISAR data began</option>
           </select>
         </div>
+        <p class="hint" id="window-note" hidden></p>
         <p class="hint">Bigger dot = stronger event. A white ring means NISAR imaged that spot in its latest passes. Click a dot to replay what happened.</p>
       </details>
 
@@ -117,6 +119,17 @@
         <div id="replay-caption"></div>
         <div id="replay-bar" role="slider" aria-label="Replay position" aria-valuemin="0" aria-valuemax="100"><i id="replay-fill"></i></div>
       </div>
+    </div>
+
+    <div id="ticker" role="region" aria-label="Latest reports from the event feeds" hidden>
+      <span id="ticker-label" class="badge"></span>
+      <button id="ticker-text" title="View on the globe"></button>
+      <span id="ticker-count"></span>
+      <button id="ticker-prev" aria-label="Previous report">‹</button>
+      <button id="ticker-next" aria-label="Next report">›</button>
+      <button id="ticker-pause" aria-label="Pause cycling through reports">❚❚</button>
+      <span id="ticker-feeds" title="Reports come from USGS, NASA EONET and GDACS. They can be delayed and do not cover every emergency. This is not an official warning service."></span>
+      <button id="ticker-close" aria-label="Hide the reports bar">✕</button>
     </div>
 
     <button id="here" hidden>▶ NISAR time-lapse here</button>

@@ -6,8 +6,6 @@
 // here; the panel labels it as context. The "look" text says what NISAR's
 // first months of data (from June 2026) can show.
 
-export const NISAR_START = '2026-06-17'; // first calibrated NISAR L-band data
-
 export const PLACE_KINDS = {
   glacier: {
     label: 'Glaciers',

@@ -81,6 +81,29 @@ export async function latestScenes(count = 200) {
   return dedupe(await search(['NISAR_L2_GCOV_V1', 'NISAR_UR_L2'], '*_GCOV_*', {}, count));
 }
 
+// NISAR flies an exact repeat orbit: the same track comes round every 12 days.
+export const REPEAT_DAYS = 12;
+
+// Estimates the next overpass from archived passes: for each repeat track,
+// the newest pass plus whole 12-day cycles until the result is in the future.
+// It is an estimate only: an overpass is not a guaranteed acquisition.
+export function nextPass(scenes, now = Date.now()) {
+  const newest = new Map();
+  for (const s of scenes) {
+    if (!Number.isFinite(s.time)) continue;
+    if (!newest.has(s.stack) || newest.get(s.stack).time < s.time) newest.set(s.stack, s);
+  }
+  let best = null;
+  for (const last of newest.values()) {
+    const cycle = REPEAT_DAYS * 86400_000;
+    const cycles = Math.max(1, Math.ceil((now - last.time) / cycle));
+    const time = last.time + cycles * cycle;
+    // Cycles beyond the first are expected passes that never reached the archive.
+    if (!best || time < best.time) best = { time, last, missed: cycles - 1 };
+  }
+  return best;
+}
+
 export async function scenesAt(lat, lon, fromMs, toMs) {
   const temporal = `${new Date(fromMs).toISOString()},${new Date(toMs).toISOString()}`;
   const at = { point: `${lon},${lat}`, temporal };
@@ -112,13 +135,22 @@ export async function historyAt(lat, lon) {
   return list.filter((st) => st.scenes.length >= 2).sort((a, b) => b.scenes.length - a.scenes.length);
 }
 
+// The newest passes over a point, whatever their date: what the next-pass
+// estimate has to start from.
+export async function newestAt(lat, lon) {
+  return dedupe(await search(ALL_GCOV, '*_GCOV_*', { point: `${lon},${lat}` }, 30));
+}
+
 // Best before/after pair: same track and frame, closest to the event on each side.
-export function bestPair(scenes, eventTime) {
+export function bestPair(scenes, eventTime, requirePreview = true) {
   const byStack = new Map();
   for (const s of scenes) {
-    if (!s.image) continue;
-    if (!byStack.has(s.stack)) byStack.set(s.stack, []);
-    byStack.get(s.stack).push(s);
+    if (s.product !== 'GCOV' || !s.track || !s.frame ||
+        !['Ascending', 'Descending'].includes(s.direction) || !Number.isFinite(s.time)) continue;
+    if (requirePreview && !s.image) continue;
+    const stack = `${s.track}-${s.direction}-${s.frame}`;
+    if (!byStack.has(stack)) byStack.set(stack, []);
+    byStack.get(stack).push(s);
   }
   let best = null;
   for (const list of byStack.values()) {
@@ -129,6 +161,20 @@ export function bestPair(scenes, eventTime) {
     if (!best || span < best.span) best = { before, after, span };
   }
   return best;
+}
+
+// Metadata-only feasibility check; no preview downloads are needed.
+export function comparisonStatus(scenes, eventTime) {
+  const pair = bestPair(scenes, eventTime);
+  if (pair) return { pair, reason: '' };
+  const coverage = scenes.filter((s) => s.product === 'GCOV' && Number.isFinite(s.time));
+  let reason;
+  if (!coverage.length) reason = 'No backscatter scenes were found in the searched archive window.';
+  else if (!coverage.some((s) => s.time < eventTime)) reason = 'No earlier pass was found before the event in the searched archive window.';
+  else if (!coverage.some((s) => s.time >= eventTime)) reason = 'No pass at or after the event was found in the searched archive window.';
+  else if (bestPair(coverage, eventTime, false)) reason = 'Matching passes exist, but a source image preview is unavailable.';
+  else reason = 'No before/after passes with verified matching metadata on the same track, direction and frame were found in the searched archive window.';
+  return { pair: null, reason };
 }
 
 // Corner coordinates of a preview image, read from its KML sidecar.
@@ -167,27 +213,4 @@ export async function latestTileDate() {
     }
   }
   return new Date(Date.now() - 3 * 86400_000).toISOString().slice(0, 10);
-}
-
-// NISAR repeats each track and frame every 12 days. From the passes already
-// found over a spot, estimate the next one: newest pass per track and frame,
-// plus 12-day steps until the date is in the future. Not every planned pass
-// is acquired, so this is an estimate, not a schedule.
-export const REPEAT_DAYS = 12;
-
-export function nextPass(scenes, now = Date.now()) {
-  const newest = new Map();
-  for (const s of scenes) {
-    if (!Number.isFinite(s.time)) continue;
-    const held = newest.get(s.stack);
-    if (!held || s.time > held.time) newest.set(s.stack, s);
-  }
-  let best = null;
-  for (const last of newest.values()) {
-    const step = REPEAT_DAYS * 86400_000;
-    const n = Math.max(1, Math.ceil((now - last.time) / step));
-    const time = last.time + n * step;
-    if (!best || time < best.time) best = { time, last };
-  }
-  return best;
 }

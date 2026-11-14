@@ -1,10 +1,10 @@
 // App wiring: polls the feeds, keeps the globe in sync and fills the panels.
 
-import { CATEGORIES, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS } from './config.js';
-import { fetchFeed } from './feeds.js';
+import { CATEGORIES, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START } from './config.js';
+import { fetchFeed, fetchArchive } from './feeds.js';
 import { buildIncidents, tagNisarCoverage, pointInPolygon, distanceKm } from './incidents.js';
-import { latestScenes, scenesAt, bestPair, imageBounds, latestTileDate, historyAt, nextPass, REPEAT_DAYS } from './nisar.js';
-import { PLACES, PLACE_KINDS, NISAR_START, otherHemisphere } from './places.js';
+import { latestScenes, scenesAt, bestPair, comparisonStatus, imageBounds, latestTileDate, historyAt, newestAt, nextPass, REPEAT_DAYS } from './nisar.js';
+import { PLACES, PLACE_KINDS, otherHemisphere } from './places.js';
 import { loadFrames, spread, view, history } from './timelapse.js';
 import { historyChart } from './chart.js';
 import { Globe, loadPicture } from './globe.js';
@@ -76,10 +76,10 @@ function visibleIncidents() {
 }
 
 function rebuild() {
-  const cutoff = Date.now() - state.windowDays * DAY;
-  const events = Object.values(state.events)
-    .flat()
-    .filter((e) => e.endTime >= cutoff);
+  const cutoff = state.archive ? NISAR_START : Date.now() - state.windowDays * DAY;
+  const byId = new Map();
+  for (const e of [...(state.archive || []), ...Object.values(state.events).flat()]) if (e.endTime >= cutoff) byId.set(e.id, e);
+  const events = [...byId.values()];
   state.incidents = buildIncidents(events);
   tagNisarCoverage(state.incidents, state.scenes);
   // An incident counts as fresh when any of its reports just arrived.
@@ -102,6 +102,7 @@ function draw() {
   renderChips();
   renderFeed();
   $('event-count').textContent = shown.length;
+  refreshTicker();
   $('scene-count').textContent = state.scenes.length ? `(${state.scenes.length})` : '';
 }
 
@@ -310,14 +311,55 @@ function incidentHtml(inc, radar) {
     ${reports}`;
 }
 
+// "Next NISAR overpass" card with a live countdown. The time is an estimate
+// worked out from archived passes, and says so.
+function nextPassHtml(scenes) {
+  const est = nextPass(scenes);
+  if (!est) return '';
+  const local = new Date(est.time).toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
+  const weak = est.missed
+    ? ` ${est.missed} expected ${est.missed === 1 ? 'pass' : 'passes'} since then ${est.missed === 1 ? 'is' : 'are'} not in the archive, so this estimate is weak.`
+    : '';
+  return `<div class="card" id="next-pass">
+    <div class="src">Next NISAR overpass <span class="badge computed">Computed</span></div>
+    <p><b class="countdown" data-until="${est.time}">…</b></p>
+    <p>${utc(est.time)} · ${esc(local)} your time</p>
+    <p>Newest archived pass on ${esc(est.last.direction.toLowerCase())} track ${esc(est.last.track)}, frame ${esc(est.last.frame)} (${utc(est.last.time)}), plus NISAR's ${REPEAT_DAYS}-day repeat cycle.${weak} An overpass is not a guaranteed acquisition, and images reach the archive hours to days later. NASA's own observation plan needs a login, so it is not used here.</p>
+  </div>`;
+}
+
+// Ticks every countdown on the page once a second; touches the DOM only.
+function tickCountdowns() {
+  for (const el of document.querySelectorAll('.countdown')) {
+    let left = Math.floor((+el.dataset.until - Date.now()) / 1000);
+    if (left <= 0) {
+      // Past due: recompute from the same passes rather than run negative.
+      const scenes = state.selected?.found?.newest?.length ? state.selected.found.newest : (state.lapse?.stacks || []).flatMap((st) => st.scenes);
+      const card = $('next-pass');
+      if (card && scenes.length) card.outerHTML = nextPassHtml(scenes);
+      else el.textContent = 'Due about now';
+      continue;
+    }
+    const d = Math.floor(left / 86400);
+    left -= d * 86400;
+    const h = String(Math.floor(left / 3600)).padStart(2, '0');
+    const m = String(Math.floor((left % 3600) / 60)).padStart(2, '0');
+    const sec = String(left % 60).padStart(2, '0');
+    el.textContent = `in ${d} d ${h}:${m}:${sec}`;
+  }
+}
+
+const SENTINEL_OFFER = `<p class="note">Meanwhile, Sentinel-1 flies a shorter radar wavelength (C-band, about 5.6 cm, against NISAR's 24 cm L-band) and may already have imaged the area. <button id="s1-now">Show Sentinel-1 radar here</button></p>`;
+
 function radarHtml(inc, found) {
   const { backscatter, interferograms } = found;
   if (!backscatter.length && !interferograms.length) {
     return `<p class="note">No NISAR scene covers this point between ${day(inc.time - NISAR_LOOKBACK_DAYS * DAY)} and today. NISAR revisits every 12 days, and oceans are mostly not imaged.</p>`;
   }
-  const pair = bestPair(backscatter, inc.time);
+  const { pair, reason } = comparisonStatus(backscatter, inc.time);
   const before = backscatter.filter((s) => s.time < inc.time).length;
   let html = `<p class="note">${backscatter.length} backscatter scenes (${before} before, ${backscatter.length - before} after) and ${interferograms.length} interferograms.</p>`;
+  html += nextPassHtml(found.newest?.length ? found.newest : backscatter);
   if (pair) {
     html += `<div class="card pair"><div class="src">What NISAR saw change</div>
       <p>Two passes on the same track and frame: ${day(pair.before.time)} and ${day(pair.after.time)}, ${Math.round(pair.span / DAY)} days apart.</p>
@@ -326,8 +368,10 @@ function radarHtml(inc, found) {
         <button id="compare">Compare the source images</button>
       </div>
       <div id="change-out"></div></div>`;
-  } else if (backscatter.length) {
-    html += waitingHtml(backscatter, inc.time);
+  } else {
+    // The reason comes from the catalogue metadata; Sentinel-1 is offered
+    // as context while NISAR has no usable pair.
+    html += `<p class="note">Before/after comparison unavailable: ${esc(reason)}</p>${backscatter.length ? SENTINEL_OFFER : ''}`;
   }
   if (inc.category === 'earthquake' && !interferograms.length) {
     html += `<p class="note">No interferogram yet. NISAR publishes interferograms later than backscatter images, so recent earthquakes may not have one for a while.</p>`;
@@ -338,27 +382,6 @@ function radarHtml(inc, found) {
     html += `<h4>Interferograms (ground movement)</h4>` + interferograms.slice(0, 5).map((s) => sceneCard(s, inc.time)).join('');
   }
   return html;
-}
-
-// No "after" scene yet: say when NISAR should be back, and offer Sentinel-1
-// radar for the time in between.
-function waitingHtml(backscatter, eventTime) {
-  const before = backscatter.filter((s) => s.time < eventTime).sort((a, b) => b.time - a.time)[0];
-  const next = nextPass(backscatter);
-  return `<div class="card next-pass">
-      <div class="src">Waiting for NISAR's next pass</div>
-      ${before ? `<p>✓ Before scene: ${day(before.time)} (${esc(before.direction.toLowerCase())} track ${esc(before.track)}, frame ${esc(before.frame)})</p>` : ''}
-      ${next ? `<p>⏳ Next pass over this spot: expected around <strong>${day(next.time)}</strong></p>` : ''}
-      <p class="hint">NISAR revisits each spot every ${REPEAT_DAYS} days, and images arrive a day or two later. Not every planned pass is acquired, so this date is an estimate.</p>
-      <p class="note">Meanwhile, the European Sentinel-1 satellites image many places in between. They use C-band radar (about 5.6 cm wavelength), so they see the surface a little differently from NISAR's L-band (about 24 cm).</p>
-      <div class="actions"><button id="s1-context">Show Sentinel-1 radar here (context)</button></div>
-    </div>`;
-}
-
-function showSentinel1(button) {
-  $('ov-s1').checked = true;
-  applyLayers();
-  button.textContent = `Sentinel-1 shown for ${$('date').value || 'the selected date'} – change the date under “NISAR radar”`;
 }
 
 async function selectIncident(inc, fly) {
@@ -372,7 +395,12 @@ async function selectIncident(inc, fly) {
 
   let found;
   try {
-    found = await scenesAt(inc.lat, inc.lon, inc.time - NISAR_LOOKBACK_DAYS * DAY, Date.now());
+    // Scenes around the event, plus the newest ones for the next-pass estimate.
+    const [around, newest] = await Promise.all([
+      scenesAt(inc.lat, inc.lon, inc.time - NISAR_LOOKBACK_DAYS * DAY, Math.min(Date.now(), inc.endTime + 75 * DAY)),
+      newestAt(inc.lat, inc.lon).catch(() => []),
+    ]);
+    found = { ...around, newest };
   } catch (err) {
     if (token === state.lookup) $('radar').innerHTML = `<p class="note">NISAR search failed: ${esc(err.message)}</p>`;
     return;
@@ -526,6 +554,101 @@ function drapeChanges(withSource) {
   globe.addPicture(c.result.canvas, c.result.bounds, undefined, 0.9);
 }
 
+// ---------- alerts ticker ----------
+
+// Freshness rule: "New" means first reported in the last 6 hours. Reports
+// from the last 24 hours follow as "Earlier today". Long-running events that
+// a feed updated in the last 6 hours are "Ongoing", at most three of them.
+const NEW_MS = 6 * 3600_000;
+const RECENT_MS = 24 * 3600_000;
+const ticker = { items: [], at: 0, paused: false, dismissed: false };
+
+function tickerItems() {
+  const now = Date.now();
+  const list = visibleIncidents();
+  const fresh = list.filter((i) => now - i.time < RECENT_MS).sort((a, b) => b.time - a.time);
+  const ongoing = list
+    .filter((i) => now - i.time >= RECENT_MS && now - i.endTime < NEW_MS)
+    .sort((a, b) => b.severity - a.severity)
+    .slice(0, 3);
+  return [
+    ...fresh.map((incident) => ({ incident, label: now - incident.time < NEW_MS ? 'New' : 'Earlier today' })),
+    ...ongoing.map((incident) => ({ incident, label: 'Ongoing' })),
+  ].slice(0, 15);
+}
+
+function renderTicker() {
+  const bar = $('ticker');
+  if (ticker.dismissed) return (bar.hidden = true);
+  bar.hidden = false;
+  const statuses = Object.entries(state.feedStatus).filter(([k]) => k !== 'nisar');
+  const checked = Math.max(0, ...statuses.filter(([, s]) => s.ok).map(([, s]) => s.at));
+  const down = statuses.filter(([, s]) => !s.ok).map(([k]) => FEEDS[k].label);
+  let feeds = checked ? `Feeds checked ${new Date(checked).toISOString().slice(11, 16)} UTC` : 'Loading the feeds…';
+  if (checked && Date.now() - checked > 15 * 60_000) feeds += ' (stale)';
+  if (down.length) feeds += ` · ${down.join(', ')} offline`;
+  $('ticker-feeds').textContent = feeds;
+
+  if (!ticker.items.length) {
+    $('ticker-label').textContent = '';
+    $('ticker-label').className = 'badge';
+    $('ticker-label').hidden = true;
+    $('ticker-text').textContent = checked ? 'No new reports from the feeds in the last 24 hours. That does not mean nothing is happening.' : '';
+    $('ticker-text').disabled = true;
+    $('ticker-count').textContent = '';
+    return;
+  }
+  ticker.at = (ticker.at + ticker.items.length) % ticker.items.length;
+  const { incident, label } = ticker.items[ticker.at];
+  const sources = [...new Set(incident.reports.map((r) => FEEDS[r.source].label))].join(' + ');
+  $('ticker-label').hidden = false;
+  $('ticker-label').textContent = label;
+  $('ticker-label').className = `badge ${label === 'New' ? 'observed' : ''}`;
+  $('ticker-text').disabled = false;
+  $('ticker-text').textContent = [`${CATEGORIES[incident.category].label}: ${incident.title}`, size(incident.magnitude), sources, `${utc(label === 'Ongoing' ? incident.endTime : incident.time)} (${ago(label === 'Ongoing' ? incident.endTime : incident.time)})`]
+    .filter(Boolean)
+    .join(' · ');
+  $('ticker-count').textContent = `${ticker.at + 1}/${ticker.items.length}`;
+}
+
+function refreshTicker() {
+  const shown = ticker.items[ticker.at]?.incident.id;
+  ticker.items = tickerItems();
+  // Stay on the same report across a feed refresh when it is still listed.
+  const again = ticker.items.findIndex((x) => x.incident.id === shown);
+  ticker.at = again >= 0 ? again : 0;
+  renderTicker();
+}
+
+function startTicker() {
+  const step = (by) => {
+    ticker.at += by;
+    renderTicker();
+  };
+  $('ticker-prev').onclick = () => step(-1);
+  $('ticker-next').onclick = () => step(1);
+  $('ticker-pause').onclick = () => {
+    ticker.paused = !ticker.paused;
+    $('ticker-pause').textContent = ticker.paused ? '▶' : '❚❚';
+    $('ticker-pause').setAttribute('aria-label', ticker.paused ? 'Resume cycling through reports' : 'Pause cycling through reports');
+  };
+  $('ticker-close').onclick = () => {
+    ticker.dismissed = true;
+    renderTicker();
+  };
+  $('ticker-text').onclick = () => {
+    const item = ticker.items[ticker.at];
+    if (item) selectIncident(item.incident, true);
+  };
+  // People who ask for less motion step through by hand instead.
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) $('ticker-pause').click();
+  const bar = $('ticker');
+  setInterval(() => {
+    if (!ticker.paused && !ticker.dismissed && !bar.matches(':hover') && !bar.contains(document.activeElement)) step(1);
+  }, 7000);
+  renderTicker();
+}
+
 // ---------- NISAR time-lapse ----------
 
 const LAPSE_STEP = 0.9; // seconds each pass stays on screen
@@ -597,6 +720,7 @@ async function startLapse(stackIndex = 0, all = false) {
 
   box.innerHTML = `
     <p class="note">${frames.length} of ${stack.scenes.length} passes on ${esc(stack.direction.toLowerCase())} track ${esc(stack.track)}, frame ${esc(stack.frame)}, ${day(frames[0].time)} to ${day(frames[frames.length - 1].time)}.${stack.unplaced ? ` ${stack.unplaced} earlier passes are left out: their previews were published without public corner coordinates, so they cannot be placed on the map accurately.` : ''}</p>
+    ${state.selected?.kind === 'incident' ? '' : nextPassHtml(stacks.flatMap((st) => st.scenes))}
     <div class="actions seg" role="group" aria-label="Which radar channel to show">
       <button data-mode="colour" class="on">Colour</button>
       <button data-mode="hh">HH only</button>
@@ -723,7 +847,7 @@ async function selectPlace(place, fly) {
   if (place.kind !== 'subsidence') return;
   let found;
   try {
-    found = await scenesAt(place.lat, place.lon, Date.parse(NISAR_START), Date.now());
+    found = await scenesAt(place.lat, place.lon, NISAR_START, Date.now());
   } catch (err) {
     if (state.selected?.place === place && $('place-ifg')) $('place-ifg').innerHTML = `<p class="note">NISAR search failed: ${esc(err.message)}</p>`;
     return;
@@ -732,7 +856,7 @@ async function selectPlace(place, fly) {
   state.selected.found = { backscatter: [], interferograms: found.interferograms };
   $('place-ifg').innerHTML = found.interferograms.length
     ? found.interferograms.slice(0, 6).map((s) => sceneCard(s, null)).join('')
-    : `<p class="note">No NISAR interferogram over this spot since ${NISAR_START} yet. They are published later than backscatter images.</p>`;
+    : `<p class="note">No NISAR interferogram over this spot since ${day(NISAR_START)} yet. They are published later than backscatter images.</p>`;
 }
 
 // ---------- search ----------
@@ -873,8 +997,17 @@ async function start() {
   $('basemap').onchange = (e) => globe.setBasemap(e.target.value);
   $('lighting').onchange = (e) => globe.setLighting(e.target.checked);
   $('footprints').onchange = draw;
-  $('window').onchange = (e) => {
-    state.windowDays = +e.target.value;
+  $('window').onchange = async (e) => {
+    if (e.target.value !== 'nisar') {
+      state.archive = null;
+      state.windowDays = +e.target.value;
+      $('window-note').hidden = true;
+      return rebuild();
+    }
+    $('window-note').hidden = false;
+    $('window-note').textContent = 'Loading larger events since 17 June 2026…';
+    state.archive = await fetchArchive();
+    $('window-note').textContent = `Since NISAR's calibrated data began (17 June 2026): earthquakes of magnitude 6 and up, orange and red GDACS alerts, and NASA-tracked floods, storms, volcanoes and ice. Smaller events are shown for the last 14 days only.`;
     rebuild();
   };
   $('chips').onclick = (e) => {
@@ -979,9 +1112,15 @@ async function start() {
     if (t.id === 'compare') return compare(t);
     if (t.id === 'changes') return showChanges(t);
     if (t.id === 'lapse-go') return startLapse();
+    if (t.id === 's1-now') {
+      $('ov-s1').checked = true;
+      $('ov-s1').closest('details').open = true;
+      applyLayers();
+      t.textContent = `Sentinel-1 shown for ${$('date').value}`;
+      return;
+    }
     if (t.dataset.mode) return setLapseMode(t.dataset.mode);
     if (t.id === 'under') return drapeChanges(t.checked);
-    if (t.id === 's1-context') return showSentinel1(t);
     const li = t.closest('li');
     if (!li) return;
     if (li.dataset.site) return selectPlace(placeById(li.dataset.site), true);
@@ -1025,6 +1164,8 @@ async function start() {
 
   setInterval(() => ($('clock').textContent = utc(Date.now()).replace(' UTC', ':') + new Date().toISOString().slice(17, 19) + ' UTC'), 1000);
   setInterval(renderFeed, 60_000);
+  setInterval(tickCountdowns, 1000);
+  startTicker();
 
   for (const name of Object.keys(FEEDS)) {
     refreshFeed(name);

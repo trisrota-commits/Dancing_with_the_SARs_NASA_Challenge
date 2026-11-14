@@ -190,7 +190,7 @@ season or a flood has an audible rhythm. The Web Audio API is enough for this.
 ## Checklist
 
 - [ ] 1a: archive endpoints checked for CORS
-- [ ] 1a: "Since NISAR data began" window added
+- [x] 1a: "Since NISAR data began" window added
 - [x] 1b: next-pass prediction in the event panel
 - [x] 1c: Sentinel-1 offer when there is no after scene
 - [ ] 2a: full-resolution dB difference maps for the showcase events
