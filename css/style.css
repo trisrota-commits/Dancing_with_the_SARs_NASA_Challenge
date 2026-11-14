@@ -1257,3 +1257,54 @@ ul.plain {
 .facts li {
   grid-template-columns: 74px 1fr;
 }
+
+/* ---------- news, share, layer groups ---------- */
+
+#share {
+  position: absolute;
+  top: 9px;
+  right: 40px;
+  padding: 2px 9px;
+  font-size: 12px;
+}
+
+#overlays h5 {
+  margin: 8px 0 2px;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--dim);
+  font-weight: 600;
+}
+
+.article {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: start;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--text);
+  text-decoration: none;
+  line-height: 1.35;
+}
+
+.article:hover b {
+  color: var(--accent);
+}
+
+.article img {
+  width: 64px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.article b {
+  font-weight: 500;
+  display: block;
+}
+
+.article small {
+  color: var(--dim);
+}

@@ -92,26 +92,85 @@ export const BASEMAPS = {
 };
 
 // Optional context overlays, all dated daily tiles from NASA GIBS.
+// Context layers, all tiles from NASA GIBS. Most follow the imagery date;
+// those with a `date` are yearly or one-off maps published under that date.
 export const OVERLAYS = {
   water: {
+    group: 'Radar and water',
     label: 'Surface water from radar (OPERA, Sentinel-1)',
     url: gibs('OPERA_L3_Dynamic_Surface_Water_Extent-Sentinel-1', 'png', 12),
     maxLevel: 12,
   },
   s1: {
+    group: 'Radar and water',
     label: 'C-band backscatter (OPERA, Sentinel-1)',
     url: gibs('OPERA_L2_Radiometric_Terrain_Corrected_SAR_Sentinel-1', 'png', 12),
     maxLevel: 12,
   },
+  soil: {
+    group: 'Radar and water',
+    label: 'Surface soil moisture (SMAP)',
+    url: gibs('SMAP_L4_Analyzed_Surface_Soil_Moisture', 'png', 6),
+    maxLevel: 6,
+  },
+  rain: {
+    group: 'Weather and ice',
+    label: 'Rainfall rate that day (IMERG)',
+    url: gibs('IMERG_Precipitation_Rate', 'png', 6),
+    maxLevel: 6,
+  },
+  seaice: {
+    group: 'Weather and ice',
+    label: 'Sea ice concentration (GHRSST MUR)',
+    url: gibs('GHRSST_L4_MUR25_Sea_Ice_Concentration', 'png', 6),
+    maxLevel: 6,
+  },
+  snow: {
+    group: 'Weather and ice',
+    label: 'Snow cover (MODIS Terra)',
+    url: gibs('MODIS_Terra_L3_NDSI_Snow_Cover_Daily', 'png', 8),
+    maxLevel: 8,
+  },
   disturbance: {
+    group: 'Land and people',
     label: 'Vegetation disturbance alerts (OPERA)',
     url: gibs('OPERA_L3_DIST-ALERT-HLS_Color_Index', 'png', 12),
     maxLevel: 12,
   },
-  soil: {
-    label: 'Surface soil moisture (SMAP)',
-    url: gibs('SMAP_L4_Analyzed_Surface_Soil_Moisture', 'png', 6),
-    maxLevel: 6,
+  landcover: {
+    group: 'Land and people',
+    label: 'Land cover type (MODIS, 2024)',
+    url: gibs('MODIS_Combined_L3_IGBP_Land_Cover_Type_Annual', 'png', 8),
+    maxLevel: 8,
+    date: '2024-01-01',
+  },
+  crops: {
+    group: 'Land and people',
+    label: 'Croplands (2000)',
+    url: gibs('Agricultural_Lands_Croplands_2000', 'png', 7),
+    maxLevel: 7,
+    date: '2000-01-01',
+  },
+  population: {
+    group: 'Land and people',
+    label: 'Population density (GPW, 2020)',
+    url: gibs('GPW_Population_Density_2020', 'png', 7),
+    maxLevel: 7,
+    date: '2020-01-01',
+  },
+  built: {
+    group: 'Land and people',
+    label: 'Built-up areas (Landsat)',
+    url: gibs('Landsat_Human_Built-up_And_Settlement_Extent', 'png', 12),
+    maxLevel: 12,
+    date: '2010-01-01',
+  },
+  lights: {
+    group: 'Land and people',
+    label: 'City lights at night (Black Marble, 2016)',
+    url: gibs('VIIRS_Black_Marble', 'png', 8),
+    maxLevel: 8,
+    date: '2016-01-01',
   },
 };
 
