@@ -1,6 +1,13 @@
-// Event replays: a short looping animation of what happened at the selected
-// event, built only from data. Each kind of event has one template whose
-// parameters (where, how big, how strong, when) are filled from the feeds.
+// What happened at the selected event, drawn on the globe from data and
+// driven by a timeline. It opens on the latest state and stands still; the
+// reader drags the timeline to go back, or plays it once. Each kind of
+// event has one template whose parameters (where, how big, how strong,
+// when) are filled from the feeds.
+//
+// A template returns a plan: { from, to, timeOf(ms), draw(t, started, ms),
+// caption(t), parts, frameKm, ... }. from and to are real times; timeOf
+// turns a real time into the plan's own clock t, which draw understands.
+// An optional intro (seconds of t) is played once when the event opens.
 //
 // Every element says where it comes from:
 //   observed  – measured by an instrument or catalogued by an agency
@@ -14,8 +21,7 @@ import { gdacsShapes, shakeContours, quakesNear, fireDetections, dateRange } fro
 
 const DAY = 86400_000;
 const HOLD = 2.5; // seconds the final picture stays before the loop restarts
-const ORBIT = 2.5; // degrees per second the camera circles a replay
-const PUSH_IN = 0.6; // how much closer the camera drifts while a replay plays
+const PLAY_SECONDS = 14; // how long "play" takes to run the whole timeline
 
 // Shaking intensity is written in Roman numerals by convention.
 const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
@@ -143,6 +149,12 @@ async function quake(inc, globe) {
 
   return {
     duration: WAVE + AFTER + 0.5,
+    from: inc.time,
+    to: Date.now(),
+    // The wave fronts cross in seconds, far too fast for a timeline of
+    // days, so they play once when the event opens.
+    intro: WAVE + 0.5,
+    timeOf: (ms) => WAVE + 0.5 + (AFTER ? Math.max(0, Math.min(1, (ms - inc.time) / span)) * AFTER : 0),
     frameKm: rmax * 1.3,
     parts: [
       { kind: 'observed', text: `Epicentre, magnitude ${mag.toFixed(1)} and time`, source: 'USGS' },
@@ -152,18 +164,32 @@ async function quake(inc, globe) {
       { kind: 'computed', text: `Wave fronts at typical crust speeds (P 6 km/s, S 3.5 km/s), played ${speedup}× faster than real time. The glow and ripple on the ground mark where the fronts are; their brightness and height are not to scale.` },
       { kind: 'observed', text: `${after.length} later and ${before.length} earlier quakes of M2.5+ within ${radius} km (30 days back)`, source: 'USGS catalogue' },
     ],
-    draw(t) {
+    draw(t, started) {
+      if (started === false) {
+        // Before the earthquake: only the quakes that came earlier.
+        globe.setShockwave(null);
+        globe.setEffectLines([]);
+        globe.setEffectZones([]);
+        globe.setEffectGlow([]);
+        globe.setEffectDots(before.map((q) => dot(q, [0.62, 0.66, 0.72])));
+        globe.setLabels([]);
+        shownZones = shownAfter = -1;
+        shownLabels = '';
+        popped.length = 0;
+        this.hadLines = this.hadFlash = false;
+        return;
+      }
       const s = Math.min(1, t / WAVE) * rmax;
       const lines = [];
-      if (t < WAVE + 1) {
-        const fade = 1 - Math.max(0, t - WAVE);
+      if (t < WAVE + 0.5) {
+        const fade = 1 - Math.max(0, t - WAVE) * 2;
         lines.push({ points: circle(centre, Math.max(1, s)), color: [1, 0.32, 0.28, 0.95 * fade], closed: true });
         lines.push({ points: circle(centre, Math.max(1, Math.min(s * (6 / 3.5), rmax * 1.72))), color: [1, 1, 1, 0.5 * fade], closed: true });
       }
       if (lines.length || this.hadLines) globe.setEffectLines(lines);
       this.hadLines = lines.length > 0;
       // The same two fronts, drawn into the terrain itself.
-      const fade = Math.max(0, Math.min(1, 1 - (t - WAVE)));
+      const fade = Math.max(0, Math.min(1, 1 - (t - WAVE) * 2));
       globe.setShockwave(
         fade > 0
           ? { ...centre, sKm: Math.max(1, s), pKm: Math.max(1, Math.min(s * (6 / 3.5), rmax * 1.72)), widthKm: rmax * 0.03, strength: fade, rippleKm: rmax * 0.1, heightM: rmax * 8 }
@@ -229,6 +255,9 @@ async function storm(inc, globe) {
 
   return {
     duration: 12,
+    from: t0,
+    to: t1,
+    timeOf: (ms) => Math.max(0, Math.min(1, (ms - t0) / Math.max(1, t1 - t0))) * 12,
     frameKm: Math.max(300, reach(centre, track) * 1.2),
     focus: centre,
     parts: [
@@ -240,7 +269,18 @@ async function storm(inc, globe) {
     setup() {
       globe.setEffectZones(zones);
     },
-    draw(t) {
+    draw(t, started, ms) {
+      // Before the first fix, or well after the last one, there is no storm
+      // to draw: only its path, faint before and whole afterwards.
+      this.over = ms != null && ms > t1 + 1.5 * DAY;
+      this.early = started === false;
+      if (this.early || this.over) {
+        this.at = this.over ? track[track.length - 1] : track[0];
+        globe.setEffectLines([{ points: track, color: [...color, this.over ? 0.9 : 0.28] }]);
+        globe.setVortex(null);
+        globe.setLabels([]);
+        return;
+      }
       const at = along(track, t0 + (Math.min(t, 12) / 12) * (t1 - t0));
       this.at = at;
       const done = track.slice(0, at.index);
@@ -257,6 +297,7 @@ async function storm(inc, globe) {
     },
     caption() {
       const a = this.at;
+      if (this.over) return `The track ended on ${day(t1)}`;
       const wind = a?.value ? ` · ${Math.round(a.value)} kt (${Math.round(a.value * 1.852)} km/h) · ${stormClass(a.value)}` : '';
       return `${stamp(a?.time ?? t0)}${wind}`;
     },
@@ -273,8 +314,12 @@ async function fire(inc, globe) {
   const total = days.reduce((n, d) => n + d.points.length, 0);
   const STEP = 1.1;
 
+  const first = Date.parse(dates[0]);
   return {
     duration: days.length * STEP,
+    from: first,
+    to: first + days.length * DAY,
+    timeOf: (ms) => Math.max(0, Math.min(days.length, (ms - first) / DAY)) * STEP,
     frameKm: radius * 1.1,
     parts: [
       total
@@ -328,8 +373,13 @@ async function flood(inc, globe) {
     north: Math.max(...pts.map((p) => p.lat)) + pad,
   };
 
+  const first = Date.parse(dates[0]);
   return {
     duration: dates.length * STEP,
+    from: first,
+    to: Date.parse(dates[dates.length - 1]) + DAY,
+    // The passes used are two days apart; each has fully arrived a day later.
+    timeOf: (ms) => Math.max(0, Math.min(dates.length, (ms - first) / (2 * DAY) + 0.5)) * STEP,
     frameKm: Math.min(600, Math.max(120, area.length ? reach(centre, area.flatMap((a) => a.ring)) * 1.2 : 150)),
     parts: [
       { kind: 'observed', text: `Water the radar saw on land (blue), building up pass by pass from ${dates[0]}. Rivers and lakes that are always there show too.`, source: 'OPERA DSWx, Sentinel-1' },
@@ -363,17 +413,20 @@ async function generic(inc, globe) {
     plan.parts[0] = { kind: 'observed', text: `${inc.track.length} dated positions`, source: 'NASA EONET' };
     plan.parts.length = 2;
     const draw = plan.draw.bind(plan);
-    plan.draw = (t) => {
-      draw(t);
+    plan.draw = (t, started, ms) => {
+      draw(t, started, ms);
       globe.setVortex(null);
       globe.setLabels([]);
-      globe.setEffectDots([{ lat: plan.at.lat, lon: plan.at.lon, color: [1, 1, 1], size: 9 }]);
+      globe.setEffectDots(plan.early ? [] : [{ lat: plan.at.lat, lon: plan.at.lon, color: [1, 1, 1], size: 9 }]);
     };
     return plan;
   }
-  if (!zones.length) return null;
+  if (!zones.length) return still(inc);
   return {
     duration: 3,
+    from: inc.time,
+    to: inc.endTime,
+    timeOf: () => 0,
     frameKm: Math.max(100, reach({ lat: inc.lat, lon: inc.lon }, shapes.polygons.flatMap((p) => p.ring)) * 1.2),
     parts: [{ kind: 'analysis', text: 'Affected-area outline', source: 'GDACS' }],
     setup() {
@@ -386,12 +439,31 @@ async function generic(inc, globe) {
   };
 }
 
+// An event the feeds give nothing more about than where and when. It still
+// gets a timeline, because NISAR's passes over it are shown on one.
+function still(inc) {
+  return {
+    duration: 1,
+    from: inc.time,
+    to: inc.endTime,
+    timeOf: () => 0,
+    frameKm: 180,
+    parts: [{ kind: 'note', text: 'The feeds carry no history for this event beyond where and when it was reported.' }],
+    draw() {},
+    caption() {
+      return 'Reported here';
+    },
+  };
+}
+
 const TEMPLATES = { earthquake: quake, storm, wildfire: fire, flood };
 
 // ---------- player ----------
 
 export class Replay {
-  // onUpdate receives { state: 'loading' | 'playing' | 'paused' | 'none' | 'off', caption, progress, parts }
+  // onUpdate receives { state: 'loading' | 'playing' | 'paused' | 'off',
+  // caption, progress, parts } and, for an event timeline, also
+  // { timeline: true, ms, range, span, marks, live }.
   constructor(globe, onUpdate) {
     this.globe = globe;
     this.onUpdate = onUpdate;
@@ -402,39 +474,58 @@ export class Replay {
     this.last = 0;
     this.loop = 0;
     this.loops = 0;
+    // Event timeline: the real time shown, the range the bar covers, and
+    // extra marks on it (NISAR passes).
+    this.timeline = false;
+    this.ms = 0;
+    this.range = null;
+    this.marks = [];
+    this.pending = null;
+    this.intro = false;
   }
 
-  async start(incident) {
+  // Opens an event on its latest state. keepView leaves the camera alone.
+  async start(incident, { keepView = false } = {}) {
     this.stop();
+    this.pending = null;
     const token = ++this.token;
     this.onUpdate({ state: 'loading' });
     let plan = null;
     try {
       plan = await (TEMPLATES[incident.category] || generic)(incident, this.globe);
     } catch (err) {
-      console.warn('Replay failed to load', err);
+      console.warn('Event history failed to load', err);
     }
     if (token !== this.token) return;
-    if (!plan) return this.onUpdate({ state: 'none' });
+    plan = plan || still(incident);
     this.plan = plan;
-    this.time = 0;
-    this.playing = true;
+    this.timeline = true;
+    const now = Date.now();
+    // The bar always runs to now, so passes after the event have a place.
+    this.range = { from: Math.min(plan.from, now - 3600_000), to: now };
+    this.marks = [];
+    if (this.pending) this.extend(this.pending.from, this.pending.marks);
     this.globe.animating = true;
     plan.setup?.();
     this.loop = ++this.loops;
     const focus = plan.focus || incident;
-    this.globe.flyTo(focus.lat, focus.lon, Math.min(9_000_000, plan.frameKm * 1000 * 3.4), { pitch: plan.frameKm < 400 ? 40 : 15 });
-    this.globe.setOrbit(ORBIT);
-    this.globe.pushIn(PUSH_IN);
+    if (!keepView) this.globe.flyTo(focus.lat, focus.lon, Math.min(9_000_000, plan.frameKm * 1000 * 3.4), { pitch: plan.frameKm < 400 ? 40 : 15 });
     this.globe.setFocus({ lat: focus.lat, lon: focus.lon, radiusKm: plan.frameKm * 1.15 });
+    this.ms = now;
+    this.intro = !!plan.intro && !keepView;
+    this.time = 0;
+    this.playing = this.intro;
+    if (!this.intro) this.show();
     this.last = performance.now();
-    requestAnimationFrame((now) => this.tick(now, this.loop));
+    requestAnimationFrame((t) => this.tick(t, this.loop));
+    this.report();
   }
 
-  // Plays a plan built elsewhere (the NISAR time-lapse uses this).
+  // Plays a plan built elsewhere, in a loop (the NISAR time-lapse).
   run(plan) {
     this.stop();
     this.plan = plan;
+    this.timeline = false;
     this.time = 0;
     this.playing = true;
     this.globe.animating = true;
@@ -444,18 +535,57 @@ export class Replay {
     requestAnimationFrame((now) => this.tick(now, this.loop));
   }
 
+  // Makes the timeline reach back to `from` and puts marks on it. Works
+  // before the event's own history has loaded, too.
+  extend(from, marks) {
+    if (!this.plan || !this.timeline) {
+      this.pending = { from, marks };
+      return;
+    }
+    if (from != null) this.range.from = Math.min(this.range.from, from);
+    this.marks = marks || [];
+    this.report();
+  }
+
+  get live() {
+    return this.timeline && !this.intro && this.ms >= this.range.to - 60_000;
+  }
+
+  // Draws the event as it stood at this.ms.
+  show() {
+    const plan = this.plan;
+    plan.draw(plan.timeOf(this.ms), this.ms >= plan.from, this.ms);
+    this.globe.dirty = true;
+  }
+
   toggle() {
     if (!this.plan) return;
-    this.playing = !this.playing;
+    if (this.timeline) {
+      this.intro = false;
+      // Play runs once, from wherever the handle is; from the end it
+      // starts over at the beginning.
+      if (!this.playing && this.live) this.ms = this.range.from;
+      this.playing = !this.playing;
+    } else {
+      this.playing = !this.playing;
+    }
     this.last = performance.now();
     this.report();
   }
 
-  // Jumps to a fraction (0..1) of the replay.
+  // Jumps to a fraction (0..1) of the timeline or of the looping plan.
   seek(fraction) {
     if (!this.plan) return;
-    this.time = Math.max(0, Math.min(1, fraction)) * this.plan.duration;
-    this.plan.draw(this.time);
+    const f = Math.max(0, Math.min(1, fraction));
+    if (this.timeline) {
+      this.intro = false;
+      this.playing = false;
+      this.ms = this.range.from + f * (this.range.to - this.range.from);
+      this.show();
+    } else {
+      this.time = f * this.plan.duration;
+      this.plan.draw(this.time);
+    }
     this.report();
   }
 
@@ -467,28 +597,66 @@ export class Replay {
     }
     this.plan = null;
     this.playing = false;
+    this.timeline = false;
+    this.intro = false;
     this.onUpdate({ state: 'off' });
   }
 
   tick(now, loop) {
     const plan = this.plan;
-    // A newer replay has its own loop; this one ends.
+    // A newer plan has its own loop; this one ends.
     if (!plan || loop !== this.loop) return;
     requestAnimationFrame((next) => this.tick(next, loop));
     // The first frame's clock can read slightly before the start time.
     const dt = Math.max(0, Math.min(0.1, (now - this.last) / 1000));
     this.last = now;
     if (!this.playing) return;
-    this.time += dt;
-    if (this.time > plan.duration + HOLD) this.time = 0;
-    plan.draw(Math.min(this.time, plan.duration));
+    if (!this.timeline) {
+      this.time += dt;
+      if (this.time > plan.duration + HOLD) this.time = 0;
+      plan.draw(Math.min(this.time, plan.duration));
+    } else if (this.intro) {
+      // The opening moment, once; then the latest state.
+      this.time += dt;
+      plan.draw(Math.min(this.time, plan.intro), true, plan.from);
+      if (this.time >= plan.intro + 1) {
+        this.intro = false;
+        this.playing = false;
+        this.show();
+      }
+    } else {
+      this.ms += (dt / PLAY_SECONDS) * (this.range.to - this.range.from);
+      if (this.ms >= this.range.to) {
+        this.ms = this.range.to;
+        this.playing = false;
+      }
+      this.show();
+    }
     this.globe.dirty = true;
     this.report();
   }
 
   report() {
     const plan = this.plan;
-    const t = Math.min(this.time, plan.duration);
-    this.onUpdate({ state: this.playing ? 'playing' : 'paused', caption: plan.caption(t), progress: t / plan.duration, parts: plan.parts, plan });
+    if (!plan) return;
+    if (!this.timeline) {
+      const t = Math.min(this.time, plan.duration);
+      return this.onUpdate({ state: this.playing ? 'playing' : 'paused', caption: plan.caption(t), progress: t / plan.duration, parts: plan.parts, plan });
+    }
+    const { from, to } = this.range;
+    const at = (ms) => Math.max(0, Math.min(1, (ms - from) / (to - from)));
+    const caption = this.intro ? plan.caption(Math.min(this.time, plan.intro)) : this.ms < plan.from ? 'Before the event' : plan.caption(plan.timeOf(this.ms));
+    this.onUpdate({
+      state: this.playing ? 'playing' : 'paused',
+      timeline: true,
+      caption,
+      ms: this.intro ? plan.from : this.ms,
+      progress: at(this.intro ? plan.from : this.ms),
+      span: [at(plan.from), at(Math.max(plan.to, plan.from))],
+      marks: this.marks.map(at),
+      live: this.live,
+      parts: plan.parts,
+      plan,
+    });
   }
 }

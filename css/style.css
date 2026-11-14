@@ -857,10 +857,92 @@ dd {
 }
 
 #replay-bar {
+  position: relative;
   height: 6px;
   border-radius: 3px;
   background: rgba(255, 255, 255, 0.14);
   cursor: pointer;
+  touch-action: none;
+}
+
+/* The event timeline: a taller line to drag, with the event's own stretch,
+   NISAR's passes as ticks and a handle. */
+#replay.timeline {
+  width: min(680px, calc(100vw - 32px));
+}
+
+#replay.timeline #replay-bar {
+  height: 8px;
+  margin: 8px 0 5px;
+  cursor: ew-resize;
+}
+
+#replay.timeline #replay-fill {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+#replay-span,
+#replay-knob,
+#replay-marks,
+#replay-live {
+  display: none;
+}
+
+#replay.timeline #replay-span {
+  display: block;
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-radius: 3px;
+  background: rgba(255, 166, 43, 0.75);
+}
+
+#replay.timeline #replay-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#replay.timeline #replay-marks {
+  display: block;
+  position: absolute;
+  inset: 0;
+}
+
+#replay-marks i {
+  position: absolute;
+  top: -5px;
+  width: 2px;
+  height: 18px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: var(--accent);
+}
+
+#replay.timeline #replay-knob {
+  display: block;
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(10, 16, 26, 0.7);
+}
+
+#replay.timeline #replay-live {
+  display: block;
+  flex: none;
+  font-size: 12px;
+  padding: 4px 9px;
+  white-space: nowrap;
+}
+
+#replay-live.on {
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.5);
+  cursor: default;
 }
 
 #replay-fill {

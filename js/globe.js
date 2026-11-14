@@ -735,19 +735,6 @@ export class Globe {
     this.dirty = true;
   }
 
-  // Turns the view slowly around its target until the next touch.
-  setOrbit(degreesPerSecond) {
-    this.controls.orbit = reducedMotion.matches ? 0 : degreesPerSecond;
-  }
-
-  // Comes slowly closer, to `factor` of the current distance (or of the
-  // distance a flight in progress is heading for), until the next touch.
-  pushIn(factor) {
-    if (reducedMotion.matches) return;
-    const from = this.controls.flight ? this.controls.flight.to.alt : this.controls.alt;
-    this.controls.push = { to: from * factor, rate: 0.16 };
-  }
-
   // Lets the map around a place step back while its replay plays, or
   // brings it forward again with null: { lat, lon, radiusKm }.
   setFocus(at) {
@@ -775,8 +762,6 @@ export class Globe {
     this.setShockwave(null);
     this.setFocus(null);
     this.setLabels([]);
-    this.controls.orbit = 0;
-    this.controls.push = null;
     if (this.fxZones.length) this.setEffectZones([]);
     if (this.state.fx.length) this.setEffectLayers([]);
     this.dirty = true;
@@ -834,7 +819,6 @@ export function loadPicture(url) {
   return pictureCache.get(url);
 }
 
-const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const scratch = new THREE.Vector3();
 const raycaster = new THREE.Raycaster();
 const ball = new THREE.Sphere(new THREE.Vector3(), 1);
