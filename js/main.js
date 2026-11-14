@@ -10,6 +10,8 @@ import { loadFrames, spread, view, history, describeSeries, rankByCoverage } fro
 import { newsFor } from './news.js';
 import { playPass } from './sound.js';
 import { measuredById, measuredNear, measuredHtml, measuredChart, changeImageUrl } from './measured.js';
+import { fetchElements, positionAt, groundTrack, swathEdges, elementsEpoch } from './orbit.js';
+import { SPECIES, MONTHS, POIS, loadSightings } from './wildlife.js';
 import { historyChart } from './chart.js';
 import { Globe, loadPicture } from './globe.js';
 import { Replay } from './replay/replay.js';
@@ -479,7 +481,13 @@ function choose(found) {
           ? `<li data-pick="${n}">${dot(f.incident.category)}<span>${esc(f.incident.title)}</span><span class="km">${ago(f.incident.endTime)}</span></li>`
           : f.kind === 'place'
             ? `<li data-pick="${n}">${diamond(f.place.kind)}<span>${esc(f.place.name)}</span><span class="km">${esc(PLACE_KINDS[f.place.kind].label)}</span></li>`
-            : `<li data-pick="${n}"><i class="dot" style="--c:#39e6c4;border-radius:2px"></i><span>NISAR pass, track ${esc(f.scene.track)} frame ${esc(f.scene.frame)}</span><span class="km">${ago(f.scene.time)}</span></li>`,
+            : f.kind === 'satellite'
+              ? `<li data-pick="${n}"><i class="dot" style="--c:#39e6c4"></i><span>NISAR, live position</span><span class="km">satellite</span></li>`
+              : f.kind === 'animal'
+                ? `<li data-pick="${n}"><i class="dot" style="--c:${speciesOf(f.animal).color}"></i><span>${esc(f.animal.common)}</span><span class="km">${esc(f.animal.date || '')}</span></li>`
+                : f.kind === 'poi'
+                  ? `<li data-pick="${n}"><i class="dot" style="--c:#f4e3b2"></i><span>${esc(f.poi.name)}</span><span class="km">landmark</span></li>`
+                  : `<li data-pick="${n}"><i class="dot" style="--c:#39e6c4;border-radius:2px"></i><span>NISAR pass, track ${esc(f.scene.track)} frame ${esc(f.scene.frame)}</span><span class="km">${ago(f.scene.time)}</span></li>`,
       )
       .join('')}</ul>`);
 }
@@ -1034,6 +1042,193 @@ async function selectSpot(at) {
   }
 }
 
+// ---------- live sky, NISAR and wildlife ----------
+
+const live = {
+  elements: null,
+  track: null,
+  swath: null,
+  trackAt: 0,
+  sightings: null,
+  month: new Date().getUTCMonth(),
+  playing: true,
+  timer: null,
+  hiddenSpecies: new Set(),
+};
+
+function openFound(f) {
+  if (f.kind === 'incident') return selectIncident(f.incident, false);
+  if (f.kind === 'place') return selectPlace(f.place, false);
+  if (f.kind === 'satellite') return selectSatellite();
+  if (f.kind === 'animal') return selectAnimal(f.animal);
+  if (f.kind === 'poi') return selectPoi(f.poi);
+  return selectScene(f.scene, false);
+}
+
+const speciesOf = (a) => SPECIES.find((sp) => sp.id === a.species);
+
+async function startNisarLive() {
+  $('nisar-live-status').textContent = 'loading…';
+  live.elements = await fetchElements();
+  if (!live.elements) {
+    $('nisar-live-status').textContent = 'orbit data unavailable';
+    return;
+  }
+  $('nisar-live-status').textContent = '';
+  tickNisar();
+  setInterval(tickNisar, 1000);
+}
+
+// Moves the satellite once a second; the ground track is recomputed every 30 s.
+function tickNisar() {
+  const e = live.elements;
+  if (!e || !$('live-nisar').checked) {
+    globe.setSatellite(null);
+    return;
+  }
+  const now = new Date();
+  if (!live.track || now - live.trackAt > 30_000) {
+    live.track = groundTrack(e.satrec, now, 50, 50, 1);
+    live.swath = swathEdges(live.track);
+    live.trackAt = now;
+  }
+  const pos = positionAt(e.satrec, now);
+  if (!pos) return;
+  const shift = (now - live.trackAt) / 60_000;
+  globe.setSatellite({ now: pos, track: live.track.map((p) => ({ ...p, minutes: p.minutes - shift })), swath: live.swath });
+  live.pos = pos;
+  if (state.selected?.kind === 'satellite' && $('sat-facts')) satFacts(pos);
+}
+
+function satFacts(pos) {
+  $('sat-facts').innerHTML = `<dt>Over</dt><dd>${where(pos.lat, pos.lon)}</dd>
+    <dt>Height</dt><dd>${Math.round(pos.altKm)} km</dd>
+    <dt>Speed</dt><dd>${pos.speedKms.toFixed(2)} km/s (${Math.round(pos.speedKms * 3600).toLocaleString('en')} km/h)</dd>`;
+}
+
+function selectSatellite() {
+  const e = live.elements;
+  if (!e) return;
+  endCompare();
+  replay.stop();
+  state.lookup++;
+  state.selected = { kind: 'satellite' };
+  globe.select(null);
+  openPanel(`<span class="tag"><i class="dot" style="--c:#39e6c4"></i>Live</span>
+    <h3>NISAR, right now</h3>
+    <dl id="sat-facts"></dl>
+    <div class="actions"><button id="sat-follow">Fly to NISAR</button></div>
+    <h4>Its orbit</h4>
+    <p class="note">NISAR circles the Earth about every 100 minutes, 747 km up, passing near both poles. Its orbit keeps it over the line between day and night (a dawn–dusk orbit), and it repeats the same path every 12 days.</p>
+    <h4>Where the radar looks</h4>
+    <p class="note">The radar looks to the left of the flight direction. The two lines on the ground mark the edges of its 242 km swath over the last 25 minutes, and the two beams show where it points now. NISAR does not image all the time, so this shows where it can look, not proof that it did.</p>
+    <h4>Where this comes from</h4>
+    <p class="hint">Position worked out in your browser with the standard SGP4 orbit model, from public orbit elements (${esc(e.source)}, ${esc(e.name)}, epoch ${utc(elementsEpoch(e.satrec).getTime())}). Accurate to a few kilometres. The swath edges are approximate.</p>`);
+  satFacts(live.pos || positionAt(e.satrec, new Date()));
+}
+
+function selectAnimal(a) {
+  const sp = speciesOf(a);
+  endCompare();
+  replay.stop();
+  state.lookup++;
+  state.selected = { kind: 'animal' };
+  globe.select({ lat: a.lat, lon: a.lon, related: [] });
+  const basis = { HUMAN_OBSERVATION: 'Seen by a person', MACHINE_OBSERVATION: 'Recorded by an instrument or tag', PRESERVED_SPECIMEN: 'Museum specimen', OCCURRENCE: 'Occurrence record' }[a.basis] || 'Occurrence record';
+  openPanel(`<span class="tag"><i class="dot" style="--c:${sp.color}"></i>Wildlife sighting</span>
+    <h3>${esc(sp.common)}</h3>
+    <p class="hint"><em>${esc(sp.sci)}</em></p>
+    <dl>
+      <dt>Seen</dt><dd>${esc(a.date || 'date not given')}</dd>
+      <dt>Where</dt><dd>${where(a.lat, a.lon)}${a.country ? ` · ${esc(a.country)}` : ''}</dd>
+      <dt>Record</dt><dd>${esc(basis)}</dd>
+    </dl>
+    <p class="note">${esc(sp.note)}</p>
+    <p class="hint">From ${esc(a.dataset || 'a dataset')} via GBIF, the Global Biodiversity Information Facility. <a href="${safeUrl(a.url)}" target="_blank" rel="noopener">Open the record</a></p>
+    <h4>NISAR radar over this spot</h4>
+    ${lapseBox(a.lat, a.lon)}`);
+}
+
+function selectPoi(poi) {
+  endCompare();
+  replay.stop();
+  state.lookup++;
+  state.selected = { kind: 'poi' };
+  globe.select({ lat: poi.lat, lon: poi.lon, related: [] });
+  openPanel(`<span class="tag"><i class="dot" style="--c:#f4e3b2"></i>Landmark · not NISAR data</span>
+    <h3>${esc(poi.name)}</h3>
+    <dl><dt>Where</dt><dd>${where(poi.lat, poi.lon)}</dd></dl>
+    <p class="note">${esc(poi.text)}</p>
+    <p class="hint">NISAR images land and ice, and only rarely the open ocean, so there is usually no NISAR data here.</p>`);
+}
+
+function renderSpeciesChips() {
+  const counts = {};
+  (live.sightings || []).forEach((s) => (counts[s.species] = (counts[s.species] || 0) + 1));
+  $('species-chips').innerHTML = SPECIES.map(
+    (sp) =>
+      `<button class="chip ${live.hiddenSpecies.has(sp.id) ? 'off' : ''}" data-species="${sp.id}" aria-pressed="${!live.hiddenSpecies.has(sp.id)}" style="--c:${sp.color}"><i></i>${esc(sp.common)} ${counts[sp.id] || 0}</button>`,
+  ).join('');
+}
+
+function showMonth(splash) {
+  if (!live.sightings) return;
+  $('wildlife-month').textContent = MONTHS[live.month];
+  const m = live.month + 1;
+  const decor = $('decor').checked;
+  globe.setAnimals(
+    live.sightings
+      .filter((a) => a.month === m && !live.hiddenSpecies.has(a.species))
+      .map((a) => {
+        const sp = speciesOf(a);
+        return { animal: a, lat: a.lat, lon: a.lon, color: sp.color, size: 6, splash: splash && decor && sp.splash };
+      }),
+  );
+}
+
+function playMonths(on) {
+  live.playing = on;
+  clearInterval(live.timer);
+  live.timer = null;
+  $('wildlife-play').textContent = on ? 'Pause' : 'Play';
+  if (on && $('wildlife').checked) {
+    live.timer = setInterval(() => {
+      live.month = (live.month + 1) % 12;
+      showMonth(true);
+    }, 1800);
+  }
+}
+
+async function setWildlife(on) {
+  $('wildlife-controls').hidden = !on;
+  if (!on) {
+    playMonths(false);
+    live.playing = true;
+    $('wildlife-play').textContent = 'Pause';
+    globe.setAnimals([]);
+    return;
+  }
+  if (!live.sightings) {
+    $('wildlife-status').textContent = 'loading…';
+    try {
+      live.sightings = await loadSightings((done, total) => ($('wildlife-status').textContent = `loading ${Math.round((done / total) * 100)}%`));
+    } catch {
+      $('wildlife-status').textContent = 'GBIF unavailable';
+      return;
+    }
+    $('wildlife-status').textContent = `${live.sightings.length.toLocaleString('en')} records`;
+  }
+  if (!$('wildlife').checked) return;
+  renderSpeciesChips();
+  showMonth(true);
+  playMonths(live.playing);
+}
+
+function setDecor(on) {
+  globe.setShootingStars(on);
+  globe.setPois(on ? POIS.map((poi) => ({ poi, lat: poi.lat, lon: poi.lon })) : []);
+}
+
 // ---------- calibrated measurements ----------
 
 // Fills #measured-slot when tools/measure.py has measured this spot.
@@ -1115,6 +1310,7 @@ async function selectPlace(place, fly) {
     <h4>What NISAR can show here</h4>
     <p class="note">${esc(kind.look)}</p>
     <p class="note">${esc(kind.note)}</p>
+    ${place.animals ? `<h4>Animals and the water</h4><p class="note">${esc(place.animals)} NISAR maps the flooding and drying that they follow. Turn on wildlife sightings under “Live sky and wildlife” to see migrating species.</p>` : ''}
     <div id="measured-slot"></div>
     <h4>NISAR passes over this spot</h4>
     ${lapseBox(place.lat, place.lon)}
@@ -1308,6 +1504,21 @@ async function start() {
 
   $('basemap').onchange = (e) => globe.setBasemap(e.target.value);
   $('lighting').onchange = (e) => globe.setLighting(e.target.checked);
+  globe.setLighting($('lighting').checked);
+  $('live-nisar').onchange = tickNisar;
+  $('wildlife').onchange = (e) => setWildlife(e.target.checked);
+  $('wildlife-play').onclick = () => playMonths(!live.playing);
+  $('species-chips').onclick = (e) => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    const id = chip.dataset.species;
+    live.hiddenSpecies.has(id) ? live.hiddenSpecies.delete(id) : live.hiddenSpecies.add(id);
+    renderSpeciesChips();
+    showMonth(false);
+  };
+  $('decor').onchange = (e) => setDecor(e.target.checked);
+  setDecor($('decor').checked);
+  startNisarLive();
   $('footprints').onchange = draw;
   $('window').onchange = async (e) => {
     if (e.target.value !== 'nisar') {
@@ -1449,6 +1660,7 @@ async function start() {
     if (t.dataset.mode) return setLapseMode(t.dataset.mode);
     if (t.id === 'under') return drapeChanges(t.checked);
     if (t.id === 'measured-map') return showMeasuredMap(t);
+    if (t.id === 'sat-follow' && live.pos) return globe.flyTo(live.pos.lat, live.pos.lon, 6_000_000);
     const li = t.closest('li');
     if (!li) return;
     if (li.dataset.site) return selectPlace(placeById(li.dataset.site), true);
@@ -1456,9 +1668,7 @@ async function start() {
     if (li.dataset.in) return selectIncident(sel.inside[+li.dataset.in], true);
     if (li.dataset.near) return selectIncident(sel.near[+li.dataset.near].incident, true);
     if (li.dataset.pick) {
-      const f = sel.found[+li.dataset.pick];
-      if (f.kind === 'place') return selectPlace(f.place, false);
-      return f.kind === 'incident' ? selectIncident(f.incident, false) : selectScene(f.scene, false);
+      return openFound(sel.found[+li.dataset.pick]);
     }
   };
 
@@ -1475,11 +1685,9 @@ async function start() {
       return;
     }
     // Dots win over the footprints they sit on, unless several dots overlap.
-    const incidents = found.filter((f) => f.kind === 'incident');
-    const places = found.filter((f) => f.kind === 'place');
-    if (incidents.length + places.length > 1) return choose([...incidents, ...places]);
-    if (incidents.length === 1) return selectIncident(incidents[0].incident, false);
-    if (places.length === 1) return selectPlace(places[0].place, false);
+    const marks = found.filter((f) => f.kind !== 'scene');
+    if (marks.length > 1) return choose(marks);
+    if (marks.length === 1) return openFound(marks[0]);
     if (found.length === 1) return selectScene(found[0].scene, false);
     choose(found);
   });

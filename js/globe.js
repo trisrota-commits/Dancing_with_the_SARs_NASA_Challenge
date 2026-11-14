@@ -9,7 +9,8 @@ import { pointInPolygon } from './incidents.js';
 import { RAD, EARTH_RADIUS_M, toVec, toLatLon, greatCircle, sunDirection, rgb } from './engine/geo.js';
 import { GlobeControls } from './engine/controls.js';
 import { TileGlobe } from './engine/tiles.js';
-import { Dots, Lines, SelectionRing, Vortex, LIFT, atmosphere, stars } from './engine/marks.js';
+import { Dots, Lines, SelectionRing, Vortex, LIFT, atmosphere } from './engine/marks.js';
+import { Sky } from './sky.js';
 
 const DAY = 86400_000;
 const iso = (ms) => new Date(ms).toISOString().slice(0, 10);
@@ -27,8 +28,9 @@ export class Globe {
     this.camera = new THREE.PerspectiveCamera(35, 1, 0.1, 10);
     this.sky = new THREE.Scene();
     this.skyCamera = new THREE.PerspectiveCamera(35, 1, 0.1, 10);
-    this.stars = stars();
-    this.sky.add(this.stars);
+    // The real sky: catalogue stars turning with the Earth, and the Sun.
+    this.skyView = new Sky(this.sky);
+    this.skyBusy = false;
 
     this.shared = {
       uCam: { value: this.camera.position },
@@ -54,6 +56,18 @@ export class Globe {
     // Changing places (glaciers, sinking cities…), drawn as diamonds.
     this.placeDots = new Dots(this.scene, this.shared);
     this.placeDots.points.renderOrder = 29;
+    // Wildlife sightings and points of interest.
+    this.animalDots = new Dots(this.scene, this.shared);
+    this.animalDots.points.renderOrder = 28;
+    this.animalPulseUntil = 0;
+    this.poiDots = new Dots(this.scene, this.shared);
+    this.poiDots.points.renderOrder = 28;
+    // NISAR itself: the satellite, its orbit and its radar swath.
+    this.satDots = new Dots(this.scene, this.shared);
+    this.satDots.points.renderOrder = 32;
+    this.orbitPast = new Lines(this.scene, this.shared, { width: 2, order: 24 });
+    this.orbitAhead = new Lines(this.scene, this.shared, { width: 1.4, dash: 10, order: 24 });
+    this.swathLines = new Lines(this.scene, this.shared, { width: 1.5, order: 23 });
     this.ring = new SelectionRing(this.scene, this.shared);
 
     // Ground height in Earth radii, as drawn (so including exaggeration).
@@ -108,7 +122,7 @@ export class Globe {
     this.camera.aspect = this.skyCamera.aspect = w / h;
     this.skyCamera.updateProjectionMatrix();
     this.shared.uRatio.value = ratio;
-    this.stars.material.uniforms.uRatio.value = ratio;
+    this.skyView.setRatio(ratio);
     this.shared.uViewport.value.set(w * ratio, h * ratio);
     this.controls.apply();
   }
@@ -126,13 +140,20 @@ export class Globe {
       this.liftedAt = this.tiles.elevationVersion;
       this.dots.relift();
       this.placeDots.relift();
+      this.animalDots.relift();
+      this.poiDots.relift();
       this.fxDots.relift();
       if (this.selected) this.ring.set(this.selected.lat, this.selected.lon, this.lift(this.selected.lat, this.selected.lon));
       this.dirty = true;
     }
     // Pulsing dots and the selection ring are the only things that animate
     // on their own; without them an idle globe costs nothing.
-    const animating = this.animating || this.ring.points.visible || seconds < this.pulseUntil;
+    // The sky turns slowly by itself; a shooting star needs every frame.
+    const date = new Date();
+    const sun = sunDirection(date);
+    const skyBusy = this.skyView.update(date, seconds, this.camera.quaternion, sun);
+    const animating = this.animating || this.ring.points.visible || seconds < this.pulseUntil || seconds < this.animalPulseUntil || skyBusy || this.skyBusy;
+    this.skyBusy = skyBusy;
     if (!(moved || tilesChanged || animating || this.dirty)) return;
     this.dirty = false;
 
@@ -140,7 +161,7 @@ export class Globe {
     this.shared.uTime.value = seconds;
     this.shared.uScale.value = 0.75 + 0.75 * Math.max(0, Math.min(1, 1 - Math.log10(alt / 0.12) / 1.5));
     this.glow.uniforms.uStrength.value = Math.max(0, Math.min(1, (alt - 0.2) / 0.6));
-    if (this.tiles.uniforms.uNight.value) this.tiles.uniforms.uSun.value.copy(sunDirection());
+    if (this.tiles.uniforms.uNight.value) this.tiles.uniforms.uSun.value.copy(sun);
 
     this.skyCamera.quaternion.copy(this.camera.quaternion);
     this.renderer.clear();
@@ -201,6 +222,9 @@ export class Globe {
       .slice(0, 12)
       .map((h) => ({ kind: 'incident', incident: h.item.incident }));
     for (const h of this.dotsAt(x, y, 5, this.placeDots).slice(0, 6)) found.push({ kind: 'place', place: h.item.place });
+    if (this.dotsAt(x, y, 6, this.satDots).length) found.unshift({ kind: 'satellite' });
+    for (const h of this.dotsAt(x, y, 4, this.animalDots).slice(0, 4)) found.push({ kind: 'animal', animal: h.item.animal });
+    for (const h of this.dotsAt(x, y, 4, this.poiDots).slice(0, 2)) found.push({ kind: 'poi', poi: h.item.poi });
     const at = this.locate(x, y);
     if (at && this.footprintsOn) {
       for (const scene of this.scenes) {
@@ -216,12 +240,26 @@ export class Globe {
     const box = this.el.getBoundingClientRect();
     const x = e.clientX - box.left;
     const y = e.clientY - box.top;
-    const hit = this.dotsAt(x, y, 3)[0] || this.dotsAt(x, y, 3, this.placeDots)[0];
+    const hit =
+      this.dotsAt(x, y, 4, this.satDots)[0] ||
+      this.dotsAt(x, y, 3)[0] ||
+      this.dotsAt(x, y, 3, this.placeDots)[0] ||
+      this.dotsAt(x, y, 3, this.animalDots)[0] ||
+      this.dotsAt(x, y, 3, this.poiDots)[0];
     this.renderer.domElement.style.cursor = hit ? 'pointer' : 'grab';
     this.tooltip.hidden = !hit;
     if (hit) {
       const place = hit.item.place;
-      this.tooltip.textContent = place ? `${place.name} · ${place.region}` : hit.item.incident.title;
+      const it = hit.item;
+      this.tooltip.textContent = it.sat
+        ? 'NISAR · live position'
+        : it.animal
+          ? `${it.animal.common} · seen ${it.animal.date || 'date unknown'}`
+          : it.poi
+            ? `${it.poi.name} · point of interest`
+            : place
+              ? `${place.name} · ${place.region}`
+              : it.incident.title;
       this.tooltip.style.left = `${x + 14}px`;
       this.tooltip.style.top = `${y + 12}px`;
     }
@@ -413,6 +451,77 @@ export class Globe {
       this.lift,
     );
     this.dirty = true;
+  }
+
+  // ---------- live layers ----------
+
+  // NISAR's live position, orbit and radar swath; null hides them.
+  // sat: { now: {lat, lon, altKm}, track: [{lat, lon, altKm, minutes}], swath: {near, far} }
+  setSatellite(sat) {
+    if (!sat) {
+      this.satDots.set([], null);
+      this.orbitPast.set([]);
+      this.orbitAhead.set([]);
+      this.swathLines.set([]);
+      this.dirty = true;
+      return;
+    }
+    const teal = rgb('#39e6c4');
+    const up = (p) => toVec(p.lat, p.lon, 1 + p.altKm / (EARTH_RADIUS_M / 1000));
+    const ground = (p) => toVec(p.lat, p.lon, 1.0004);
+    const alt = sat.now.altKm / (EARTH_RADIUS_M / 1000);
+    this.satDots.set([{ sat: true, lat: sat.now.lat, lon: sat.now.lon, color: [1, 1, 1], size: 11, ring: true }], () => alt);
+    // Both halves of the orbit meet exactly at the satellite.
+    this.orbitPast.set([{ points: [...sat.track.filter((p) => p.minutes < 0).map(up), up(sat.now)], color: [...teal, 0.85] }]);
+    this.orbitAhead.set([{ points: [up(sat.now), ...sat.track.filter((p) => p.minutes > 0).map(up)], color: [...teal, 0.45] }]);
+    // The swath it swept over the last 25 minutes, plus two beams from the
+    // satellite down to the near and far edge of the swath right now.
+    const recent = sat.track.map((p, i) => ({ p, i })).filter(({ p }) => p.minutes >= -25 && p.minutes <= 0);
+    const near = recent.map(({ i }) => ground(sat.swath.near[i]));
+    const far = recent.map(({ i }) => ground(sat.swath.far[i]));
+    const at = recent.length ? recent[recent.length - 1].i : -1;
+    const beams =
+      at >= 0
+        ? [
+            { points: [up(sat.now), ground(sat.swath.near[at])], color: [...teal, 0.4] },
+            { points: [up(sat.now), ground(sat.swath.far[at])], color: [...teal, 0.4] },
+          ]
+        : [];
+    this.swathLines.set([
+      { points: near, color: [...teal, 0.7] },
+      { points: far, color: [...teal, 0.7] },
+      ...beams,
+    ]);
+    this.dirty = true;
+  }
+
+  // Wildlife sightings: [{ animal, lat, lon, color, size, splash }].
+  // Sightings with splash get one expanding ring when they appear.
+  setAnimals(list) {
+    const seconds = (performance.now() - this.started) / 1000;
+    let splash = false;
+    this.animalDots.set(
+      list.map((a) => {
+        if (a.splash) splash = true;
+        return { animal: a.animal, lat: a.lat, lon: a.lon, color: rgb(a.color), size: a.size || 6, born: a.splash ? seconds : undefined };
+      }),
+      this.lift,
+    );
+    if (splash) this.animalPulseUntil = seconds + 1.8;
+    this.dirty = true;
+  }
+
+  // Points of interest: [{ poi, lat, lon }].
+  setPois(list) {
+    this.poiDots.set(
+      list.map((p) => ({ poi: p.poi, lat: p.lat, lon: p.lon, color: rgb('#f4e3b2'), size: 7 })),
+      this.lift,
+    );
+    this.dirty = true;
+  }
+
+  setShootingStars(on) {
+    this.skyView.shooting.enabled = on;
   }
 
   renderFootprints(scenes, on) {
