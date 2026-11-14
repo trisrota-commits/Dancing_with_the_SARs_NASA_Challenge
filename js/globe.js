@@ -4,7 +4,7 @@
 // something changed.
 
 import * as THREE from '../vendor/three.module.min.js';
-import { CATEGORIES, BASEMAPS, OVERLAYS, NISAR_TILES } from './config.js';
+import { CATEGORIES, BASEMAPS, OVERLAYS, NISAR_TILES, PALETTE } from './config.js';
 import { pointInPolygon } from './incidents.js';
 import { RAD, EARTH_RADIUS_M, toVec, toLatLon, greatCircle, sunDirection, rgb } from './engine/geo.js';
 import { GlobeControls } from './engine/controls.js';
@@ -16,6 +16,9 @@ import { Sky } from './sky.js';
 
 const DAY = 86400_000;
 const iso = (ms) => new Date(ms).toISOString().slice(0, 10);
+
+// NISAR's teal as "r,g,b" for canvas colours.
+const NISAR_RGB = rgb(PALETTE.nisar).map((v) => Math.round(v * 255)).join(',');
 
 export class Globe {
   constructor(containerId) {
@@ -308,7 +311,8 @@ export class Globe {
             ? `${it.poi.name} · point of interest`
             : place
               ? `${place.name} · ${place.region}`
-              : it.incident.title;
+              : // The kind of event in words: its colour alone must never have to say it.
+                `${CATEGORIES[it.incident.category].label} · ${it.incident.title}`;
       this.tooltip.style.left = `${x + 14}px`;
       this.tooltip.style.top = `${y + 12}px`;
     }
@@ -340,7 +344,9 @@ export class Globe {
         if (date >= NISAR_TILES.firstDate) layers.push({ url: NISAR_TILES.url.replace('{date}', date), maxLevel: NISAR_TILES.maxLevel });
       }
     }
-    for (const layer of s.fx) layers.push(layer);
+    // An event's own filled layer (flood water) steps aside while a change
+    // map is up: two blue fills with two meanings must not share the ground.
+    if (!this.fillsHidden) for (const layer of s.fx) layers.push(layer);
     this.tiles.setLayers(layers);
     this.dirty = true;
   }
@@ -568,11 +574,12 @@ export class Globe {
       this.dirty = true;
       return;
     }
-    const teal = rgb('#39e6c4');
+    const teal = rgb(PALETTE.nisar);
     const up = (p) => toVec(p.lat, p.lon, 1 + p.altKm / (EARTH_RADIUS_M / 1000));
     const ground = (p) => toVec(p.lat, p.lon, 1.0004);
     const alt = sat.now.altKm / (EARTH_RADIUS_M / 1000);
-    this.satDots.set([{ sat: true, lat: sat.now.lat, lon: sat.now.lon, color: [1, 1, 1], size: 11, ring: true }], () => alt);
+    // The satellite is NISAR, so it is teal like its orbit and its passes.
+    this.satDots.set([{ sat: true, lat: sat.now.lat, lon: sat.now.lon, color: teal, size: 11 }], () => alt);
     // Both halves of the orbit meet exactly at the satellite.
     this.orbitPast.set([{ points: [...sat.track.filter((p) => p.minutes < 0).map(up), up(sat.now)], color: [...teal, 0.85] }]);
     this.orbitAhead.set([{ points: [up(sat.now), ...sat.track.filter((p) => p.minutes > 0).map(up)], color: [...teal, 0.45] }]);
@@ -639,10 +646,10 @@ export class Globe {
     if (this.footprintsOn) {
       for (const scene of this.scenes) {
         const strength = Math.max(0.25, 1 - (now - scene.time) / DAY / 4);
-        outlines.push({ ring: scene.ring, color: `rgba(57,230,196,${(0.8 * strength).toFixed(2)})`, fill: `rgba(57,230,196,${(0.07 * strength).toFixed(3)})`, width: 1.4 });
+        outlines.push({ ring: scene.ring, color: `rgba(${NISAR_RGB},${(0.8 * strength).toFixed(2)})`, fill: `rgba(${NISAR_RGB},${(0.07 * strength).toFixed(3)})`, width: 1.4 });
       }
     }
-    for (const scene of this.highlighted) outlines.push({ ring: scene.ring, color: 'rgba(57,230,196,1)', width: 2.6 });
+    for (const scene of this.highlighted) outlines.push({ ring: scene.ring, color: `rgba(${NISAR_RGB},1)`, width: 2.6 });
     outlines.push(...this.fxZones);
     this.tiles.setOutlines(outlines);
     this.dirty = true;
@@ -685,6 +692,13 @@ export class Globe {
   setEffectZones(zones) {
     this.fxZones = zones;
     this.drawOutlines();
+  }
+
+  // Hides or brings back the event's filled layers (see applyLayers).
+  setEffectFillsShown(on) {
+    if (this.fillsHidden === !on) return;
+    this.fillsHidden = !on;
+    if (this.state.fx.length) this.applyLayers();
   }
 
   // Extra dated tile layers shown on top of everything else.
@@ -793,7 +807,8 @@ export class Globe {
       incident
         ? incident.related.slice(0, 25).map((link) => ({
             points: greatCircle(incident, link.incident, 32, 1.0002, 0.12),
-            color: [...rgb(CATEGORIES[link.incident.category].color), 0.9],
+            // A link is context, not a kind of event: one neutral colour.
+            color: [...rgb(PALETTE.context), 0.85],
           }))
         : [],
     );

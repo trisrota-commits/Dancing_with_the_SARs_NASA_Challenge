@@ -10,10 +10,14 @@
 // coastline and ridge, so a difference only counts if it survives nudging
 // one image by up to two pixels in any direction.
 
+import { PALETTE } from './config.js';
+
 export const CHANGE_THRESHOLD = 28; // out of 255, about 11 % of full brightness
 const MAX_SIDE = 1100;
-const WEAKER = [64, 170, 255];
-const STRONGER = [255, 170, 60];
+// The same pair as the measured change map and every key (config PALETTE).
+const bytes = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+const WEAKER = bytes(PALETTE.weaker);
+const STRONGER = bytes(PALETTE.stronger);
 
 // Pixels of `picture` (a canvas with known lat/lon bounds) resampled onto a
 // w×h grid covering `box`.

@@ -9,12 +9,14 @@ const H = 176;
 const BOX = { left: 30, right: 36, top: 10, bottom: 24 };
 const SURFACE = '#0a101a';
 // Colours validated for colour-blind separation on the dark panel surface.
+import { PALETTE } from './config.js';
+
 // Each channel is named with what mostly sends it back: the co-polarised
 // echo returns in the orientation it was sent, the cross-polarised one
 // comes back turned, which happens inside vegetation.
 const seriesFor = (pol) => [
-  { key: 'co', short: pol.co, name: `${pol.co}: the straight echo (ground, buildings, water's edge)`, color: '#d55181' },
-  ...(pol.cross ? [{ key: 'cross', short: pol.cross, name: `${pol.cross}: the twisted echo (leaves and branches)`, color: '#0ca30c' }] : []),
+  { key: 'co', short: pol.co, name: `${pol.co}: the straight echo (ground, buildings, water's edge)`, color: PALETTE.co },
+  ...(pol.cross ? [{ key: 'cross', short: pol.cross, name: `${pol.cross}: the twisted echo (leaves and branches)`, color: PALETTE.cross }] : []),
 ];
 
 const el = (name, attrs = {}, text) => {

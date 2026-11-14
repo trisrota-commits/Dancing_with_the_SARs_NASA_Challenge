@@ -929,7 +929,7 @@ body:has(#ticker:not([hidden])) #split-handle span {
   top: 0;
   height: 100%;
   border-radius: 3px;
-  background: rgba(255, 166, 43, 0.75);
+  background: rgba(255, 255, 255, 0.55);
 }
 
 #replay.timeline #replay-fill {
@@ -1737,6 +1737,125 @@ ul.plain {
 
 #legend small {
   color: var(--dim);
+}
+
+/* NASA's own legend for a map layer, shown while the layer is on. Its
+   pictures are drawn for a light page, so they sit on a light card. */
+.layer-key {
+  margin: 2px 0 8px 22px;
+}
+
+.layer-key img {
+  display: block;
+  max-width: 100%;
+  padding: 4px 6px;
+  background: #f4f6fa;
+  border-radius: 6px;
+}
+
+.layer-key small {
+  display: block;
+  margin-top: 3px;
+  color: var(--dim);
+  line-height: 1.35;
+}
+
+/* The key to the event dots, in the menu. */
+#event-key i {
+  flex: none;
+  width: 22px;
+  height: 12px;
+  background: none;
+  position: relative;
+}
+
+#event-key i::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--dim);
+  transform: translate(-50%, -50%);
+}
+
+#event-key i.big::before {
+  width: 12px;
+  height: 12px;
+}
+
+#event-key i.ring::before {
+  box-shadow: 0 0 0 2px var(--bg-solid, #0a101a), 0 0 0 3.5px #fff;
+}
+
+#event-key i.ring.nisar::before {
+  box-shadow: 0 0 0 2px var(--bg-solid, #0a101a), 0 0 0 3.5px var(--accent);
+}
+
+#event-key i.ring.pulse::before {
+  box-shadow: 0 0 0 4px rgba(148, 161, 181, 0.35), 0 0 0 5px var(--dim);
+}
+
+#event-key i.line::before {
+  width: 22px;
+  height: 2px;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+#event-key i.line::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--dim);
+  transform: translate(-50%, -50%);
+}
+
+/* Marks of the open event: a dot, a glowing spot, a line, an outline. */
+#legend li i.dot,
+#legend li i.glow {
+  width: 10px;
+  height: 10px;
+  margin: 0 6px;
+  border-radius: 50%;
+}
+
+#legend li i.glow {
+  box-shadow: 0 0 7px 2px var(--c);
+}
+
+#legend li i.line,
+#legend li i.bands,
+#legend li i.dash {
+  height: 3px;
+  transform: translateY(-3px);
+}
+
+#legend li i.dash {
+  background: repeating-linear-gradient(90deg, var(--c) 0 6px, transparent 6px 10px);
+}
+
+#legend li i.outline {
+  background: transparent;
+  border: 2px solid var(--c);
+}
+
+#legend .also {
+  display: block;
+  margin: 8px 0 3px;
+  padding-top: 7px;
+  border-top: 1px solid var(--line);
+}
+
+#legend {
+  max-height: calc(100vh - 230px);
+  overflow-y: auto;
 }
 
 #left.closed ~ #legend {
