@@ -159,11 +159,13 @@ async function covers(scene, lat, lon) {
   return false;
 }
 
-// Puts the repeat tracks whose newest picture really covers the point first.
-// A track can list a point inside its frame outline while the imaged strip
-// misses it, so the track with the most passes is not always the best.
+// Puts the repeat tracks whose pictures really cover the point first. A
+// track can list a point inside its frame outline while the imaged strip
+// misses it. Both the oldest and the newest picture are checked, because
+// later product versions image a wider strip than earlier ones.
 export async function rankByCoverage(stacks, lat, lon) {
   const head = stacks.slice(0, 4);
-  const seen = await Promise.all(head.map((st) => covers(st.scenes[st.scenes.length - 1], lat, lon).catch(() => false)));
+  const both = async (st) => (await covers(st.scenes[0], lat, lon)) && (await covers(st.scenes[st.scenes.length - 1], lat, lon));
+  const seen = await Promise.all(head.map((st) => both(st).catch(() => false)));
   return [...head.filter((_, i) => seen[i]), ...head.filter((_, i) => !seen[i]), ...stacks.slice(4)];
 }

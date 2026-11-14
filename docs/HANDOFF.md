@@ -267,10 +267,12 @@ that appears on a place, or an event nearby, once results exist.
   on simulated files. Someone with an Earthdata login has to run it and
   commit `data/measured/`; until then the card never shows. See "Measuring
   with NISAR" in the README.
-- **Event history chart is often empty.** Many tracks list a point inside
-  their frame outline while the imaged strip misses it. Ranking tracks by
-  thumbnail coverage (`rankByCoverage`) did not fix the test case (1 usable
-  sample of 8). Needs a per-pass coverage check.
+- **Event history chart: fixed 14 Nov.** It was often empty because the
+  track with the most passes was chosen even when the place sat in the
+  empty strip along the frame edge. `historyAt` now puts tracks that hold
+  the place at least 12 km inside their frame first (`edgeMarginKm`), and
+  `bestPair` prefers such pairs. Checked on one event (8 of 8 samples,
+  where it had 1 of 8); other places may still have gaps.
 - **Live satellite and wildlife are barely checked.** In the test container
   CelesTrak is unreachable and the fallback orbit source and GBIF answer
   slowly or with 429, so the satellite was seen once and the wildlife
@@ -315,7 +317,7 @@ that appears on a place, or an event nearby, once results exist.
    AI; Space Apps normally requires saying so). Check the submission form
    for exact requirements. The demo script is in
    `docs/DATA_RULES_AND_DEMO_PLAN.md`.
-4. **Fix the event history chart** (per-pass coverage).
+4. (Done) Event history chart.
 5. **Phone layout pass** and a hands-on test on a real machine.
 6. **Run the measurements** (plan item 2a): `tools/measure.py` is ready;
    it needs an Earthdata login. Check each change map in the app and move

@@ -39,3 +39,16 @@ test('available comparison uses the nearest matching passes bracketing the event
   assert.deepEqual(result, { pair: { before, after, span: 3 }, reason: '' });
   assert.equal(nisar.bestPair([scene(15), scene(15)], 15), null);
 });
+
+test('a point well inside a frame is preferred over one that grazes its edge', () => {
+  const box = (west, east) => [{ lat: 0, lon: west }, { lat: 2, lon: west }, { lat: 2, lon: east }, { lat: 0, lon: east }];
+  assert.ok(nisar.edgeMarginKm(box(0, 2), 1, 1) > 100);
+  assert.ok(nisar.edgeMarginKm(box(0, 2), 1, 1.99) < 2);
+  assert.ok(nisar.edgeMarginKm(box(0, 2), 1, 2.5) < 0);
+  // The grazing pair is closer in time, but the pair that covers the place wins.
+  const at = { lat: 1, lon: 1.98 };
+  const grazing = [scene(14, { ring: box(0, 2) }), scene(16, { ring: box(0, 2) })];
+  const covering = [scene(5, { track: '009', ring: box(1, 3) }), scene(30, { track: '009', ring: box(1, 3) })];
+  assert.equal(nisar.bestPair([...grazing, ...covering], 15, true, at).before.track, '009');
+  assert.equal(nisar.bestPair([...grazing, ...covering], 15).before.track, '001');
+});

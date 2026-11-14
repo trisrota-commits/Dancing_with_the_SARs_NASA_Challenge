@@ -368,7 +368,7 @@ function radarHtml(inc, found) {
   if (!backscatter.length && !interferograms.length) {
     return `<p class="note">No NISAR scene covers this point between ${day(inc.time - NISAR_LOOKBACK_DAYS * DAY)} and today. NISAR revisits every 12 days, and oceans are mostly not imaged.</p>`;
   }
-  const { pair, reason } = comparisonStatus(backscatter, inc.time);
+  const { pair, reason } = comparisonStatus(backscatter, inc.time, inc);
   const before = backscatter.filter((s) => s.time < inc.time).length;
   let html = `<p class="note">${backscatter.length} backscatter scenes (${before} before, ${backscatter.length - before} after) and ${interferograms.length} interferograms.</p>`;
   html += nextPassHtml(found.newest?.length ? found.newest : backscatter);
@@ -516,7 +516,7 @@ async function showScene(id, button) {
 
 async function compare(button) {
   const inc = state.selected.incident;
-  const pair = bestPair(state.selected.found.backscatter, inc.time);
+  const pair = bestPair(state.selected.found.backscatter, inc.time, true, inc);
   if (!pair) return;
   endCompare();
   replay.stop();
@@ -556,7 +556,7 @@ function endCompare() {
 // two passes, with the source image available underneath as proof.
 async function showChanges(button) {
   const inc = state.selected.incident;
-  const pair = bestPair(state.selected.found.backscatter, inc.time);
+  const pair = bestPair(state.selected.found.backscatter, inc.time, true, inc);
   if (!pair) return;
   endCompare();
   replay.stop();
