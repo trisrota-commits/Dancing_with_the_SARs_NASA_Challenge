@@ -65,9 +65,9 @@ radar overlays easily, need a paid key and show one fixed date).
 ### Practical notes for an AI session
 
 - The project lead tests on a Mac and wants a fresh zip of `main` after
-  each batch (`index.html css js vendor docs tests tools README.md LICENSE
-  .nojekyll start.bat start.sh start.command`), sent as a file, plus a few
-  screenshots of what changed.
+  each batch (`index.html css js vendor data docs tests tools README.md
+  LICENSE .nojekyll start.bat start.sh start.command`), sent as a file, plus
+  a few screenshots of what changed.
 - The lead writes casually and trusts our judgement; keep replies plain,
   lead with the result, and always say what was not verified.
 - This session can push only to `claude/peaceful-curie-4pexs2`. It cannot
@@ -92,6 +92,8 @@ radar overlays easily, need a paid key and show one fixed date).
   `python3 -m http.server 8765` then `http://localhost:8765`.
 - Opening `index.html` from disk does not work (ES modules need a server).
 - `node --test tests/*.test.mjs` runs the unit tests (7, from a teammate).
+- `python tests/test_measure.py` checks the measurement script on simulated
+  files (needs `pip install h5py numpy pyproj pillow`).
 - `node tools/smoke.js` loads the app in headless Chromium against the live
   services and checks the main paths. It needs Playwright and a server on
   port 8765. In a proxied cloud container set `HTTPS_PROXY`; headless
@@ -115,7 +117,9 @@ time; there is no backend and there are no keys.
 | `js/timelapse.js` | Loads passes of one repeat track, splits channels, describes a point history, ranks tracks by coverage |
 | `js/chart.js` | The HH/HV history chart |
 | `js/stories.js` | Five curated stories (places and explanations only) |
-| `js/places.js` | 27 "changing places" (teammate) |
+| `js/places.js` | 33 "changing places" in eight kinds (teammate) |
+| `js/measured.js` | Shows calibrated measurements from `data/measured/`: card, dB chart, change map (teammate) |
+| `tools/measure.py` | Offline: makes those measurements from full-resolution NISAR files; sites in `tools/measure_sites.json` (teammate) |
 | `js/replay/replay.js` | Event replay templates and the player |
 | `js/replay/sources.js` | Per-event data: shaking contours, nearby quakes, agency outlines, fire detections |
 | `js/replay/mvt.js` | Vector-tile reader for the fire detections |
@@ -149,7 +153,7 @@ All checked from a browser origin (CORS) unless noted.
 |---|---|---|
 | NASA CMR `granules.json` | NISAR scene search | No login for search. Entries are about 25 KB each uncompressed. |
 | NISAR previews (ASF) | `_LATLON.png` plus `.kml` corners per scene | Public. Passes before about mid-June 2026 mostly lack public corner files, so they cannot be placed; we leave them out and say so. Iceland is an exception with a full year. |
-| NISAR full HDF5 | Not used | Needs Earthdata login, 1 to 8 GB each. |
+| NISAR full HDF5 | Read offline by `tools/measure.py`, never by the app | Needs Earthdata login, 1 to 8 GB each; the script reads only a small window over HTTPS. Not yet run against real files. |
 | NASA GIBS (EPSG:3857 tiles) | Basemaps, daily NISAR backscatter, context layers | Raster only on this endpoint. |
 | NASA GIBS (EPSG:4326, `.mvt`) | VIIRS fire detections | Vector tiles are only served on the 4326 endpoint; tiles span 288°/2^z. |
 | USGS feeds, FDSN query, ShakeMap `cont_mmi.json` | Earthquakes, nearby quakes, shaking contours | Fine. |
@@ -194,14 +198,21 @@ three feeds with merging and links; event replays (earthquake, storm,
 wildfire, flood); NISAR lookup with before/after divider and the "what
 changed" view; interferogram cards for earthquakes; NISAR time-lapse for any
 spot with channel views, chart, computed facts and optional sound; five
-stories; 27 changing places; search; reports bar; next-pass countdown;
+stories; 33 changing places; search; reports bar; next-pass countdown;
 archive time window back to 17 June 2026; Sentinel-1 offer; event history
 chart; a "Why might this have changed?" explainer per event type; news per
 event; share links; 12 grouped context layers; L-band
-versus C-band divider; launchers for macOS, Windows and Linux.
+versus C-band divider; launchers for macOS, Windows and Linux; thirteen
+event types (landslides, snow, dust and haze, extreme heat or cold and
+human-made events have their own category); a "Measured with NISAR" card
+that appears on a place, or an event nearby, once results exist.
 
 ### Known problems
 
+- **No calibrated measurements exist yet.** `tools/measure.py` has only run
+  on simulated files. Someone with an Earthdata login has to run it and
+  commit `data/measured/`; until then the card never shows. See "Measuring
+  with NISAR" in the README.
 - **Event history chart is often empty.** Many tracks list a point inside
   their frame outline while the imaged strip misses it. Ranking tracks by
   thumbnail coverage (`rankByCoverage`) did not fix the test case (1 usable
@@ -240,6 +251,7 @@ versus C-band divider; launchers for macOS, Windows and Linux.
    `docs/DATA_RULES_AND_DEMO_PLAN.md`.
 4. **Fix the event history chart** (per-pass coverage).
 5. **Phone layout pass** and a hands-on test on a real machine.
-6. **Full-resolution analysis for showcase events** (plan item 2a): needs an
-   Earthdata login and large downloads; not started.
+6. **Run the measurements** (plan item 2a): `tools/measure.py` is ready;
+   it needs an Earthdata login. Check each change map in the app and move
+   the point in `tools/measure_sites.json` if it misses the feature.
 7. Split `js/main.js` into modules if time allows.

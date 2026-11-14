@@ -32,6 +32,12 @@ const proxy = process.env.HTTPS_PROXY ? { server: process.env.HTTPS_PROXY, bypas
     return `${await page.locator('#event-count').innerText()} events`;
   });
   await page.locator('#welcome-close').click().catch(() => {});
+  // A stylesheet slip once left these rules applying on phones only.
+  await step('desktop styles', async () => {
+    const got = await page.evaluate(() => [getComputedStyle(document.getElementById('stories')).display, getComputedStyle(document.getElementById('share')).position].join(', '));
+    if (got !== 'grid, absolute') throw new Error(`stories and share button are styled ${got}`);
+    return got;
+  });
   await step('reports bar', async () => (await page.locator('#ticker-text').innerText()).slice(0, 60));
   await step('story with a time-lapse', async () => {
     await page.click('[data-story="vatnajokull"]');

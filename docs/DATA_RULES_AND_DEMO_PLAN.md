@@ -153,8 +153,9 @@ showcase panel should cover:
 5. Who is affected, and what could NISAR be used for next?
 
 **Fix 3d: changing places (done).** Slow changes such as glacier loss never
-appear in event feeds. The app now marks 27 places with diamonds: 13 glaciers
-worldwide, plus sinking cities, wetlands, forest loss and farming seasons.
+appear in event feeds. The app now marks 33 places with diamonds: 13 glaciers
+worldwide, plus sinking cities, wetlands, forest loss, farming seasons,
+volcanoes, moving slopes and a filling reservoir.
 Each place says what NISAR can show there and plays the time-lapse. The list
 is in `js/places.js`, so swapping or adding a place is one entry. Check each
 place in the app: if the time-lapse finds few passes, replace it.
@@ -193,8 +194,9 @@ season or a flood has an audible rhythm. The Web Audio API is enough for this.
 - [x] 1a: "Since NISAR data began" window added
 - [x] 1b: next-pass prediction in the event panel
 - [x] 1c: Sentinel-1 offer when there is no after scene
-- [ ] 2a: full-resolution dB difference maps for the showcase events
-- [ ] 2b: method line next to each processed result
+- [x] 2a: measurement pipeline ready (`tools/measure.py`), tested on simulated files
+- [ ] 2a: run it with an Earthdata login and commit the results in `data/measured/`
+- [x] 2b: method line next to each processed result
 - [ ] 3a: showcase events chosen and data checked in Vertex
 - [ ] 3b: explanation written for each showcase event
 - [x] 3c: entry point for curated places (the "Changing places" list)

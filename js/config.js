@@ -8,6 +8,11 @@ export const CATEGORIES = {
   volcano: { label: 'Volcano', color: '#ff4fa3', mergeKm: 30, mergeHours: 24 * 14 },
   ice: { label: 'Sea & lake ice', color: '#7fe7f2', mergeKm: 50, mergeHours: 24 * 14 },
   drought: { label: 'Drought', color: '#d9b26a', mergeKm: 300, mergeHours: 24 * 30 },
+  landslide: { label: 'Landslide', color: '#b5651d', mergeKm: 30, mergeHours: 24 * 7 },
+  snow: { label: 'Snow', color: '#eef3ff', mergeKm: 300, mergeHours: 24 * 3 },
+  dust: { label: 'Dust & haze', color: '#bfa38a', mergeKm: 300, mergeHours: 24 * 3 },
+  heat: { label: 'Extreme heat or cold', color: '#ff8f6b', mergeKm: 300, mergeHours: 24 * 3 },
+  manmade: { label: 'Human-made', color: '#9aa6b8', mergeKm: 30, mergeHours: 24 * 3 },
   other: { label: 'Other', color: '#c2c9d6', mergeKm: 50, mergeHours: 24 * 7 },
 };
 
@@ -183,6 +188,11 @@ export const CHANGE_EXPLANATIONS = {
   volcano: 'Fresh lava or ash can change surface roughness and radar brightness. Rainfall, vegetation changes and viewing geometry can also affect the image. Brightness alone cannot confirm an eruption or measure volcanic deformation; deformation requires separate analysis.',
   ice: 'Changes in ice roughness, snow wetness or open water can alter radar brightness. Temperature, season and viewing geometry also matter. A brightness change alone cannot establish ice loss, melt volume or ice motion.',
   drought: 'Drying soil and changing vegetation moisture or structure can alter the radar return. Rainfall, harvesting and seasonal growth can produce similar changes. Brightness alone cannot confirm drought or quantify crop loss.',
+  landslide: 'A slope failure can strip vegetation and change surface roughness, which may change radar brightness in either direction. Rainfall, soil moisture and seasonal vegetation changes can also affect the return. Brightness alone cannot confirm a landslide or measure how far the ground moved; that needs interferometric or pixel-offset analysis.',
+  snow: 'New, wet or melting snow can change the radar return: wet snow often looks darker, while dry snow is nearly transparent at L-band. Temperature and the time of day of each pass also matter. Brightness alone cannot measure snow depth or water content.',
+  dust: 'Radar sees through dust and haze, so any change comes from the ground, such as drying soil or vegetation. Rainfall and seasonal changes can produce similar patterns. This comparison cannot detect the dust itself.',
+  heat: 'Heat can dry soil and vegetation or melt snow and ice, which may change radar brightness. Rainfall, irrigation and seasonal growth can produce similar changes. Brightness alone cannot measure temperature or confirm heat damage.',
+  manmade: 'Construction, accidents or spills can change surface roughness or water cover, which may change radar brightness. Weather and seasonal changes can look similar. Compare independent observations before attributing a change to a particular event.',
   other: 'Changes in water, vegetation, soil moisture or surface roughness can alter radar brightness. Weather, season and differences between acquisitions can produce similar patterns. Compare independent observations before attributing a change to a particular event.',
 };
 
@@ -201,5 +211,12 @@ export const RADAR_NOTES = {
   ice: 'Sea ice roughness and age separate clearly at L-band. Pixel-offset products track how far the ice or a glacier moved between two passes.',
   drought:
     'Backscatter falls as soil dries, because dry soil has a lower dielectric constant. Crop canopies thinning out also lower the HV return.',
+  landslide:
+    'A landslide strips the vegetation and roughens the slope, so backscatter changes sharply along the scar, often most in HV. Interferograms and pixel offsets also show slopes that creep slowly before or after a failure.',
+  snow: 'Dry snow is almost transparent at L-band, so the radar sees the ground beneath it. Wet snow absorbs the signal and turns dark, which marks melting.',
+  dust: 'Radar sees straight through dust and haze. Look for change on the ground instead: drying soil lowers the backscatter.',
+  heat: 'Heat waves dry out soil and vegetation, which lowers the backscatter. Where heat melts snow or ice, the wet surface turns dark.',
+  manmade:
+    'Human-made events, such as industrial accidents, can change surfaces sharply. Oil calms the sea surface and turns it dark, but NISAR images most open ocean only rarely.',
   other: 'Compare a scene from before the event with one after it and look for brightness changes in HH and HV.',
 };

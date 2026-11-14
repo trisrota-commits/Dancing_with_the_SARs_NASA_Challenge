@@ -11,6 +11,11 @@ const EONET_CATEGORY = {
   floods: 'flood',
   earthquakes: 'earthquake',
   drought: 'drought',
+  landslides: 'landslide',
+  snow: 'snow',
+  dustHaze: 'dust',
+  tempExtremes: 'heat',
+  manmade: 'manmade',
 };
 
 const GDACS_CATEGORY = { EQ: 'earthquake', TC: 'storm', FL: 'flood', VO: 'volcano', WF: 'wildfire', DR: 'drought' };

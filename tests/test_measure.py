@@ -1,0 +1,78 @@
+"""Checks tools/measure.py on simulated GCOV files.
+
+The files copy the real layout (/science/LSAR/GCOV/grids/frequencyA with
+HHHH, HVHV, xCoordinates, yCoordinates and projection/epsg_code) but hold
+made-up values: a "glacier" that loses 8 dB in HH during July, on a
+background that stays the same. Run with: python tests/test_measure.py
+"""
+
+import sys
+import tempfile
+from datetime import datetime, timezone
+from pathlib import Path
+
+import h5py
+import numpy as np
+from pyproj import Transformer
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
+import measure  # noqa: E402
+
+LAT, LON = 46.5, 8.03
+EPSG = 32632  # UTM zone 32N, as for a scene over the Alps
+DATES = ["20260621T053000", "20260703T053000", "20260715T053000", "20260727T053000", "20260808T053000"]
+HH_DB = [-8.0, -8.5, -16.0, -16.5, -15.5]  # melt starts between 3 and 15 July
+
+
+def make_file(folder: Path, stamp: str, hh_db: float) -> None:
+    cx, cy = Transformer.from_crs(4326, EPSG, always_xy=True).transform(LON, LAT)
+    spacing = 20.0
+    xs = np.arange(cx - 10_000, cx + 10_000, spacing)
+    ys = np.arange(cy + 10_000, cy - 10_000, -spacing)  # north-up, like the products
+    xx, yy = np.meshgrid(xs, ys)
+    rng = np.random.default_rng(int(stamp[:8]))
+    glacier = (xx - cx) ** 2 + (yy - cy) ** 2 < 3000**2
+    hh = np.where(glacier, 10 ** (hh_db / 10), 10 ** (-9 / 10))
+    hh *= rng.gamma(4, 1 / 4, hh.shape)  # speckle, about four looks
+    hv = hh * 10 ** (-7 / 10)
+    hh[:5, :] = np.nan  # a strip of no data, as at swath edges
+    name = f"NISAR_L2_PR_GCOV_010_088_A_031_2005_DHDH_A_{stamp}_{stamp}_P05023_N_F_J_001.h5"
+    with h5py.File(folder / name, "w") as f:
+        g = f.create_group(measure.GRID)
+        g["HHHH"] = hh.astype("float32")
+        g["HVHV"] = hv.astype("float32")
+        g["xCoordinates"] = xs
+        g["yCoordinates"] = ys
+        g["projection"] = np.int32(EPSG)
+        g["projection"].attrs["epsg_code"] = np.int32(EPSG)
+
+
+def main() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        for stamp, db in zip(DATES, HH_DB):
+            make_file(tmp, stamp, db)
+        measure.OUT_DIR = tmp / "out"
+        site = {"id": "test", "name": "Test glacier", "lat": LAT, "lon": LON, "mapRadiusM": 6000}
+        result = measure.measure(site, measure.local_passes(tmp))
+
+        assert result, "no result"
+        got = [s["hh"] for s in result["series"]]
+        assert len(got) == 5, got
+        for want, have in zip(HH_DB, got):
+            assert abs(want - have) < 0.6, (want, have)
+        drop = datetime.fromtimestamp(result["firstDrop"] / 1000, timezone.utc).strftime("%Y-%m-%d")
+        assert drop == "2026-07-15", drop
+        assert result["change"]["weakerPct"] > 10, result["change"]
+        assert result["change"]["strongerPct"] < 2, result["change"]
+        png = measure.OUT_DIR / result["change"]["image"]
+        assert png.exists() and png.stat().st_size > 1000
+        b = result["change"]["bounds"]
+        assert b["west"] < LON < b["east"] and b["south"] < LAT < b["north"]
+        print("series (dB):", got)
+        print("summary:", result["summary"])
+        print("ok")
+
+
+if __name__ == "__main__":
+    main()
