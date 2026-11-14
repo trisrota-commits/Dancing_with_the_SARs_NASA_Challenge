@@ -309,6 +309,8 @@ function showDetails() {
   if (sel?.kind !== 'incident') return;
   $('right').hidden = false;
   $('card').hidden = true;
+  // Keyboard and screen-reader users land in the panel they just opened.
+  $('close').focus({ preventScroll: true });
   if (!sel.historyStarted) {
     sel.historyStarted = true;
     startIncidentHistory(sel.incident, sel);

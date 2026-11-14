@@ -9,7 +9,7 @@ import { pointInPolygon } from './incidents.js';
 import { RAD, EARTH_RADIUS_M, toVec, toLatLon, greatCircle, sunDirection, rgb } from './engine/geo.js';
 import { GlobeControls } from './engine/controls.js';
 import { TileGlobe } from './engine/tiles.js';
-import { Dots, Lines, SelectionRing, Vortex, Glow, Beams, LIFT, atmosphere } from './engine/marks.js';
+import { Dots, Lines, SelectionRing, RING_SECONDS, Vortex, Glow, Beams, LIFT, atmosphere } from './engine/marks.js';
 import { Fire } from './engine/fire.js';
 import { Labels } from './engine/labels.js';
 import { Sky } from './sky.js';
@@ -64,7 +64,10 @@ export class Globe {
     this.beams = new Beams(this.scene, this.shared);
     this.beamItems = [];
     this.fxZones = [];
-    this.animating = false;
+    // Until when (on the shader clock) an entrance or the ring is moving.
+    this.ringUntil = 0;
+    this.popUntil = 0;
+    this.glowFlickers = false;
     this.dots = new Dots(this.scene, this.shared, { halo: true });
     // Changing places (glaciers, sinking cities…), drawn as diamonds.
     this.placeDots = new Dots(this.scene, this.shared, { halo: true });
@@ -130,13 +133,16 @@ export class Globe {
   resize() {
     const w = this.el.clientWidth || 1;
     const h = this.el.clientHeight || 1;
-    const ratio = Math.min(window.devicePixelRatio || 1, 2);
+    // Sharp enough on a phone at 1.5, and far fewer pixels to shade.
+    const ratio = Math.min(window.devicePixelRatio || 1, matchMedia('(pointer: coarse)').matches ? 1.5 : 2);
     this.renderer.setPixelRatio(ratio);
     this.renderer.setSize(w, h);
     this.camera.aspect = this.skyCamera.aspect = w / h;
     this.skyCamera.updateProjectionMatrix();
     this.shared.uRatio.value = ratio;
     this.skyView.setRatio(ratio);
+    this.width = w;
+    this.height = h;
     this.shared.uViewport.value.set(w * ratio, h * ratio);
     this.controls.apply();
   }
@@ -150,7 +156,7 @@ export class Globe {
     // Tiles stamp the start of a cross-fade with this clock while painting.
     this.shared.uTime.value = seconds;
     const moved = this.controls.update(dt);
-    const tilesChanged = this.tiles.update(this.camera, this.el.clientHeight, moved);
+    const tilesChanged = this.tiles.update(this.camera, this.height, moved);
     // New terrain arrived: settle the dots back onto the ground.
     if (this.tiles.elevationVersion !== this.liftedAt && this.tiles.frame % 30 === 0) {
       this.liftedAt = this.tiles.elevationVersion;
@@ -165,13 +171,17 @@ export class Globe {
       if (this.selected) this.ring.set(this.selected.lat, this.selected.lon, this.lift(this.selected.lat, this.selected.lon));
       this.dirty = true;
     }
-    // Pulsing dots and the selection ring are the only things that animate
-    // on their own; without them an idle globe costs nothing.
-    // The sky turns slowly by itself; a shooting star needs every frame.
+    // An idle globe costs nothing: a frame is drawn only while something
+    // on it moves by itself. That is a new arrival's pulse, the ring just
+    // after a selection, fire, a storm's clouds, flood water, a flickering
+    // glow or a mark popping in. A timeline that is playing asks for its
+    // own frames. The sky turns slowly; a shooting star needs every frame.
     const date = new Date();
     const sun = sunDirection(date);
     const skyBusy = this.skyView.update(date, seconds, this.camera.quaternion, sun);
-    const animating = this.animating || this.ring.points.visible || seconds < this.pulseUntil || seconds < this.animalPulseUntil || skyBusy || this.skyBusy || this.fadeEnd > 0 || Math.abs(this.focus - this.focusTarget) > 0.002;
+    const water = this.tiles.uniforms.uWater.value;
+    const alive = this.fire.hot.visible || this.vortex.mesh.visible || this.glowFlickers || seconds < this.popUntil || seconds < this.ringUntil || (water.y > 0 && water.x > -0.15 && this.tiles.masked);
+    const animating = alive || seconds < this.pulseUntil || seconds < this.animalPulseUntil || skyBusy || this.skyBusy || this.fadeEnd > 0 || this.focus !== this.focusTarget;
     this.skyBusy = skyBusy;
     // A finished cross-fade is tidied up: one picture, no second canvas.
     if (this.fadeEnd && seconds > this.fadeEnd) this.settle();
@@ -183,8 +193,9 @@ export class Globe {
       this.dirty = true;
     }
     // The focus eases in and out.
-    if (Math.abs(this.focus - this.focusTarget) > 0.002) {
-      this.focus += (this.focusTarget - this.focus) * Math.min(1, dt * 2.5);
+    if (this.focus !== this.focusTarget) {
+      // The last step lands exactly, so the easing ends and frames stop.
+      this.focus = Math.abs(this.focus - this.focusTarget) < 0.004 ? this.focusTarget : this.focus + (this.focusTarget - this.focus) * Math.min(1, dt * 2.5);
       this.tiles.uniforms.uFocus.value.y = this.focus;
       this.dirty = true;
     }
@@ -220,7 +231,7 @@ export class Globe {
     if (vec.dot(this.camera.position) < 1) return null;
     const p = scratch.copy(vec).project(this.camera);
     if (p.z > 1) return null;
-    return { x: (p.x * 0.5 + 0.5) * this.el.clientWidth, y: (0.5 - p.y * 0.5) * this.el.clientHeight };
+    return { x: (p.x * 0.5 + 0.5) * this.width, y: (0.5 - p.y * 0.5) * this.height };
   }
 
   dotsAt(x, y, slack, dots = this.dots) {
@@ -237,7 +248,7 @@ export class Globe {
 
   // Latitude and longitude under a screen position, or null off the globe.
   locate(x, y) {
-    const ndc = new THREE.Vector2((x / this.el.clientWidth) * 2 - 1, 1 - (y / this.el.clientHeight) * 2);
+    const ndc = new THREE.Vector2((x / this.width) * 2 - 1, 1 - (y / this.height) * 2);
     raycaster.setFromCamera(ndc, this.camera);
     let at = null;
     // Two passes: the second meets the ground at the height found by the first.
@@ -664,6 +675,8 @@ export class Globe {
   // items: [{ lat, lon, color: [r, g, b], size, pop }]
   setEffectDots(items) {
     this.fxDots.set(items, this.lift);
+    // A mark that pops in needs frames until it has settled.
+    for (const it of items) if (it.pop != null) this.popUntil = Math.max(this.popUntil, it.pop + 1.3);
     this.dirty = true;
   }
 
@@ -683,6 +696,7 @@ export class Globe {
   // Glowing points: [{ lat, lon, color: [r, g, b], size, km, flicker }]
   setEffectGlow(items) {
     this.fxGlow.set(items, this.lift);
+    this.glowFlickers = items.some((it) => it.flicker);
     this.dirty = true;
   }
 
@@ -753,7 +767,7 @@ export class Globe {
   }
 
   clearEffects() {
-    this.animating = false;
+    this.glowFlickers = false;
     this.fxLines.set([]);
     this.fxDots.set([], this.lift);
     this.fxGlow.set([], this.lift);
@@ -770,8 +784,11 @@ export class Globe {
   // Ring on the chosen incident, arcs to everything linked to it, and a
   // bright outline around the given radar scenes.
   select(incident, scenes = []) {
+    // The ring breathes for a moment on a new selection, then rests.
+    const fresh = incident && incident.id !== this.selected?.id;
+    if (fresh) this.ringUntil = this.clock + RING_SECONDS;
     this.selected = incident;
-    this.ring.set(incident ? incident.lat : null, incident?.lon, incident ? this.lift(incident.lat, incident.lon) : 0);
+    this.ring.set(incident ? incident.lat : null, incident?.lon, incident ? this.lift(incident.lat, incident.lon) : 0, fresh ? this.clock : null);
     this.linkLines.set(
       incident
         ? incident.related.slice(0, 25).map((link) => ({

@@ -51,7 +51,7 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
   quakes, the wind speed travelling with a storm.
 - A NISAR picture is uncovered by a line sweeping the way the satellite
   flew, and the "what changed" picture fades in over the ground.
-- Labels every part of a replay as **observed** (measured or catalogued),
+- Labels every part of an event's timeline as **observed** (measured or catalogued),
   **analysis** (worked out and published by an agency) or **computed** (drawn
   here by a stated rule), with its source.
 - Searches the NISAR archive over the event and shows **what NISAR saw
@@ -131,7 +131,7 @@ this app's workload:
   whatever is switched on, and everything drapes over the relief.
 - All event dots are a single draw call, and so are their light beams,
   which rise as the view tilts: taller for stronger events.
-- Replay effects live in shaders: the earthquake front is drawn and lifted
+- Event effects live in shaders: the earthquake front is drawn and lifted
   in the terrain shader itself, and the storm is a procedural cloud shader.
 - Effects have levels of detail and never pop: a fire is one instanced
   system that shows embers from afar and soft, exactly placed spots up
@@ -199,7 +199,8 @@ app in headless Chromium against the live services.
   polarisation channels and describes a point history in plain statements
 - `js/stories.js` – the curated stories (places and explanations only)
 - `js/chart.js` – the HH/HV history chart
-- `js/replay/replay.js` – event replay templates and player
+- `js/replay/replay.js` – the event timeline: one template per event type
+  and the player that draws the event as it stood at any moment
 - `js/replay/sources.js` – per-event data: shaking contours, nearby quakes,
   agency outlines, daily fire detections
 - `js/replay/mvt.js` – small vector-tile reader for the fire detections
@@ -284,7 +285,8 @@ the same layout as real GCOV products.
   value of each channel with dates, and where the channels sit furthest apart.
 - Explanations of cause are marked as hypotheses.
 
-- Replays never draw anything between data points without saying so; the
+- An event's timeline never draws anything between data points without
+  saying so; the
   panel lists each element with its source and whether it is observed,
   agency analysis or computed here. Decoration is named as decoration: the
   shape and shimmer of a fire's glow and its smoke, the ripples and edge waves of flood

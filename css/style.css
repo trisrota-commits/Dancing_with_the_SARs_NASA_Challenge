@@ -720,6 +720,11 @@ dd {
   font-size: 12px;
 }
 
+/* The dates sit under the reports bar while it is showing. */
+body:has(#ticker:not([hidden])) #split-handle span {
+  top: 106px;
+}
+
 #split-before {
   right: 12px;
 }

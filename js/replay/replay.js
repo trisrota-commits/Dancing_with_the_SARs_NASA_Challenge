@@ -158,6 +158,7 @@ async function quake(inc, globe) {
   let shownLabels = '';
   let shownZones = -1;
   let shownAfter = -1;
+  let shownEarly = -1;
 
   return {
     from: inc.time,
@@ -181,11 +182,16 @@ async function quake(inc, globe) {
     draw(t, started, ms) {
       if (started === false) {
         // Before the earthquake: only the quakes that had happened by then.
+        // Dragging the handle asks for this many times a second, so the
+        // globe is only touched when the set of quakes changes.
+        const earlier = before.filter((q) => ms == null || q.time <= ms);
+        if (earlier.length === shownEarly) return;
+        shownEarly = earlier.length;
         globe.setShockwave(null);
         globe.setEffectLines([]);
         globe.setEffectZones([]);
         globe.setEffectGlow([]);
-        globe.setEffectDots(before.filter((q) => ms == null || q.time <= ms).map((q) => dot(q, [0.62, 0.66, 0.72])));
+        globe.setEffectDots(earlier.map((q) => dot(q, [0.62, 0.66, 0.72])));
         globe.setLabels([]);
         shownZones = shownAfter = -1;
         shownLabels = '';
@@ -193,6 +199,7 @@ async function quake(inc, globe) {
         this.hadLines = this.hadFlash = false;
         return;
       }
+      shownEarly = -1;
       const s = Math.min(1, t / WAVE) * rmax;
       const lines = [];
       if (t < WAVE + 0.5) {
@@ -556,7 +563,6 @@ export class Replay {
     this.intro = !!plan.intro && !refresh;
     this.time = 0;
     this.playing = this.intro;
-    this.globe.animating = true;
     plan.setup?.();
     this.loop = ++this.loops;
     const focus = plan.focus || incident;
@@ -583,7 +589,6 @@ export class Replay {
     this.timeline = false;
     this.time = 0;
     this.playing = true;
-    this.globe.animating = true;
     plan.setup?.();
     this.loop = ++this.loops;
     this.last = performance.now();

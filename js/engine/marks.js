@@ -155,11 +155,15 @@ const LINE_VERTEX = /* glsl */ `
   uniform vec2 uViewport;
   uniform float uWidth;
   uniform float uRatio;
+  uniform vec3 uCam;
   varying vec4 vColor;
   varying float vAlong;
+  varying float vFacing;
   void main() {
     vColor = aColor;
     vAlong = aAlong;
+    // Above 1 on the side of the Earth the camera can see.
+    vFacing = dot(position, uCam);
     vec4 a = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
     vec4 b = projectionMatrix * modelViewMatrix * vec4(aOther, 1.0);
     if (a.w <= 0.0 || b.w <= 0.0) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }
@@ -175,7 +179,13 @@ const LINE_FRAGMENT = /* glsl */ `
   uniform float uDash;
   varying vec4 vColor;
   varying float vAlong;
+  varying float vFacing;
+  uniform float uCull;
   void main() {
+    // Lines drawn over everything must not show through the Earth from its
+    // far side. (Lines that test depth, like the orbit, are hidden by the
+    // Earth itself and stay visible past its edge.)
+    if (uCull > 0.5 && vFacing < 1.0) discard;
     if (uDash > 0.0 && fract(vAlong * uDash) > 0.55) discard;
     gl_FragColor = vColor;
   }`;
@@ -183,7 +193,7 @@ const LINE_FRAGMENT = /* glsl */ `
 export class Lines {
   constructor(scene, shared, { width = 1.5, dash = 0, order = 20, depthTest = true } = {}) {
     this.material = new THREE.ShaderMaterial({
-      uniforms: { uViewport: shared.uViewport, uRatio: shared.uRatio, uWidth: { value: width }, uDash: { value: dash } },
+      uniforms: { uViewport: shared.uViewport, uRatio: shared.uRatio, uCam: shared.uCam, uWidth: { value: width }, uDash: { value: dash }, uCull: { value: depthTest ? 0 : 1 } },
       vertexShader: LINE_VERTEX,
       fragmentShader: LINE_FRAGMENT,
       transparent: true,
@@ -246,9 +256,12 @@ const RING_VERTEX = /* glsl */ `
   uniform vec3 uCam;
   uniform float uRatio;
   uniform float uTime;
+  uniform float uSince;
   varying float vSize;
   void main() {
-    vSize = (30.0 + 8.0 * (0.5 + 0.5 * sin(uTime * 3.8))) * uRatio;
+    // The ring breathes for a few seconds after a selection, then rests.
+    float calm = 1.0 - smoothstep(2.5, 4.5, uTime - uSince);
+    vSize = (30.0 + 8.0 * (0.5 + 0.5 * sin((uTime - uSince) * 3.8 - 1.5708)) * calm) * uRatio;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
     if (dot(position, uCam) < 1.0) gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
     gl_PointSize = vSize + 4.0 * uRatio;
@@ -264,6 +277,8 @@ const RING_FRAGMENT = /* glsl */ `
     gl_FragColor = vec4(1.0, 1.0, 1.0, ring);
   }`;
 
+export const RING_SECONDS = 4.5;
+
 export class SelectionRing {
   constructor(scene, shared) {
     const g = new THREE.BufferGeometry();
@@ -271,7 +286,7 @@ export class SelectionRing {
     this.points = new THREE.Points(
       g,
       new THREE.ShaderMaterial({
-        uniforms: { uCam: shared.uCam, uRatio: shared.uRatio, uTime: shared.uTime },
+        uniforms: { uCam: shared.uCam, uRatio: shared.uRatio, uTime: shared.uTime, uSince: { value: -100 } },
         vertexShader: RING_VERTEX,
         fragmentShader: RING_FRAGMENT,
         transparent: true,
@@ -285,9 +300,12 @@ export class SelectionRing {
     scene.add(this.points);
   }
 
-  set(lat, lon, lift = 0) {
+  // The ring moves for RING_SECONDS after `since` (on the shader clock);
+  // leave `since` out to keep the ring as it is, only on new ground.
+  set(lat, lon, lift = 0, since = null) {
     this.points.visible = lat != null;
     if (lat == null) return;
+    if (since != null) this.points.material.uniforms.uSince.value = since;
     const v = toVec(lat, lon, 1 + LIFT + lift);
     this.points.geometry.attributes.position.setXYZ(0, v.x, v.y, v.z);
     this.points.geometry.attributes.position.needsUpdate = true;
