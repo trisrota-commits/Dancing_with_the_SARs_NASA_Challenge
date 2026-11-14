@@ -2137,16 +2137,15 @@ async function start() {
     /* storage unavailable: just show the hint */
   }
   $('welcome').hidden = seen;
-  $('welcome-story').onclick = () => {
-    $('welcome-close').click();
-    openStory(STORIES[0].id);
-  };
-  $('spotlight-go').onclick = () => {
-    const pick = state.spotlight;
-    $('welcome-close').click();
-    if (pick) selectIncident(pick.incident, true);
-  };
-  $('welcome-close').onclick = () => {
+  // A first visit starts clean: the globe and the opening card, with the
+  // menu folded behind its button. It counts as folded for a selection, so
+  // it slides in once the visitor closes what they went to look at.
+  if (!seen) {
+    $('left').classList.add('closed');
+    $('menu').setAttribute('aria-expanded', 'false');
+    menu.folded = true;
+  }
+  const closeWelcome = () => {
     $('welcome').hidden = true;
     try {
       localStorage.setItem('sars-welcome', '1');
@@ -2154,13 +2153,29 @@ async function start() {
       /* nothing to remember it with */
     }
   };
+  $('welcome-story').onclick = () => {
+    closeWelcome();
+    openStory(STORIES[0].id);
+  };
+  $('spotlight-go').onclick = () => {
+    const pick = state.spotlight;
+    closeWelcome();
+    if (pick) selectIncident(pick.incident, true);
+  };
+  // Exploring needs the stories, the filters and the key to the dots, so
+  // the menu slides in. On a phone it would cover the globe; it stays shut.
+  $('welcome-close').onclick = () => {
+    closeWelcome();
+    if (window.innerWidth > 760 && !state.selected) focusLayout(false);
+  };
   $('menu').onclick = () => {
     const closed = $('left').classList.toggle('closed');
     $('menu').setAttribute('aria-expanded', String(!closed));
     // A choice made by hand during a selection is kept.
     if (state.selected) menu.byHand = true;
   };
-  if (window.innerWidth <= 760) $('menu').click();
+  // A phone starts with the menu shut (a first visit already shut it above).
+  if (window.innerWidth <= 760 && !$('left').classList.contains('closed')) $('menu').click();
 
   $('card').onclick = (e) => {
     const t = e.target;

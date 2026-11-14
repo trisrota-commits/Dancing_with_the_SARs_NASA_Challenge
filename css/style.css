@@ -1930,6 +1930,23 @@ body:has(#replay:not([hidden])) #nav {
   font-weight: 600;
 }
 
+/* The menu button says what it is, and is marked while the opening card
+   points at it. */
+#menu span {
+  margin-left: 4px;
+  font-size: 13px;
+}
+
+body:has(#welcome:not([hidden])) #menu {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+@media (max-width: 760px) {
+  #menu span {
+    display: none;
+  }
+}
+
 #spotlight-title .dot {
   margin-right: 7px;
 }
