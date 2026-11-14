@@ -130,3 +130,12 @@ test('the catalogue is searched without a name pattern, and the kind of product 
     globalThis.fetch = realFetch;
   }
 });
+
+test("the radar layers name NASA's map service for a single tile and for the whole world", async () => {
+  const { NISAR_TILES, OVERLAYS } = await import('../js/config.js');
+  for (const layer of [NISAR_TILES, OVERLAYS.s1]) {
+    // The tile engine fills these in for one tile's area (see fetchTile).
+    assert.ok(layer.map.includes('BBOX={bbox}') && layer.map.includes('WIDTH={px}') && layer.map.includes('HEIGHT={px}') && layer.map.includes('TIME={date}'));
+    assert.ok(!/\{bbox\}|\{px\}/.test(layer.sheet) && layer.sheet.includes('WIDTH=1024') && layer.sheet.includes('TIME={date}'));
+  }
+});

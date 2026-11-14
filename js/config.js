@@ -120,17 +120,24 @@ export const NISAR_LOOKBACK_DAYS = 45;
 const gibs = (layer, ext, level) =>
   `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/${layer}/default/{date}/GoogleMapsCompatible_Level${level}/{z}/{y}/{x}.${ext}`;
 
-// One picture of the whole world for a layer and a day, drawn by NASA's map
-// service on request: 1,024 pixels square, the same as the sixteen level-2
-// tiles put together. The tile engine uses it for radar layers (see
-// `sparse` there).
-const gibsSheet = (layer) =>
-  `https://gibs.earthdata.nasa.gov/wms/epsg3857/best/wms.cgi?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=${layer}&STYLES=&FORMAT=image/png&TRANSPARENT=true&CRS=EPSG:3857&BBOX=-20037508.34,-20037508.34,20037508.34,20037508.34&WIDTH=1024&HEIGHT=1024&TIME={date}`;
+// NASA's map service draws any part of a layer on request, where the tile
+// service above hands out ready-made tiles. It is slower, so the tile
+// engine uses it for two things only (see `sparse` there): one picture of
+// the whole world per layer and day, and any single tile the tile service
+// sends damaged. `{bbox}` is the area in Web Mercator metres, `{px}` the
+// picture's size.
+const gibsMap = (layer) =>
+  `https://gibs.earthdata.nasa.gov/wms/epsg3857/best/wms.cgi?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=${layer}&STYLES=&FORMAT=image/png&TRANSPARENT=true&CRS=EPSG:3857&BBOX={bbox}&WIDTH={px}&HEIGHT={px}&TIME={date}`;
+
+// The whole world, 1,024 pixels square: the same as the sixteen level-2
+// tiles put together.
+const gibsSheet = (layer) => gibsMap(layer).replace('{bbox}', '-20037508.34,-20037508.34,20037508.34,20037508.34').replaceAll('{px}', '1024');
 
 export const NISAR_TILES = {
   id: 'NISAR_L2_Geocoded_Polarimetric_Covariance',
   url: gibs('NISAR_L2_Geocoded_Polarimetric_Covariance', 'png', 13),
   sheet: gibsSheet('NISAR_L2_Geocoded_Polarimetric_Covariance'),
+  map: gibsMap('NISAR_L2_Geocoded_Polarimetric_Covariance'),
   maxLevel: 13,
   firstDate: '2026-04-01',
 };
@@ -181,6 +188,7 @@ export const OVERLAYS = {
     url: gibs('OPERA_L2_Radiometric_Terrain_Corrected_SAR_Sentinel-1', 'png', 12),
     sparse: true,
     sheet: gibsSheet('OPERA_L2_Radiometric_Terrain_Corrected_SAR_Sentinel-1'),
+    map: gibsMap('OPERA_L2_Radiometric_Terrain_Corrected_SAR_Sentinel-1'),
     note: 'A radar picture from Sentinel-1 (C-band). Bright: rough ground, buildings, vegetation. Dark: calm water and smooth ground.',
     maxLevel: 12,
   },
