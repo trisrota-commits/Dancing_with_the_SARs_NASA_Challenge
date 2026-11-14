@@ -1811,3 +1811,13 @@ body:has(#replay:not([hidden])) #nav {
   padding: 0 6px;
   margin-right: 2px;
 }
+
+#welcome ol {
+  margin: 0 0 10px;
+  padding-left: 20px;
+  color: var(--text);
+}
+
+#welcome li {
+  padding: 2px 0;
+}

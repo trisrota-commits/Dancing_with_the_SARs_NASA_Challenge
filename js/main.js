@@ -951,7 +951,7 @@ function storyHtml(story, data = '') {
     ${part('Why it happens', story.why, true)}
     ${part('Which polarisation shows it', story.pol, true)}
     ${part('What a camera would miss', story.beyond)}
-    ${part('What it could be used for', story.next)}
+    ${part('Who could use this, and for what', story.next)}
     <p class="hint">The place and the explanations are our choice. Every number here is computed from the NISAR passes and feeds loaded right now.</p>
     <button id="story-next" data-next="${next.id}">Next story: ${esc(next.title)} ▸</button>
   </div>`;

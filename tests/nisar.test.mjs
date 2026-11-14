@@ -65,3 +65,8 @@ test('the two-channel reading is a labelled hypothesis and ignores small differe
   // One channel only: nothing to compare.
   assert.equal(channelReading(at(100, null), at(50, null), { co: 'HH', cross: null }), null);
 });
+
+test('every kind of event says who could use NISAR there', async () => {
+  const config = await import('../js/config.js');
+  for (const category of Object.keys(config.CATEGORIES)) assert.ok(config.WHO_USES[category]?.length > 30, category);
+});
