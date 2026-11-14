@@ -131,6 +131,13 @@ the layout below. Both went into one pull request.
   menu back. The ☰ button always opens it, and a menu opened by hand
   stays open (`focusLayout`, `menu = { folded, byHand }` in `main.js`).
   The trigger is selection, never zoom level.
+- **A first visit starts clean** (lead, 14 Nov, late): the menu is folded
+  behind its button, which is labelled "☰ Menu" and ringed in teal while
+  the opening card points at it. "Explore the globe" slides the menu in
+  (it holds the stories, the filters and the key to the dots); the live
+  event and the story keep it folded until the visitor closes them. A
+  returning visitor gets no card and an open menu. On a phone the menu
+  stays shut.
 - **Stepping back.** ✕ on the details panel and Escape return to the
   card; ✕ on the card or a second Escape clears the selection (`stepBack`).
 - **Who owns the picture on the globe.** Six things can put a radar
