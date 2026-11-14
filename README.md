@@ -230,6 +230,8 @@ app in headless Chromium against the live services.
 - `js/sound.js` – plays a time-lapse as notes
 - `tools/smoke.js` – browser smoke test against the live services
 - `docs/HANDOFF.md` – where the project stands and how to continue it
+- `docs/SUBMISSION.md` – the text for the challenge's project page: summary,
+  how we made it, use of AI, and every source
 - `js/globe.js` – the globe the app talks to
 - `js/engine/` – our own globe engine on three.js
   - `tiles.js` – streams map tiles, shapes terrain, composites layers,
