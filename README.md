@@ -16,9 +16,11 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
     later quakes nearby in the order they struck.
   - Storm: a cloud spiral travelling the dated track above the terrain,
     turning the right way for its hemisphere, sized and spun by wind speed.
-  - Wildfire: the satellite fire detections of each day as glowing embers at
-    the sensor's true pixel size, cooling to coals as the days pass.
-  - Flood: water the radar saw on land, pass by pass, inside the affected area.
+  - Wildfire: the satellite fire detections of each day as glowing embers
+    that ignite through the day and cool to coals. Zoom in and each one
+    becomes a patch of burning ground with flames, sparks and smoke.
+  - Flood: water the radar saw on land, fading in pass by pass, with moving
+    ripples and waves along its edge whose detail grows as you zoom in.
 - Labels every part of a replay as **observed** (measured or catalogued),
   **analysis** (worked out and published by an agency) or **computed** (drawn
   here by a stated rule), with its source.
@@ -88,6 +90,9 @@ this app's workload:
 - Replay effects live in shaders: the earthquake front is drawn and lifted
   in the terrain shader itself, the storm is a procedural cloud shader, and
   the camera slowly circles a replay until you touch the globe.
+- Effects have levels of detail and never pop: a fire is one instanced
+  particle system that shows embers from afar and flames up close; flood
+  water is a mask the terrain shader animates; radar pictures cross-fade.
 - The camera orbits a point on the ground like Google Earth: drag to pan,
   wheel or pinch to zoom, right-drag or two-finger drag to tilt and turn.
 - A frame is drawn only when something changed; an idle globe costs nothing.
@@ -161,8 +166,10 @@ app in headless Chromium against the live services.
 - `docs/HANDOFF.md` – where the project stands and how to continue it
 - `js/globe.js` – the globe the app talks to
 - `js/engine/` – our own globe engine on three.js
-  - `tiles.js` – streams map tiles, shapes terrain, composites layers
-  - `marks.js` – event dots, lines, atmosphere, stars
+  - `tiles.js` – streams map tiles, shapes terrain, composites layers,
+    animates flood water and cross-fades pictures
+  - `marks.js` – event dots and beams, lines, storm spiral, atmosphere, stars
+  - `fire.js` – the wildfire particle system
   - `controls.js` – pan, zoom, tilt, turn and fly-to camera
   - `geo.js` – coordinate maths
 - `vendor/three.module.min.js` – three.js r170 (MIT), bundled so the engine
@@ -225,8 +232,9 @@ the same layout as real GCOV products.
 - Replays never draw anything between data points without saying so; the
   panel lists each element with its source and whether it is observed,
   agency analysis or computed here. Decoration is named as decoration: the
-  ember flicker, the height of the ground ripple and the look of the storm
-  spiral follow fixed rules and are not measurements.
+  flames, sparks and smoke of a fire, the ripples and edge waves of flood
+  water, the height of the ground ripple and the look of the storm spiral
+  follow fixed rules and are not measurements.
 - The NISAR change view is computed in the browser from NASA's 8-bit preview
   images, not the full-resolution products. It ignores differences that a
   two-pixel offset between the images would explain, and it marks where to
