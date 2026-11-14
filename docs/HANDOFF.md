@@ -51,6 +51,28 @@ Things the lead ruled out: a global time scrubber,
 and making Google's photorealistic 3D tiles the core (they cannot take our
 radar overlays easily, need a paid key and show one fixed date).
 
+### The event card and the details panel (team decision, 14 Nov)
+
+The team asked for less on screen, in a voice note the lead passed on:
+
+- **Open the app:** globe and event points, little else. The left menu
+  now opens with only Stories and Events unfolded.
+- **Click an event:** a small card (`#card`, `renderCard` in `main.js`):
+  title, when, size, the news about it (or what the feeds report when
+  there is no press), one computed NISAR line, "Show details" and "Show
+  the NISAR image". The image is not shown automatically: it is about
+  1 MB and would cover the replay.
+- **Show details:** the right panel. It starts with one plain text
+  (`narrate` in `js/narrative.js`) built from fixed sentence templates,
+  never free writing; sources in it are links (`.src`) that explain
+  themselves on hover and open the matching folded section on click.
+  Then a timeline of the event against NISAR's passes, then folded
+  sections with NISAR first and open.
+- The panel is always filled when an event is selected, even while shut,
+  so the code that fills it did not change; only the pass-by-pass history
+  waits for "Show details", because it downloads several previews.
+- Stories, places and spots still open the panel directly.
+
 ## How we work
 
 - **Branch:** all our work goes on `claude/peaceful-curie-4pexs2`, then a
@@ -133,6 +155,7 @@ time; there is no backend and there are no keys.
 | `js/replay/mvt.js` | Vector-tile reader for the fire detections |
 | `js/search.js` | Fuzzy event search and place lookup |
 | `js/news.js` | Press coverage per event |
+| `js/narrative.js` | Plain-text account of an event with source links, one-line NISAR summary, event timeline |
 | `js/sound.js` | Plays a time-lapse as notes |
 | `js/orbit.js` | NISAR's live position, track and swath edges from public orbit elements (teammate) |
 | `js/sky.js`, `js/stars-data.js` | Real star sky, the Sun, shooting stars (teammate) |

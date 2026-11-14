@@ -13,6 +13,7 @@ import { measuredById, measuredNear, measuredHtml, measuredChart, changeImageUrl
 import { fetchElements, positionAt, groundTrack, swathEdges, elementsEpoch } from './orbit.js';
 import { SPECIES, MONTHS, POIS, loadSightings } from './wildlife.js';
 import { historyChart } from './chart.js';
+import { narrate, nisarLine, timeline, SOURCE_NOTES } from './narrative.js';
 import { Globe, loadPicture } from './globe.js';
 import { Replay } from './replay/replay.js';
 import { changeMap, CHANGE_THRESHOLD } from './change.js';
@@ -197,9 +198,13 @@ function renderFeed() {
 
 // ---------- detail panel ----------
 
-function openPanel(html) {
+// Fills the details panel. An event opens quietly: the panel is filled but
+// stays shut, and the small card shows until "Show details" is pressed.
+function openPanel(html, quiet = false) {
   $('detail').innerHTML = html;
-  $('right').hidden = false;
+  $('right').hidden = quiet;
+  $('card').hidden = !quiet;
+  $('tip').hidden = true;
   $('right').scrollTop = 0;
 }
 
@@ -208,9 +213,110 @@ function closePanel() {
   state.selected = null;
   state.lookup++;
   $('right').hidden = true;
+  $('card').hidden = true;
+  $('tip').hidden = true;
   globe.select(null);
   replay.stop();
   endCompare();
+}
+
+// ---------- event card and plain-text account ----------
+
+// The popup for an event: what it is, the news about it, one line on what
+// NISAR has seen, and the way into the details.
+function renderCard() {
+  const sel = state.selected;
+  if (sel?.kind !== 'incident') return;
+  const inc = sel.incident;
+  const lasting = inc.endTime - inc.time > 6 * 3600_000;
+  const when = lasting ? `${day(inc.time)} to ${day(inc.endTime)}` : `${utc(inc.time)} (${ago(inc.time)})`;
+  const sized = size(inc.magnitude);
+  let body;
+  if (!sel.news) {
+    body = '<p class="spinner">Looking for news about this event…</p>';
+  } else if (sel.news.articles.length) {
+    body =
+      sel.news.articles
+        .slice(0, 3)
+        .map((a) => `<a class="headline" href="${safeUrl(a.url)}" target="_blank" rel="noopener noreferrer">${esc(a.title)}<small>${esc(a.source || '')}${Number.isFinite(a.time) ? ` · ${ago(a.time)}` : ''}</small></a>`)
+        .join('') + `<p class="hint">${sel.news.via === 'gdacs' ? 'Linked to this event by GDACS, by topic and country' : 'Found by a news search'}; some may be about something else. Press coverage, not data.</p>`;
+  } else {
+    // No press: say what the feeds themselves report.
+    const lines = [...new Set(inc.reports.flatMap((r) => r.detail.map((d) => `${d} (${FEEDS[r.source].label})`)))].slice(0, 4);
+    body = `<p class="note">No press coverage found${lines.length ? '. The feeds report:' : '.'}</p>${lines.length ? `<ul class="plain">${lines.map((l) => `<li>${esc(l)}</li>`).join('')}</ul>` : ''}`;
+  }
+  const scene = sel.found?.backscatter.find((s) => s.image);
+  $('card').innerHTML = `<button id="card-close" aria-label="Close">✕</button>
+    <span class="tag">${dot(inc.category)}${esc(CATEGORIES[inc.category].label)}</span>
+    <h3>${esc(inc.title)}</h3>
+    <p class="when">${esc(when)}${sized ? ` · ${esc(sized)}` : ''}</p>
+    <h4>In the news</h4>
+    ${body}
+    <p class="nisar-line">${esc(nisarLine(inc, sel.found))}</p>
+    <div class="actions">
+      <button class="primary" id="card-details">Show details</button>
+      ${scene ? `<button id="card-nisar" aria-pressed="${!!sel.nisarShown}">${sel.nisarShown ? 'Hide the NISAR image' : 'Show the NISAR image'}</button>` : ''}
+    </div>`;
+}
+
+// The account of the event in the details panel, and its timeline. Both
+// are redrawn as the news, the NISAR search and the history arrive.
+function renderNarrative() {
+  const sel = state.selected;
+  if (sel?.kind !== 'incident' || !$('story-text')) return;
+  $('story-text').innerHTML = narrate(sel.incident, { found: sel.found, news: sel.news, history: sel.history, sizeText: size(sel.incident.magnitude) });
+  $('timeline').innerHTML = timeline(sel.incident, sel.found);
+}
+
+// Opens the details panel for the selected event. The pass-by-pass history
+// downloads several radar previews, so it only starts here.
+function showDetails() {
+  const sel = state.selected;
+  if (sel?.kind !== 'incident') return;
+  $('right').hidden = false;
+  $('card').hidden = true;
+  if (!sel.historyStarted) {
+    sel.historyStarted = true;
+    startIncidentHistory(sel.incident, sel);
+  }
+}
+
+// The newest NISAR picture over the event, on or off, from the card.
+async function toggleCardImage(button) {
+  const sel = state.selected;
+  const scene = sel?.found?.backscatter.find((s) => s.image);
+  if (!scene) return;
+  if (sel.nisarShown) {
+    sel.nisarShown = false;
+    endCompare();
+    return renderCard();
+  }
+  button.textContent = 'Loading…';
+  try {
+    await globe.addScene(scene, await imageBounds(scene));
+    if (state.selected !== sel) return;
+    sel.nisarShown = true;
+  } catch {
+    /* the button goes back to its offer */
+  }
+  renderCard();
+}
+
+// The hover box for a source named in the text. For NISAR it shows the
+// newest pass itself.
+function sourceTip(link) {
+  const sel = state.selected;
+  const key = link.dataset.src;
+  const scene = key === 'nisar' ? sel?.found?.backscatter[0] : null;
+  const tip = $('tip');
+  tip.innerHTML = `${scene?.thumb ? `<img src="${safeUrl(scene.thumb)}" alt="" />` : ''}<span>${esc(SOURCE_NOTES[key] || '')}${scene ? ` Newest pass here: ${day(scene.time)}, ${esc(scene.direction.toLowerCase())} track ${esc(scene.track)}.` : ''} <b>Click to see it.</b></span>`;
+  tip.hidden = false;
+  // Beside the panel, level with the link, so it never covers the text.
+  const box = link.getBoundingClientRect();
+  const panel = $('right').getBoundingClientRect();
+  const beside = panel.left - tip.offsetWidth - 10;
+  tip.style.left = `${beside > 8 ? beside : Math.max(8, Math.min(window.innerWidth - tip.offsetWidth - 8, box.left))}px`;
+  tip.style.top = `${beside > 8 ? Math.max(8, Math.min(window.innerHeight - tip.offsetHeight - 8, box.top - 8)) : box.bottom + 6}px`;
 }
 
 // ---------- replay ----------
@@ -302,25 +408,29 @@ function incidentHtml(inc, radar) {
         .join('')}</ul>${inc.related.length > 12 ? `<p class="hint">and ${inc.related.length - 12} more</p>` : ''}`
     : `<p class="note">Nothing else within ${RELATED_KM} km and ${RELATED_DAYS} days.</p>`;
 
+  // One plain text first, then the timeline; everything else is folded
+  // away under headings the text links to. NISAR comes first and is open.
   return `<span class="tag">${dot(inc.category)}${esc(cat.label)}</span>
     <h3>${esc(inc.title)}</h3>
-    <dl>${facts.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
-    <h4>What happened here</h4>
-    <div id="replay-parts"></div>
-    <div id="measured-slot"></div>
-    <h4>Preview brightness history at this pin</h4>
-    <div id="incident-history" aria-live="polite"><p class="spinner">Searching NISAR repeat passes…</p></div>
-    <h4>NISAR radar over this spot</h4>
-    ${lapseBox(inc.lat, inc.lon)}
-    <div id="radar">${radar}</div>
-    <h4>What radar can show here</h4>
-    <p class="note">${esc(RADAR_NOTES[inc.category])}</p>
-    <h4>Linked events (${inc.related.length})</h4>
-    ${related}
-    <h4>In the news</h4>
-    <div id="news"><p class="spinner">Looking for press coverage…</p></div>
-    <h4>Source reports</h4>
-    ${reports}`;
+    <div id="story-text" class="prose"></div>
+    <div id="timeline"></div>
+    <details class="fold" id="sec-nisar" open>
+      <summary>NISAR radar at this place</summary>
+      <div id="measured-slot"></div>
+      <h4>Radar brightness here, pass by pass</h4>
+      <div id="incident-history" aria-live="polite"><p class="spinner">Searching NISAR repeat passes…</p></div>
+      <h4>Passes, changes and ground movement</h4>
+      <div id="radar">${radar}</div>
+      ${lapseBox(inc.lat, inc.lon)}
+    </details>
+    <details class="fold" id="sec-replay"><summary>How the replay is built</summary><div id="replay-parts"></div></details>
+    <details class="fold" id="sec-news"><summary>In the news</summary><div id="news"><p class="spinner">Looking for press coverage…</p></div></details>
+    <details class="fold" id="sec-linked"><summary>Linked events (${inc.related.length})</summary>${related}</details>
+    <details class="fold" id="sec-reports"><summary>Source reports and facts</summary>
+      <dl>${facts.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
+      ${reports}
+    </details>
+    <details class="fold" id="sec-about"><summary>What radar can show for this kind of event</summary><p class="note">${esc(RADAR_NOTES[inc.category])}</p></details>`;
 }
 
 // "Next NISAR overpass" card with a live countdown. The time is an estimate
@@ -402,25 +512,32 @@ function radarHtml(inc, found) {
   } else if (inc.category === 'earthquake' && !interferograms.length) {
     html += `<p class="note">No interferogram yet. NISAR publishes interferograms later than backscatter images, so recent earthquakes may not have one for a while.</p>`;
   }
+  // The single passes are for those who want them.
+  html += `<details class="fold inner"><summary>Every pass found (${backscatter.length + interferograms.length})</summary>`;
   html += backscatter.slice(0, 8).map((s) => sceneCard(s, inc.time)).join('');
   if (backscatter.length > 8) html += `<p class="hint">${backscatter.length - 8} older scenes not listed.</p>`;
   if (interferograms.length) {
     html += `<h4>Interferograms (ground movement)</h4>` + interferograms.slice(0, 5).map((s) => sceneCard(s, inc.time)).join('');
   }
-  return html;
+  return `${html}</details>`;
 }
 
 async function selectIncident(inc, fly, intro = '') {
   endCompare();
   const token = ++state.lookup;
-  state.selected = { kind: 'incident', incident: inc };
-  openPanel(intro + incidentHtml(inc, '<p class="spinner">Searching the NISAR archive…</p>'));
+  // A story, or someone already reading details, goes straight to the
+  // panel; otherwise the event opens as the small card.
+  const detailed = !!intro || (!$('right').hidden && state.selected?.kind === 'incident');
+  state.selected = { kind: 'incident', incident: inc, historyStarted: detailed };
+  openPanel(intro + incidentHtml(inc, '<p class="spinner">Searching the NISAR archive…</p>'), !detailed);
+  renderCard();
+  renderNarrative();
   showMeasured(() => state.selected?.incident === inc, measuredNear(inc.lat, inc.lon));
   globe.select(inc);
   if (fly) globe.flyTo(inc.lat, inc.lon);
   replay.start(inc);
   // Independent of the replay and the shorter before/after catalogue search.
-  startIncidentHistory(inc, state.selected);
+  if (detailed) startIncidentHistory(inc, state.selected);
   loadNews(inc, state.selected);
   setLink(`event=${encodeURIComponent(inc.id)}`);
 
@@ -439,6 +556,8 @@ async function selectIncident(inc, fly, intro = '') {
   if (token !== state.lookup) return;
   state.selected.found = found;
   $('radar').innerHTML = radarHtml(inc, found);
+  renderCard();
+  renderNarrative();
   globe.select(inc, found.backscatter.slice(0, 1));
 }
 
@@ -599,13 +718,16 @@ async function loadNews(inc, selection) {
   const { articles, via } = await newsFor(inc).catch(() => ({ articles: [], via: 'gdelt' }));
   const box = $('news');
   if (state.selected !== selection || !box) return;
+  selection.news = { articles, via };
+  renderCard();
+  renderNarrative();
   if (!articles.length) {
     box.innerHTML = '<p class="note">No press coverage found for this event. Small or remote events often go unreported.</p>';
     return;
   }
   const how =
     via === 'gdacs'
-      ? 'Articles GDACS has linked to this event.'
+      ? 'Articles GDACS has linked to this event by topic and country; some may be about something else.'
       : 'Found by searching the GDELT news index for the place and event type; only headlines naming the place are kept, but some may still be about something else.';
   box.innerHTML = `${articles
     .map(
@@ -869,6 +991,12 @@ async function startIncidentHistory(inc, selection) {
     // Keep failed images in their original time slots so lines show gaps.
     const points = wanted.map((scene) => byId.get(scene.id)?.point || { time: scene.time, co: null, cross: null });
     const usable = points.filter((p) => p.co != null).length;
+    // The samples also feed the plain-text account.
+    const sampled = points.filter((p) => p.co != null);
+    if (sampled.length >= 2) {
+      selection.history = { pol: pol.co, points: sampled };
+      renderNarrative();
+    }
     box.innerHTML = `
       <p class="note">${usable} usable samples from ${wanted.length} requested previews of ${stack.scenes.length} available passes. Same ${esc(stack.direction)} track ${esc(stack.track)}, frame ${esc(stack.frame)}; ${day(wanted[0].time)} to ${day(wanted[wanted.length - 1].time)}.${stack.unplaced ? ` ${stack.unplaced} other passes lack placeable previews and are omitted.` : ''}</p>
       <div id="incident-history-chart"></div>
@@ -1638,10 +1766,35 @@ async function start() {
   };
   if (window.innerWidth <= 760) $('menu').click();
 
+  $('card').onclick = (e) => {
+    const t = e.target;
+    if (t.id === 'card-close') return closePanel();
+    if (t.id === 'card-details') return showDetails();
+    if (t.id === 'card-nisar') return toggleCardImage(t);
+  };
+  // Sources named in the text: hovering explains one, clicking opens the
+  // part of the panel that holds what came from it.
+  $('detail').addEventListener('mouseover', (e) => {
+    const link = e.target.closest('.src');
+    if (link) sourceTip(link);
+  });
+  $('detail').addEventListener('mouseout', (e) => {
+    if (e.target.closest('.src')) $('tip').hidden = true;
+  });
   $('detail').onclick = (e) => {
     const t = e.target;
     const sel = state.selected;
     if (!sel) return;
+    const source = t.closest('.src');
+    if (source) {
+      e.preventDefault();
+      const section = $(source.dataset.open);
+      if (section) {
+        section.open = true;
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      return;
+    }
     if (t.dataset.show) return showScene(t.dataset.show, t);
     if (t.id === 'compare') return compare(t);
     if (t.id === 'changes') return showChanges(t);
