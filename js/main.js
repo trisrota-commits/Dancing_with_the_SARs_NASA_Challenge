@@ -747,6 +747,7 @@ function startTicker() {
 
 const LAPSE_STEP = 0.9; // seconds each pass stays on screen
 const LAPSE_DEFAULT = 14; // passes loaded unless "all" is ticked
+const PIN_HISTORY = 8; // passes sampled automatically when an event is opened
 
 // Loads a bounded history alongside incident details, without taking ownership
 // of the replay or incrementing lookup (the radar search shares that token).
@@ -762,7 +763,11 @@ async function startIncidentHistory(inc, selection) {
       box.innerHTML = '<p class="note">No repeat history available: the archive has fewer than two placeable previews on the same track, frame and orbit direction here.</p>';
       return;
     }
-    const wanted = spread(stack.scenes, LAPSE_DEFAULT);
+    // Each pass is about a megabyte, and this loads on every click on an
+    // event, so it samples fewer passes than the full time-lapse does.
+    const wanted = spread(stack.scenes, PIN_HISTORY);
+    const pol = stack.pol?.co ? stack.pol : { co: 'Radar', cross: null };
+    const channels = pol.cross ? `${pol.co} and ${pol.cross}` : pol.co;
     const frames = [];
     // Do not start more image requests after switching or closing the pin.
     for (let i = 0; i < wanted.length; i += 3) {
@@ -773,18 +778,18 @@ async function startIncidentHistory(inc, selection) {
     const samples = history(frames, inc.lat, inc.lon);
     const byId = new Map(frames.map((frame, i) => [frame.scene.id, { frame, point: samples[i] }]));
     // Keep failed images in their original time slots so lines show gaps.
-    const points = wanted.map((scene) => byId.get(scene.id)?.point || { time: scene.time, hh: null, hv: null });
-    const usable = points.filter((p) => p.hh != null || p.hv != null).length;
+    const points = wanted.map((scene) => byId.get(scene.id)?.point || { time: scene.time, co: null, cross: null });
+    const usable = points.filter((p) => p.co != null).length;
     box.innerHTML = `
       <p class="note">${usable} usable samples from ${wanted.length} requested previews of ${stack.scenes.length} available passes. Same ${esc(stack.direction)} track ${esc(stack.track)}, frame ${esc(stack.frame)}; ${day(wanted[0].time)} to ${day(wanted[wanted.length - 1].time)}.${stack.unplaced ? ` ${stack.unplaced} other passes lack placeable previews and are omitted.` : ''}</p>
       <div id="incident-history-chart"></div>
       <p id="incident-history-status" class="note" role="status">${usable < 2 ? 'Insufficient data for a trend: fewer than two previews have samples at this pin. ' : ''}${wanted.length - usable} requested passes have no sample (failed image or no coverage); these are gaps, not zero brightness.</p>
-      <p class="hint">HH and HV are NASA preview brightness (0–255), not calibrated backscatter or a measurement of forest loss, area lost or ice melt. Samples average up to 5×5 preview pixels; the ground footprint varies with image resolution and coverage, not a fixed area. Click a chart date to stop the replay and show that preview on the globe.</p>`;
+      <p class="hint">${esc(channels)} ${pol.cross ? 'are' : 'is'} NASA preview brightness (0–255), not calibrated backscatter or a measurement of forest loss, area lost or ice melt. Samples average up to 5×5 preview pixels; the ground footprint varies with image resolution and coverage, not a fixed area. Click a chart date to stop the replay and show that preview on the globe.</p>`;
     if (!usable) {
       $('incident-history-chart').innerHTML = '<p class="note">No brightness history could be sampled from these previews.</p>';
       return;
     }
-    const chart = historyChart($('incident-history-chart'), points, (i) => {
+    const chart = historyChart($('incident-history-chart'), points, pol, (i) => {
       if (!current()) return;
       const frame = byId.get(wanted[i].id)?.frame;
       const status = $('incident-history-status');
@@ -798,7 +803,7 @@ async function startIncidentHistory(inc, selection) {
       globe.addPicture(view(frame, 'colour'), frame.bounds);
       globe.flyToBounds(frame.bounds);
       chart.setActive(i);
-      status.textContent = `${day(frame.time)}: preview shown on globe.${points[i].hh == null && points[i].hv == null ? ' No sample at the exact pin.' : ''}`;
+      status.textContent = `${day(frame.time)}: preview shown on globe.${points[i].co == null ? ' No sample at the exact pin.' : ''}`;
     });
   } catch (err) {
     if (current()) box.innerHTML = `<p class="note">Preview history unavailable: ${esc(err.message)}</p>`;
