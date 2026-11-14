@@ -43,7 +43,9 @@ const DOT_FRAGMENT = /* glsl */ `
   varying float vRing;
   varying float vPulse;
   void main() {
-    float r = length(gl_PointCoord - 0.5) * vSprite;
+    // vRing 2 draws a diamond (a changing place) instead of a disc.
+    vec2 d = gl_PointCoord - 0.5;
+    float r = vRing > 1.5 ? (abs(d.x) + abs(d.y)) * 0.8 * vSprite : length(d) * vSprite;
     float edge = vDisc * 0.5;
     float px = uRatio;
     vec4 color = vec4(0.0);
@@ -52,7 +54,7 @@ const DOT_FRAGMENT = /* glsl */ `
     vec3 fill = mix(vColor, vec3(0.02, 0.03, 0.05), smoothstep(edge - 2.0 * px, edge - px, r) * 0.7);
     color = vec4(fill, disc * 0.95);
     // White ring: NISAR has imaged this spot recently.
-    if (vRing > 0.5) {
+    if (vRing > 0.5 && vRing < 1.5) {
       float ring = smoothstep(edge, edge + px, r) * (1.0 - smoothstep(edge + 2.2 * px, edge + 3.2 * px, r));
       color = mix(color, vec4(1.0), ring);
     }
@@ -83,7 +85,8 @@ export class Dots {
     this.items = [];
   }
 
-  // items: [{ lat, lon, color: [r,g,b], size, ring, born }]; lift(lat, lon)
+  // items: [{ lat, lon, color: [r,g,b], size, ring, born }]; ring is true for
+  // a white ring, or 2 for a diamond. lift(lat, lon)
   // gives the ground height there, in Earth radii.
   set(items, lift) {
     this.items = items;
@@ -101,7 +104,7 @@ export class Dots {
       position.set([v.x, v.y, v.z], i * 3);
       color.set(it.color, i * 3);
       size[i] = it.size;
-      ring[i] = it.ring ? 1 : 0;
+      ring[i] = typeof it.ring === 'number' ? it.ring : it.ring ? 1 : 0;
       born[i] = it.born ?? -1e6;
     });
     const g = new THREE.BufferGeometry();

@@ -33,6 +33,12 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
   search a place) to step through every placeable pass of one repeat track,
   switch between the colour composite, HH only and HV only, and read a chart
   of both channels at that point over time.
+- Marks **changing places** with diamonds: slow changes that no event feed
+  reports. There are 13 glaciers around the world (Greenland, Alaska, Canada,
+  Iceland, the Alps, the Himalaya, Patagonia, New Zealand and Antarctica),
+  plus sinking cities, wetland flood pulses, forest clearing and monsoon
+  farming. Each one explains what NISAR can show there and plays its passes.
+  Glaciers link to ones in the other hemisphere, to compare seasons.
 - Shows where NISAR looked recently, and rings every event inside a pass.
 - Estimates the **next NISAR overpass** for any event or spot, with a live
   countdown, clearly labelled as computed from the 12-day repeat cycle.
@@ -89,6 +95,7 @@ from a web server.
 - `js/incidents.js` – merges duplicate reports, links nearby events
 - `js/nisar.js` – NISAR scene search and preview handling
 - `js/change.js` – what changed between two NISAR passes
+- `js/places.js` – the changing places and what NISAR can show at each
 - `js/timelapse.js` – loads the passes of one repeat track, splits the
   polarisation channels and describes a point history in plain statements
 - `js/stories.js` – the curated stories (places and explanations only)

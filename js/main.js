@@ -5,6 +5,7 @@ import { fetchFeed, fetchArchive } from './feeds.js';
 import { buildIncidents, tagNisarCoverage, pointInPolygon, distanceKm } from './incidents.js';
 import { latestScenes, scenesAt, bestPair, comparisonStatus, imageBounds, latestTileDate, historyAt, newestAt, nextPass, interferogramsAt, REPEAT_DAYS } from './nisar.js';
 import { STORIES } from './stories.js';
+import { PLACES, PLACE_KINDS, otherHemisphere } from './places.js';
 import { loadFrames, spread, view, history, describeSeries } from './timelapse.js';
 import { historyChart } from './chart.js';
 import { Globe, loadPicture } from './globe.js';
@@ -25,6 +26,7 @@ const state = {
   incidents: [],
   scenes: [],
   hidden: new Set(),
+  hiddenPlaces: new Set(),
   windowDays: 7,
   selected: null,
   lookup: 0,
@@ -59,6 +61,8 @@ function size(mag) {
 
 const where = (lat, lon) => `${Math.abs(lat).toFixed(2)}°${lat >= 0 ? 'N' : 'S'}, ${Math.abs(lon).toFixed(2)}°${lon >= 0 ? 'E' : 'W'}`;
 const dot = (category) => `<i class="dot" style="--c:${CATEGORIES[category].color}"></i>`;
+const diamond = (kind) => `<i class="diamond" style="--c:${PLACE_KINDS[kind].color}"></i>`;
+const placeById = (id) => PLACES.find((p) => p.id === id);
 
 // ---------- data ----------
 
@@ -298,6 +302,8 @@ function incidentHtml(inc, radar) {
     <h4>What happened here</h4>
     <div id="replay-parts"></div>
     <h4>NISAR radar over this spot</h4>
+    <h4>Preview brightness history at this pin</h4>
+    <div id="incident-history" aria-live="polite"><p class="spinner">Searching NISAR repeat passes…</p></div>
     ${lapseBox(inc.lat, inc.lon)}
     <div id="radar">${radar}</div>
     <h4>What radar can show here</h4>
@@ -379,6 +385,8 @@ function radarHtml(inc, found) {
       <p>An interferogram compares the passes of ${day(g.refTime)} and ${day(g.secTime)}, either side of this event${spanning.length > 1 ? `, and ${spanning.length - 1} more ${spanning.length > 2 ? 'do' : 'does'} too` : ''}.</p>
       <div class="actions"><button class="primary" id="igram-go" data-show="${esc(g.id)}">Show ground movement</button></div>
       <p class="hint">Each full run through the colours means the distance to the satellite changed by about 12 cm, half of NISAR's 24 cm wavelength. Tight bands that crowd around one place are ground movement. Broad bands across the whole picture are mostly the atmosphere, and speckle means the two passes did not match, as over water.</p></div>`;
+  } else if (inc.category === 'earthquake' && !interferograms.length) {
+    html += `<p class="note">No interferogram yet. NISAR publishes interferograms later than backscatter images, so recent earthquakes may not have one for a while.</p>`;
   }
   html += backscatter.slice(0, 8).map((s) => sceneCard(s, inc.time)).join('');
   if (backscatter.length > 8) html += `<p class="hint">${backscatter.length - 8} older scenes not listed.</p>`;
@@ -396,6 +404,8 @@ async function selectIncident(inc, fly, intro = '') {
   globe.select(inc);
   if (fly) globe.flyTo(inc.lat, inc.lon);
   replay.start(inc);
+  // Independent of the replay and the shorter before/after catalogue search.
+  startIncidentHistory(inc, state.selected);
 
   let found;
   try {
@@ -452,7 +462,9 @@ function choose(found) {
       .map((f, n) =>
         f.kind === 'incident'
           ? `<li data-pick="${n}">${dot(f.incident.category)}<span>${esc(f.incident.title)}</span><span class="km">${ago(f.incident.endTime)}</span></li>`
-          : `<li data-pick="${n}"><i class="dot" style="--c:#39e6c4;border-radius:2px"></i><span>NISAR pass, track ${esc(f.scene.track)} frame ${esc(f.scene.frame)}</span><span class="km">${ago(f.scene.time)}</span></li>`,
+          : f.kind === 'place'
+            ? `<li data-pick="${n}">${diamond(f.place.kind)}<span>${esc(f.place.name)}</span><span class="km">${esc(PLACE_KINDS[f.place.kind].label)}</span></li>`
+            : `<li data-pick="${n}"><i class="dot" style="--c:#39e6c4;border-radius:2px"></i><span>NISAR pass, track ${esc(f.scene.track)} frame ${esc(f.scene.frame)}</span><span class="km">${ago(f.scene.time)}</span></li>`,
       )
       .join('')}</ul>`);
 }
@@ -735,6 +747,68 @@ function startTicker() {
 
 const LAPSE_STEP = 0.9; // seconds each pass stays on screen
 const LAPSE_DEFAULT = 14; // passes loaded unless "all" is ticked
+const PIN_HISTORY = 8; // passes sampled automatically when an event is opened
+
+// Loads a bounded history alongside incident details, without taking ownership
+// of the replay or incrementing lookup (the radar search shares that token).
+async function startIncidentHistory(inc, selection) {
+  const box = $('incident-history');
+  const current = () => state.selected === selection && $('incident-history') === box;
+  if (!box || !current()) return;
+  try {
+    const stacks = await historyAt(inc.lat, inc.lon);
+    if (!current()) return;
+    const stack = stacks[0]; // historyAt ranks repeat stacks by number of passes.
+    if (!stack) {
+      box.innerHTML = '<p class="note">No repeat history available: the archive has fewer than two placeable previews on the same track, frame and orbit direction here.</p>';
+      return;
+    }
+    // Each pass is about a megabyte, and this loads on every click on an
+    // event, so it samples fewer passes than the full time-lapse does.
+    const wanted = spread(stack.scenes, PIN_HISTORY);
+    const pol = stack.pol?.co ? stack.pol : { co: 'Radar', cross: null };
+    const channels = pol.cross ? `${pol.co} and ${pol.cross}` : pol.co;
+    const frames = [];
+    // Do not start more image requests after switching or closing the pin.
+    for (let i = 0; i < wanted.length; i += 3) {
+      box.innerHTML = `<p class="spinner">Loading preview history: ${i} of ${wanted.length} passes…</p>`;
+      frames.push(...await loadFrames(wanted.slice(i, i + 3)));
+      if (!current()) return;
+    }
+    const samples = history(frames, inc.lat, inc.lon);
+    const byId = new Map(frames.map((frame, i) => [frame.scene.id, { frame, point: samples[i] }]));
+    // Keep failed images in their original time slots so lines show gaps.
+    const points = wanted.map((scene) => byId.get(scene.id)?.point || { time: scene.time, co: null, cross: null });
+    const usable = points.filter((p) => p.co != null).length;
+    box.innerHTML = `
+      <p class="note">${usable} usable samples from ${wanted.length} requested previews of ${stack.scenes.length} available passes. Same ${esc(stack.direction)} track ${esc(stack.track)}, frame ${esc(stack.frame)}; ${day(wanted[0].time)} to ${day(wanted[wanted.length - 1].time)}.${stack.unplaced ? ` ${stack.unplaced} other passes lack placeable previews and are omitted.` : ''}</p>
+      <div id="incident-history-chart"></div>
+      <p id="incident-history-status" class="note" role="status">${usable < 2 ? 'Insufficient data for a trend: fewer than two previews have samples at this pin. ' : ''}${wanted.length - usable} requested passes have no sample (failed image or no coverage); these are gaps, not zero brightness.</p>
+      <p class="hint">${esc(channels)} ${pol.cross ? 'are' : 'is'} NASA preview brightness (0–255), not calibrated backscatter or a measurement of forest loss, area lost or ice melt. Samples average up to 5×5 preview pixels; the ground footprint varies with image resolution and coverage, not a fixed area. Click a chart date to stop the replay and show that preview on the globe.</p>`;
+    if (!usable) {
+      $('incident-history-chart').innerHTML = '<p class="note">No brightness history could be sampled from these previews.</p>';
+      return;
+    }
+    const chart = historyChart($('incident-history-chart'), points, pol, (i) => {
+      if (!current()) return;
+      const frame = byId.get(wanted[i].id)?.frame;
+      const status = $('incident-history-status');
+      if (!frame) {
+        status.textContent = `${day(wanted[i].time)}: preview unavailable; no image to show.`;
+        return;
+      }
+      // Explicit user interaction takes over the globe; background loading never does.
+      replay.stop();
+      endCompare();
+      globe.addPicture(view(frame, 'colour'), frame.bounds);
+      globe.flyToBounds(frame.bounds);
+      chart.setActive(i);
+      status.textContent = `${day(frame.time)}: preview shown on globe.${points[i].co == null ? ' No sample at the exact pin.' : ''}`;
+    });
+  } catch (err) {
+    if (current()) box.innerHTML = `<p class="note">Preview history unavailable: ${esc(err.message)}</p>`;
+  }
+}
 
 function lapseBox(lat, lon) {
   return `<div id="lapse" data-lat="${lat}" data-lon="${lon}"><button id="lapse-go">▶ Play a year of NISAR passes here</button></div>`;
@@ -870,6 +944,80 @@ async function selectSpot(at) {
   } catch {
     /* coordinates are a fine title */
   }
+}
+
+// ---------- changing places ----------
+
+function visiblePlaces() {
+  return PLACES.filter((p) => !state.hiddenPlaces.has(p.kind));
+}
+
+function drawPlaces() {
+  const shown = visiblePlaces();
+  globe.renderPlaces(shown.map((place) => ({ place, color: PLACE_KINDS[place.kind].color })));
+  const counts = {};
+  PLACES.forEach((p) => (counts[p.kind] = (counts[p.kind] || 0) + 1));
+  $('place-chips').innerHTML = Object.entries(PLACE_KINDS)
+    .map(
+      ([key, k]) =>
+        `<button class="chip ${state.hiddenPlaces.has(key) ? 'off' : ''}" data-kind="${key}" aria-pressed="${!state.hiddenPlaces.has(key)}" style="--c:${k.color}"><i></i>${k.label} ${counts[key] || 0}</button>`,
+    )
+    .join('');
+  $('place-list').innerHTML = shown
+    .map((p) => `<li data-site="${esc(p.id)}">${diamond(p.kind)}<span>${esc(p.name)}</span><span class="km">${esc(p.region)}</span></li>`)
+    .join('');
+  $('place-count').textContent = shown.length;
+}
+
+async function selectPlace(place, fly) {
+  endCompare();
+  replay.stop();
+  const kind = PLACE_KINDS[place.kind];
+  state.selected = { kind: 'site', place, incident: { lat: place.lat, lon: place.lon, related: [] } };
+  globe.select(state.selected.incident);
+  if (fly) globe.flyTo(place.lat, place.lon, 300_000);
+
+  const others = place.kind === 'glacier' ? otherHemisphere(place) : [];
+  const links = kind.links.length
+    ? `<h4>Read more (context, not NISAR)</h4><ul class="plain">${kind.links
+        .map(([label, url]) => `<li><a href="${safeUrl(url)}" target="_blank" rel="noopener">${esc(label)}</a></li>`)
+        .join('')}</ul>`
+    : '';
+  openPanel(`<span class="tag">${diamond(place.kind)}Changing place · ${esc(kind.label)}</span>
+    <h3>${esc(place.name)}</h3>
+    <dl><dt>Where</dt><dd>${esc(place.region)} · ${where(place.lat, place.lon)}</dd></dl>
+    <h4>Why this place</h4>
+    <div class="context"><p class="note">${esc(place.story)}</p>
+    <p class="hint">Background from published research, not measured by this app.</p></div>
+    <h4>What NISAR can show here</h4>
+    <p class="note">${esc(kind.look)}</p>
+    <p class="note">${esc(kind.note)}</p>
+    <h4>NISAR passes over this spot</h4>
+    ${lapseBox(place.lat, place.lon)}
+    ${place.kind === 'subsidence' ? '<h4>Interferograms (ground movement)</h4><div id="place-ifg"><p class="spinner">Searching for interferograms…</p></div>' : ''}
+    ${
+      others.length
+        ? `<h4>Same months, other hemisphere</h4><p class="hint">Play one of these next to see the opposite season.</p><ul class="links">${others
+            .map((p) => `<li data-site="${esc(p.id)}">${diamond(p.kind)}<span>${esc(p.name)}</span><span class="km">${esc(p.region)}</span></li>`)
+            .join('')}</ul>`
+        : ''
+    }
+    ${links}`);
+  startLapse();
+
+  if (place.kind !== 'subsidence') return;
+  let found;
+  try {
+    found = await scenesAt(place.lat, place.lon, NISAR_START, Date.now());
+  } catch (err) {
+    if (state.selected?.place === place && $('place-ifg')) $('place-ifg').innerHTML = `<p class="note">NISAR search failed: ${esc(err.message)}</p>`;
+    return;
+  }
+  if (state.selected?.place !== place || !$('place-ifg')) return;
+  state.selected.found = { backscatter: [], interferograms: found.interferograms };
+  $('place-ifg').innerHTML = found.interferograms.length
+    ? found.interferograms.slice(0, 6).map((s) => sceneCard(s, null)).join('')
+    : `<p class="note">No NISAR interferogram over this spot since ${day(NISAR_START)} yet. They are published later than backscatter images.</p>`;
 }
 
 // ---------- search ----------
@@ -1059,6 +1207,18 @@ async function start() {
     state.hidden.clear();
     draw();
   };
+  $('place-chips').onclick = (e) => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    const kind = chip.dataset.kind;
+    state.hiddenPlaces.has(kind) ? state.hiddenPlaces.delete(kind) : state.hiddenPlaces.add(kind);
+    drawPlaces();
+  };
+  $('place-list').onclick = (e) => {
+    const li = e.target.closest('li');
+    if (li) selectPlace(placeById(li.dataset.site), true);
+  };
+  drawPlaces();
   $('chips-none').onclick = () => {
     Object.keys(CATEGORIES).forEach((c) => state.hidden.add(c));
     draw();
@@ -1130,11 +1290,13 @@ async function start() {
     if (t.id === 'under') return drapeChanges(t.checked);
     const li = t.closest('li');
     if (!li) return;
+    if (li.dataset.site) return selectPlace(placeById(li.dataset.site), true);
     if (li.dataset.rel) return selectIncident(sel.incident.related[+li.dataset.rel].incident, true);
     if (li.dataset.in) return selectIncident(sel.inside[+li.dataset.in], true);
     if (li.dataset.near) return selectIncident(sel.near[+li.dataset.near].incident, true);
     if (li.dataset.pick) {
       const f = sel.found[+li.dataset.pick];
+      if (f.kind === 'place') return selectPlace(f.place, false);
       return f.kind === 'incident' ? selectIncident(f.incident, false) : selectScene(f.scene, false);
     }
   };
@@ -1152,8 +1314,10 @@ async function start() {
     }
     // Dots win over the footprints they sit on, unless several dots overlap.
     const incidents = found.filter((f) => f.kind === 'incident');
+    const places = found.filter((f) => f.kind === 'place');
+    if (incidents.length + places.length > 1) return choose([...incidents, ...places]);
     if (incidents.length === 1) return selectIncident(incidents[0].incident, false);
-    if (incidents.length > 1) return choose(incidents);
+    if (places.length === 1) return selectPlace(places[0].place, false);
     if (found.length === 1) return selectScene(found[0].scene, false);
     choose(found);
   });

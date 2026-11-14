@@ -152,6 +152,13 @@ showcase panel should cover:
 4. What did NISAR see that optical imagery could not (cloud, smoke, night)?
 5. Who is affected, and what could NISAR be used for next?
 
+**Fix 3d: changing places (done).** Slow changes such as glacier loss never
+appear in event feeds. The app now marks 27 places with diamonds: 13 glaciers
+worldwide, plus sinking cities, wetlands, forest loss and farming seasons.
+Each place says what NISAR can show there and plays the time-lapse. The list
+is in `js/places.js`, so swapping or adding a place is one entry. Check each
+place in the app: if the time-lapse finds few passes, replace it.
+
 **Fix 3c: a "Showcase" entry point.** Add a button or menu that flies to each
 showcase event in turn. This gives the demo a reliable path and makes the
 science easy to find for anyone using the app after the hackathon.
@@ -183,13 +190,14 @@ season or a flood has an audible rhythm. The Web Audio API is enough for this.
 ## Checklist
 
 - [ ] 1a: archive endpoints checked for CORS
-- [ ] 1a: "Since NISAR data began" window added
-- [ ] 1b: next-pass prediction in the event panel
-- [ ] 1c: Sentinel-1 offer when there is no after scene
+- [x] 1a: "Since NISAR data began" window added
+- [x] 1b: next-pass prediction in the event panel
+- [x] 1c: Sentinel-1 offer when there is no after scene
 - [ ] 2a: full-resolution dB difference maps for the showcase events
 - [ ] 2b: method line next to each processed result
 - [ ] 3a: showcase events chosen and data checked in Vertex
 - [ ] 3b: explanation written for each showcase event
-- [ ] 3c: showcase button or menu
+- [x] 3c: entry point for curated places (the "Changing places" list)
+- [x] 3d: changing places: glaciers worldwide and other slow changes
 - [ ] 4: demo script rehearsed, backup video recorded
 - [ ] README: short "Data we use and why" section linking to this file
