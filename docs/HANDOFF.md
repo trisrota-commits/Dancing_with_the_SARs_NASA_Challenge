@@ -385,6 +385,26 @@ player that loaded fourteen full pictures before showing anything.
   after 6.9 s, first picture 8.3 s, sharp 9.4 s, chart from 14.7 s, all
   14 read after 25.6 s. Before, nothing showed until all 14 were loaded.
 
+### Signals for recent events, and earthquake rings that stay (lead's QA, 14 Nov, night)
+
+- **A soft ring every five seconds** on every event first reported in
+  the last 24 hours (`RECENT_MS` in `js/config.js`, the reports bar's own
+  rule). It is the dot shader's existing pulse with a second trigger
+  (`aPing` in `js/engine/marks.js`; `PING_EVERY`, `PING_LASTS`). Each dot
+  starts up to 0.7 s apart from the others, always the same for the same
+  event, so the globe does not blink as one. The quick pulse of an event
+  that arrived in the last minutes is unchanged and takes precedence.
+  Cost: the globe now draws frames while rings spread, about 2.6 of
+  every 5 seconds, where an idle globe used to draw none.
+- **The earthquake's two wave rings rest** where they stood when the
+  opening ended, fainter, each labelled with the wave and the seconds
+  after the quake it stands for (`atRest`, `waveLabels` in the `quake`
+  template of `js/replay/replay.js`). The lead asked for them because an
+  earthquake without a published shaking map had nothing left on the
+  globe after the opening. The key and the "computed" line say what they
+  are. Before the earthquake on the timeline they are off, like
+  everything else of the event.
+
 ### Visual rules (lead, 14 Nov, night)
 
 The lead, after one screenshot confused them: no arbitrary colours; one

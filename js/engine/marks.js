@@ -11,6 +11,12 @@ const NISAR_VEC3 = `vec3(${rgb(PALETTE.nisar).map((v) => v.toFixed(3)).join(', '
 
 export const LIFT = 2e-5; // marks sit about 130 m above the ground
 
+// A report from the last day sends out one soft ring every few seconds: a
+// signal that it is recent, calm enough not to pull at the eye.
+export const PING_EVERY = 5; // seconds from one ring to the next
+export const PING_LASTS = 1.8; // seconds one ring takes to spread and fade
+export const PING_SPREAD = 0.7; // dots start within this many seconds of each other
+
 // ---------- event dots ----------
 
 const DOT_VERTEX = /* glsl */ `
@@ -19,6 +25,7 @@ const DOT_VERTEX = /* glsl */ `
   attribute float aRing;
   attribute float aBorn;
   attribute float aPop;
+  attribute float aPing;
   uniform vec3 uCam;
   uniform float uScale;
   uniform float uRatio;
@@ -28,11 +35,22 @@ const DOT_VERTEX = /* glsl */ `
   varying float vSprite;
   varying float vRing;
   varying float vPulse;
+  varying float vGain;
   void main() {
     vColor = aColor;
     vRing = aRing;
+    vGain = 1.0;
     float age = uTime - aBorn;
     vPulse = age < 90.0 ? fract(age / 1.8) : -1.0;
+    // Recent, but no longer just arrived: one soft ring now and then.
+    // aPing is when this dot's beat starts, or negative for none.
+    if (vPulse < 0.0 && aPing >= 0.0) {
+      float beat = mod(uTime - aPing, ${PING_EVERY.toFixed(1)});
+      if (beat < ${PING_LASTS.toFixed(1)}) {
+        vPulse = beat / ${PING_LASTS.toFixed(1)};
+        vGain = 0.8;
+      }
+    }
     // A mark with a pop time swells into place and sends out one ring.
     float popped = uTime - aPop;
     float grow = clamp(popped / 0.4, 0.0, 1.0);
@@ -54,6 +72,7 @@ const DOT_FRAGMENT = /* glsl */ `
   varying float vSprite;
   varying float vRing;
   varying float vPulse;
+  varying float vGain;
   void main() {
     // vRing 2 draws a diamond (a changing place) instead of a disc.
     vec2 d = gl_PointCoord - 0.5;
@@ -74,10 +93,11 @@ const DOT_FRAGMENT = /* glsl */ `
       float ring = smoothstep(edge, edge + px, r) * (1.0 - smoothstep(edge + 2.4 * px, edge + 3.6 * px, r));
       color = mix(color, vec4(${NISAR_VEC3}, 1.0), ring);
     }
-    // Expanding ring on events that just arrived.
+    // Expanding ring: quick and repeated on events that just arrived, one
+    // soft ring every few seconds on those of the last day.
     if (vPulse >= 0.0) {
       float at = edge + vPulse * 23.0 * px;
-      float wave = (1.0 - smoothstep(0.0, 1.6 * px, abs(r - at))) * (1.0 - vPulse);
+      float wave = (1.0 - smoothstep(0.0, 1.6 * px, abs(r - at))) * (1.0 - vPulse) * vGain;
       color = mix(color, vec4(vColor, 1.0), wave);
     }
     if (color.a < 0.01) discard;
@@ -102,9 +122,10 @@ export class Dots {
     this.items = [];
   }
 
-  // items: [{ lat, lon, color: [r,g,b], size, ring, born, pop }]; ring is
-  // true for a white ring, or 2 for a diamond. born starts a long pulse
-  // (new arrivals), pop a short entrance. lift(lat, lon) gives the ground
+  // items: [{ lat, lon, color: [r,g,b], size, ring, born, pop, ping }]; ring
+  // is true for a teal ring, or 2 for a diamond. born starts a long pulse
+  // (new arrivals), pop a short entrance, ping (a start time on the shader
+  // clock) one soft ring every PING_EVERY seconds. lift(lat, lon) gives the ground
   // height there, in Earth radii.
   set(items, lift) {
     this.items = items;
@@ -116,6 +137,7 @@ export class Dots {
     const ring = new Float32Array(n);
     const born = new Float32Array(n);
     const pop = new Float32Array(n);
+    const ping = new Float32Array(n);
     const v = new THREE.Vector3();
     items.forEach((it, i) => {
       pop[i] = it.pop ?? -1e6;
@@ -126,6 +148,7 @@ export class Dots {
       size[i] = it.size;
       ring[i] = typeof it.ring === 'number' ? it.ring : it.ring ? 1 : 0;
       born[i] = it.born ?? -1e6;
+      ping[i] = it.ping ?? -1;
     });
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(position, 3));
@@ -134,6 +157,7 @@ export class Dots {
     g.setAttribute('aRing', new THREE.BufferAttribute(ring, 1));
     g.setAttribute('aBorn', new THREE.BufferAttribute(born, 1));
     g.setAttribute('aPop', new THREE.BufferAttribute(pop, 1));
+    g.setAttribute('aPing', new THREE.BufferAttribute(ping, 1));
     this.points.geometry.dispose();
     this.points.geometry = g;
   }

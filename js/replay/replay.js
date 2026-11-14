@@ -158,6 +158,24 @@ async function quake(inc, globe) {
   let shownZones = -1;
   let shownAfter = -1;
   let shownEarly = -1;
+  // Where the two wave fronts stand when the opening ends. They stay
+  // there, fainter, for as long as the event is open: a ring that vanishes
+  // leaves nothing to look at where no shaking map was published.
+  const sEnd = Math.max(1, rmax);
+  const pEnd = Math.max(1, Math.min(rmax * (6 / 3.5), rmax * 1.72));
+  const reached = Math.round(rmax / 3.5); // seconds after the quake
+  const sRing = circle(centre, sEnd);
+  const pRing = circle(centre, pEnd);
+  const atRest = [
+    { points: sRing, color: [1, 0.32, 0.28, 0.5], closed: true },
+    { points: pRing, color: [1, 1, 1, 0.26], closed: true },
+  ];
+  // Named at their southern edge, clear of the shaking labels on top.
+  const south = (ring) => ring.reduce((a, b) => (b.lat < a.lat ? b : a));
+  const waveLabels = [
+    { ...south(sRing), text: `Slower wave (S), ${reached} s after`, color: GROUND },
+    { ...south(pRing), text: `Faster wave (P), ${reached} s after`, color: '#e8edf5' },
+  ];
 
   return {
     from: inc.time,
@@ -172,7 +190,7 @@ async function quake(inc, globe) {
       ...(zones.length ? [{ mark: 'bands', color: SHAKING_SWATCH, text: `Outlines: how strong the shaking was, from weak (blue) to violent (red), in the colours of ${zoneSource === 'GDACS' ? 'the USGS scale (outlines from GDACS)' : 'USGS'}` }] : []),
       ...(after.length ? [{ mark: 'dot', color: GROUND, text: 'Red dots: later quakes nearby, bigger for stronger' }] : []),
       ...(before.length ? [{ mark: 'dot', color: PALETTE.context, text: 'Grey dots: quakes in the 30 days before' }] : []),
-      { mark: 'line', color: GROUND, text: 'Red and white rings at the start: the two earthquake waves spreading, sped up' },
+      { mark: 'line', color: GROUND, text: `Red and white rings: the two earthquake waves. They spread once, sped up, then rest where they stood ${reached} s after the quake` },
     ],
     timeOf: (ms) => WAVE + 0.5 + (AFTER ? Math.max(0, Math.min(1, (ms - inc.time) / span)) * AFTER : 0),
     frameKm: rmax * 1.3,
@@ -181,7 +199,7 @@ async function quake(inc, globe) {
       zones.length
         ? { kind: 'analysis', text: `Shaking intensity outlines, levels ${Math.min(...zones.map((z) => z.value))} to ${Math.max(...zones.map((z) => z.value))}`, source: zoneSource }
         : { kind: 'note', text: 'No shaking map has been published for this earthquake.' },
-      { kind: 'computed', text: `Wave fronts at typical crust speeds (P 6 km/s, S 3.5 km/s), played ${speedup}× faster than real time. The glow and ripple on the ground mark where the fronts are; their brightness and height are not to scale.` },
+      { kind: 'computed', text: `Wave fronts at typical crust speeds (P 6 km/s, S 3.5 km/s), played ${speedup}× faster than real time. The glow and ripple on the ground mark where the fronts are; their brightness and height are not to scale. The rings then rest where the fronts stood ${reached} s after the quake.` },
       { kind: 'observed', text: `${after.length} later and ${before.length} earlier quakes of M2.5+ within ${radius} km, from 30 days before the quake until now${nearby.length >= 600 ? ' (the catalogue query stops at 600, so the newest may be missing)' : ''}`, source: 'USGS catalogue' },
     ],
     draw(t, started, ms) {
@@ -201,19 +219,24 @@ async function quake(inc, globe) {
         shownZones = shownAfter = -1;
         shownLabels = '';
         popped.length = 0;
-        this.hadLines = this.hadFlash = false;
+        this.hadFlash = this.resting = false;
         return;
       }
       shownEarly = -1;
       const s = Math.min(1, t / WAVE) * rmax;
-      const lines = [];
       if (t < WAVE + 0.5) {
-        const fade = 1 - Math.max(0, t - WAVE) * 2;
-        lines.push({ points: circle(centre, Math.max(1, s)), color: [1, 0.32, 0.28, 0.95 * fade], closed: true });
-        lines.push({ points: circle(centre, Math.max(1, Math.min(s * (6 / 3.5), rmax * 1.72))), color: [1, 1, 1, 0.5 * fade], closed: true });
+        // Spreading; in the last half second they settle to their resting look.
+        const settle = Math.max(0, t - WAVE) * 2;
+        globe.setEffectLines([
+          { points: circle(centre, Math.max(1, s)), color: [1, 0.32, 0.28, 0.95 - 0.45 * settle], closed: true },
+          { points: circle(centre, Math.max(1, Math.min(s * (6 / 3.5), rmax * 1.72))), color: [1, 1, 1, 0.5 - 0.24 * settle], closed: true },
+        ]);
+        this.resting = false;
+      } else if (!this.resting) {
+        // Set once: the timeline asks for this many times a second.
+        globe.setEffectLines(atRest);
+        this.resting = true;
       }
-      if (lines.length || this.hadLines) globe.setEffectLines(lines);
-      this.hadLines = lines.length > 0;
       // The same two fronts, drawn into the terrain itself.
       const fade = Math.max(0, Math.min(1, 1 - (t - WAVE) * 2));
       globe.setShockwave(
@@ -243,6 +266,7 @@ async function quake(inc, globe) {
       this.now = now;
       this.count = nAfter;
       const labels = [
+        ...(t >= WAVE + 0.5 ? waveLabels : []),
         ...levelLabels.filter((l) => t >= WAVE || l.km <= s),
         ...after.slice(0, nAfter).filter((q) => named.has(q)).map((q) => ({ lat: q.lat, lon: q.lon, text: `M ${q.mag.toFixed(1)}`, color: GROUND, within: closer })),
       ];

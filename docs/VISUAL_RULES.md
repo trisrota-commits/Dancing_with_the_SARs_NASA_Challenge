@@ -97,7 +97,7 @@ Events are round dots; places are diamonds.
 | Dot or glowing spot | One observation at one point: an event, a quake, a fire detection |
 | Solid line | A path really travelled: a storm track, the orbit flown |
 | Dashed line | Not an observation: a link between events, the orbit ahead, the next expected pass, a reference date |
-| Ring around a dot | The dot's state: teal = NISAR imaged it, white = selected, spreading = just arrived |
+| Ring around a dot | The dot's state: teal = NISAR imaged it, white = selected, quick spreading rings = arrived in the last minutes, one soft ring every five seconds = first reported in the last 24 hours |
 
 Two filled patches with different meanings are never on the ground
 together: while a change map is up, the event's own water layer steps
