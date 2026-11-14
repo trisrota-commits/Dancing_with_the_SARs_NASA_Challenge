@@ -51,6 +51,9 @@ export class Globe {
     this.fxZones = [];
     this.animating = false;
     this.dots = new Dots(this.scene, this.shared);
+    // Changing places (glaciers, sinking cities…), drawn as diamonds.
+    this.placeDots = new Dots(this.scene, this.shared);
+    this.placeDots.points.renderOrder = 29;
     this.ring = new SelectionRing(this.scene, this.shared);
 
     // Ground height in Earth radii, as drawn (so including exaggeration).
@@ -122,6 +125,7 @@ export class Globe {
     if (this.tiles.elevationVersion !== this.liftedAt && this.tiles.frame % 30 === 0) {
       this.liftedAt = this.tiles.elevationVersion;
       this.dots.relift();
+      this.placeDots.relift();
       this.fxDots.relift();
       if (this.selected) this.ring.set(this.selected.lat, this.selected.lon, this.lift(this.selected.lat, this.selected.lon));
       this.dirty = true;
@@ -160,10 +164,10 @@ export class Globe {
     return { x: (p.x * 0.5 + 0.5) * this.el.clientWidth, y: (0.5 - p.y * 0.5) * this.el.clientHeight };
   }
 
-  dotsAt(x, y, slack) {
+  dotsAt(x, y, slack, dots = this.dots) {
     const hits = [];
     const scale = this.shared.uScale.value;
-    for (const item of this.dots.items) {
+    for (const item of dots.items) {
       const p = this.project(item.vec);
       if (!p) continue;
       const d = Math.hypot(p.x - x, p.y - y);
@@ -196,6 +200,7 @@ export class Globe {
     const found = this.dotsAt(x, y, 5)
       .slice(0, 12)
       .map((h) => ({ kind: 'incident', incident: h.item.incident }));
+    for (const h of this.dotsAt(x, y, 5, this.placeDots).slice(0, 6)) found.push({ kind: 'place', place: h.item.place });
     const at = this.locate(x, y);
     if (at && this.footprintsOn) {
       for (const scene of this.scenes) {
@@ -211,11 +216,12 @@ export class Globe {
     const box = this.el.getBoundingClientRect();
     const x = e.clientX - box.left;
     const y = e.clientY - box.top;
-    const hit = this.dotsAt(x, y, 3)[0];
+    const hit = this.dotsAt(x, y, 3)[0] || this.dotsAt(x, y, 3, this.placeDots)[0];
     this.renderer.domElement.style.cursor = hit ? 'pointer' : 'grab';
     this.tooltip.hidden = !hit;
     if (hit) {
-      this.tooltip.textContent = hit.item.incident.title;
+      const place = hit.item.place;
+      this.tooltip.textContent = place ? `${place.name} · ${place.region}` : hit.item.incident.title;
       this.tooltip.style.left = `${x + 14}px`;
       this.tooltip.style.top = `${y + 12}px`;
     }
@@ -274,6 +280,7 @@ export class Globe {
     this.tiles.setTerrain(on);
     this.tiles.uniforms.uRelief.value = on ? 1 : 0;
     this.dots.relift();
+    this.placeDots.relift();
     this.controls.apply();
     this.dirty = true;
   }
@@ -282,6 +289,7 @@ export class Globe {
   setExaggeration(factor) {
     this.tiles.uniforms.uExaggeration.value = factor;
     this.dots.relift();
+    this.placeDots.relift();
     this.controls.apply();
     this.dirty = true;
   }
@@ -378,6 +386,15 @@ export class Globe {
     this.pulseUntil = pulseUntil;
     this.dots.set(items, this.lift);
     this.trackLines.set(tracks);
+    this.dirty = true;
+  }
+
+  // places: [{ place, color }], drawn as diamonds.
+  renderPlaces(places) {
+    this.placeDots.set(
+      places.map(({ place, color }) => ({ place, lat: place.lat, lon: place.lon, color: rgb(color), size: 13, ring: 2 })),
+      this.lift,
+    );
     this.dirty = true;
   }
 

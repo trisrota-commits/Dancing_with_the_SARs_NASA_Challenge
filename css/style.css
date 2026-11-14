@@ -380,7 +380,8 @@ h2 {
   cursor: pointer;
 }
 
-#chips {
+#chips,
+#place-chips {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
@@ -407,6 +408,44 @@ h2 {
 
 .chip.off {
   opacity: 0.4;
+}
+
+/* Changing places are diamonds, on the globe and in the panels. */
+.diamond {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin: 0 1px;
+  background: var(--c);
+  transform: rotate(45deg);
+  flex: none;
+}
+
+#place-chips .chip i {
+  border-radius: 1px;
+  transform: rotate(45deg);
+  width: 8px;
+  height: 8px;
+}
+
+#place-list {
+  margin-top: 8px;
+  max-height: 180px;
+  overflow-y: auto;
+  font-size: 13px;
+}
+
+#place-list .km {
+  font-size: 11.5px;
+}
+
+.context {
+  border-left: 3px solid var(--dim);
+  padding-left: 10px;
+}
+
+.next-pass {
+  margin: 6px 0;
 }
 
 #feed {
@@ -1078,4 +1117,14 @@ dd {
 .chart-table th {
   color: var(--dim);
   font-weight: 500;
+}
+
+ul.plain {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+}
+
+.note + .note {
+  margin-top: 8px;
 }

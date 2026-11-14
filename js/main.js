@@ -3,7 +3,8 @@
 import { CATEGORIES, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS } from './config.js';
 import { fetchFeed } from './feeds.js';
 import { buildIncidents, tagNisarCoverage, pointInPolygon, distanceKm } from './incidents.js';
-import { latestScenes, scenesAt, bestPair, imageBounds, latestTileDate, historyAt } from './nisar.js';
+import { latestScenes, scenesAt, bestPair, imageBounds, latestTileDate, historyAt, nextPass, REPEAT_DAYS } from './nisar.js';
+import { PLACES, PLACE_KINDS, NISAR_START, otherHemisphere } from './places.js';
 import { loadFrames, spread, view, history } from './timelapse.js';
 import { historyChart } from './chart.js';
 import { Globe, loadPicture } from './globe.js';
@@ -24,6 +25,7 @@ const state = {
   incidents: [],
   scenes: [],
   hidden: new Set(),
+  hiddenPlaces: new Set(),
   windowDays: 7,
   selected: null,
   lookup: 0,
@@ -58,6 +60,8 @@ function size(mag) {
 
 const where = (lat, lon) => `${Math.abs(lat).toFixed(2)}°${lat >= 0 ? 'N' : 'S'}, ${Math.abs(lon).toFixed(2)}°${lon >= 0 ? 'E' : 'W'}`;
 const dot = (category) => `<i class="dot" style="--c:${CATEGORIES[category].color}"></i>`;
+const diamond = (kind) => `<i class="diamond" style="--c:${PLACE_KINDS[kind].color}"></i>`;
+const placeById = (id) => PLACES.find((p) => p.id === id);
 
 // ---------- data ----------
 
@@ -323,7 +327,10 @@ function radarHtml(inc, found) {
       </div>
       <div id="change-out"></div></div>`;
   } else if (backscatter.length) {
-    html += `<p class="note">No repeat pass after the event yet, so there is no before/after pair. The next pass on the same track comes 12 days after the last one.</p>`;
+    html += waitingHtml(backscatter, inc.time);
+  }
+  if (inc.category === 'earthquake' && !interferograms.length) {
+    html += `<p class="note">No interferogram yet. NISAR publishes interferograms later than backscatter images, so recent earthquakes may not have one for a while.</p>`;
   }
   html += backscatter.slice(0, 8).map((s) => sceneCard(s, inc.time)).join('');
   if (backscatter.length > 8) html += `<p class="hint">${backscatter.length - 8} older scenes not listed.</p>`;
@@ -331,6 +338,27 @@ function radarHtml(inc, found) {
     html += `<h4>Interferograms (ground movement)</h4>` + interferograms.slice(0, 5).map((s) => sceneCard(s, inc.time)).join('');
   }
   return html;
+}
+
+// No "after" scene yet: say when NISAR should be back, and offer Sentinel-1
+// radar for the time in between.
+function waitingHtml(backscatter, eventTime) {
+  const before = backscatter.filter((s) => s.time < eventTime).sort((a, b) => b.time - a.time)[0];
+  const next = nextPass(backscatter);
+  return `<div class="card next-pass">
+      <div class="src">Waiting for NISAR's next pass</div>
+      ${before ? `<p>✓ Before scene: ${day(before.time)} (${esc(before.direction.toLowerCase())} track ${esc(before.track)}, frame ${esc(before.frame)})</p>` : ''}
+      ${next ? `<p>⏳ Next pass over this spot: expected around <strong>${day(next.time)}</strong></p>` : ''}
+      <p class="hint">NISAR revisits each spot every ${REPEAT_DAYS} days, and images arrive a day or two later. Not every planned pass is acquired, so this date is an estimate.</p>
+      <p class="note">Meanwhile, the European Sentinel-1 satellites image many places in between. They use C-band radar (about 5.6 cm wavelength), so they see the surface a little differently from NISAR's L-band (about 24 cm).</p>
+      <div class="actions"><button id="s1-context">Show Sentinel-1 radar here (context)</button></div>
+    </div>`;
+}
+
+function showSentinel1(button) {
+  $('ov-s1').checked = true;
+  applyLayers();
+  button.textContent = `Sentinel-1 shown for ${$('date').value || 'the selected date'} – change the date under “NISAR radar”`;
 }
 
 async function selectIncident(inc, fly) {
@@ -392,7 +420,9 @@ function choose(found) {
       .map((f, n) =>
         f.kind === 'incident'
           ? `<li data-pick="${n}">${dot(f.incident.category)}<span>${esc(f.incident.title)}</span><span class="km">${ago(f.incident.endTime)}</span></li>`
-          : `<li data-pick="${n}"><i class="dot" style="--c:#39e6c4;border-radius:2px"></i><span>NISAR pass, track ${esc(f.scene.track)} frame ${esc(f.scene.frame)}</span><span class="km">${ago(f.scene.time)}</span></li>`,
+          : f.kind === 'place'
+            ? `<li data-pick="${n}">${diamond(f.place.kind)}<span>${esc(f.place.name)}</span><span class="km">${esc(PLACE_KINDS[f.place.kind].label)}</span></li>`
+            : `<li data-pick="${n}"><i class="dot" style="--c:#39e6c4;border-radius:2px"></i><span>NISAR pass, track ${esc(f.scene.track)} frame ${esc(f.scene.frame)}</span><span class="km">${ago(f.scene.time)}</span></li>`,
       )
       .join('')}</ul>`);
 }
@@ -631,6 +661,80 @@ async function selectSpot(at) {
   }
 }
 
+// ---------- changing places ----------
+
+function visiblePlaces() {
+  return PLACES.filter((p) => !state.hiddenPlaces.has(p.kind));
+}
+
+function drawPlaces() {
+  const shown = visiblePlaces();
+  globe.renderPlaces(shown.map((place) => ({ place, color: PLACE_KINDS[place.kind].color })));
+  const counts = {};
+  PLACES.forEach((p) => (counts[p.kind] = (counts[p.kind] || 0) + 1));
+  $('place-chips').innerHTML = Object.entries(PLACE_KINDS)
+    .map(
+      ([key, k]) =>
+        `<button class="chip ${state.hiddenPlaces.has(key) ? 'off' : ''}" data-kind="${key}" aria-pressed="${!state.hiddenPlaces.has(key)}" style="--c:${k.color}"><i></i>${k.label} ${counts[key] || 0}</button>`,
+    )
+    .join('');
+  $('place-list').innerHTML = shown
+    .map((p) => `<li data-site="${esc(p.id)}">${diamond(p.kind)}<span>${esc(p.name)}</span><span class="km">${esc(p.region)}</span></li>`)
+    .join('');
+  $('place-count').textContent = shown.length;
+}
+
+async function selectPlace(place, fly) {
+  endCompare();
+  replay.stop();
+  const kind = PLACE_KINDS[place.kind];
+  state.selected = { kind: 'site', place, incident: { lat: place.lat, lon: place.lon, related: [] } };
+  globe.select(state.selected.incident);
+  if (fly) globe.flyTo(place.lat, place.lon, 300_000);
+
+  const others = place.kind === 'glacier' ? otherHemisphere(place) : [];
+  const links = kind.links.length
+    ? `<h4>Read more (context, not NISAR)</h4><ul class="plain">${kind.links
+        .map(([label, url]) => `<li><a href="${safeUrl(url)}" target="_blank" rel="noopener">${esc(label)}</a></li>`)
+        .join('')}</ul>`
+    : '';
+  openPanel(`<span class="tag">${diamond(place.kind)}Changing place · ${esc(kind.label)}</span>
+    <h3>${esc(place.name)}</h3>
+    <dl><dt>Where</dt><dd>${esc(place.region)} · ${where(place.lat, place.lon)}</dd></dl>
+    <h4>Why this place</h4>
+    <div class="context"><p class="note">${esc(place.story)}</p>
+    <p class="hint">Background from published research, not measured by this app.</p></div>
+    <h4>What NISAR can show here</h4>
+    <p class="note">${esc(kind.look)}</p>
+    <p class="note">${esc(kind.note)}</p>
+    <h4>NISAR passes over this spot</h4>
+    ${lapseBox(place.lat, place.lon)}
+    ${place.kind === 'subsidence' ? '<h4>Interferograms (ground movement)</h4><div id="place-ifg"><p class="spinner">Searching for interferograms…</p></div>' : ''}
+    ${
+      others.length
+        ? `<h4>Same months, other hemisphere</h4><p class="hint">Play one of these next to see the opposite season.</p><ul class="links">${others
+            .map((p) => `<li data-site="${esc(p.id)}">${diamond(p.kind)}<span>${esc(p.name)}</span><span class="km">${esc(p.region)}</span></li>`)
+            .join('')}</ul>`
+        : ''
+    }
+    ${links}`);
+  startLapse();
+
+  if (place.kind !== 'subsidence') return;
+  let found;
+  try {
+    found = await scenesAt(place.lat, place.lon, Date.parse(NISAR_START), Date.now());
+  } catch (err) {
+    if (state.selected?.place === place && $('place-ifg')) $('place-ifg').innerHTML = `<p class="note">NISAR search failed: ${esc(err.message)}</p>`;
+    return;
+  }
+  if (state.selected?.place !== place || !$('place-ifg')) return;
+  state.selected.found = { backscatter: [], interferograms: found.interferograms };
+  $('place-ifg').innerHTML = found.interferograms.length
+    ? found.interferograms.slice(0, 6).map((s) => sceneCard(s, null)).join('')
+    : `<p class="note">No NISAR interferogram over this spot since ${NISAR_START} yet. They are published later than backscatter images.</p>`;
+}
+
 // ---------- search ----------
 
 let searchRun = 0;
@@ -804,6 +908,18 @@ async function start() {
     state.hidden.clear();
     draw();
   };
+  $('place-chips').onclick = (e) => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    const kind = chip.dataset.kind;
+    state.hiddenPlaces.has(kind) ? state.hiddenPlaces.delete(kind) : state.hiddenPlaces.add(kind);
+    drawPlaces();
+  };
+  $('place-list').onclick = (e) => {
+    const li = e.target.closest('li');
+    if (li) selectPlace(placeById(li.dataset.site), true);
+  };
+  drawPlaces();
   $('chips-none').onclick = () => {
     Object.keys(CATEGORIES).forEach((c) => state.hidden.add(c));
     draw();
@@ -865,13 +981,16 @@ async function start() {
     if (t.id === 'lapse-go') return startLapse();
     if (t.dataset.mode) return setLapseMode(t.dataset.mode);
     if (t.id === 'under') return drapeChanges(t.checked);
+    if (t.id === 's1-context') return showSentinel1(t);
     const li = t.closest('li');
     if (!li) return;
+    if (li.dataset.site) return selectPlace(placeById(li.dataset.site), true);
     if (li.dataset.rel) return selectIncident(sel.incident.related[+li.dataset.rel].incident, true);
     if (li.dataset.in) return selectIncident(sel.inside[+li.dataset.in], true);
     if (li.dataset.near) return selectIncident(sel.near[+li.dataset.near].incident, true);
     if (li.dataset.pick) {
       const f = sel.found[+li.dataset.pick];
+      if (f.kind === 'place') return selectPlace(f.place, false);
       return f.kind === 'incident' ? selectIncident(f.incident, false) : selectScene(f.scene, false);
     }
   };
@@ -889,8 +1008,10 @@ async function start() {
     }
     // Dots win over the footprints they sit on, unless several dots overlap.
     const incidents = found.filter((f) => f.kind === 'incident');
+    const places = found.filter((f) => f.kind === 'place');
+    if (incidents.length + places.length > 1) return choose([...incidents, ...places]);
     if (incidents.length === 1) return selectIncident(incidents[0].incident, false);
-    if (incidents.length > 1) return choose(incidents);
+    if (places.length === 1) return selectPlace(places[0].place, false);
     if (found.length === 1) return selectScene(found[0].scene, false);
     choose(found);
   });

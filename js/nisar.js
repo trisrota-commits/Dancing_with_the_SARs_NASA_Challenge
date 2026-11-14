@@ -168,3 +168,26 @@ export async function latestTileDate() {
   }
   return new Date(Date.now() - 3 * 86400_000).toISOString().slice(0, 10);
 }
+
+// NISAR repeats each track and frame every 12 days. From the passes already
+// found over a spot, estimate the next one: newest pass per track and frame,
+// plus 12-day steps until the date is in the future. Not every planned pass
+// is acquired, so this is an estimate, not a schedule.
+export const REPEAT_DAYS = 12;
+
+export function nextPass(scenes, now = Date.now()) {
+  const newest = new Map();
+  for (const s of scenes) {
+    if (!Number.isFinite(s.time)) continue;
+    const held = newest.get(s.stack);
+    if (!held || s.time > held.time) newest.set(s.stack, s);
+  }
+  let best = null;
+  for (const last of newest.values()) {
+    const step = REPEAT_DAYS * 86400_000;
+    const n = Math.max(1, Math.ceil((now - last.time) / step));
+    const time = last.time + n * step;
+    if (!best || time < best.time) best = { time, last };
+  }
+  return best;
+}

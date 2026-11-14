@@ -27,6 +27,14 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
   search a place) to step through every placeable pass of one repeat track,
   switch between the colour composite, HH only and HV only, and read a chart
   of both channels at that point over time.
+- Marks **changing places** with diamonds: slow changes that no event feed
+  reports. There are 13 glaciers around the world (Greenland, Alaska, Canada,
+  Iceland, the Alps, the Himalaya, Patagonia, New Zealand and Antarctica),
+  plus sinking cities, wetland flood pulses, forest clearing and monsoon
+  farming. Each one explains what NISAR can show there and plays its passes.
+  Glaciers link to ones in the other hemisphere, to compare seasons.
+- When an event has no NISAR pass after it yet, estimates when the next pass
+  is due and offers Sentinel-1 radar (C-band) for the time in between.
 - Shows where NISAR looked recently, and rings every event inside a pass.
 - Drapes daily NISAR backscatter and other satellite layers over the terrain.
 - One search box for events (fuzzy match, no keyword list) and places.
@@ -77,6 +85,7 @@ from a web server.
 - `js/incidents.js` – merges duplicate reports, links nearby events
 - `js/nisar.js` – NISAR scene search and preview handling
 - `js/change.js` – what changed between two NISAR passes
+- `js/places.js` – the changing places and what NISAR can show at each
 - `js/timelapse.js` – loads the passes of one repeat track, splits HH and HV
 - `js/chart.js` – the HH/HV history chart
 - `js/replay/replay.js` – event replay templates and player
@@ -95,7 +104,7 @@ from a web server.
 - `js/main.js` – wiring and panels
 - `docs/DATA_SOURCES.md` – survey of every data source and what is reachable
 - `docs/DATA_RULES_AND_DEMO_PLAN.md` – which data the challenge allows besides
-  NISAR, and the plan for a reliable demo
+  NISAR, and how to solve the remaining gaps
 
 ## Data and credits
 
