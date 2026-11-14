@@ -1153,7 +1153,7 @@ async function startIncidentHistory(inc, selection) {
     // The samples also feed the plain-text account.
     const sampled = points.filter((p) => p.co != null);
     if (sampled.length >= 2) {
-      selection.history = { pol: pol.co, points: sampled };
+      selection.history = { pol: pol.co, pols: pol, points: sampled };
       renderNarrative();
     }
     box.innerHTML = `
@@ -1929,6 +1929,10 @@ async function start() {
     /* storage unavailable: just show the hint */
   }
   $('welcome').hidden = seen;
+  $('welcome-story').onclick = () => {
+    $('welcome-close').click();
+    openStory(STORIES[0].id);
+  };
   $('welcome-close').onclick = () => {
     $('welcome').hidden = true;
     try {

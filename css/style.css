@@ -1752,3 +1752,62 @@ ul.plain {
 body:has(#replay:not([hidden])) #nav {
   bottom: 124px;
 }
+
+/* ---------- the opening card ---------- */
+
+#welcome {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: block;
+  width: min(480px, calc(100vw - 32px));
+  max-width: none;
+  padding: 22px 24px 16px;
+  border-radius: var(--radius);
+  border-color: rgba(57, 230, 196, 0.45);
+  background: rgba(10, 16, 26, 0.9);
+  z-index: 6;
+  font-size: 14.5px;
+  line-height: 1.5;
+}
+
+#welcome h2 {
+  margin: 0 0 8px;
+  font-size: 21px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text);
+  font-weight: 700;
+}
+
+#welcome p {
+  margin: 0 0 14px;
+  color: var(--text);
+}
+
+#welcome .actions {
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+#welcome button {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.07);
+  padding: 7px 14px;
+}
+
+#welcome button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+#welcome .hint {
+  margin: 0;
+  color: var(--dim);
+}
+
+.prose .badge {
+  display: inline-block;
+  padding: 0 6px;
+  margin-right: 2px;
+}

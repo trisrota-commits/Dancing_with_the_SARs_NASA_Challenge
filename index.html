@@ -167,9 +167,14 @@
 
     <button id="here" hidden>▶ NISAR time-lapse here</button>
 
-    <div id="welcome" hidden>
-      <span><b>Click a dot</b> for an event and what the radar saw · <b>Click the ground</b> for a year of radar · <b>Right-drag</b> to tilt</span>
-      <button id="welcome-close" aria-label="Dismiss">✕</button>
+    <div id="welcome" role="dialog" aria-labelledby="welcome-title" hidden>
+      <h2 id="welcome-title">Earth's surface never holds still.</h2>
+      <p>Every 12 days the NISAR radar satellite images the planet's land and ice again, through cloud and at night. This globe shows what it sees change, next to the events being reported on the ground right now.</p>
+      <div class="actions">
+        <button class="primary" id="welcome-story">Start with a story</button>
+        <button id="welcome-close">Explore the globe</button>
+      </div>
+      <p class="hint"><b>Click a dot</b> for an event and what the radar saw there · <b>Click the ground</b> for a year of radar · <b>Right-drag</b> to tilt</p>
     </div>
 
     <footer id="credits">Imagery: Esri, Maxar, Earthstar Geographics · NASA GIBS · NISAR: NASA/ISRO, ASF DAAC · Elevation: Mapzen Terrain Tiles · Places: Photon, OpenStreetMap · News: GDACS, GDELT</footer>
