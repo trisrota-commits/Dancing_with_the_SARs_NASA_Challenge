@@ -1,0 +1,59 @@
+{
+  "about": "Sites for tools/measure.py. 'id' matches a place in js/places.js, so the app shows the result on that place. lat/lon is the point for the time series: check on the change map that it sits on the feature (ice, water, field) and move it if not. Optional: seriesRadiusM (default 500), mapRadiusM (default 6000), mapPol (hh or hv), before/after (YYYY-MM-DD) for the change map, stack (track-direction-frame-mode, as printed by --list) to force one track, matchKm (default 25) to also show the result on events this close.",
+  "sites": [
+    {
+      "id": "aletsch",
+      "name": "Aletsch Glacier (Konkordiaplatz)",
+      "lat": 46.5,
+      "lon": 8.03,
+      "mapRadiusM": 8000
+    },
+    {
+      "id": "perito-moreno",
+      "name": "Perito Moreno Glacier",
+      "lat": -50.5,
+      "lon": -73.15,
+      "mapRadiusM": 8000
+    },
+    {
+      "id": "jakobshavn",
+      "name": "Sermeq Kujalleq (Jakobshavn)",
+      "lat": 69.17,
+      "lon": -49.9,
+      "mapRadiusM": 12000
+    },
+    {
+      "id": "okavango",
+      "name": "Okavango Delta",
+      "lat": -19.3,
+      "lon": 22.9,
+      "seriesRadiusM": 1000,
+      "mapRadiusM": 15000
+    },
+    {
+      "id": "west-bengal",
+      "name": "Rice fields of Bardhaman",
+      "lat": 23.3,
+      "lon": 87.7,
+      "seriesRadiusM": 1000,
+      "mapRadiusM": 8000
+    },
+    {
+      "id": "rondonia",
+      "name": "Rondônia",
+      "lat": -9.9,
+      "lon": -63.0,
+      "seriesRadiusM": 1000,
+      "mapRadiusM": 10000,
+      "mapPol": "hv"
+    },
+    {
+      "id": "gerd",
+      "name": "Grand Ethiopian Renaissance Dam reservoir",
+      "lat": 11.1,
+      "lon": 35.15,
+      "seriesRadiusM": 1000,
+      "mapRadiusM": 15000
+    }
+  ]
+}

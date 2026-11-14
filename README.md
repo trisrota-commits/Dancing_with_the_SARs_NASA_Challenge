@@ -36,9 +36,17 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
 - Marks **changing places** with diamonds: slow changes that no event feed
   reports. There are 13 glaciers around the world (Greenland, Alaska, Canada,
   Iceland, the Alps, the Himalaya, Patagonia, New Zealand and Antarctica),
-  plus sinking cities, wetland flood pulses, forest clearing and monsoon
-  farming. Each one explains what NISAR can show there and plays its passes.
+  plus sinking cities, wetland flood pulses, forest clearing, monsoon
+  farming, volcanoes, moving slopes and a filling reservoir: 33 places in
+  all. Each one explains what NISAR can show there and plays its passes.
   Glaciers link to ones in the other hemisphere, to compare seasons.
+- Shows **calibrated NISAR measurements** where we have made them: a time
+  series in dB, a change map and a one-sentence result, with the method
+  stated. These come from the full-resolution GCOV products, not the
+  previews (see "Measuring with NISAR" below).
+- Event types include landslides, snow, dust and haze, extreme heat or cold,
+  and human-made events from NASA EONET, as well as earthquakes, fires,
+  floods, storms, volcanoes, ice and drought.
 - Shows where NISAR looked recently, and rings every event inside a pass.
 - Estimates the **next NISAR overpass** for any event or spot, with a live
   countdown, clearly labelled as computed from the 12-day repeat cycle.
@@ -126,6 +134,11 @@ app in headless Chromium against the live services.
 - `js/nisar.js` – NISAR scene search and preview handling
 - `js/change.js` – what changed between two NISAR passes
 - `js/places.js` – the changing places and what NISAR can show at each
+- `js/measured.js` – shows the calibrated measurements: card, dB chart and
+  change map
+- `tools/measure.py` – makes the calibrated measurements from NISAR GCOV
+  files; `tools/measure_sites.json` lists the sites
+- `data/measured/` – the measurement results the app reads
 - `js/timelapse.js` – loads the passes of one repeat track, splits the
   polarisation channels and describes a point history in plain statements
 - `js/stories.js` – the curated stories (places and explanations only)
@@ -159,6 +172,37 @@ Tiles: NASA GIBS. Events: USGS, NASA EONET, GDACS. Basemap: Esri World Imagery.
 Fire detections: VIIRS on NOAA-20 via NASA GIBS. Surface water: OPERA DSWx.
 Elevation: Mapzen Terrain Tiles (AWS Open Data). Place search: Photon
 (OpenStreetMap). Rendering: three.js.
+
+## Measuring with NISAR
+
+The previews are pictures for people: 8-bit, contrast-stretched and reduced
+in resolution. To measure, `tools/measure.py` reads the full-resolution
+GCOV products (terrain-corrected gamma-naught backscatter) instead. For each
+site in `tools/measure_sites.json`, it:
+
+1. finds every NISAR pass over the site and keeps the repeat track, frame
+   and polarisation mode with the most passes;
+2. reads only a small window around the site from each file (a few MB, not
+   the whole 1–5 GB file);
+3. computes the mean backscatter in dB within a small circle, pass by pass;
+4. maps the change in dB between a "before" and an "after" pass;
+5. writes the results to `data/measured/`, where the app picks them up.
+
+To run it, you need a free NASA Earthdata login
+(https://urs.earthdata.nasa.gov/users/new) and Python 3:
+
+```bash
+pip install earthaccess h5py numpy pyproj pillow
+python tools/measure.py --list aletsch     # which tracks cover the site
+python tools/measure.py aletsch perito-moreno
+```
+
+Then commit the new files in `data/measured/`. Check each change map in the
+app: if the measurement point is not on the feature (ice, water, a field),
+move it in `tools/measure_sites.json` and run the site again.
+
+`python tests/test_measure.py` checks the script on simulated files with
+the same layout as real GCOV products.
 
 ## How honest the pictures are
 

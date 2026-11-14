@@ -9,6 +9,7 @@ import { PLACES, PLACE_KINDS, otherHemisphere } from './places.js';
 import { loadFrames, spread, view, history, describeSeries, rankByCoverage } from './timelapse.js';
 import { newsFor } from './news.js';
 import { playPass } from './sound.js';
+import { measuredById, measuredNear, measuredHtml, measuredChart, changeImageUrl } from './measured.js';
 import { historyChart } from './chart.js';
 import { Globe, loadPicture } from './globe.js';
 import { Replay } from './replay/replay.js';
@@ -304,6 +305,7 @@ function incidentHtml(inc, radar) {
     <dl>${facts.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
     <h4>What happened here</h4>
     <div id="replay-parts"></div>
+    <div id="measured-slot"></div>
     <h4>NISAR radar over this spot</h4>
     <h4>Preview brightness history at this pin</h4>
     <div id="incident-history" aria-live="polite"><p class="spinner">Searching NISAR repeat passes…</p></div>
@@ -411,6 +413,7 @@ async function selectIncident(inc, fly, intro = '') {
   const token = ++state.lookup;
   state.selected = { kind: 'incident', incident: inc };
   openPanel(intro + incidentHtml(inc, '<p class="spinner">Searching the NISAR archive…</p>'));
+  showMeasured(() => state.selected?.incident === inc, measuredNear(inc.lat, inc.lon));
   globe.select(inc);
   if (fly) globe.flyTo(inc.lat, inc.lon);
   replay.start(inc);
@@ -1031,6 +1034,36 @@ async function selectSpot(at) {
   }
 }
 
+// ---------- calibrated measurements ----------
+
+// Fills #measured-slot when tools/measure.py has measured this spot.
+// stillHere() guards against the panel having moved on meanwhile.
+async function showMeasured(stillHere, pending, findCompare) {
+  const d = await pending;
+  if (!d || !stillHere() || !$('measured-slot')) return;
+  const compare = findCompare ? await findCompare() : null;
+  if (!stillHere() || !$('measured-slot')) return;
+  state.selected.measured = d;
+  $('measured-slot').innerHTML = `<h4>Measured with NISAR</h4>${measuredHtml(d, compare)}`;
+  measuredChart($('measured-chart'), d, compare);
+}
+
+async function showMeasuredMap(button) {
+  const d = state.selected?.measured;
+  if (!d) return;
+  endCompare();
+  replay.stop();
+  button.textContent = 'Loading…';
+  try {
+    const picture = await loadPicture(changeImageUrl(d));
+    globe.addPicture(picture, d.change.bounds, undefined, 0.95);
+    globe.flyToBounds(d.change.bounds);
+    button.textContent = 'Change map shown';
+  } catch {
+    button.textContent = 'Change map failed to load';
+  }
+}
+
 // ---------- changing places ----------
 
 function visiblePlaces() {
@@ -1078,6 +1111,7 @@ async function selectPlace(place, fly) {
     <h4>What NISAR can show here</h4>
     <p class="note">${esc(kind.look)}</p>
     <p class="note">${esc(kind.note)}</p>
+    <div id="measured-slot"></div>
     <h4>NISAR passes over this spot</h4>
     ${lapseBox(place.lat, place.lon)}
     ${place.kind === 'subsidence' ? '<h4>Interferograms (ground movement)</h4><div id="place-ifg"><p class="spinner">Searching for interferograms…</p></div>' : ''}
@@ -1090,6 +1124,13 @@ async function selectPlace(place, fly) {
     }
     ${links}`);
   startLapse();
+  showMeasured(() => state.selected?.place === place, measuredById(place.id), async () => {
+    for (const other of others) {
+      const d = await measuredById(other.id);
+      if (d) return d;
+    }
+    return null;
+  });
 
   if (place.kind !== 'subsidence') return;
   let found;
@@ -1403,6 +1444,7 @@ async function start() {
     }
     if (t.dataset.mode) return setLapseMode(t.dataset.mode);
     if (t.id === 'under') return drapeChanges(t.checked);
+    if (t.id === 'measured-map') return showMeasuredMap(t);
     const li = t.closest('li');
     if (!li) return;
     if (li.dataset.site) return selectPlace(placeById(li.dataset.site), true);

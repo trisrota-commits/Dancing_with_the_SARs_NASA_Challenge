@@ -46,6 +46,27 @@ export const PLACE_KINDS = {
     note: 'June to November covers the monsoon rice season in South and Southeast Asia, so NISAR’s first months show one whole crop cycle there.',
     links: [],
   },
+  volcano: {
+    label: 'Volcanoes',
+    color: '#ff7ac0',
+    look: 'Magma moving underground lifts or lowers the ground by centimetres. Interferograms show this as colour fringes: one full cycle is about 12 cm of movement. In the backscatter time-lapse, fresh lava flows and ash change the surface roughness.',
+    note: 'Ground that keeps rising can be an early sign of unrest. Radar watches it through cloud and at night, which matters at volcanoes that are often cloud-covered.',
+    links: [['Smithsonian Global Volcanism Program', 'https://volcano.si.edu/']],
+  },
+  landslide: {
+    label: 'Moving slopes',
+    color: '#c9824a',
+    look: 'Slow-moving slopes show in interferograms and pixel offsets as a patch moving downhill, centimetres to metres a year. A sudden failure strips the surface and changes the backscatter sharply.',
+    note: 'L-band keeps a usable signal on vegetated slopes, where shorter radar wavelengths often lose it. That makes NISAR well suited to landslide monitoring.',
+    links: [],
+  },
+  human: {
+    label: 'Human-made change',
+    color: '#9aa6b8',
+    look: 'A filling reservoir turns from land into dark, calm water, pass by pass. Mines and new construction change the surface and its roughness, which shows as a shift in backscatter.',
+    note: 'These changes show how people reshape the surface, which the challenge asks teams to consider alongside natural processes.',
+    links: [],
+  },
 };
 
 export const PLACES = [
@@ -100,7 +121,7 @@ export const PLACES = [
     kind: 'glacier',
     name: 'Aletsch Glacier',
     region: 'Swiss Alps',
-    lat: 46.47,
+    lat: 46.5,
     lon: 8.03,
     story: 'The largest glacier in the Alps. It is thinning and shortening, and Alpine glaciers have lost a large share of their ice in recent decades.',
   },
@@ -270,8 +291,8 @@ export const PLACES = [
     kind: 'farming',
     name: 'Rice fields of Bardhaman',
     region: 'West Bengal, India',
-    lat: 23.25,
-    lon: 87.85,
+    lat: 23.3,
+    lon: 87.7,
     story: 'Known as the rice bowl of West Bengal. The main crop is planted with the monsoon rains and harvested in late autumn.',
   },
   {
@@ -300,6 +321,66 @@ export const PLACES = [
     lat: 39.2,
     lon: -122.0,
     story: 'Rice fields flooded in spring, harvested in autumn, and often flooded again in winter for migrating birds.',
+  },
+
+  // ---------- volcanoes ----------
+  {
+    id: 'kilauea',
+    kind: 'volcano',
+    name: 'Kīlauea',
+    region: 'Hawaiʻi, USA',
+    lat: 19.41,
+    lon: -155.28,
+    story: 'One of the most active volcanoes on Earth. Its summit rises and sinks as magma moves beneath it, and eruptions reshape the caldera.',
+  },
+  {
+    id: 'campi-flegrei',
+    kind: 'volcano',
+    name: 'Campi Flegrei',
+    region: 'Naples, Italy',
+    lat: 40.83,
+    lon: 14.14,
+    story: 'A large caldera beneath a densely populated area. The ground has been rising since 2005, with more frequent small earthquakes in recent years.',
+  },
+  {
+    id: 'etna',
+    kind: 'volcano',
+    name: 'Mount Etna',
+    region: 'Sicily, Italy',
+    lat: 37.75,
+    lon: 14.99,
+    story: 'Europe’s most active volcano. Its eastern flank slowly slides towards the sea, and frequent eruptions lay down new lava flows.',
+  },
+
+  // ---------- moving slopes ----------
+  {
+    id: 'joshimath',
+    kind: 'landslide',
+    name: 'Joshimath',
+    region: 'Uttarakhand, India',
+    lat: 30.56,
+    lon: 79.56,
+    story: 'A Himalayan town built on old landslide debris. In early 2023, sinking ground cracked hundreds of buildings.',
+  },
+  {
+    id: 'slumgullion',
+    kind: 'landslide',
+    name: 'Slumgullion landslide',
+    region: 'Colorado, USA',
+    lat: 38.02,
+    lon: -107.3,
+    story: 'A landslide that has crept downhill for centuries. It is a classic test site for radar measurements of slope movement.',
+  },
+
+  // ---------- human-made change ----------
+  {
+    id: 'gerd',
+    kind: 'human',
+    name: 'Grand Ethiopian Renaissance Dam reservoir',
+    region: 'Blue Nile, Ethiopia',
+    lat: 11.1,
+    lon: 35.15,
+    story: 'Africa’s largest hydropower dam. Its reservoir fills mostly in the rainy season, from July to September.',
   },
 ];
 
