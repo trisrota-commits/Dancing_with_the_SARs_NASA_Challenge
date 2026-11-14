@@ -1,5 +1,6 @@
-// NISAR time-lapse: loads every pass of one repeat track over a place and
-// prepares them for playback, single-polarisation views and a point history.
+// NISAR passes over one place: single-polarisation views of a pass, the
+// brightness history of a point, and the choice of the repeat track that
+// really covers it.
 //
 // In a dual-polarisation preview red and blue both carry the co-polarised
 // echo (HH: sent and received horizontally) and green the cross-polarised
@@ -109,6 +110,47 @@ export function history(frames, lat, lon) {
     }
     return { time: frame.time, co: n ? co / n : null, cross: n && frame.scene.pol?.cross ? cross / n : null };
   });
+}
+
+// The same reading from one full-size preview picture (a canvas): co- and
+// cross-polarised brightness in the 5 × 5 pixels around the point, or
+// nulls where the pass did not cover it. Only those 25 pixels are read.
+export function sampleAt(picture, bounds, lat, lon, hasCross, time) {
+  const cx = Math.round(((lon - bounds.west) / (bounds.east - bounds.west)) * picture.width);
+  const cy = Math.round(((bounds.north - lat) / (bounds.north - bounds.south)) * picture.height);
+  const x0 = Math.max(0, cx - 2);
+  const y0 = Math.max(0, cy - 2);
+  const w = Math.min(picture.width, cx + 3) - x0;
+  const h = Math.min(picture.height, cy + 3) - y0;
+  if (w <= 0 || h <= 0) return { time, co: null, cross: null };
+  const px = picture.getContext('2d', { willReadFrequently: true }).getImageData(x0, y0, w, h).data;
+  let co = 0;
+  let cross = 0;
+  let n = 0;
+  for (let i = 0; i < px.length; i += 4) {
+    if (px[i + 3] === 0) continue;
+    co += px[i];
+    cross += px[i + 1];
+    n++;
+  }
+  return { time, co: n ? co / n : null, cross: n && hasCross ? cross / n : null };
+}
+
+// One channel of a preview picture alone, as greys: 'co' or 'cross'. Made
+// at a reduced size, because it is worked out on the page's own thread.
+export function channelView(picture, mode) {
+  const scale = Math.min(1, MAX_SIDE / Math.max(picture.width, picture.height));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(picture.width * scale);
+  canvas.height = Math.round(picture.height * scale);
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(picture, 0, 0, canvas.width, canvas.height);
+  const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const px = data.data;
+  const channel = mode === 'cross' ? 1 : 0;
+  for (let i = 0; i < px.length; i += 4) px[i] = px[i + 1] = px[i + 2] = px[i + channel];
+  ctx.putImageData(data, 0, 0);
+  return canvas;
 }
 
 // Plain statements about a point history, worked out from the numbers by

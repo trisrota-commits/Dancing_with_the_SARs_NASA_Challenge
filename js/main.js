@@ -11,7 +11,7 @@ import { buildIncidents, tagNisarCoverage, pointInPolygon, distanceKm } from './
 import { edgeMarginKm, latestScenes, scenesAt, passesAt, bestPair, comparisonStatus, imageBounds, latestTileDate, likelyTileDate, historyAt, newestAt, nextPass, interferogramsAt, REPEAT_DAYS } from './nisar.js';
 import { STORIES } from './stories.js';
 import { PLACES, PLACE_KINDS, otherHemisphere } from './places.js';
-import { loadFrames, spread, view, history, describeSeries, rankByCoverage } from './timelapse.js';
+import { loadFrames, spread, view, history, describeSeries, rankByCoverage, sampleAt, channelView } from './timelapse.js';
 import { playPass } from './sound.js';
 import { measuredById, measuredNear, measuredHtml, measuredChart, measuredLine, changeImageUrl } from './measured.js';
 import { fetchElements, positionAt, groundTrack, swathEdges, elementsEpoch } from './orbit.js';
@@ -107,7 +107,7 @@ function rebuild() {
       const sel = state.selected;
       const grew = again.endTime !== sel.incident.endTime || again.reports.length !== sel.incident.reports.length;
       sel.incident = again;
-      if (grew && replay.timeline && replay.live) {
+      if (grew && replay.timeline && !replay.plan?.lapse && replay.live) {
         replay.start(again, { keepView: true });
         if (sel.passes) replay.extend(sel.reach, sel.passes.map((x) => x.time));
       }
@@ -356,7 +356,8 @@ function renderReplay(u) {
   const bar = $('replay');
   const list = $('replay-parts');
   // The key says what this event's marks are, plus the lines to its neighbours.
-  const event = u.timeline ? state.selected?.incident : null;
+  const lapsing = !!u.plan?.lapse;
+  const event = u.timeline && !lapsing ? state.selected?.incident : null;
   const changeUp = stage.owner === 'change' || stage.owner === 'measured';
   setEventKey(
     event
@@ -371,10 +372,9 @@ function renderReplay(u) {
     return;
   }
   bar.hidden = false;
-  bar.classList.toggle('timeline', !!u.timeline);
-  if (u.timeline || u.state === 'loading') bar.classList.remove('back');
+  bar.classList.add('timeline');
   if (u.state === 'loading') {
-    bar.classList.add('timeline');
+    bar.classList.remove('back');
     $('replay-caption').textContent = 'Gathering what is known about this event…';
     $('replay-fill').style.width = '0';
     $('replay-knob').style.left = '100%';
@@ -387,38 +387,35 @@ function renderReplay(u) {
   const percent = (f) => `${(f * 100).toFixed(2)}%`;
   $('replay-fill').style.width = percent(u.progress);
   $('replay-bar').setAttribute('aria-valuenow', Math.round(u.progress * 100));
-  if (u.timeline) {
-    // The event's own stretch of the line, NISAR's passes as ticks, and
-    // the handle. The radar picture follows the handle.
-    $('replay-knob').style.left = percent(u.progress);
+  // The event's own stretch of the line (a place has none), NISAR's passes
+  // as ticks, and the handle. The radar picture follows the handle.
+  $('replay-knob').style.left = percent(u.progress);
+  $('replay-span').style.display = u.span ? '' : 'none';
+  if (u.span) {
     $('replay-span').style.left = percent(u.span[0]);
     $('replay-span').style.width = percent(Math.max(0.006, u.span[1] - u.span[0]));
-    const marks = u.marks.map(percent).join(',');
-    if ($('replay-marks').dataset.at !== marks) {
-      $('replay-marks').dataset.at = marks;
-      $('replay-marks').innerHTML = u.marks.map((f) => `<i style="left:${percent(f)}"></i>`).join('');
-    }
-    const event = state.selected?.incident;
-    if (event) $('replay-span').style.background = CATEGORIES[event.category].color;
-    $('replay-from').textContent = day(u.range.from);
-    document.querySelector('.key-event').style.background = event ? CATEGORIES[event.category].color : '';
-    $('replay-bar').setAttribute('aria-label', 'Timeline: drag to go back in time');
-    $('replay-bar').setAttribute('aria-valuetext', u.live ? 'Latest' : day(u.ms));
-    $('replay-live').classList.toggle('on', u.live);
-    $('replay-live').textContent = u.live ? '● Latest' : 'Go to latest';
+  }
+  const marks = u.marks.map(percent).join(',');
+  if ($('replay-marks').dataset.at !== marks) {
+    $('replay-marks').dataset.at = marks;
+    $('replay-marks').innerHTML = u.marks.map((f) => `<i style="left:${percent(f)}"></i>`).join('');
+  }
+  if (event) $('replay-span').style.background = CATEGORIES[event.category].color;
+  $('replay-from').textContent = day(u.range.from);
+  document.querySelector('.key-event').style.background = event ? CATEGORIES[event.category].color : '';
+  $('replay-key-event').hidden = lapsing;
+  $('replay-bar').setAttribute('aria-label', 'Timeline: drag to go back in time');
+  $('replay-bar').setAttribute('aria-valuetext', u.live ? 'Latest' : day(u.ms));
+  $('replay-live').classList.toggle('on', u.live);
+  $('replay-live').textContent = u.live ? '● Latest' : 'Go to latest';
+  // The passes of a place opened from inside an event: the way back to it.
+  bar.classList.toggle('back', lapsing && state.selected?.kind === 'incident');
+  if (lapsing) {
+    $('replay-caption').textContent = `${u.live ? 'Latest' : day(u.ms)} · ${u.caption}`;
+  } else {
     const pass = syncNisar(u.ms);
     // The opening plays in seconds, not on a date.
     $('replay-caption').textContent = `${u.intro ? '' : `${u.live ? 'Latest' : day(u.ms)} · `}${u.caption}${pass ? ` · NISAR pass of ${day(pass.time)} underneath` : ''}`;
-  } else {
-    // The time-lapse is a looping player, and says so. Inside an event it
-    // offers the way back to that event's timeline.
-    $('replay-caption').textContent = `Time-lapse (loops) · ${u.caption}`;
-    $('replay-bar').setAttribute('aria-label', 'Time-lapse position');
-    $('replay-bar').setAttribute('aria-valuetext', u.caption);
-    const inEvent = state.selected?.kind === 'incident';
-    bar.classList.toggle('back', inEvent);
-    $('replay-live').classList.remove('on');
-    $('replay-live').textContent = 'Back to the event';
   }
   if (list && u.parts && list.partsRef !== u.parts) {
     list.partsRef = u.parts;
@@ -959,8 +956,8 @@ const stage = { owner: 'none', token: 0 };
 function take(owner) {
   stage.token++;
   stage.owner = owner;
-  // A running time-lapse yields to whatever takes the globe from it.
-  if (owner !== 'lapse' && replay.plan && !replay.timeline) replay.stop();
+  // The passes of a place yield to whatever takes the globe from them.
+  if (owner !== 'lapse' && replay.plan?.lapse) replay.stop();
   // A change map is a blue and orange fill; the event's own blue water
   // makes way for it and comes back with anything else.
   globe.setEffectFillsShown(owner !== 'change' && owner !== 'measured');
@@ -1123,7 +1120,7 @@ async function openStory(id) {
   setLink(`story=${story.id}`);
 
   if (story.action === 'lapse') {
-    openPanel(storyHtml(story, `<h4>NISAR time-lapse at this point</h4>${lapseBox(story.lat, story.lon)}`), false, false);
+    openPanel(storyHtml(story, `<h4>NISAR's passes over this point</h4>${lapseBox(story.lat, story.lon)}`), false, false);
     return startLapse();
   }
   if (story.action === 'interferogram') {
@@ -1303,8 +1300,7 @@ function startTicker() {
 
 // ---------- NISAR time-lapse ----------
 
-const LAPSE_STEP = 0.9; // seconds each pass stays on screen
-const LAPSE_DEFAULT = 14; // passes loaded unless "all" is ticked
+const LAPSE_DEFAULT = 14; // passes read for the chart unless "all" is ticked
 const PIN_HISTORY = 8; // passes sampled automatically when an event is opened
 
 // Loads a bounded history alongside incident details, without taking ownership
@@ -1376,12 +1372,35 @@ async function startIncidentHistory(inc, selection) {
   }
 }
 
+const LAPSE_OFFER = "▶ NISAR's passes here, on a timeline";
+
 function lapseBox(lat, lon) {
-  return `<div id="lapse" data-lat="${lat}" data-lon="${lon}"><button id="lapse-go">▶ Play a year of NISAR passes here</button></div>`;
+  return `<div id="lapse" data-lat="${lat}" data-lon="${lon}"><button id="lapse-go">${LAPSE_OFFER}</button></div>`;
 }
 
-// Finds every pass over the point, loads one repeat track of them and
-// plays them in order, with a history chart for the point itself.
+// The repeat tracks over a point, the one that covers it best first. Asked
+// for as soon as a spot is offered, so the answer is usually here by the
+// time it is opened.
+const stacksAsked = new Map();
+function stacksAt(lat, lon) {
+  const key = `${lat.toFixed(3)},${lon.toFixed(3)}`;
+  if (!stacksAsked.has(key)) {
+    const asked = historyAt(lat, lon).then((stacks) => rankByCoverage(stacks, lat, lon));
+    stacksAsked.set(key, asked);
+    asked.catch(() => stacksAsked.delete(key));
+    if (stacksAsked.size > 6) stacksAsked.delete(stacksAsked.keys().next().value);
+  }
+  return stacksAsked.get(key);
+}
+
+// NISAR's passes over a place, on the same timeline as an event: it opens
+// on the newest pass and stands still, every pass is a mark on the line,
+// dragging goes back, and play runs through them once.
+//
+// Nothing waits for the whole year. The newest pass goes up at once (its
+// small picture first, then the sharp one); the others are read in the
+// background, oldest first, for the brightness chart, and any pass the
+// handle stands on is fetched then and there.
 async function startLapse(stackIndex = 0, all = false) {
   const box = $('lapse');
   if (!box) return;
@@ -1394,13 +1413,12 @@ async function startLapse(stackIndex = 0, all = false) {
   const stale = () => run !== state.lapseRun || look !== state.lookup || !$('lapse');
   take('lapse');
   replay.stop();
-  box.innerHTML = '<p class="spinner">Searching a year of NISAR passes…</p>';
-  let stacks = state.lapse?.lat === lat && state.lapse?.lon === lon ? state.lapse.stacks : null;
+  box.innerHTML = "<p class=\"spinner\">Looking up NISAR's passes over this spot…</p>";
+  let stacks;
   try {
-    // Tracks whose picture really covers the point go first.
-    stacks = stacks || (await rankByCoverage(await historyAt(lat, lon), lat, lon));
+    stacks = await stacksAt(lat, lon);
   } catch (err) {
-    box.innerHTML = `<p class="note">NISAR search failed: ${esc(err.message)}</p>`;
+    if (!stale()) box.innerHTML = `<p class="note">NISAR search failed: ${esc(err.message)}</p>`;
     return;
   }
   if (stale()) return;
@@ -1409,77 +1427,210 @@ async function startLapse(stackIndex = 0, all = false) {
     return;
   }
   const stack = stacks[stackIndex];
-  const wanted = all ? stack.scenes : spread(stack.scenes, LAPSE_DEFAULT);
-  const frames = await loadFrames(wanted, (done, total) => {
-    if (!stale()) box.innerHTML = `<p class="spinner">Loading pass ${done} of ${total}…</p>`;
-  });
-  if (stale()) return;
-  if (frames.length < 2) {
-    box.innerHTML = '<p class="note">The preview images for these passes could not be loaded.</p>';
-    return;
-  }
-
-  const lapse = { lat, lon, stacks, stackIndex, all, frames, mode: 'colour', chart: null };
-  state.lapse = lapse;
+  const passes = stack.scenes; // every placeable pass of the track, oldest first
   const pol = stack.pol?.co ? stack.pol : { co: 'Radar', cross: null };
-  const names = { colour: pol.cross ? `both radar channels in colour (${pol.co} + ${pol.cross})` : `one radar channel (${pol.co})`, co: `${pol.co} channel only`, cross: `${pol.cross} channel only` };
+  const names = { co: `${pol.co} channel only`, cross: `${pol.cross} channel only` };
+  const lapse = {
+    lat, lon, stacks, stackIndex, all, passes, pol,
+    mode: 'colour',
+    index: -2, // the pass the handle stands on; -1 before the first
+    drawn: null, // the channel that pass was last asked for in
+    sharp: -1, // the pass whose full picture is up
+    series: passes.map((p) => ({ time: p.time, co: null, cross: null })),
+    read: new Set(), // passes whose picture has been read for the chart
+    missed: 0,
+    views: new Map(),
+    chart: null,
+  };
+  state.lapse = lapse;
+  const first = passes[0].time;
   const plan = {
-    duration: frames.length * LAPSE_STEP,
+    lapse: true,
+    // A little room before the first pass, so its mark is not on the edge.
+    from: first - Math.max(DAY, (Date.now() - first) * 0.04),
+    to: Date.now(),
+    timeOf: (ms) => ms,
     parts: null,
-    index: -1,
-    draw(t) {
-      const i = Math.max(0, Math.min(frames.length - 1, Math.floor(t / LAPSE_STEP)));
-      if (stage.owner !== 'lapse' || (i === this.index && this.mode === lapse.mode)) return;
-      this.index = i;
-      this.mode = lapse.mode;
-      globe.fadeTo(view(frames[i], lapse.mode), frames[i].bounds, 0.45);
-      lapse.chart?.setActive(i);
-      if (lapse.sound && replay.playing) playPass(lapse.series?.[i]);
+    draw(t, started, ms) {
+      showLapsePass(lapse, ms);
     },
     caption() {
-      const i = Math.max(0, this.index);
-      return `${day(frames[i].time)} · pass ${i + 1} of ${frames.length} · ${names[lapse.mode]}`;
+      const i = lapse.index;
+      if (i < 0) return "Before NISAR's first pass here";
+      // Kept short: the bar is narrow. The colour view is the usual one and
+      // goes unnamed.
+      return `NISAR pass of ${day(passes[i].time)} · ${i + 1} of ${passes.length}${lapse.mode === 'colour' ? '' : ` · ${names[lapse.mode]}`}${lapse.sharp === i ? '' : ' · loading…'}`;
     },
     teardown() {
+      lapse.over = true;
       globe.clearScenes();
-      // The passes are large: let them go, keep the track list for a restart.
-      lapse.frames = null;
-      // Its controls would be dead now, so the box offers to play again.
+      // Its controls would be dead now, so the box offers to open it again.
       const here = $('lapse');
-      if (here && state.lapse === lapse) here.innerHTML = '<button id="lapse-go">▶ Play a year of NISAR passes here</button>';
+      if (here && state.lapse === lapse) here.innerHTML = `<button id="lapse-go">${LAPSE_OFFER}</button>`;
     },
   };
   lapse.plan = plan;
 
   // The picture controls and the chart come first; the fine print follows.
+  const wanted = all ? passes.length : Math.min(passes.length, LAPSE_DEFAULT);
   box.innerHTML = `
+    <p class="hint">Drag the timeline at the bottom, or click the chart, to go to a pass. ▶ plays them once.</p>
     <div class="actions seg" role="group" aria-label="Which radar channel to show">
       <button data-mode="colour" class="on">${pol.cross ? 'Colour' : 'As published'}</button>
       ${pol.cross ? `<button data-mode="co">${esc(pol.co)} only</button><button data-mode="cross">${esc(pol.cross)} only</button>` : ''}
     </div>
     <h4>Brightness at ${where(lat, lon)}</h4>
     <div id="lapse-chart"></div>
+    <p id="lapse-status" class="note" role="status"></p>
     ${stacks.length > 1 ? `<label class="row"><span>Track</span><select id="lapse-stack">${stacks.map((st, n) => `<option value="${n}" ${n === stackIndex ? 'selected' : ''}>${esc(st.direction)} ${esc(st.track)} (${st.scenes.length} passes)</option>`).join('')}</select></label>` : ''}
-    ${stack.scenes.length > frames.length || all ? `<label class="check"><input type="checkbox" id="lapse-all" ${all ? 'checked' : ''} /> Load all ${stack.scenes.length} passes (about ${stack.scenes.length} MB)</label>` : ''}
+    ${passes.length > wanted || all ? `<label class="check"><input type="checkbox" id="lapse-all" ${all ? 'checked' : ''} /> Read all ${passes.length} passes for the chart (a few megabytes each)</label>` : ''}
     <label class="check"><input type="checkbox" id="lapse-sound" /> ♪ Play it as sound: pitch follows the brightness at this point</label>
-    <p class="note">${frames.length} of ${stack.scenes.length} passes on ${esc(stack.direction.toLowerCase())} track ${esc(stack.track)}, frame ${esc(stack.frame)}, ${day(frames[0].time)} to ${day(frames[frames.length - 1].time)}.${stack.unplaced ? ` ${stack.unplaced} earlier passes are left out: their previews were published without public corner coordinates, so they cannot be placed on the map accurately.` : ''}${stack.otherModes ? ` ${stack.otherModes} passes recorded in a different polarisation mode are left out too, because their previews are not comparable with these.` : ''}</p>
+    <p class="note">${passes.length} passes on ${esc(stack.direction.toLowerCase())} track ${esc(stack.track)}, frame ${esc(stack.frame)}, ${day(first)} to ${day(passes[passes.length - 1].time)}.${stack.unplaced ? ` ${stack.unplaced} earlier passes are left out: their previews were published without public corner coordinates, so they cannot be placed on the map accurately.` : ''}${stack.otherModes ? ` ${stack.otherModes} passes recorded in a different polarisation mode are left out too, because their previews are not comparable with these.` : ''}</p>
     ${state.selected?.kind === 'incident' ? '' : nextPassHtml(stacks.flatMap((st) => st.scenes))}
-    <p class="hint">Each pass is NASA's preview of a NISAR backscatter scene, recorded here in ${pol.cross ? `dual polarisation. ${esc(pol.co)} is the echo that comes back in the polarisation that was sent; ${esc(pol.cross)} is the part that came back twisted, which mostly happens inside vegetation` : `single polarisation (${esc(pol.co)}), so there is no cross-polarised channel`}. Values are the 0–255 preview brightness averaged over 5×5 pixels, not calibrated radar units. Click the chart to jump to a pass.</p>`;
-  const series = history(frames, lat, lon);
-  lapse.series = series;
-  if (series.some((p) => p.co != null)) {
-    lapse.chart = historyChart($('lapse-chart'), series, pol, (i) => replay.seek((i + 0.01) / frames.length));
-    // What the numbers say, worked out from the series by fixed rules.
-    const lines = describeSeries(series, pol);
-    if (lines.length) $('lapse-chart').insertAdjacentHTML('beforeend', `<ul class="parts facts">${lines.map((l) => `<li><span class="badge computed">Computed</span><span>${esc(l)}</span></li>`).join('')}</ul>`);
-  }
-  else $('lapse-chart').innerHTML = '<p class="note">These passes do not cover the exact point, so there is no history to chart.</p>';
-
-  replay.run(plan);
-  lapse.pol = pol;
+    <p class="hint">Each pass is NASA's preview of a NISAR backscatter scene, recorded here in ${pol.cross ? `dual polarisation. ${esc(pol.co)} is the echo that comes back in the polarisation that was sent; ${esc(pol.cross)} is the part that came back twisted, which mostly happens inside vegetation` : `single polarisation (${esc(pol.co)}), so there is no cross-polarised channel`}. Values are the 0–255 preview brightness averaged over 5×5 pixels, not calibrated radar units.</p>`;
+  drawLapseChart(lapse);
   setLegend('radar', { pol });
-  globe.select(state.selected?.incident || null, [stack.scenes[stack.scenes.length - 1]]);
-  globe.flyToBounds(frames[frames.length - 1].bounds);
+  const newest = passes[passes.length - 1];
+  globe.select(state.selected?.incident || null, [newest]);
+  imageBounds(newest).then((b) => !stale() && state.lapse === lapse && !lapse.over && globe.flyToBounds(b), () => {});
+  replay.open(plan, passes.map((p) => p.time));
+  readLapse(lapse);
+}
+
+// Puts the newest pass up to `ms` on the globe: its small picture the
+// moment it is here, the full one when it has arrived.
+function showLapsePass(lapse, ms) {
+  if (stage.owner !== 'lapse' || state.lapse !== lapse || lapse.over) return;
+  const { passes } = lapse;
+  let i = -1;
+  passes.forEach((p, k) => p.time <= ms && (i = k));
+  if (i === lapse.index && lapse.mode === lapse.drawn) return;
+  const moved = i !== lapse.index;
+  lapse.index = i;
+  lapse.drawn = lapse.mode;
+  markLapseChart(lapse);
+  if (i < 0) {
+    lapse.sharp = -1;
+    globe.clearScenes();
+    return;
+  }
+  if (moved && lapse.sound && replay.playing) playPass(lapse.series[i]);
+  const pass = passes[i];
+  const mode = lapse.mode;
+  const token = stage.token;
+  const current = () => state.lapse === lapse && !lapse.over && lapse.index === i && lapse.mode === mode && token === stage.token;
+  let up = null; // 'quick' or 'sharp'
+  const put = (picture, bounds, sharp) => {
+    if (!current() || up === 'sharp' || (up && !sharp)) return;
+    // The first picture is uncovered by the sweep; later ones cross-fade.
+    if (up) globe.fadeTo(picture, bounds, 0.3);
+    else if (!lapse.shown) globe.sweepTo(picture, bounds, pass.direction !== 'Descending');
+    else globe.fadeTo(picture, bounds, 0.45);
+    lapse.shown = true;
+    up = sharp ? 'sharp' : 'quick';
+    if (sharp) lapse.sharp = i;
+    setLegend('radar', { pol: lapse.pol, time: pass.time, channel: mode === 'colour' ? null : mode });
+    replay.report();
+  };
+  const bounds = imageBounds(pass);
+  // The small picture is in colour, so it only stands in for the colour view.
+  if (mode === 'colour' && pass.thumb) Promise.all([bounds, loadPicture(pass.thumb)]).then(([b, picture]) => put(picture, b, false), () => {});
+  Promise.all([bounds, lapsePicture(lapse, i)]).then(([b, picture]) => put(mode === 'colour' ? picture : lapseChannel(lapse, i, picture, mode), b, true), () => {});
+}
+
+// The full picture of one pass. The first time it arrives, the brightness
+// at the point is read from it for the chart.
+function lapsePicture(lapse, i) {
+  const pass = lapse.passes[i];
+  return Promise.all([loadPicture(pass.image), imageBounds(pass)]).then(([picture, bounds]) => {
+    if (!lapse.read.has(i)) {
+      lapse.read.add(i);
+      lapse.series[i] = sampleAt(picture, bounds, lapse.lat, lapse.lon, !!pass.pol?.cross, pass.time);
+      lapseChartSoon(lapse);
+    }
+    return picture;
+  });
+}
+
+// One channel of a pass as greys; the last few are kept.
+function lapseChannel(lapse, i, picture, mode) {
+  const key = `${i}-${mode}`;
+  if (!lapse.views.has(key)) {
+    lapse.views.set(key, channelView(picture, mode));
+    if (lapse.views.size > 12) lapse.views.delete(lapse.views.keys().next().value);
+  }
+  return lapse.views.get(key);
+}
+
+// Reads the passes for the chart in the background, two at a time: the
+// oldest first, so the most recent ones are the ones still in memory when
+// the reader starts dragging back from the latest. Unless all are asked
+// for, a spread of them is read; the rest join when the handle visits them.
+async function readLapse(lapse) {
+  const { passes } = lapse;
+  const alive = () => state.lapse === lapse && !lapse.over;
+  // Where each pass lies, and its small picture: a few kilobytes each.
+  for (const pass of passes) {
+    imageBounds(pass).catch(() => {});
+    if (pass.thumb) loadPicture(pass.thumb).catch(() => {});
+  }
+  const every = passes.map((_, k) => k);
+  const wanted = lapse.all ? every : spread(every, LAPSE_DEFAULT);
+  lapse.wanted = wanted.length;
+  let next = 0;
+  const reader = async () => {
+    while (next < wanted.length && alive()) {
+      const i = wanted[next++];
+      await lapsePicture(lapse, i).catch(() => lapse.missed++);
+      lapseChartSoon(lapse);
+    }
+  };
+  await Promise.all([reader(), reader()]);
+  if (!alive()) return;
+  lapse.done = true;
+  drawLapseChart(lapse);
+}
+
+function lapseChartSoon(lapse) {
+  if (lapse.chartTimer) return;
+  lapse.chartTimer = setTimeout(() => {
+    lapse.chartTimer = 0;
+    drawLapseChart(lapse);
+  }, 400);
+}
+
+// The brightness chart, from the passes read so far.
+function drawLapseChart(lapse) {
+  const box = $('lapse-chart');
+  if (!box || state.lapse !== lapse || lapse.over) return;
+  const { passes, series, pol } = lapse;
+  // Only passes that were read: one not read yet is not a gap in the data.
+  const shown = [...lapse.read].sort((a, b) => a - b);
+  const usable = shown.filter((i) => series[i].co != null).length;
+  const status = $('lapse-status');
+  if (status) {
+    status.textContent = lapse.done
+      ? `Read from ${shown.length} of ${passes.length} passes${lapse.missed ? `; ${lapse.missed} pictures could not be loaded` : ''}.${shown.length < passes.length ? ' A pass you go to on the timeline is added.' : ''}`
+      : `Reading the passes: ${shown.length} of ${lapse.wanted || Math.min(passes.length, LAPSE_DEFAULT)} so far…`;
+  }
+  if (usable < 2) {
+    lapse.chart = null;
+    lapse.chartOf = null;
+    box.innerHTML = lapse.done ? '<p class="note">These passes do not cover the exact point, so there is no history to chart.</p>' : '<p class="spinner">Reading the brightness at this point, pass by pass…</p>';
+    return;
+  }
+  lapse.chartOf = shown;
+  lapse.chart = historyChart(box, shown.map((i) => series[i]), pol, (k) => replay.seekTo(passes[shown[k]].time + 1000));
+  markLapseChart(lapse);
+  // What the numbers say, worked out from the series by fixed rules.
+  const lines = describeSeries(shown.map((i) => series[i]), pol);
+  if (lines.length) box.insertAdjacentHTML('beforeend', `<ul class="parts facts">${lines.map((l) => `<li><span class="badge computed">Computed</span><span>${esc(l)}</span></li>`).join('')}</ul>`);
+}
+
+// Marks the pass on the globe in the chart, if the chart holds it.
+function markLapseChart(lapse) {
+  const k = lapse.chartOf ? lapse.chartOf.indexOf(lapse.index) : -1;
+  if (k >= 0) lapse.chart?.setActive(k);
 }
 
 function setLapseMode(mode) {
@@ -1489,8 +1640,8 @@ function setLapseMode(mode) {
   $('lapse')
     .querySelectorAll('[data-mode]')
     .forEach((b) => b.classList.toggle('on', b.dataset.mode === mode));
-  setLegend('radar', { pol: lapse.pol, channel: mode === 'colour' ? null : mode });
-  replay.seek(Math.min(0.999, replay.time / lapse.plan.duration));
+  replay.show();
+  replay.report();
 }
 
 // A click on bare ground offers a time-lapse there.
@@ -1506,6 +1657,8 @@ function hideHere() {
 function offerHere(at, screen) {
   if (globe.tiles.landAt(at.lat, at.lon) === false) return hideHere();
   const here = $('here');
+  // The search starts now, so the answer is here if the offer is taken.
+  stacksAt(at.lat, at.lon).catch(() => {});
   here.hidden = false;
   here.style.left = `${screen.x}px`;
   here.style.top = `${screen.y}px`;
@@ -2149,16 +2302,15 @@ async function start() {
   };
 
   $('replay-toggle').onclick = () => {
-    if (replay.timeline && stage.owner !== 'timeline') {
-      take('timeline');
-      renderCard();
-    }
+    retake();
     replay.toggle();
   };
   // The timeline is dragged like a slider.
   const line = $('replay-bar');
+  // An event's timeline takes the globe back from a picture put up by
+  // hand. (The passes of a place always hold it while they are open.)
   const retake = () => {
-    if (replay.timeline && stage.owner !== 'timeline') {
+    if (replay.timeline && !replay.plan.lapse && stage.owner !== 'timeline') {
       take('timeline');
       renderCard();
     }
@@ -2181,15 +2333,16 @@ async function start() {
     replay.seek(+line.getAttribute('aria-valuenow') / 100 + (e.key === 'ArrowLeft' ? -0.02 : 0.02));
   };
   $('replay-live').onclick = () => {
+    if (!replay.timeline) return;
+    retake();
+    replay.seek(1);
+  };
+  // From the passes of a place inside an event: back to that event's timeline.
+  $('replay-back').onclick = () => {
     const sel = state.selected;
-    if (replay.timeline) {
-      retake();
-      return replay.seek(1);
-    }
-    // From a time-lapse inside an event: back to that event's timeline.
     if (sel?.kind !== 'incident') return;
     take('timeline');
-    replay.start(sel.incident, { keepView: true });
+    replay.start(sel.incident);
     if (sel.passes) replay.extend(sel.reach, sel.passes.map((x) => x.time));
     renderCard();
   };

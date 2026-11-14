@@ -352,6 +352,39 @@ not our drawing, but it was our engine's fault to show it.
   handles. It was found by listing the requests marked "not delivered".
   When the far view looks thin, look there first.
 
+### The passes of a place use the event timeline (lead's QA, 14 Nov, night)
+
+The lead's three complaints about "a year of NISAR here": it took forever
+to start, it looped without end, and it had its own player instead of the
+timeline events have. All three had one cause: it was a separate looping
+player that loaded fourteen full pictures before showing anything.
+
+- **One timeline for both.** `Replay.open(plan, marks)` in
+  `js/replay/replay.js` opens a timeline that is not an event's. The
+  looping player (`run`) is gone. A place's plan carries `lapse: true`;
+  the bar then hides the event's stretch and its key entry
+  (`renderReplay` in `js/main.js`). It stands on the latest pass, every
+  pass is a mark, dragging goes back, play runs once.
+- **Nothing waits for the year** (`startLapse`, `showLapsePass`,
+  `readLapse`). The newest pass goes up at once, its 15 KB picture first,
+  then the full one, exactly as for an event. The other passes are read
+  in the background, two at a time, oldest first, only for the brightness
+  chart (`sampleAt` reads 25 pixels of each). At most 14 are read unless
+  "Read all" is ticked; a pass the handle stands on is fetched then and
+  joins the chart. The search itself starts when the offer appears on a
+  click (`stacksAt`), before it is taken.
+- **The chart** shows only passes that were read, so one not read yet is
+  not drawn as a gap, and says how many it has.
+- **Pictures** come through `loadPicture` like an event's (worker, kept on
+  disk), at full size; the one-channel views are made at 900 px
+  (`channelView`).
+- **Inside an event** the bar gets a second button, "Back to the event".
+  Anything else that takes the globe (the change picture, the divider)
+  ends the place's timeline, as before.
+- Measured headless from page load, Colorado, 21 passes: timeline open
+  after 6.9 s, first picture 8.3 s, sharp 9.4 s, chart from 14.7 s, all
+  14 read after 25.6 s. Before, nothing showed until all 14 were loaded.
+
 ### Visual rules (lead, 14 Nov, night)
 
 The lead, after one screenshot confused them: no arbitrary colours; one

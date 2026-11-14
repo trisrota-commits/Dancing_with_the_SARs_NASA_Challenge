@@ -56,9 +56,10 @@ repository: https://github.com/trisrota-commits/Dancing_with_the_SARs_NASA_Chall
   it gets NISAR's interferogram, with a key that says what one colour
   cycle means.
 - **A time-lapse for any place on Earth.** Click the ground or search a
-  place: the app steps through every pass of one repeat track, in the
-  colour composite or in one channel, with a chart of both channels over
-  time.
+  place: the newest NISAR pass is on the globe at once, and every pass of
+  that repeat track is a mark on the same timeline an event has. Drag it
+  back or play it once, in the colour composite or in one channel, with a
+  chart of both channels over time.
 - **Five stories and 33 changing places.** Glaciers, sinking cities,
   wetlands, forest clearing, farming seasons, volcanoes and moving
   slopes: slow change that no event feed reports. Each explains what to
