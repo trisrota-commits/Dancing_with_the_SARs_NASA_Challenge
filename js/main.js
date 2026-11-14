@@ -590,9 +590,7 @@ async function showChanges(button) {
 function drapeChanges(withSource) {
   const c = state.change;
   if (!c) return;
-  globe.clearScenes();
-  if (withSource) globe.addPicture(c.after, c.afterBounds);
-  globe.addPicture(c.result.canvas, c.result.bounds, undefined, 0.9);
+  globe.fadeToAll([...(withSource ? [{ image: c.after, bounds: c.afterBounds, alpha: 1 }] : []), { image: c.result.canvas, bounds: c.result.bounds, alpha: 0.9 }], 0.9);
 }
 
 // ---------- press coverage ----------

@@ -22,6 +22,12 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
     the closer you get, the finer the detail.
   - Flood: water the radar saw on land, fading in pass by pass, with moving
     ripples and waves along its edge whose detail grows as you zoom in.
+- While a replay plays, the map around it dims a little, the camera drifts
+  slowly closer, and a few data labels appear on the globe: the shaking
+  level on each earthquake outline, the magnitude of the strongest later
+  quakes, the wind speed travelling with a storm.
+- A NISAR picture is uncovered by a line sweeping the way the satellite
+  flew, and the "what changed" picture fades in over the ground.
 - Labels every part of a replay as **observed** (measured or catalogued),
   **analysis** (worked out and published by an agency) or **computed** (drawn
   here by a stated rule), with its source.

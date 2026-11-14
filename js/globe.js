@@ -11,6 +11,7 @@ import { GlobeControls } from './engine/controls.js';
 import { TileGlobe } from './engine/tiles.js';
 import { Dots, Lines, SelectionRing, Vortex, Glow, Beams, LIFT, atmosphere } from './engine/marks.js';
 import { Fire } from './engine/fire.js';
+import { Labels } from './engine/labels.js';
 import { Sky } from './sky.js';
 
 const DAY = 86400_000;
@@ -53,6 +54,11 @@ export class Globe {
     this.fxDots.points.renderOrder = 27;
     this.fxGlow = new Glow(this.scene, this.shared);
     this.fire = new Fire(this.scene, this.shared);
+    this.labels = new Labels(el);
+    this.focus = 0; // how far the map has stepped back, 0..1
+    this.focusTarget = 0;
+    this.night = 0; // how much of the day and night shading is applied
+    this.nightOn = false;
     this.vortex = new Vortex(this.scene, this.shared);
     // Light beams on the event dots: taller for stronger events.
     this.beams = new Beams(this.scene, this.shared);
@@ -165,10 +171,23 @@ export class Globe {
     const date = new Date();
     const sun = sunDirection(date);
     const skyBusy = this.skyView.update(date, seconds, this.camera.quaternion, sun);
-    const animating = this.animating || this.ring.points.visible || seconds < this.pulseUntil || seconds < this.animalPulseUntil || skyBusy || this.skyBusy || this.fadeEnd > 0;
+    const animating = this.animating || this.ring.points.visible || seconds < this.pulseUntil || seconds < this.animalPulseUntil || skyBusy || this.skyBusy || this.fadeEnd > 0 || Math.abs(this.focus - this.focusTarget) > 0.002;
     this.skyBusy = skyBusy;
     // A finished cross-fade is tidied up: one picture, no second canvas.
     if (this.fadeEnd && seconds > this.fadeEnd) this.settle();
+    // Day and night shading eases back while data is on the ground.
+    const night = !this.nightOn ? 0 : this.pictures.length || this.focusTarget ? 0.25 : 1;
+    if (Math.abs(this.night - night) > 0.002) {
+      this.night = Math.abs(this.night - night) < 0.01 ? night : this.night + (night - this.night) * Math.min(1, dt * 2.5);
+      this.tiles.uniforms.uNight.value = this.night;
+      this.dirty = true;
+    }
+    // The focus eases in and out.
+    if (Math.abs(this.focus - this.focusTarget) > 0.002) {
+      this.focus += (this.focusTarget - this.focus) * Math.min(1, dt * 2.5);
+      this.tiles.uniforms.uFocus.value.y = this.focus;
+      this.dirty = true;
+    }
     if (!(moved || tilesChanged || animating || this.dirty)) return;
     this.dirty = false;
 
@@ -186,6 +205,7 @@ export class Globe {
     this.renderer.render(this.sky, this.skyCamera);
     this.renderer.clearDepth();
     this.renderer.render(this.scene, this.camera);
+    if (this.labels.items.length) this.labels.update((lat, lon) => this.project(this.ground(lat, lon)), alt);
     this.onView?.(this.controls);
   }
 
@@ -320,7 +340,8 @@ export class Globe {
   }
 
   setLighting(on) {
-    this.tiles.uniforms.uNight.value = on ? 1 : 0;
+    // The shading itself eases in and out in the frame loop.
+    this.nightOn = on;
     this.tiles.uniforms.uSun.value.copy(sunDirection());
     this.dirty = true;
   }
@@ -372,6 +393,7 @@ export class Globe {
   clearScenes() {
     this.fadeEnd = 0;
     this.tiles.uniforms.uFadeDur.value = 0;
+    this.tiles.uniforms.uSweep.value.x = 0;
     if (!this.pictures.length) return;
     this.pictures = [];
     this.tiles.setPictures([]);
@@ -382,11 +404,17 @@ export class Globe {
   // Shows a picture by cross-fading from whatever picture (or bare ground)
   // is there now. Used for the time-lapse and for single radar scenes.
   fadeTo(image, bounds, seconds = 0.5) {
-    const shown = this.pictures.filter((p) => p.side !== 'left').pop();
-    const next = { image, bounds, side: 'right', alpha: 1 };
-    this.pictures = shown ? [{ ...shown, side: 'left' }, next] : [next];
+    return this.fadeToAll([{ image, bounds, alpha: 1 }], seconds)[0];
+  }
+
+  // The same for a stack of pictures: [{ image, bounds, alpha }].
+  fadeToAll(list, seconds = 0.5) {
+    const shown = this.pictures.filter((p) => p.side !== 'left');
+    const next = list.map((p) => ({ ...p, side: 'right' }));
+    this.pictures = [...shown.map((p) => ({ ...p, side: 'left' })), ...next];
     this.tiles.fadeGen++;
     this.tiles.uniforms.uFadeDur.value = seconds;
+    this.tiles.uniforms.uSweep.value.x = 0;
     this.tiles.setPictures(this.pictures);
     // Tiles repaint over a few frames, each starting its own fade.
     this.fadeEnd = (performance.now() - this.started) / 1000 + seconds + 0.8;
@@ -394,12 +422,26 @@ export class Globe {
     return next;
   }
 
+  // Uncovers a picture with a line that travels the way the satellite
+  // flew: south to north on an ascending pass, north to south otherwise.
+  sweepTo(image, bounds, ascending, seconds = 1.8) {
+    const next = this.fadeToAll([{ image, bounds, alpha: 1 }], seconds)[0];
+    const south = Math.sin(bounds.south * RAD);
+    const north = Math.sin(bounds.north * RAD);
+    // A short head start lets the tiles repaint before the line sets off.
+    const start = (performance.now() - this.started) / 1000 + 0.4;
+    this.tiles.uniforms.uSweep.value.set(1, ascending ? south : north, ascending ? north : south, start);
+    this.fadeEnd = start + seconds + 0.6;
+    return next;
+  }
+
   settle() {
     this.fadeEnd = 0;
     this.tiles.uniforms.uFadeDur.value = 0;
-    const shown = this.pictures.filter((p) => p.side === 'right').pop();
-    if (!shown) return;
-    this.pictures = [{ ...shown, side: undefined }];
+    this.tiles.uniforms.uSweep.value.x = 0;
+    const shown = this.pictures.filter((p) => p.side === 'right');
+    if (!shown.length) return;
+    this.pictures = shown.map((p) => ({ ...p, side: undefined }));
     this.tiles.setPictures(this.pictures);
     this.dirty = true;
   }
@@ -408,7 +450,7 @@ export class Globe {
   // undefined for the whole screen.
   async addScene(scene, bounds, side) {
     const image = await loadPicture(scene.image);
-    return side ? this.addPicture(image, bounds, side) : this.fadeTo(image, bounds, 0.9);
+    return side ? this.addPicture(image, bounds, side) : this.sweepTo(image, bounds, scene.direction !== 'Descending');
   }
 
   // Drapes any image or canvas over a lat/lon box.
@@ -698,6 +740,31 @@ export class Globe {
     this.controls.orbit = reducedMotion.matches ? 0 : degreesPerSecond;
   }
 
+  // Comes slowly closer, to `factor` of the current distance (or of the
+  // distance a flight in progress is heading for), until the next touch.
+  pushIn(factor) {
+    if (reducedMotion.matches) return;
+    const from = this.controls.flight ? this.controls.flight.to.alt : this.controls.alt;
+    this.controls.push = { to: from * factor, rate: 0.16 };
+  }
+
+  // Lets the map around a place step back while its replay plays, or
+  // brings it forward again with null: { lat, lon, radiusKm }.
+  setFocus(at) {
+    this.focusTarget = at ? 1 : 0;
+    if (at) {
+      toVec(at.lat, at.lon, 1, this.tiles.uniforms.uFocusC.value);
+      this.tiles.uniforms.uFocus.value.x = (at.radiusKm * 1000) / EARTH_RADIUS_M;
+    }
+    this.dirty = true;
+  }
+
+  // Data labels pinned to the globe: [{ lat, lon, text, color, within }].
+  setLabels(items) {
+    this.labels.set(items);
+    this.dirty = true;
+  }
+
   clearEffects() {
     this.animating = false;
     this.fxLines.set([]);
@@ -706,7 +773,10 @@ export class Globe {
     this.fire.set([]);
     this.vortex.set(null);
     this.setShockwave(null);
+    this.setFocus(null);
+    this.setLabels([]);
     this.controls.orbit = 0;
+    this.controls.push = null;
     if (this.fxZones.length) this.setEffectZones([]);
     if (this.state.fx.length) this.setEffectLayers([]);
     this.dirty = true;

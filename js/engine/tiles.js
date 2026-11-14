@@ -60,6 +60,9 @@ const FRAGMENT = /* glsl */ `
   uniform float uSplit;
   uniform float uFadeDur;
   uniform float uFadeAt;
+  uniform vec4 uSweep;
+  uniform vec3 uFocusC;
+  uniform vec2 uFocus;
   uniform float uTime;
   uniform vec3 uWater;
   uniform vec2 uViewport;
@@ -86,7 +89,18 @@ const FRAGMENT = /* glsl */ `
     vec3 color = texture2D(map, vUv).rgb;
     if (uUseB > 0.5) {
       vec3 other = texture2D(mapB, vUv).rgb;
-      if (uFadeDur > 0.0) {
+      if (uFadeDur > 0.0 && uSweep.x > 0.5) {
+        // The new picture is uncovered by a line travelling the way the
+        // satellite flew, from one latitude to another.
+        float t = clamp((uTime - uSweep.w) / uFadeDur, 0.0, 1.0);
+        float along = (normalize(vNormal).y - uSweep.y) / (uSweep.z - uSweep.y);
+        float edge = t * 1.1 - 0.05;
+        float differs = step(0.02, length(color - other));
+        vec3 next = color;
+        color = mix(other, next, smoothstep(edge, edge - 0.03, along));
+        float line = exp(-pow((along - edge) / 0.012, 2.0)) * differs * step(t, 0.999);
+        color += vec3(0.22, 0.9, 0.77) * line * 0.8;
+      } else if (uFadeDur > 0.0) {
         // Cross-fade from the previous picture, timed from when this tile
         // was painted with the new one.
         float f = clamp((uTime - uFadeAt) / uFadeDur, 0.0, 1.0);
@@ -123,8 +137,18 @@ const FRAGMENT = /* glsl */ `
       color += vec3(0.45, 0.75, 1.0) * arrive * (1.0 - arrive) * smoothstep(0.1, 0.5, cover) * 1.3;
     }
     float lit = smoothstep(-0.12, 0.18, dot(normalize(vNormal), uSun));
-    // Night is dim and cool, but the ground stays readable.
+    // Night is dim and cool, but the ground stays readable. uNight drops
+    // while data is being shown: radar does not need daylight, and a
+    // picture or a replay should look the same on either side of the Earth.
     color *= mix(vec3(1.0), mix(vec3(0.2, 0.24, 0.33), vec3(1.0), lit), uNight);
+    // While a replay plays, the map around it steps back: dimmer and
+    // greyer outside the scene, a touch dimmer inside, so the data glows.
+    if (uFocus.y > 0.0) {
+      float d = 2.0 * asin(min(1.0, length(normalize(vNormal) - uFocusC) * 0.5));
+      float outside = smoothstep(uFocus.x, uFocus.x * 1.9, d);
+      float grey = dot(color, vec3(0.3, 0.59, 0.11));
+      color = mix(color, mix(color * 0.93, mix(color, vec3(grey), 0.55) * 0.62, outside), uFocus.y);
+    }
     // Shock fronts glow on the ground: the slower, stronger wave in red
     // with a fading wake behind it, the faster one ahead of it in white.
     if (uWave.w > 0.0) {
@@ -215,6 +239,12 @@ export class TileGlobe {
       // Above zero, a tile with two pictures cross-fades between them over
       // this many seconds instead of splitting at the divider.
       uFadeDur: { value: 0 },
+      // Sweep reveal: on or off, the sine of the latitude it starts and
+      // ends at, and the time it starts.
+      uSweep: { value: new THREE.Vector4(0, 0, 1, 0) },
+      // Focus: centre, then radius (radians) and strength 0..1.
+      uFocusC: { value: new THREE.Vector3(0, 1, 0) },
+      uFocus: { value: new THREE.Vector2(1, 0) },
       uTime: shared.uTime,
       // Flood water: the replay step now, and the number of steps.
       uWater: { value: new THREE.Vector3(0, 1, 0) },
