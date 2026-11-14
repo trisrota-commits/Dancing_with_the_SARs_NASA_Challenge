@@ -1648,3 +1648,107 @@ ul.plain {
     display: none;
   }
 }
+
+/* ---------- the key to the picture on the globe ---------- */
+
+#legend {
+  position: fixed;
+  left: 318px;
+  bottom: 96px;
+  width: 262px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  backdrop-filter: blur(10px);
+  z-index: 3;
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+
+#legend p {
+  margin: 3px 0 6px;
+  color: var(--dim);
+}
+
+#legend ul {
+  list-style: none;
+  margin: 0 0 6px;
+  padding: 0;
+}
+
+#legend li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 1px 0;
+}
+
+#legend li i {
+  flex: none;
+  width: 22px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--c);
+  transform: translateY(1px);
+}
+
+#legend small {
+  color: var(--dim);
+}
+
+#left.closed ~ #legend {
+  left: 14px;
+}
+
+/* The key under the event timeline. */
+#replay-key {
+  display: none;
+}
+
+#replay.timeline #replay-key {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--dim);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+#replay-key i {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 4px 0 8px;
+}
+
+.key-event {
+  width: 16px;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.key-pass {
+  width: 2px;
+  height: 12px;
+  background: var(--accent);
+}
+
+@media (max-width: 760px) {
+  #legend {
+    left: 8px;
+    right: 8px;
+    bottom: auto;
+    top: 104px;
+    width: auto;
+  }
+
+  #replay-key span:nth-child(2) {
+    display: none;
+  }
+}
+
+/* The zoom buttons sit above the bar at the bottom when it is showing. */
+body:has(#replay:not([hidden])) #nav {
+  bottom: 124px;
+}

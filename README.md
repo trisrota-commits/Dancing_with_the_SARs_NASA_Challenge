@@ -13,6 +13,10 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
 - **Clicking an event opens a small card**, not a wall of data: what it is,
   the news about it, one line on what NISAR has seen there, and a button
   for the NISAR image. "Show details" opens the panel.
+- **A key on the globe** says what a radar picture, an interferogram or a
+  change picture is and what its colours mean, whenever one is shown.
+- **"Show what changed"** on the card lays the change between the two passes
+  either side of the event over the radar picture.
 - **The details start with one plain text** that explains the event and
   names every source as a link: hover one to see what it is (for NISAR,
   the newest pass itself), click it to open what was taken from it. A

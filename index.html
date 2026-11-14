@@ -132,6 +132,7 @@
     </aside>
 
     <aside id="card" aria-live="polite" hidden></aside>
+    <aside id="legend" aria-live="polite" hidden></aside>
     <div id="tip" role="tooltip" hidden></div>
 
     <nav id="nav" aria-label="Map view">
@@ -148,6 +149,7 @@
         <div id="replay-bar" role="slider" tabindex="0" aria-label="Timeline: drag to go back in time" aria-valuemin="0" aria-valuemax="100">
           <i id="replay-span" title="The event"></i><i id="replay-fill"></i><span id="replay-marks" title="NISAR passes"></span><b id="replay-knob"></b>
         </div>
+        <div id="replay-key"><span id="replay-from"></span><span><i class="key-event"></i>the event <i class="key-pass"></i>a NISAR pass · drag to go back</span><span>now</span></div>
       </div>
       <button id="replay-live" title="Back to the latest state">Latest</button>
     </div>

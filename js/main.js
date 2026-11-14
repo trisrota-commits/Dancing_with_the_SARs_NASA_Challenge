@@ -265,6 +265,7 @@ function renderCard() {
     <p class="nisar-line">${esc(nisarLine(inc, sel.found))}</p>
     <div class="actions">
       <button class="primary" id="card-details">Show details</button>
+      ${sel.found && bestPair(sel.found.backscatter, inc.time, true, inc) ? `<button id="card-change" aria-pressed="${!!sel.changeShown}">${sel.changeShown ? 'Back to the radar picture' : 'Show what changed'}</button>` : ''}
       ${scene ? `<button id="card-nisar" aria-pressed="${!sel.nisarOff}">${sel.nisarOff ? 'Show the NISAR image' : 'Hide the NISAR image'}</button>` : ''}
     </div>`;
 }
@@ -291,10 +292,46 @@ function showDetails() {
   }
 }
 
+// The change between the two passes either side of the event, straight
+// from the card: the colours go over the newer radar picture, and the
+// timeline stays. Pressing again goes back to the radar picture.
+async function toggleCardChange(button) {
+  const sel = state.selected;
+  if (sel?.kind !== 'incident' || !sel.found) return;
+  const back = () => {
+    sel.changeShown = false;
+    sel.passIndex = undefined;
+    state.change = null;
+    if (replay.timeline) replay.report();
+    renderCard();
+  };
+  if (sel.changeShown) return back();
+  const pair = bestPair(sel.found.backscatter, sel.incident.time, true, sel.incident);
+  if (!pair) return;
+  button.textContent = 'Comparing two passes…';
+  try {
+    const [b1, b2, before, after] = await Promise.all([imageBounds(pair.before), imageBounds(pair.after), loadPicture(pair.before.image), loadPicture(pair.after.image)]);
+    if (state.selected !== sel) return;
+    const result = changeMap(before, b1, after, b2);
+    if (!result) throw new Error('no overlap');
+    sel.changeShown = true;
+    sel.manualPicture = false;
+    state.change = { result, after, afterBounds: b2, pair };
+    drapeChanges(true);
+    setLegend('change', { result, from: pair.before.time, to: pair.after.time });
+    renderCard();
+  } catch {
+    button.textContent = 'These two passes could not be compared';
+  }
+}
+
 // The radar picture under the event, off or on again, from the card.
 function toggleCardImage() {
   const sel = state.selected;
   if (sel?.kind !== 'incident') return;
+  sel.manualPicture = false;
+  sel.changeShown = false;
+  sel.passIndex = undefined;
   sel.nisarOff = !sel.nisarOff;
   if (replay.timeline) replay.report();
   else syncNisar(Date.now());
@@ -360,6 +397,7 @@ function renderReplay(u) {
     }
     const event = state.selected?.incident;
     if (event) $('replay-span').style.background = CATEGORIES[event.category].color;
+    $('replay-from').textContent = day(u.range.from);
     $('replay-live').classList.toggle('on', u.live);
     $('replay-live').textContent = u.live ? '● Latest' : 'Go to latest';
     const pass = syncNisar(u.ms);
@@ -393,6 +431,8 @@ function timelinePasses(inc, found) {
 function syncNisar(ms) {
   const sel = state.selected;
   if (sel?.kind !== 'incident' || !sel.passes?.length) return null;
+  // A picture the reader chose, or the change picture, is left alone.
+  if (sel.manualPicture || sel.changeShown) return null;
   let i = -1;
   if (!sel.nisarOff) sel.passes.forEach((x, k) => x.time <= ms && (i = k));
   const pass = i >= 0 ? sel.passes[i] : null;
@@ -400,8 +440,10 @@ function syncNisar(ms) {
   sel.passIndex = i;
   if (!pass) {
     globe.clearScenes();
+    setLegend(null);
     return null;
   }
+  setLegend('radar', { pol: pass.pol, time: pass.time });
   // The first picture is uncovered by the sweep; later ones cross-fade.
   const first = !sel.passShown;
   sel.passShown = true;
@@ -695,6 +737,10 @@ async function showScene(id, button) {
     const bounds = await imageBounds(scene);
     await globe.addScene(scene, bounds);
     globe.flyToBounds(bounds);
+    // A picture chosen by hand stays until the reader picks another.
+    if (state.selected) state.selected.manualPicture = true;
+    if (scene.product === 'GUNW') setLegend('interferogram', { from: scene.refTime, to: scene.secTime });
+    else setLegend('radar', { pol: scene.pol, time: scene.time });
     button.textContent = 'Shown';
   } catch {
     button.textContent = 'Preview failed';
@@ -717,6 +763,7 @@ async function compare(button) {
     $('split-after').textContent = `After · ${day(pair.after.time)}`;
     $('split').hidden = false;
     setSplit(0.5);
+    setLegend('radar', { pol: pair.after.pol });
     button.textContent = 'Comparing: drag the white bar';
   } catch {
     button.textContent = 'Preview failed';
@@ -729,7 +776,46 @@ function setSplit(fraction) {
   globe.setSplit(f);
 }
 
+// ---------- the key to what is on the globe ----------
+
+// Says what the picture on the globe is and what its colours mean, in the
+// corner of the map, whenever a radar picture or a change picture is up.
+// kind: 'radar' | 'interferogram' | 'change' | null to hide.
+function setLegend(kind, info = {}) {
+  const box = $('legend');
+  if (!kind) return (box.hidden = true);
+  const row = (color, text) => `<li><i style="--c:${color}"></i><span>${text}</span></li>`;
+  let html;
+  if (kind === 'radar') {
+    const pol = info.pol?.co ? info.pol : { co: 'HH', cross: 'HV' };
+    const single = !pol.cross || info.channel;
+    const channel = info.channel === 'cross' ? pol.cross : pol.co;
+    html = `<b>NISAR radar picture${info.time ? ` · ${day(info.time)}` : ''}</b>
+      <p>Not a photo: it shows how strongly the ground sends the radar pulse back.</p>
+      <ul>${
+        single
+          ? row('#f2f2f2', 'Bright: rough ground, buildings, plants standing in water') + row('#10141c;border:1px solid #556', 'Dark: calm water, smooth or wet ground')
+          : row('#4be04b', 'Green: forest and other vegetation') + row('#d85bd8', 'Magenta: bare ground and buildings') + row('#f2f2f2', 'White: both echoes strong') + row('#10141c;border:1px solid #556', 'Dark: calm water, smooth ground')
+      }</ul>
+      <small>${single ? `One radar channel (${esc(channel)}).` : `Two radar channels: magenta is ${esc(pol.co)}, green is ${esc(pol.cross)}.`}</small>`;
+  } else if (kind === 'interferogram') {
+    html = `<b>NISAR interferogram${info.from ? ` · ${day(info.from)} to ${day(info.to)}` : ''}</b>
+      <p>Two passes compared: the colours show how the distance to the satellite changed.</p>
+      <ul>${row('linear-gradient(90deg,#f33,#ff3,#3f3,#3ff,#33f,#f3f)', 'One run through the colours: about 12 cm')}</ul>
+      <small>Tight bands around one place are ground movement. Broad bands are mostly the atmosphere. Speckle means the passes did not match, as over water.</small>`;
+  } else {
+    const km = (v) => (v >= 100 ? Math.round(v).toLocaleString('en') : v.toFixed(1));
+    html = `<b>What changed · ${day(info.from)} to ${day(info.to)}</b>
+      <p>Where the radar echo differs between two NISAR passes.</p>
+      <ul>${row('#40aaff', `Echo got weaker: ${km(info.result.weakerKm2)} km²`) + row('#ffaa3c', `Echo got stronger: ${km(info.result.strongerKm2)} km²`)}</ul>
+      <small>Worked out from preview pictures: a guide to where to look, not a measurement, and not a statement of cause.</small>`;
+  }
+  box.innerHTML = html;
+  box.hidden = false;
+}
+
 function endCompare() {
+  setLegend(null);
   globe.clearScenes();
   // The divider stays up while the two radar wavelengths are being compared.
   if (state.bands) showBandSplit();
@@ -756,6 +842,7 @@ async function showChanges(button) {
     if (!result) throw new Error('The two passes do not overlap');
     state.change = { result, after, afterBounds: b2, pair };
     drapeChanges(false);
+    setLegend('change', { result, from: pair.before.time, to: pair.after.time });
     globe.flyToBounds(result.bounds);
     globe.select(inc, [pair.after]);
     const km = (v) => (v >= 100 ? Math.round(v).toLocaleString('en') : v.toFixed(1));
@@ -849,7 +936,9 @@ async function openLink() {
 
 // ---------- stories ----------
 
-function storyHtml(story) {
+// `data` is what the story shows (a time-lapse box, an interferogram): it
+// goes right after "What to look at", before the explanations.
+function storyHtml(story, data = '') {
   const n = STORIES.indexOf(story);
   const next = STORIES[(n + 1) % STORIES.length];
   const part = (heading, text, hypothesis) => `<h4>${heading}${hypothesis ? ' <span class="badge computed">Hypothesis</span>' : ''}</h4><p class="note">${esc(text)}</p>`;
@@ -858,11 +947,12 @@ function storyHtml(story) {
     <h3>${esc(story.title)}</h3>
     <p class="note">${esc(story.place)} · ${where(story.lat, story.lon)}</p>
     ${part('What to look at', story.look)}
+    ${data}
     ${part('Why it happens', story.why, true)}
     ${part('Which polarisation shows it', story.pol, true)}
     ${part('What a camera would miss', story.beyond)}
     ${part('What it could be used for', story.next)}
-    <p class="hint">The place and the explanations are our choice. Every number below is computed from the NISAR passes and feeds loaded right now.</p>
+    <p class="hint">The place and the explanations are our choice. Every number here is computed from the NISAR passes and feeds loaded right now.</p>
     <button id="story-next" data-next="${next.id}">Next story: ${esc(next.title)} ▸</button>
   </div>`;
 }
@@ -878,11 +968,11 @@ async function openStory(id) {
   setLink(`story=${story.id}`);
 
   if (story.action === 'lapse') {
-    openPanel(`${storyHtml(story)}<h4>NISAR time-lapse at this point</h4>${lapseBox(story.lat, story.lon)}`);
+    openPanel(storyHtml(story, `<h4>NISAR time-lapse at this point</h4>${lapseBox(story.lat, story.lon)}`));
     return startLapse();
   }
   if (story.action === 'interferogram') {
-    openPanel(`${storyHtml(story)}<h4>The interferogram</h4><div id="igram"><p class="spinner">Searching the NISAR archive…</p></div>`);
+    openPanel(storyHtml(story, `<h4>The interferogram</h4><div id="igram"><p class="spinner">Searching the NISAR archive…</p></div>`));
     globe.flyTo(story.lat, story.lon, 600_000);
     const token = state.lookup;
     try {
@@ -894,6 +984,7 @@ async function openStory(id) {
       state.selected.found = { backscatter: [], interferograms: list };
       const bounds = await imageBounds(pick);
       await globe.addScene(pick, bounds);
+      setLegend('interferogram', { from: pick.refTime, to: pick.secTime });
       globe.flyToBounds(bounds);
       $('igram').innerHTML = `<p class="note">Shown on the globe: ${day(pick.refTime)} compared with ${day(pick.secTime)}, ${Math.round((pick.secTime - pick.refTime) / DAY)} days apart, ${esc(pick.direction.toLowerCase())} track ${esc(pick.track)}. ${list.length} pairs cover this point in all.</p>
         ${list.slice(0, 4).map((x) => sceneCard(x, null)).join('')}`;
@@ -1137,7 +1228,7 @@ async function startLapse(stackIndex = 0, all = false) {
   const lapse = { lat, lon, stacks, stackIndex, all, frames, mode: 'colour', chart: null };
   state.lapse = lapse;
   const pol = stack.pol?.co ? stack.pol : { co: 'Radar', cross: null };
-  const names = { colour: pol.cross ? `${pol.co} + ${pol.cross} colour` : `${pol.co} (single polarisation)`, co: `${pol.co} only`, cross: `${pol.cross} only` };
+  const names = { colour: pol.cross ? `both radar channels in colour (${pol.co} + ${pol.cross})` : `one radar channel (${pol.co})`, co: `${pol.co} channel only`, cross: `${pol.cross} channel only` };
   const plan = {
     duration: frames.length * LAPSE_STEP,
     parts: null,
@@ -1161,18 +1252,19 @@ async function startLapse(stackIndex = 0, all = false) {
   };
   lapse.plan = plan;
 
+  // The picture controls and the chart come first; the fine print follows.
   box.innerHTML = `
-    <p class="note">${frames.length} of ${stack.scenes.length} passes on ${esc(stack.direction.toLowerCase())} track ${esc(stack.track)}, frame ${esc(stack.frame)}, ${day(frames[0].time)} to ${day(frames[frames.length - 1].time)}.${stack.unplaced ? ` ${stack.unplaced} earlier passes are left out: their previews were published without public corner coordinates, so they cannot be placed on the map accurately.` : ''}${stack.otherModes ? ` ${stack.otherModes} passes recorded in a different polarisation mode are left out too, because their previews are not comparable with these.` : ''}</p>
-    ${state.selected?.kind === 'incident' ? '' : nextPassHtml(stacks.flatMap((st) => st.scenes))}
     <div class="actions seg" role="group" aria-label="Which radar channel to show">
       <button data-mode="colour" class="on">${pol.cross ? 'Colour' : 'As published'}</button>
       ${pol.cross ? `<button data-mode="co">${esc(pol.co)} only</button><button data-mode="cross">${esc(pol.cross)} only</button>` : ''}
     </div>
+    <h4>Brightness at ${where(lat, lon)}</h4>
+    <div id="lapse-chart"></div>
     ${stacks.length > 1 ? `<label class="row"><span>Track</span><select id="lapse-stack">${stacks.map((st, n) => `<option value="${n}" ${n === stackIndex ? 'selected' : ''}>${esc(st.direction)} ${esc(st.track)} (${st.scenes.length} passes)</option>`).join('')}</select></label>` : ''}
     ${stack.scenes.length > frames.length || all ? `<label class="check"><input type="checkbox" id="lapse-all" ${all ? 'checked' : ''} /> Load all ${stack.scenes.length} passes (about ${stack.scenes.length} MB)</label>` : ''}
     <label class="check"><input type="checkbox" id="lapse-sound" /> ♪ Play it as sound: pitch follows the brightness at this point</label>
-    <h4>Brightness at ${where(lat, lon)}</h4>
-    <div id="lapse-chart"></div>
+    <p class="note">${frames.length} of ${stack.scenes.length} passes on ${esc(stack.direction.toLowerCase())} track ${esc(stack.track)}, frame ${esc(stack.frame)}, ${day(frames[0].time)} to ${day(frames[frames.length - 1].time)}.${stack.unplaced ? ` ${stack.unplaced} earlier passes are left out: their previews were published without public corner coordinates, so they cannot be placed on the map accurately.` : ''}${stack.otherModes ? ` ${stack.otherModes} passes recorded in a different polarisation mode are left out too, because their previews are not comparable with these.` : ''}</p>
+    ${state.selected?.kind === 'incident' ? '' : nextPassHtml(stacks.flatMap((st) => st.scenes))}
     <p class="hint">Each pass is NASA's preview of a NISAR backscatter scene, recorded here in ${pol.cross ? `dual polarisation. ${esc(pol.co)} is the echo that comes back in the polarisation that was sent; ${esc(pol.cross)} is the part that came back twisted, which mostly happens inside vegetation` : `single polarisation (${esc(pol.co)}), so there is no cross-polarised channel`}. Values are the 0–255 preview brightness averaged over 5×5 pixels, not calibrated radar units. Click the chart to jump to a pass.</p>`;
   const series = history(frames, lat, lon);
   lapse.series = series;
@@ -1185,6 +1277,8 @@ async function startLapse(stackIndex = 0, all = false) {
   else $('lapse-chart').innerHTML = '<p class="note">These passes do not cover the exact point, so there is no history to chart.</p>';
 
   replay.run(plan);
+  lapse.pol = pol;
+  setLegend('radar', { pol });
   globe.select(state.selected?.incident || null, [stack.scenes[stack.scenes.length - 1]]);
   globe.flyToBounds(frames[frames.length - 1].bounds);
 }
@@ -1196,6 +1290,7 @@ function setLapseMode(mode) {
   $('lapse')
     .querySelectorAll('[data-mode]')
     .forEach((b) => b.classList.toggle('on', b.dataset.mode === mode));
+  setLegend('radar', { pol: lapse.pol, channel: mode === 'colour' ? null : mode });
   replay.seek(Math.min(0.999, replay.time / lapse.plan.duration));
 }
 
@@ -1853,6 +1948,7 @@ async function start() {
     if (t.id === 'card-close') return closePanel();
     if (t.id === 'card-details') return showDetails();
     if (t.id === 'card-nisar') return toggleCardImage();
+    if (t.id === 'card-change') return toggleCardChange(t);
   };
   // Sources named in the text: hovering explains one, clicking opens the
   // part of the panel that holds what came from it.
