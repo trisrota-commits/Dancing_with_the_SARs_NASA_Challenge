@@ -45,7 +45,15 @@
           </select>
         </div>
         <p class="hint" id="window-note" hidden></p>
-        <p class="hint">Bigger dot = stronger event, and in the 3D view a taller beam means the same. A white ring means NISAR imaged that spot in its latest passes. Click a dot to see the event and what NISAR saw there.</p>
+        <ul class="legend" id="event-key">
+          <li><i class="dot"></i>Colour: the kind of event (the buttons above). Point at a dot to read it.</li>
+          <li><i class="dot big"></i>Bigger dot, taller beam: a stronger event</li>
+          <li><i class="ring nisar"></i>Teal ring: NISAR imaged that spot in its latest passes</li>
+          <li><i class="ring"></i>White ring: the one you selected</li>
+          <li><i class="ring pulse"></i>Spreading ring: it arrived in the last minutes</li>
+          <li><i class="line"></i>Line through a dot: the path it has taken</li>
+        </ul>
+        <p class="hint">Click a dot to see the event and what NISAR saw there.</p>
       </details>
 
       <details>
@@ -58,6 +66,7 @@
       <details>
         <summary>NISAR radar</summary>
         <label class="check"><input type="checkbox" id="footprints" checked /> Where NISAR looked recently <span id="scene-count" class="count"></span></label>
+        <p class="hint">Teal frames: the newest are bold, and they fade over four days.</p>
         <label class="check"><input type="checkbox" id="nisar-tiles" /> NISAR radar picture on the globe</label>
         <label class="check"><input type="checkbox" id="bands" /> Compare with Sentinel-1: L-band left, C-band right</label>
         <div class="row date">
@@ -75,12 +84,15 @@
             <option value="12">12 days (full cycle)</option>
           </select>
         </label>
-        <ul class="legend">
-          <li><i style="--c: #4be04b"></i>Green: forest and rough ground (strong HV echo)</li>
-          <li><i style="--c: #d85bd8"></i>Magenta: bare ground and buildings (strong HH echo)</li>
-          <li><i style="--c: #10141c; border: 1px solid #556"></i>Dark: calm water, which reflects the pulse away</li>
-          <li><i style="--c: #9aa3b2"></i>Grey picture: a pass recorded in one polarisation only</li>
-        </ul>
+        <div class="layer-key" id="nisar-tiles-key" hidden>
+          <ul class="legend">
+            <li><i style="--c: #4fbf2f"></i>Green: vegetation</li>
+            <li><i style="--c: #d8a030"></i>Orange or yellow: towns and thinly vegetated ground</li>
+            <li><i style="--c: #1c3f7a"></i>Blue: calm water, dry sand, frozen ground</li>
+            <li><i style="--c: #c8402c"></i>Red: rough water</li>
+          </ul>
+          <small>NASA's colours for this map layer, as its archive describes them (ASF, NISAR in Worldview). The single radar pictures shown for an event use NASA's other rendering, magenta and green, explained in the key beside them.</small>
+        </div>
       </details>
 
       <details>

@@ -4,6 +4,7 @@
 // site has its own JSON file and change map.
 
 import { distanceKm } from './incidents.js';
+import { PALETTE } from './config.js';
 
 const DIR = 'data/measured/';
 const NS = 'http://www.w3.org/2000/svg';
@@ -11,10 +12,10 @@ const W = 340;
 const H = 190;
 const BOX = { left: 34, right: 28, top: 12, bottom: 24 };
 const LINES = [
-  { key: 'hh', label: 'HH', color: '#d55181' },
-  { key: 'hv', label: 'HV', color: '#0ca30c' },
+  { key: 'hh', label: 'HH', color: PALETTE.co },
+  { key: 'hv', label: 'HV', color: PALETTE.cross },
 ];
-const COMPARE_COLOR = '#9fb4d0';
+const COMPARE_COLOR = PALETTE.context;
 
 let index = null;
 const cache = new Map();
@@ -102,8 +103,8 @@ export function measuredHtml(d, compare) {
       <button class="primary" id="measured-map">Show the measured change map</button>
     </div>
     <ul class="legend">
-      <li><i style="--c: rgb(64, 170, 255)"></i>Blue: echo got weaker from ${day(c.before)} to ${day(c.after)} (${esc(c.pol)})</li>
-      <li><i style="--c: rgb(255, 170, 60)"></i>Orange: echo got stronger. Full colour means 3 dB or more.</li>
+      <li><i style="--c: ${PALETTE.weaker}"></i>Blue: echo got weaker from ${day(c.before)} to ${day(c.after)} (${esc(c.pol)})</li>
+      <li><i style="--c: ${PALETTE.stronger}"></i>Orange: echo got stronger. Full colour means 3 dB or more.</li>
     </ul>
     <p class="hint"><strong>Method.</strong> ${esc(d.method)} Made ${esc(d.generated.slice(0, 10))}.</p>
   </div>`;

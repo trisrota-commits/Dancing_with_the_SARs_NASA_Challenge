@@ -3,7 +3,11 @@
 // Each kind is a single draw call.
 
 import * as THREE from '../../vendor/three.module.min.js';
-import { toVec } from './geo.js';
+import { toVec, rgb } from './geo.js';
+import { PALETTE } from '../config.js';
+
+// NISAR's teal as a GLSL colour: a ring in it means "NISAR imaged this".
+const NISAR_VEC3 = `vec3(${rgb(PALETTE.nisar).map((v) => v.toFixed(3)).join(', ')})`;
 
 export const LIFT = 2e-5; // marks sit about 130 m above the ground
 
@@ -64,10 +68,11 @@ const DOT_FRAGMENT = /* glsl */ `
     // Soft glow around the mark, so it reads against any ground.
     float halo = exp(-max(0.0, r - edge) / (4.5 * px)) * 0.42 * (1.0 - disc) * uHalo;
     color = mix(color, vec4(vColor, 1.0), halo);
-    // White ring: NISAR has imaged this spot recently.
+    // Teal ring: NISAR has imaged this spot recently. Teal is NISAR's
+    // colour everywhere; white is kept for the reader's own selection.
     if (vRing > 0.5 && vRing < 1.5) {
-      float ring = smoothstep(edge, edge + px, r) * (1.0 - smoothstep(edge + 2.2 * px, edge + 3.2 * px, r));
-      color = mix(color, vec4(1.0), ring);
+      float ring = smoothstep(edge, edge + px, r) * (1.0 - smoothstep(edge + 2.4 * px, edge + 3.6 * px, r));
+      color = mix(color, vec4(${NISAR_VEC3}, 1.0), ring);
     }
     // Expanding ring on events that just arrived.
     if (vPulse >= 0.0) {

@@ -19,7 +19,7 @@
 //   analysis  – an area or zone an agency worked out and published
 //   computed  – drawn here by a stated rule, to connect the data points
 
-import { OVERLAYS } from '../config.js';
+import { OVERLAYS, CATEGORIES, PALETTE } from '../config.js';
 import { distanceKm } from '../incidents.js';
 import { rgb, lonDelta } from '../engine/geo.js';
 import { gdacsShapes, shakeContours, quakesNear, fireDetections, dateRange, useSignal } from './sources.js';
@@ -75,21 +75,14 @@ function reach(centre, points) {
   return km;
 }
 
-// The colour scale seismologists use for shaking intensity.
+// The USGS ShakeMap colour for a shaking intensity. USGS contours carry
+// their own colour; this is for outlines that arrive without one.
 function intensityColor(v) {
-  const stops = [
-    [3, '#a0e6ff'],
-    [4, '#80ffff'],
-    [5, '#7aff93'],
-    [6, '#ffff00'],
-    [7, '#ffc800'],
-    [8, '#ff9100'],
-    [9, '#ff0000'],
-  ];
-  let hex = stops[0][1];
-  for (const [at, c] of stops) if (v >= at) hex = c;
-  return hex;
+  return PALETTE.shaking[Math.max(0, Math.min(PALETTE.shaking.length - 1, Math.floor(v) - 3))];
 }
+
+const SHAKING_SWATCH = `linear-gradient(90deg,${PALETTE.shaking.join(',')})`;
+const GDACS_SWATCH = `linear-gradient(90deg,${PALETTE.gdacs.green} 0 33%,${PALETTE.gdacs.orange} 33% 66%,${PALETTE.gdacs.red} 66%)`;
 
 // Wind speed in knots to the familiar storm class.
 function stormClass(kts) {
@@ -115,6 +108,8 @@ function outlines(globe, zones) {
     globe.setEffectZones(show ? zones : []);
   };
 }
+
+const GROUND = PALETTE.family.ground;
 
 // ---------- templates ----------
 
@@ -175,9 +170,10 @@ async function quake(inc, globe) {
     // days, so they play once when the event opens.
     intro: WAVE + 0.5,
     key: [
-      ...(zones.length ? [{ mark: 'bands', color: 'linear-gradient(90deg,#4ade80,#ffa62b,#ff5a4f)', text: 'Outlines: how strong the shaking was, weakest outside (USGS)' }] : []),
-      ...(after.length ? [{ mark: 'dot', color: '#ff9e33', text: 'Orange dots: later quakes nearby, bigger for stronger' }] : []),
-      ...(before.length ? [{ mark: 'dot', color: '#9ea8b8', text: 'Grey dots: quakes in the 30 days before' }] : []),
+      ...(zones.length ? [{ mark: 'bands', color: SHAKING_SWATCH, text: `Outlines: how strong the shaking was, from weak (blue) to violent (red), in the colours of ${zoneSource === 'GDACS' ? 'the USGS scale (outlines from GDACS)' : 'USGS'}` }] : []),
+      ...(after.length ? [{ mark: 'dot', color: GROUND, text: 'Red dots: later quakes nearby, bigger for stronger' }] : []),
+      ...(before.length ? [{ mark: 'dot', color: PALETTE.context, text: 'Grey dots: quakes in the 30 days before' }] : []),
+      { mark: 'line', color: GROUND, text: 'Red and white rings at the start: the two earthquake waves spreading, sped up' },
     ],
     timeOf: (ms) => WAVE + 0.5 + (AFTER ? Math.max(0, Math.min(1, (ms - inc.time) / span)) * AFTER : 0),
     frameKm: rmax * 1.3,
@@ -201,7 +197,7 @@ async function quake(inc, globe) {
         globe.setEffectLines([]);
         globe.setEffectZones([]);
         globe.setEffectGlow([]);
-        globe.setEffectDots(earlier.map((q) => dot(q, [0.62, 0.66, 0.72])));
+        globe.setEffectDots(earlier.map((q) => dot(q, rgb(PALETTE.context))));
         globe.setLabels([]);
         shownZones = shownAfter = -1;
         shownLabels = '';
@@ -243,13 +239,13 @@ async function quake(inc, globe) {
         if (nAfter < shownAfter) popped.length = nAfter;
         for (let i = popped.length; i < nAfter; i++) popped[i] = globe.clock;
         shownAfter = nAfter;
-        globe.setEffectDots([...before.map((q) => dot(q, [0.62, 0.66, 0.72])), ...after.slice(0, nAfter).map((q, i) => dot(q, [1, 0.62, 0.2], popped[i]))]);
+        globe.setEffectDots([...before.map((q) => dot(q, rgb(PALETTE.context))), ...after.slice(0, nAfter).map((q, i) => dot(q, rgb(GROUND), popped[i]))]);
       }
       this.now = now;
       this.count = nAfter;
       const labels = [
         ...levelLabels.filter((l) => t >= WAVE || l.km <= s),
-        ...after.slice(0, nAfter).filter((q) => named.has(q)).map((q) => ({ lat: q.lat, lon: q.lon, text: `M ${q.mag.toFixed(1)}`, color: '#ffb066', within: closer })),
+        ...after.slice(0, nAfter).filter((q) => named.has(q)).map((q) => ({ lat: q.lat, lon: q.lon, text: `M ${q.mag.toFixed(1)}`, color: GROUND, within: closer })),
       ];
       const key = labels.map((l) => l.text + l.lat).join('|');
       if (key !== shownLabels) {
@@ -278,8 +274,10 @@ async function storm(inc, globe) {
   if (!track || track.length < 2) return null;
   // A track without any spread in time cannot be put on a timeline.
   if (!(track[track.length - 1].time > track[0].time)) return null;
-  const color = rgb('#b48cff');
-  const zoneStyle = { Poly_Green: '#4ade80', Poly_Orange: '#ffa62b', Poly_Red: '#ff5a4f' };
+  // A path is drawn in the colour of the kind of event it belongs to.
+  const hex = (Object.hasOwn(CATEGORIES, inc.category) ? CATEGORIES[inc.category] : CATEGORIES.storm).color;
+  const color = rgb(hex);
+  const zoneStyle = { Poly_Green: PALETTE.gdacs.green, Poly_Orange: PALETTE.gdacs.orange, Poly_Red: PALETTE.gdacs.red };
   const zones = shapes.polygons.filter((p) => zoneStyle[p.kind]).map((p) => ({ ring: p.ring, color: rgba(zoneStyle[p.kind], 0.8), fill: rgba(zoneStyle[p.kind], 0.1), width: 1.4 }));
   const t0 = track[0].time;
   const t1 = track[track.length - 1].time;
@@ -298,9 +296,9 @@ async function storm(inc, globe) {
     frameKm: Math.max(300, reach(centre, track) * 1.2),
     focus: centre,
     key: [
-      { mark: 'line', color: '#b48cff', text: `Line: the storm's path${timing === 'observed' ? '' : ' (GDACS)'}` },
-      { mark: 'glow', color: '#d9c6ff', text: 'Cloud spiral: where the storm was. Its size follows the wind speed by a rule; it is not a picture of the clouds.' },
-      ...(zones.length ? [{ mark: 'bands', color: 'linear-gradient(90deg,#4ade80,#ffa62b,#ff5a4f)', text: 'Green, orange, red areas: wind-speed zones (GDACS)' }] : []),
+      { mark: 'line', color: hex, text: `Line: the storm's path${timing === 'observed' ? '' : ' (GDACS)'}, bold up to the moment shown` },
+      { mark: 'glow', color: hex, text: 'Cloud spiral: where the storm was. Its size follows the wind speed by a rule; it is animation, not a picture of the clouds.' },
+      ...(zones.length ? [{ mark: 'bands', color: GDACS_SWATCH, text: 'Green, orange, red areas: wind-speed zones, weakest to strongest, in the alert colours of GDACS' }] : []),
     ],
     parts: [
       { kind: timing, text: timing === 'observed' ? `${track.length} dated position fixes${peak ? ` with wind speed (peak ${Math.round(peak)} kt)` : ''}` : 'Track line, with timing spread evenly along it', source: timing === 'observed' ? 'NASA EONET' : 'GDACS' },
@@ -333,7 +331,7 @@ async function storm(inc, globe) {
       const radiusKm = 120 + strength * 380;
       globe.setVortex({ lat: at.lat, lon: at.lon, radiusKm, color, power: strength });
       // The wind speed travels with the storm, at the rim of the spiral.
-      globe.setLabels(at.value ? [{ lat: Math.min(89, at.lat + radiusKm / 111), lon: at.lon, text: `${Math.round(at.value * 1.852)} km/h · ${stormClass(at.value)}`, color: '#d9c6ff' }] : []);
+      globe.setLabels(at.value ? [{ lat: Math.min(89, at.lat + radiusKm / 111), lon: at.lon, text: `${Math.round(at.value * 1.852)} km/h · ${stormClass(at.value)}`, color: hex }] : []);
     },
     caption() {
       const a = this.at;
@@ -360,15 +358,16 @@ async function fire(inc, globe) {
   const STEP = 1.1;
 
   const first = Date.parse(dates[0]);
-  const showZones = outlines(globe, burnt.map((b) => ({ ring: b.ring, color: 'rgba(255,166,43,0.95)', fill: 'rgba(255,166,43,0.07)', width: 2 })));
+  const showZones = outlines(globe, burnt.map((b) => ({ ring: b.ring, color: rgba(PALETTE.family.fire, 0.95), fill: rgba(PALETTE.family.fire, 0.07), width: 2 })));
   return {
     from: first,
     to: first + days.length * DAY,
     timeOf: (ms) => Math.max(0, Math.min(days.length, (ms - first) / DAY)) * STEP,
     frameKm: radius * 1.1,
     key: [
-      ...(total ? [{ mark: 'glow', color: '#ff8a3c', text: 'Glowing spots: fires a satellite saw that day (VIIRS). They cool to dark red over three days.' }] : []),
-      ...(burnt.length ? [{ mark: 'outline', color: '#ffa62b', text: 'Orange outline: the burnt area as published by GDACS' }] : []),
+      ...(total ? [{ mark: 'glow', color: 'radial-gradient(#ffc257,#ff660f 55%,#eb1708)', text: 'Glowing spots: fires a satellite saw that day (VIIRS). Hot is bright; they cool to dark red over three days.' }] : []),
+      ...(total ? [{ mark: 'glow', color: '#8a8a8a', text: 'Thin smoke and shimmer: animation, not data' }] : []),
+      ...(burnt.length ? [{ mark: 'outline', color: PALETTE.family.fire, text: 'Orange outline: the burnt area as published by GDACS' }] : []),
     ],
     parts: [
       total
@@ -427,7 +426,7 @@ async function flood(inc, globe) {
   };
 
   const first = Date.parse(dates[0]);
-  const showZones = outlines(globe, area.map((a) => ({ ring: a.ring, color: 'rgba(63,167,255,0.95)', fill: 'rgba(63,167,255,0.06)', width: 2 })));
+  const showZones = outlines(globe, area.map((a) => ({ ring: a.ring, color: rgba(PALETTE.family.water, 0.95), fill: rgba(PALETTE.family.water, 0.06), width: 2 })));
   return {
     from: first,
     to: Date.parse(dates[dates.length - 1]) + DAY,
@@ -435,8 +434,8 @@ async function flood(inc, globe) {
     timeOf: (ms) => Math.max(0, Math.min(dates.length, (ms - first) / (2 * DAY) + 0.5)) * STEP,
     frameKm: Math.min(600, Math.max(120, area.length ? reach(centre, area.flatMap((a) => a.ring)) * 1.2 : 150)),
     key: [
-      { mark: 'fill', color: '#3f9fdc', text: 'Blue water: water a radar satellite saw on land (Sentinel-1). Rivers and lakes show too.' },
-      ...(area.length ? [{ mark: 'outline', color: '#3fa7ff', text: 'Blue outline: the affected area as published by GDACS' }] : []),
+      { mark: 'fill', color: 'linear-gradient(90deg,#3d99d6,#0d4580)', text: 'Blue water: water a radar satellite saw on land (Sentinel-1). Rivers and lakes show too. Its ripples are animation.' },
+      ...(area.length ? [{ mark: 'outline', color: PALETTE.family.water, text: 'Blue outline: the affected area as published by GDACS' }] : []),
     ],
     parts: [
       { kind: 'observed', text: `Water the radar saw on land (blue), building up pass by pass from ${dates[0]}. Rivers and lakes that are always there show too.`, source: 'OPERA DSWx, Sentinel-1' },
@@ -469,14 +468,14 @@ async function generic(inc, globe) {
   const showZones = outlines(globe, zones);
   // A moving thing that is not a storm (an iceberg, a plume): the storm
   // template's path, without its cloud, wind wording or wind zones.
-  const plan = inc.track && inc.track.length > 1 ? await storm({ ...inc, reports: [] }, globe) : null;
+  const plan = inc.track && inc.track.length > 1 ? await storm({ ...inc, reports: [] }, globe) : null; // drawn in this event's own colour
   if (plan) {
     plan.parts[0] = { kind: 'observed', text: `${inc.track.length} dated positions`, source: 'NASA EONET' };
     plan.parts.length = 2;
     if (zones.length) plan.parts.push({ kind: 'analysis', text: 'Affected-area outline', source: 'GDACS' });
     plan.key = [
-      { mark: 'line', color: '#b48cff', text: 'Line: the path it took (NASA EONET)' },
-      { mark: 'dot', color: '#ffffff', text: 'White dot: where it was at that time' },
+      { mark: 'line', color: CATEGORIES[inc.category]?.color || PALETTE.context, text: 'Line: the path it took (NASA EONET), bold up to the moment shown' },
+      { mark: 'dot', color: PALETTE.focus, text: 'White dot: where it was at the moment shown' },
       ...(zones.length ? [{ mark: 'outline', color: '#e8edf5', text: 'Outline: the affected area as published by GDACS' }] : []),
     ];
     const draw = plan.draw.bind(plan);

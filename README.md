@@ -297,6 +297,14 @@ point or changing a radius reads everything again, as does `--fresh`.
 `python tests/test_measure.py` checks the script on simulated files with
 the same layout as real GCOV products.
 
+## Colours and marks
+
+The app follows one written set of visual rules, `docs/VISUAL_RULES.md`:
+which colour means what, where each choice comes from (NASA Earth
+Observatory's colour guidance, the NISAR picture convention, and the
+colours USGS, GDACS and NASA give their own data), and which tests keep it
+that way.
+
 ## How honest the pictures are
 
 - NISAR records in several polarisation modes, and the preview colours mean

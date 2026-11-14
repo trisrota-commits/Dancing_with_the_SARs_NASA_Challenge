@@ -1,6 +1,6 @@
 // App wiring: polls the feeds, keeps the globe in sync and fills the panels.
 
-import { CATEGORIES, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START } from './config.js';
+import { CATEGORIES, FAMILIES, PALETTE, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START } from './config.js';
 import { fetchFeed, fetchArchive } from './feeds.js';
 import { buildIncidents, tagNisarCoverage, pointInPolygon, distanceKm } from './incidents.js';
 import { edgeMarginKm, latestScenes, scenesAt, bestPair, comparisonStatus, imageBounds, latestTileDate, historyAt, newestAt, nextPass, interferogramsAt, REPEAT_DAYS } from './nisar.js';
@@ -194,7 +194,7 @@ function renderFeed() {
         return `<li tabindex="0" role="button" data-n="${n}" class="${state.fresh.has(i.id) ? 'fresh' : ''}">${dot(i.category)}<span class="name">${esc(i.title)}</span><span class="t">${ago(item.time)}</span></li>`;
       }
       const s = item.scene;
-      return `<li tabindex="0" role="button" data-n="${n}" class="${state.fresh.has(s.id) ? 'fresh' : ''}"><i class="dot" style="--c:#39e6c4;border-radius:2px"></i><span class="name">NISAR pass, track ${esc(s.track)} frame ${esc(s.frame)}</span><span class="t">${ago(item.time)}</span></li>`;
+      return `<li tabindex="0" role="button" data-n="${n}" class="${state.fresh.has(s.id) ? 'fresh' : ''}"><i class="dot" style="--c:${PALETTE.nisar};border-radius:2px"></i><span class="name">NISAR pass, track ${esc(s.track)} frame ${esc(s.frame)}</span><span class="t">${ago(item.time)}</span></li>`;
     })
     .join('');
   $('feed').onclick = (e) => {
@@ -358,9 +358,10 @@ function renderReplay(u) {
   const list = $('replay-parts');
   // The key says what this event's marks are, plus the lines to its neighbours.
   const event = u.timeline ? state.selected?.incident : null;
+  const changeUp = stage.owner === 'change' || stage.owner === 'measured';
   setEventKey(
     event
-      ? [...(u.plan.key || []), ...(event.related.length ? [{ mark: 'dash', color: '#c8d0dc', text: 'Dashed lines: other events nearby in place and time' }] : [])]
+      ? [...(u.plan.key || []).filter((row) => !(changeUp && row.mark === 'fill')), ...(event.related.length ? [{ mark: 'dash', color: PALETTE.context, text: 'Dashed lines: other events nearby in place and time' }] : [])]
       : null,
   );
   if (u.state === 'off') {
@@ -703,7 +704,7 @@ function selectScene(scene, fly) {
   state.lookup++;
   state.selected = { kind: 'scene', scene, found: { backscatter: [scene], interferograms: [] } };
   const inside = visibleIncidents().filter((i) => pointInPolygon(i.lat, i.lon, scene.ring));
-  openPanel(`<span class="tag"><i class="dot" style="--c:#39e6c4;border-radius:2px"></i>NISAR radar pass</span>
+  openPanel(`<span class="tag"><i class="dot" style="--c:${PALETTE.nisar};border-radius:2px"></i>NISAR radar pass</span>
     <h3>Track ${esc(scene.track)}, frame ${esc(scene.frame)}</h3>
     <dl>
       <dt>Acquired</dt><dd>${utc(scene.time)} (${ago(scene.time)})</dd>
@@ -740,12 +741,12 @@ function choose(found) {
           : f.kind === 'place'
             ? `<li tabindex="0" role="button" data-pick="${n}">${diamond(f.place.kind)}<span>${esc(f.place.name)}</span><span class="km">${esc(PLACE_KINDS[f.place.kind].label)}</span></li>`
             : f.kind === 'satellite'
-              ? `<li tabindex="0" role="button" data-pick="${n}"><i class="dot" style="--c:#39e6c4"></i><span>NISAR, live position</span><span class="km">satellite</span></li>`
+              ? `<li tabindex="0" role="button" data-pick="${n}"><i class="dot" style="--c:${PALETTE.nisar}"></i><span>NISAR, live position</span><span class="km">satellite</span></li>`
               : f.kind === 'animal'
                 ? `<li tabindex="0" role="button" data-pick="${n}"><i class="dot" style="--c:${speciesOf(f.animal).color}"></i><span>${esc(f.animal.common)}</span><span class="km">${esc(f.animal.date || '')}</span></li>`
                 : f.kind === 'poi'
                   ? `<li tabindex="0" role="button" data-pick="${n}"><i class="dot" style="--c:#f4e3b2"></i><span>${esc(f.poi.name)}</span><span class="km">landmark</span></li>`
-                  : `<li tabindex="0" role="button" data-pick="${n}"><i class="dot" style="--c:#39e6c4;border-radius:2px"></i><span>NISAR pass, track ${esc(f.scene.track)} frame ${esc(f.scene.frame)}</span><span class="km">${ago(f.scene.time)}</span></li>`,
+                  : `<li tabindex="0" role="button" data-pick="${n}"><i class="dot" style="--c:${PALETTE.nisar};border-radius:2px"></i><span>NISAR pass, track ${esc(f.scene.track)} frame ${esc(f.scene.frame)}</span><span class="km">${ago(f.scene.time)}</span></li>`,
       )
       .join('')}</ul>`);
 }
@@ -828,7 +829,7 @@ function setLegend(kind, info = {}) {
   }
   const row = (color, text) => `<li><i style="--c:${color}"></i><span>${text}</span></li>`;
   // The teal frame around a radar picture is the edge of what that pass saw.
-  const frame = '<li><i class="outline" style="--c:#39e6c4"></i><span>Teal frame: the area this pass covered</span></li>';
+  const frame = `<li><i class="outline" style="--c:${PALETTE.nisar}"></i><span>Teal frame: the area this pass covered</span></li>`;
   let html;
   if (kind === 'radar') {
     const pol = info.pol?.co ? info.pol : { co: 'HH', cross: 'HV' };
@@ -839,8 +840,8 @@ function setLegend(kind, info = {}) {
       <ul>${
         single
           ? row('#f2f2f2', 'Bright: rough ground, buildings, plants standing in water') + row('#10141c;border:1px solid #556', 'Dark: calm water, smooth or wet ground')
-          : row('#4be04b', 'Green: forest and other vegetation') + row('#d85bd8', 'Magenta: bare ground and buildings') + row('#f2f2f2', 'White: both echoes strong') + row('#10141c;border:1px solid #556', 'Dark: calm water, smooth ground')
-      }${info.time ? frame : ''}</ul>
+          : row(PALETTE.cross, 'Green: forest and other vegetation') + row(PALETTE.co, 'Magenta: bare ground and buildings') + row('#f2f2f2', 'White: both echoes strong') + row('#10141c;border:1px solid #556', 'Dark: calm water, smooth ground')
+      }${frame}</ul>
       <small>${single ? `One radar channel (${esc(channel)}).` : `Two radar channels: magenta is ${esc(pol.co)}, green is ${esc(pol.cross)}.`}</small>`;
   } else if (kind === 'interferogram') {
     html = `<b>NISAR interferogram${info.from ? ` · ${day(info.from)} to ${day(info.to)}` : ''}</b>
@@ -851,13 +852,13 @@ function setLegend(kind, info = {}) {
     const c = info.d.change;
     html = `<b>Measured change · ${day(c.before)} to ${day(c.after)}</b>
       <p>How much the ${esc(c.pol)} radar echo changed here between two NISAR passes, from NISAR's calibrated data.</p>
-      <ul>${row('#40aaff', 'Blue: the echo got weaker') + row('#ffaa3c', 'Orange: the echo got stronger')}</ul>
+      <ul>${row(PALETTE.weaker, 'Blue: the echo got weaker') + row(PALETTE.stronger, 'Orange: the echo got stronger')}</ul>
       <small>Full colour means 3 dB or more, which is half or double the echo's power. Changes under 1.5 dB are not drawn. A measurement, not a statement of cause.</small>`;
   } else {
     const km = (v) => (v >= 100 ? Math.round(v).toLocaleString('en') : v.toFixed(1));
     html = `<b>What changed · ${day(info.from)} to ${day(info.to)}</b>
       <p>Where the radar echo differs between two NISAR passes.</p>
-      <ul>${row('#40aaff', `Echo got weaker: ${km(info.result.weakerKm2)} km²`) + row('#ffaa3c', `Echo got stronger: ${km(info.result.strongerKm2)} km²`)}</ul>
+      <ul>${row(PALETTE.weaker, `Blue: the echo got weaker, ${km(info.result.weakerKm2)} km²`) + row(PALETTE.stronger, `Orange: the echo got stronger, ${km(info.result.strongerKm2)} km²`)}</ul>
       <small>Worked out from preview pictures: a guide to where to look, not a measurement, and not a statement of cause.</small>`;
   }
   legend.picture = html;
@@ -903,6 +904,10 @@ function take(owner) {
   stage.owner = owner;
   // A running time-lapse yields to whatever takes the globe from it.
   if (owner !== 'lapse' && replay.plan && !replay.timeline) replay.stop();
+  // A change map is a blue and orange fill; the event's own blue water
+  // makes way for it and comes back with anything else.
+  globe.setEffectFillsShown(owner !== 'change' && owner !== 'measured');
+  if (replay.timeline) replay.report();
   setLegend(null);
   globe.clearScenes();
   // The divider stays up while the two radar wavelengths are being compared.
@@ -914,6 +919,7 @@ function take(owner) {
   // Buttons that had put a picture up go back to offering it.
   if ($('compare')) $('compare').textContent = 'Compare the source images';
   if ($('changes')) $('changes').textContent = 'Show what changed';
+  if ($('measured-map')) $('measured-map').textContent = 'Show the measured change map';
   document.querySelectorAll('#detail [data-show]').forEach((b) => (b.textContent = b.id === 'igram-go' ? 'Show ground movement' : 'Show on globe'));
   // The timeline draws its pass afresh when it next owns the globe.
   if (state.selected) state.selected.passIndex = state.selected.passLoaded = undefined;
@@ -962,8 +968,8 @@ async function showChanges(button) {
     if ($('change-out')) {
       $('change-out').innerHTML = `
       <ul class="legend">
-        <li><i style="--c:#40aaff"></i><span><b>Echo got weaker</b> on ${km(result.weakerKm2)} km² (${pct(result.weakerShare)}). Typical causes: new open water, burnt or cleared vegetation, smoother ground.</span></li>
-        <li><i style="--c:#ffaa3c"></i><span><b>Echo got stronger</b> on ${km(result.strongerKm2)} km² (${pct(result.strongerShare)}). Typical causes: flooded vegetation, wetter or rougher ground, new structures.</span></li>
+        <li><i style="--c:${PALETTE.weaker}"></i><span><b>Echo got weaker</b> on ${km(result.weakerKm2)} km² (${pct(result.weakerShare)}). Typical causes: new open water, burnt or cleared vegetation, smoother ground.</span></li>
+        <li><i style="--c:${PALETTE.stronger}"></i><span><b>Echo got stronger</b> on ${km(result.strongerKm2)} km² (${pct(result.strongerShare)}). Typical causes: flooded vegetation, wetter or rougher ground, new structures.</span></li>
       </ul>
       <label class="check"><input type="checkbox" id="under" checked /> Show the radar image underneath</label>
       <details class="fold inner"><summary>How this is worked out</summary>
@@ -1541,14 +1547,14 @@ function selectSatellite() {
   state.lookup++;
   state.selected = { kind: 'satellite' };
   globe.select(null);
-  openPanel(`<span class="tag"><i class="dot" style="--c:#39e6c4"></i>Live</span>
+  openPanel(`<span class="tag"><i class="dot" style="--c:${PALETTE.nisar}"></i>Live</span>
     <h3>NISAR, right now</h3>
     <dl id="sat-facts"></dl>
     <div class="actions"><button id="sat-follow">Fly to NISAR</button></div>
     <h4>Its orbit</h4>
     <p class="note">NISAR circles the Earth about every 100 minutes, 747 km up, passing near both poles. Its orbit keeps it over the line between day and night (a dawn–dusk orbit), and it repeats the same path every 12 days.</p>
     <h4>Where the radar looks</h4>
-    <p class="note">The radar looks to the left of the flight direction. The two lines on the ground mark the edges of its 242 km swath over the last 25 minutes, and the two beams show where it points now. NISAR does not image all the time, so this shows where it can look, not proof that it did.</p>
+    <p class="note">The radar looks to the left of the flight direction. The two lines on the ground mark the edges of its 242 km swath over the last 25 minutes, and the two beams show where it points now. The solid line is the orbit it has just flown, the dashed line the orbit ahead; everything of NISAR's is drawn in teal. NISAR does not image all the time, so this shows where it can look, not proof that it did.</p>
     <h4>Where this comes from</h4>
     <p class="hint">Position worked out in your browser with the standard SGP4 orbit model, from public orbit elements (${esc(e.source)}, ${esc(e.name)}, epoch ${utc(elementsEpoch(e.satrec).getTime())}). Accurate to a few kilometres. The swath edges are approximate.</p>`);
   satFacts(live.pos || positionAt(e.satrec, new Date()));
@@ -1678,7 +1684,7 @@ async function showMeasured(stillHere, pending, findCompare) {
 async function showMeasuredMap(button) {
   const d = state.selected?.measured;
   if (!d) return;
-  const token = take('manual');
+  const token = take('measured');
   button.textContent = 'Loading…';
   try {
     const picture = await loadPicture(changeImageUrl(d));
@@ -1877,7 +1883,9 @@ function applyLayers() {
   globe.setNisarTiles($('nisar-tiles').checked, date, +$('stack').value);
   for (const key of Object.keys(OVERLAYS)) {
     globe.setOverlay(key, $(`ov-${key}`).checked, date);
+    $(`key-${key}`).hidden = !$(`ov-${key}`).checked;
   }
+  $('nisar-tiles-key').hidden = !$('nisar-tiles').checked;
   // Two wavelengths side by side, for the same days.
   state.bands = $('bands').checked;
   globe.setBandCompare(state.bands, date, Math.min(3, +$('stack').value));
@@ -1929,7 +1937,15 @@ async function start() {
         `<h5>${group}</h5>` +
         Object.entries(OVERLAYS)
           .filter(([, o]) => o.group === group)
-          .map(([k, o]) => `<label class="check"><input type="checkbox" id="ov-${k}" /> ${o.label}</label>`)
+          .map(
+            ([k, o]) =>
+              `<label class="check"><input type="checkbox" id="ov-${k}" /> ${o.label}</label>` +
+              // What the layer's colours mean, shown while it is on: NASA's
+              // own legend picture where there is one, a plain line if not.
+              `<div class="layer-key" id="key-${k}" hidden>${
+                o.legend ? `<img src="${o.legend}" alt="NASA's legend for this layer" loading="lazy" /><small>Legend: NASA GIBS</small>` : `<small>${esc(o.note || '')}</small>`
+              }</div>`,
+          )
           .join(''),
     )
     .join('');

@@ -186,6 +186,19 @@ say what it shows without us.
   the results. The lead has been given the options (GitHub's scheduler
   with an encrypted secret, or a server of our own) and has not chosen.
 
+### Visual rules (lead, 14 Nov, night)
+
+The lead, after one screenshot confused them: no arbitrary colours; one
+general, explicit rule set, from NASA where NASA has one. It is in
+`docs/VISUAL_RULES.md`, with the sources. Read it before adding anything
+visible. In short: every meaningful colour comes from `PALETTE` in
+`js/config.js`; teal is NISAR and nothing else; event types and place
+kinds share seven colour families and are always also named in words;
+shape says what sort of thing a mark is; agency scales stay the agencies'
+own; NASA's legend pictures explain NASA's layers; and every mark is in a
+key. `tests/visual.test.mjs` enforces what can be computed. An inventory
+of all 91 colour uses found the clashes that led to these rules.
+
 ### The awards the lead is aiming at (told 14 Nov)
 
 Space Apps gives these across all challenges: Best Use of Science, Best

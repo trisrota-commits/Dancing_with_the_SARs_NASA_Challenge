@@ -1,19 +1,72 @@
 // Static configuration: event categories, data endpoints and map layers.
 
+// Every colour that carries meaning, in one place. docs/VISUAL_RULES.md
+// gives the rule behind each and where it comes from. A colour that means
+// something must come from here, never be typed in where it is used.
+export const PALETTE = {
+  // Everything NISAR: footprints, the frame of a pass, pass ticks, the
+  // orbit, the ring on an event NISAR has imaged.
+  nisar: '#39e6c4',
+  // The two radar channels, as in NASA's preview pictures: the
+  // same-polarisation echo (HH or VV) is in red and blue, so it reads
+  // magenta; the cross-polarisation echo (HV or VH) is in green.
+  co: '#d85bd8',
+  cross: '#4be04b',
+  // Change between two passes: a diverging pair around "no change", which
+  // is not drawn. Only ever a filled patch on the ground.
+  weaker: '#40aaff',
+  stronger: '#ffaa3c',
+  // The reader's own focus: selection, divider, handle, "today".
+  focus: '#ffffff',
+  // Context that is not the subject: earlier quakes, links, missing data.
+  context: '#9ea8b8',
+  // Kinds of event and place, grouped into families by what physically
+  // happens. NASA's guidance allows about twelve categories "practically
+  // speaking, probably fewer"; seven can be told apart, thirteen cannot.
+  family: {
+    ground: '#ff5a4f', // the ground moves: earthquakes, volcanoes, landslides
+    fire: '#ffa62b', // something burns
+    water: '#2f8fff', // water where it was not
+    weather: '#d596ff', // the air: storms, dust, heat and cold, drought
+    ice: '#e4f4ff', // ice and snow
+    life: '#c5e84a', // vegetation: forests and fields
+    human: '#7f8ba0', // human-made, and anything else
+  },
+  // GDACS alert levels, the agency's own three colours.
+  gdacs: { green: '#4ade80', orange: '#ffa62b', red: '#ff5a4f' },
+  // USGS ShakeMap intensity, used only when a contour arrives without the
+  // colour USGS normally gives it. From intensity III to IX and above.
+  shaking: ['#a0e6ff', '#80ffff', '#7aff93', '#ffff00', '#ffc800', '#ff9100', '#ff0000'],
+};
+
+const F = PALETTE.family;
+
+// Listed family by family, so the filter chips sit together by colour.
 export const CATEGORIES = {
-  earthquake: { label: 'Earthquake', color: '#ff5a4f', mergeKm: 100, mergeHours: 0.25 },
-  wildfire: { label: 'Wildfire', color: '#ffa62b', mergeKm: 25, mergeHours: 24 * 7 },
-  flood: { label: 'Flood', color: '#3fa7ff', mergeKm: 100, mergeHours: 24 * 7 },
-  storm: { label: 'Storm', color: '#b48cff', mergeKm: 300, mergeHours: 24 * 3 },
-  volcano: { label: 'Volcano', color: '#ff4fa3', mergeKm: 30, mergeHours: 24 * 14 },
-  ice: { label: 'Sea & lake ice', color: '#7fe7f2', mergeKm: 50, mergeHours: 24 * 14 },
-  drought: { label: 'Drought', color: '#d9b26a', mergeKm: 300, mergeHours: 24 * 30 },
-  landslide: { label: 'Landslide', color: '#b5651d', mergeKm: 30, mergeHours: 24 * 7 },
-  snow: { label: 'Snow', color: '#eef3ff', mergeKm: 300, mergeHours: 24 * 3 },
-  dust: { label: 'Dust & haze', color: '#bfa38a', mergeKm: 300, mergeHours: 24 * 3 },
-  heat: { label: 'Extreme heat or cold', color: '#ff8f6b', mergeKm: 300, mergeHours: 24 * 3 },
-  manmade: { label: 'Human-made', color: '#9aa6b8', mergeKm: 30, mergeHours: 24 * 3 },
-  other: { label: 'Other', color: '#c2c9d6', mergeKm: 50, mergeHours: 24 * 7 },
+  earthquake: { label: 'Earthquake', family: 'ground', color: F.ground, mergeKm: 100, mergeHours: 0.25 },
+  volcano: { label: 'Volcano', family: 'ground', color: F.ground, mergeKm: 30, mergeHours: 24 * 14 },
+  landslide: { label: 'Landslide', family: 'ground', color: F.ground, mergeKm: 30, mergeHours: 24 * 7 },
+  wildfire: { label: 'Wildfire', family: 'fire', color: F.fire, mergeKm: 25, mergeHours: 24 * 7 },
+  flood: { label: 'Flood', family: 'water', color: F.water, mergeKm: 100, mergeHours: 24 * 7 },
+  storm: { label: 'Storm', family: 'weather', color: F.weather, mergeKm: 300, mergeHours: 24 * 3 },
+  drought: { label: 'Drought', family: 'weather', color: F.weather, mergeKm: 300, mergeHours: 24 * 30 },
+  dust: { label: 'Dust & haze', family: 'weather', color: F.weather, mergeKm: 300, mergeHours: 24 * 3 },
+  heat: { label: 'Extreme heat or cold', family: 'weather', color: F.weather, mergeKm: 300, mergeHours: 24 * 3 },
+  ice: { label: 'Sea & lake ice', family: 'ice', color: F.ice, mergeKm: 50, mergeHours: 24 * 14 },
+  snow: { label: 'Snow', family: 'ice', color: F.ice, mergeKm: 300, mergeHours: 24 * 3 },
+  manmade: { label: 'Human-made', family: 'human', color: F.human, mergeKm: 30, mergeHours: 24 * 3 },
+  other: { label: 'Other', family: 'human', color: F.human, mergeKm: 50, mergeHours: 24 * 7 },
+};
+
+// What each family colour stands for, for the key.
+export const FAMILIES = {
+  ground: 'The ground moves: earthquakes, volcanoes, landslides',
+  fire: 'Fire',
+  water: 'Water: floods and wetlands',
+  weather: 'Weather: storms, dust, heat or cold, drought',
+  ice: 'Ice and snow',
+  life: 'Vegetation: forests and fields',
+  human: 'Human-made, and other',
 };
 
 // Events of different kinds this close in space and time are shown as related.
@@ -97,6 +150,13 @@ export const BASEMAPS = {
 };
 
 // Optional context overlays, all dated daily tiles from NASA GIBS.
+// NASA publishes a legend picture for most of its map layers. The app shows
+// that picture and does not describe NASA's colours in its own words. The
+// names come from the GIBS catalogue (WMTS GetCapabilities, LegendURL).
+const legend = (name) => `https://gibs.earthdata.nasa.gov/legends/${name}_H.svg`;
+
+// Layers that are pictures, not colour-coded values, have no legend there;
+// they carry one plain line on how to read them instead.
 // Context layers, all tiles from NASA GIBS. Most follow the imagery date;
 // those with a `date` are yearly or one-off maps published under that date.
 export const OVERLAYS = {
@@ -104,48 +164,56 @@ export const OVERLAYS = {
     group: 'Radar and water',
     label: 'Surface water from radar (OPERA, Sentinel-1)',
     url: gibs('OPERA_L3_Dynamic_Surface_Water_Extent-Sentinel-1', 'png', 12),
+    legend: legend('OPERA_Dynamic_Surface_Water_Extent_S1'),
     maxLevel: 12,
   },
   s1: {
     group: 'Radar and water',
     label: 'C-band backscatter (OPERA, Sentinel-1)',
     url: gibs('OPERA_L2_Radiometric_Terrain_Corrected_SAR_Sentinel-1', 'png', 12),
+    note: 'A radar picture from Sentinel-1 (C-band). Bright: rough ground, buildings, vegetation. Dark: calm water and smooth ground.',
     maxLevel: 12,
   },
   soil: {
     group: 'Radar and water',
     label: 'Surface soil moisture (SMAP)',
     url: gibs('SMAP_L4_Analyzed_Surface_Soil_Moisture', 'png', 6),
+    legend: legend('SMAP_Analyzed_Soil_Moisture'),
     maxLevel: 6,
   },
   rain: {
     group: 'Weather and ice',
     label: 'Rainfall rate that day (IMERG)',
     url: gibs('IMERG_Precipitation_Rate', 'png', 6),
+    legend: legend('GPM_Precipitation_Rate'),
     maxLevel: 6,
   },
   seaice: {
     group: 'Weather and ice',
     label: 'Sea ice concentration (GHRSST MUR)',
     url: gibs('GHRSST_L4_MUR25_Sea_Ice_Concentration', 'png', 6),
+    legend: legend('GHRSST_Sea_Ice_Concentration'),
     maxLevel: 6,
   },
   snow: {
     group: 'Weather and ice',
     label: 'Snow cover (MODIS Terra)',
     url: gibs('MODIS_Terra_L3_NDSI_Snow_Cover_Daily', 'png', 8),
+    legend: legend('MODIS_NDSI_Snow_Cover'),
     maxLevel: 8,
   },
   disturbance: {
     group: 'Land and people',
     label: 'Vegetation disturbance alerts (OPERA)',
     url: gibs('OPERA_L3_DIST-ALERT-HLS_Color_Index', 'png', 12),
+    legend: legend('OPERA_Vegetation_Disturbance_Status'),
     maxLevel: 12,
   },
   landcover: {
     group: 'Land and people',
     label: 'Land cover type (MODIS, 2024)',
     url: gibs('MODIS_Combined_L3_IGBP_Land_Cover_Type_Annual', 'png', 8),
+    legend: legend('MODIS_IGBP_Land_Cover_Type'),
     maxLevel: 8,
     date: '2024-01-01',
   },
@@ -153,6 +221,7 @@ export const OVERLAYS = {
     group: 'Land and people',
     label: 'Croplands (2000)',
     url: gibs('Agricultural_Lands_Croplands_2000', 'png', 7),
+    legend: legend('Agricultural_Lands_Croplands_2000'),
     maxLevel: 7,
     date: '2000-01-01',
   },
@@ -160,6 +229,7 @@ export const OVERLAYS = {
     group: 'Land and people',
     label: 'Population density (GPW, 2020)',
     url: gibs('GPW_Population_Density_2020', 'png', 7),
+    legend: legend('GPW_Population_Density_2020'),
     maxLevel: 7,
     date: '2020-01-01',
   },
@@ -167,6 +237,7 @@ export const OVERLAYS = {
     group: 'Land and people',
     label: 'Built-up areas (Landsat)',
     url: gibs('Landsat_Human_Built-up_And_Settlement_Extent', 'png', 12),
+    legend: legend('Landsat_Human_Built-up_And_Settlement_Extent'),
     maxLevel: 12,
     date: '2010-01-01',
   },
@@ -174,6 +245,7 @@ export const OVERLAYS = {
     group: 'Land and people',
     label: 'City lights at night (Black Marble, 2016)',
     url: gibs('VIIRS_Black_Marble', 'png', 8),
+    note: 'A night-time picture: the brighter, the more light a place gave off.',
     maxLevel: 8,
     date: '2016-01-01',
   },

@@ -7,10 +7,13 @@
 // follows the water there, which NISAR maps. The "look" text says what NISAR's
 // first months of data (from June 2026) can show.
 
+import { PALETTE } from './config.js';
+
 export const PLACE_KINDS = {
   glacier: {
     label: 'Glaciers',
-    color: '#cfe9ff',
+    family: 'ice',
+    color: PALETTE.family.ice,
     look: 'In the melt season, wet snow and ice absorb the L-band signal, so the glacier turns dark in the time-lapse. When it refreezes in autumn, it brightens again. At a calving front, watch the edge between bright ice and dark water move. HH carries most of the signal over ice; HV is weaker.',
     note: 'Northern glaciers melt from June to September, while southern ones are in winter. Compare a northern glacier with a Patagonian or New Zealand one to see the two hemispheres move out of step.',
     links: [
@@ -21,49 +24,56 @@ export const PLACE_KINDS = {
   },
   subsidence: {
     label: 'Sinking ground',
-    color: '#d08a4e',
+    family: 'ground',
+    color: PALETTE.family.ground,
     look: 'Sinking ground barely changes the radar brightness, so the backscatter time-lapse shows little here. The change shows up in interferograms instead: one full colour cycle is about 12 cm of movement towards or away from the satellite (half of NISAR’s 24 cm wavelength).',
     note: 'Most of this sinking comes from pumping groundwater faster than it refills, which compacts the clay layers underground.',
     links: [],
   },
   wetland: {
     label: 'Wetlands',
-    color: '#3cc0a0',
+    family: 'water',
+    color: PALETTE.family.water,
     look: 'Open water turns dark. Flooded forest or reeds turn very bright in HH, because the signal bounces off the water and then the stems (a “double bounce”). As the flood spreads and retreats, these dark and bright patches move.',
     note: 'Radar sees flooding under a forest canopy, which optical satellites cannot. That makes L-band especially useful for wetlands.',
     links: [],
   },
   forest: {
     label: 'Forest loss',
-    color: '#66bb44',
+    family: 'life',
+    color: PALETTE.family.life,
     look: 'Forest gives a strong HV echo from leaves and branches. Where it is cleared, HV drops sharply and stays low. L-band sees through the clouds that hide tropical forests for much of the year.',
     note: 'L-band reaches deeper into the canopy than shorter radar wavelengths, so it relates more closely to forest structure and biomass.',
     links: [['Global Forest Watch', 'https://www.globalforestwatch.org/']],
   },
   farming: {
     label: 'Farming seasons',
-    color: '#e6d24a',
+    family: 'life',
+    color: PALETTE.family.life,
     look: 'Flooded paddies at planting turn dark, because calm water reflects the pulse away. As the rice grows, stems standing in water brighten HH through double bounce, and HV rises with the canopy. After harvest the fields fall dark again.',
     note: 'June to November covers the monsoon rice season in South and Southeast Asia, so NISAR’s first months show one whole crop cycle there.',
     links: [],
   },
   volcano: {
     label: 'Volcanoes',
-    color: '#ff7ac0',
+    family: 'ground',
+    color: PALETTE.family.ground,
     look: 'Magma moving underground lifts or lowers the ground by centimetres. Interferograms show this as colour fringes: one full cycle is about 12 cm of movement. In the backscatter time-lapse, fresh lava flows and ash change the surface roughness.',
     note: 'Ground that keeps rising can be an early sign of unrest. Radar watches it through cloud and at night, which matters at volcanoes that are often cloud-covered.',
     links: [['Smithsonian Global Volcanism Program', 'https://volcano.si.edu/']],
   },
   landslide: {
     label: 'Moving slopes',
-    color: '#c9824a',
+    family: 'ground',
+    color: PALETTE.family.ground,
     look: 'Slow-moving slopes show in interferograms and pixel offsets as a patch moving downhill, centimetres to metres a year. A sudden failure strips the surface and changes the backscatter sharply.',
     note: 'L-band keeps a usable signal on vegetated slopes, where shorter radar wavelengths often lose it. That makes NISAR well suited to landslide monitoring.',
     links: [],
   },
   human: {
     label: 'Human-made change',
-    color: '#9aa6b8',
+    family: 'human',
+    color: PALETTE.family.human,
     look: 'A filling reservoir turns from land into dark, calm water, pass by pass. Mines and new construction change the surface and its roughness, which shows as a shift in backscatter.',
     note: 'These changes show how people reshape the surface, which the challenge asks teams to consider alongside natural processes.',
     links: [],
