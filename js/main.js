@@ -3,7 +3,7 @@
 import { CATEGORIES, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS } from './config.js';
 import { fetchFeed } from './feeds.js';
 import { buildIncidents, tagNisarCoverage, pointInPolygon, distanceKm } from './incidents.js';
-import { latestScenes, scenesAt, bestPair, imageBounds, latestTileDate, historyAt } from './nisar.js';
+import { latestScenes, scenesAt, bestPair, comparisonStatus, imageBounds, latestTileDate, historyAt } from './nisar.js';
 import { loadFrames, spread, view, history } from './timelapse.js';
 import { historyChart } from './chart.js';
 import { Globe, loadPicture } from './globe.js';
@@ -311,7 +311,7 @@ function radarHtml(inc, found) {
   if (!backscatter.length && !interferograms.length) {
     return `<p class="note">No NISAR scene covers this point between ${day(inc.time - NISAR_LOOKBACK_DAYS * DAY)} and today. NISAR revisits every 12 days, and oceans are mostly not imaged.</p>`;
   }
-  const pair = bestPair(backscatter, inc.time);
+  const { pair, reason } = comparisonStatus(backscatter, inc.time);
   const before = backscatter.filter((s) => s.time < inc.time).length;
   let html = `<p class="note">${backscatter.length} backscatter scenes (${before} before, ${backscatter.length - before} after) and ${interferograms.length} interferograms.</p>`;
   if (pair) {
@@ -322,8 +322,8 @@ function radarHtml(inc, found) {
         <button id="compare">Compare the source images</button>
       </div>
       <div id="change-out"></div></div>`;
-  } else if (backscatter.length) {
-    html += `<p class="note">No repeat pass after the event yet, so there is no before/after pair. The next pass on the same track comes 12 days after the last one.</p>`;
+  } else {
+    html += `<p class="note">Before/after comparison unavailable: ${esc(reason)}</p>`;
   }
   html += backscatter.slice(0, 8).map((s) => sceneCard(s, inc.time)).join('');
   if (backscatter.length > 8) html += `<p class="hint">${backscatter.length - 8} older scenes not listed.</p>`;

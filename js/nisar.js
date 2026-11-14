@@ -113,12 +113,15 @@ export async function historyAt(lat, lon) {
 }
 
 // Best before/after pair: same track and frame, closest to the event on each side.
-export function bestPair(scenes, eventTime) {
+export function bestPair(scenes, eventTime, requirePreview = true) {
   const byStack = new Map();
   for (const s of scenes) {
-    if (!s.image) continue;
-    if (!byStack.has(s.stack)) byStack.set(s.stack, []);
-    byStack.get(s.stack).push(s);
+    if (s.product !== 'GCOV' || !s.track || !s.frame ||
+        !['Ascending', 'Descending'].includes(s.direction) || !Number.isFinite(s.time)) continue;
+    if (requirePreview && !s.image) continue;
+    const stack = `${s.track}-${s.direction}-${s.frame}`;
+    if (!byStack.has(stack)) byStack.set(stack, []);
+    byStack.get(stack).push(s);
   }
   let best = null;
   for (const list of byStack.values()) {
@@ -129,6 +132,20 @@ export function bestPair(scenes, eventTime) {
     if (!best || span < best.span) best = { before, after, span };
   }
   return best;
+}
+
+// Metadata-only feasibility check; no preview downloads are needed.
+export function comparisonStatus(scenes, eventTime) {
+  const pair = bestPair(scenes, eventTime);
+  if (pair) return { pair, reason: '' };
+  const coverage = scenes.filter((s) => s.product === 'GCOV' && Number.isFinite(s.time));
+  let reason;
+  if (!coverage.length) reason = 'No backscatter scenes were found in the searched archive window.';
+  else if (!coverage.some((s) => s.time < eventTime)) reason = 'No earlier pass was found before the event in the searched archive window.';
+  else if (!coverage.some((s) => s.time >= eventTime)) reason = 'No pass at or after the event was found in the searched archive window.';
+  else if (bestPair(coverage, eventTime, false)) reason = 'Matching passes exist, but a source image preview is unavailable.';
+  else reason = 'No before/after passes with verified matching metadata on the same track, direction and frame were found in the searched archive window.';
+  return { pair: null, reason };
 }
 
 // Corner coordinates of a preview image, read from its KML sidecar.
