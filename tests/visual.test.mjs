@@ -83,3 +83,12 @@ test('every event type that draws on the globe says what its marks are', () => {
     assert.ok(/\bkey: \[|\.key = \[/.test(body), `${name} draws on the globe without a key`);
   }
 });
+
+test('context layers that cover the whole map are marked, so only one shows at a time', async () => {
+  const { OVERLAYS } = await import('../js/config.js');
+  // Measured on NASA's tiles: these draw 77 to 100 % of a tile over land.
+  const fills = Object.keys(OVERLAYS).filter((k) => OVERLAYS[k].fills).sort();
+  assert.deepEqual(fills, ['built', 'crops', 'landcover', 'lights', 'population', 'soil']);
+  // A radar layer is strips on an empty globe and never fills.
+  for (const k of fills) assert.ok(!OVERLAYS[k].sparse, k);
+});

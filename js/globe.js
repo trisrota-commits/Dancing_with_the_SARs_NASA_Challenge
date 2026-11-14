@@ -342,7 +342,11 @@ export class Globe {
     const s = this.state;
     const base = BASEMAPS[s.base];
     const layers = [{ url: base.url.replace('{date}', iso(Date.now() - DAY)), maxLevel: base.maxLevel, base: true }];
-    for (const [key, date] of Object.entries(s.overlays)) {
+    // A layer that fills the land goes underneath, the partial ones on top,
+    // each group in the order of the menu, whatever was switched on first.
+    const order = Object.keys(OVERLAYS);
+    const rank = (key) => (OVERLAYS[key].fills ? 0 : 100) + order.indexOf(key);
+    for (const [key, date] of Object.entries(s.overlays).sort((a, b) => rank(a[0]) - rank(b[0]))) {
       layers.push({ url: OVERLAYS[key].url.replace('{date}', OVERLAYS[key].date || date), maxLevel: OVERLAYS[key].maxLevel, alpha: 0.85, sparse: !!OVERLAYS[key].sparse, sheet: OVERLAYS[key].sheet?.replace('{date}', OVERLAYS[key].date || date), map: OVERLAYS[key].map?.replace('{date}', OVERLAYS[key].date || date) });
     }
     // Two radar wavelengths side by side: NISAR (L-band) left of the

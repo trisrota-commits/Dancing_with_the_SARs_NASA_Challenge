@@ -177,7 +177,17 @@ const legend = (name) => `https://gibs.earthdata.nasa.gov/legends/${name}_H.svg`
 // Layers that are pictures, not colour-coded values, have no legend there;
 // they carry one plain line on how to read them instead.
 // Context layers, all tiles from NASA GIBS. Most follow the imagery date;
-// those with a `date` are yearly or one-off maps published under that date.
+// those with a `date` are yearly or one-off maps published under that date
+// ('default' for a map NASA publishes without one).
+//
+// `fills` marks a layer that paints the whole land surface (measured: 77 to
+// 100 % of a tile over land is drawn). Such a layer hides everything under
+// it, so only one of them is shown at a time; the others (strips, alerts,
+// rain, ice) lie on top and can be combined.
+// How many days back the app looks for the newest day NASA has published
+// for a daily layer. Some run days behind (soil moisture two, the
+// vegetation alerts about a week).
+export const OVERLAY_REACH_DAYS = 12;
 export const OVERLAYS = {
   water: {
     group: 'Radar and water',
@@ -198,6 +208,7 @@ export const OVERLAYS = {
   },
   soil: {
     group: 'Radar and water',
+    fills: true,
     label: 'Surface soil moisture (SMAP)',
     url: gibs('SMAP_L4_Analyzed_Surface_Soil_Moisture', 'png', 6),
     legend: legend('SMAP_Analyzed_Soil_Moisture'),
@@ -233,6 +244,7 @@ export const OVERLAYS = {
   },
   landcover: {
     group: 'Land and people',
+    fills: true,
     label: 'Land cover type (MODIS, 2024)',
     url: gibs('MODIS_Combined_L3_IGBP_Land_Cover_Type_Annual', 'png', 8),
     legend: legend('MODIS_IGBP_Land_Cover_Type'),
@@ -241,6 +253,7 @@ export const OVERLAYS = {
   },
   crops: {
     group: 'Land and people',
+    fills: true,
     label: 'Croplands (2000)',
     url: gibs('Agricultural_Lands_Croplands_2000', 'png', 7),
     legend: legend('Agricultural_Lands_Croplands_2000'),
@@ -249,14 +262,17 @@ export const OVERLAYS = {
   },
   population: {
     group: 'Land and people',
+    fills: true,
     label: 'Population density (GPW, 2020)',
     url: gibs('GPW_Population_Density_2020', 'png', 7),
     legend: legend('GPW_Population_Density_2020'),
     maxLevel: 7,
-    date: '2020-01-01',
+    // Published without a date: asking for one is refused.
+    date: 'default',
   },
   built: {
     group: 'Land and people',
+    fills: true,
     label: 'Built-up areas (Landsat)',
     url: gibs('Landsat_Human_Built-up_And_Settlement_Extent', 'png', 12),
     legend: legend('Landsat_Human_Built-up_And_Settlement_Extent'),
@@ -265,6 +281,7 @@ export const OVERLAYS = {
   },
   lights: {
     group: 'Land and people',
+    fills: true,
     label: 'City lights at night (Black Marble, 2016)',
     url: gibs('VIIRS_Black_Marble', 'png', 8),
     note: 'A night-time picture: the brighter, the more light a place gave off.',

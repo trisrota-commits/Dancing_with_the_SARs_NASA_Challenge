@@ -122,7 +122,9 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
   Sentinel-1 (C-band) right of it.
 - Twelve context layers in three groups: radar and water, weather and ice,
   land and people (population, built-up areas, croplands, land cover, city
-  lights).
+  lights). The six that cover the whole map show one at a time; the others
+  lie on top and can be combined. A daily layer NASA has not published yet
+  for the chosen day is shown for its newest day, and the menu says which.
 - A time-lapse can be **played as sound**: pitch follows the brightness at
   the chosen point.
 

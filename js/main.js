@@ -5,7 +5,7 @@
 // still showing an older copy.
 const BUILD = '2026-11-14 22:50 UTC';
 
-import { CATEGORIES, FAMILIES, PALETTE, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START, RECENT_MS } from './config.js';
+import { CATEGORIES, FAMILIES, PALETTE, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START, RECENT_MS, OVERLAY_REACH_DAYS } from './config.js';
 import { fetchFeed, fetchArchive } from './feeds.js';
 import { buildIncidents, tagNisarCoverage, pointInPolygon, distanceKm } from './incidents.js';
 import { edgeMarginKm, latestScenes, scenesAt, passesAt, bestPair, comparisonStatus, imageBounds, latestTileDate, likelyTileDate, historyAt, newestAt, nextPass, interferogramsAt, REPEAT_DAYS } from './nisar.js';
@@ -2103,12 +2103,56 @@ function goToPlace(place) {
 
 // ---------- layer controls ----------
 
+// The day a context layer is shown for: the chosen day, or the newest day
+// before it that NASA has published. Several layers run days behind, and
+// asking for a day they do not have returns an error for every tile. One
+// tiny tile (the whole world) answers whether a day exists.
+const overlayDays = new Map();
+function overlayDay(key, date) {
+  const o = OVERLAYS[key];
+  if (o.date) return Promise.resolve(o.date);
+  const id = `${key} ${date}`;
+  if (!overlayDays.has(id)) {
+    const has = (d) =>
+      fetch(o.url.replace('{date}', d).replace('{z}/{y}/{x}', '0/0/0')).then(
+        (res) => (res.ok ? true : res.status === 404 || res.status === 400 ? false : null),
+        () => null,
+      );
+    const found = (async () => {
+      const first = await has(date);
+      // Published, or the question could not be answered: the chosen day.
+      if (first !== false) return date;
+      const days = Array.from({ length: OVERLAY_REACH_DAYS }, (_, k) => day(Date.parse(date) - (k + 1) * DAY));
+      const answers = await Promise.all(days.map(has));
+      return days[answers.indexOf(true)] || null;
+    })();
+    overlayDays.set(id, found);
+  }
+  return overlayDays.get(id);
+}
+
 function applyLayers() {
   const date = $('date').value;
   globe.setNisarTiles($('nisar-tiles').checked, date, +$('stack').value);
   for (const key of Object.keys(OVERLAYS)) {
-    globe.setOverlay(key, $(`ov-${key}`).checked, date);
-    $(`key-${key}`).hidden = !$(`ov-${key}`).checked;
+    const on = $(`ov-${key}`).checked;
+    $(`key-${key}`).hidden = !on;
+    const note = $(`day-${key}`);
+    note.hidden = true;
+    if (!on) {
+      globe.setOverlay(key, false, date);
+      continue;
+    }
+    overlayDay(key, date).then((used) => {
+      // The switch or the date may have changed while the answer was out.
+      if (!$(`ov-${key}`).checked || $('date').value !== date) return;
+      globe.setOverlay(key, !!used, used);
+      if (used === date || OVERLAYS[key].date) return;
+      note.hidden = false;
+      note.textContent = used
+        ? `NASA's newest day for this layer is ${used}; that is what is shown.`
+        : `NASA has published nothing for this layer in the ${OVERLAY_REACH_DAYS} days before ${date}.`;
+    });
   }
   $('nisar-tiles-key').hidden = !$('nisar-tiles').checked;
   // Two wavelengths side by side, for the same days.
@@ -2164,7 +2208,8 @@ async function start() {
           .filter(([, o]) => o.group === group)
           .map(
             ([k, o]) =>
-              `<label class="check"><input type="checkbox" id="ov-${k}" /> ${o.label}</label>` +
+              `<label class="check"><input type="checkbox" id="ov-${k}" ${o.fills ? 'data-fills' : ''} /> ${o.label}${o.fills ? ' <span class="fills" title="This layer covers the whole map, so it replaces any other that does">▣</span>' : ''}</label>` +
+              `<small class="layer-day" id="day-${k}" hidden></small>` +
               // What the layer's colours mean, shown while it is on: NASA's
               // own legend picture where there is one, a plain line if not.
               `<div class="layer-key" id="key-${k}" hidden>${
@@ -2220,7 +2265,14 @@ async function start() {
     draw();
   };
   ['nisar-tiles', 'stack', 'date', 'bands'].forEach((id) => ($(id).onchange = applyLayers));
-  $('overlays').onchange = applyLayers;
+  $('overlays').onchange = (e) => {
+    // A layer that covers the whole map hides whatever lies under it, so
+    // switching one on switches the other ones of that sort off.
+    if (e.target.dataset?.fills != null && e.target.checked) {
+      for (const other of document.querySelectorAll('#overlays input[data-fills]')) if (other !== e.target) other.checked = false;
+    }
+    applyLayers();
+  };
   $('date-prev').onclick = () => shiftDate(-1);
   $('date-next').onclick = () => shiftDate(1);
   $('date-play').onclick = togglePlay;
