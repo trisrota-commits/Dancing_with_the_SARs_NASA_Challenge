@@ -123,7 +123,8 @@ const FRAGMENT = /* glsl */ `
       color += vec3(0.45, 0.75, 1.0) * arrive * (1.0 - arrive) * smoothstep(0.1, 0.5, cover) * 1.3;
     }
     float lit = smoothstep(-0.12, 0.18, dot(normalize(vNormal), uSun));
-    color *= mix(1.0, mix(0.13, 1.0, lit), uNight);
+    // Night is dim and cool, but the ground stays readable.
+    color *= mix(vec3(1.0), mix(vec3(0.2, 0.24, 0.33), vec3(1.0), lit), uNight);
     // Shock fronts glow on the ground: the slower, stronger wave in red
     // with a fading wake behind it, the faster one ahead of it in white.
     if (uWave.w > 0.0) {
