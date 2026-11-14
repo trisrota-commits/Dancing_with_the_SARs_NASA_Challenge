@@ -1,12 +1,15 @@
-// Streams map tiles onto the sphere. A quadtree picks the tiles the camera
-// needs, and each visible tile composites every active layer into one small
-// canvas, so the GPU draws exactly one textured mesh per tile however many
-// layers are switched on.
+// Streams map tiles onto the sphere and shapes them into real terrain.
+//
+// A quadtree picks the tiles the camera needs. Each visible tile composites
+// every active layer (tile layers, single images such as radar previews, and
+// outlines) into one small canvas, so the GPU draws exactly one textured mesh
+// per tile however much is switched on, and everything drapes over the relief.
 
 import * as THREE from '../../vendor/three.module.min.js';
-import { RAD, toVec, tileLon, tileLat, lonDelta } from './geo.js';
+import { RAD, EARTH_RADIUS_M, toVec, tileLon, tileLat, lonDelta } from './geo.js';
 
 const SIZE = 256;
+const GRID = 32;
 const MIN_ZOOM = 2;
 const MAX_ZOOM = 17;
 const MAX_LEAVES = 320;
@@ -14,32 +17,58 @@ const PARALLEL_DOWNLOADS = 14;
 const IMAGE_CACHE = 900;
 const TILE_CACHE = 420;
 
+// Open elevation tiles (Mapzen/AWS Terrain Tiles): height in metres packed
+// into the red, green and blue of each pixel.
+const ELEVATION_URL = 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png';
+const ELEVATION_MAX = 13;
+// One elevation tile serves 8×8 map tiles: 256 samples spread over 32 cells.
+const ELEVATION_SHIFT = 3;
+const ELEVATION_CACHE = 260;
+
 const VERTEX = /* glsl */ `
+  attribute float aHeight;
+  attribute float aDrop;
+  attribute float aShade;
+  uniform float uExaggeration;
   varying vec2 vUv;
   varying vec3 vNormal;
+  varying float vShade;
   void main() {
     vUv = uv;
     vNormal = normal;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    vShade = aShade;
+    vec3 p = position + normal * ((aHeight * uExaggeration - aDrop) / ${EARTH_RADIUS_M.toFixed(1)});
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
   }`;
 
 const FRAGMENT = /* glsl */ `
   uniform sampler2D map;
+  uniform sampler2D mapB;
+  uniform float uUseB;
+  uniform float uSplit;
+  uniform vec2 uViewport;
   uniform vec3 uSun;
   uniform float uNight;
+  uniform float uRelief;
   varying vec2 vUv;
   varying vec3 vNormal;
+  varying float vShade;
   void main() {
-    vec3 color = texture2D(map, vUv).rgb;
+    // Left of the divider shows the "before" picture when one is loaded.
+    bool left = uUseB > 0.5 && gl_FragCoord.x / uViewport.x < uSplit;
+    vec3 color = left ? texture2D(mapB, vUv).rgb : texture2D(map, vUv).rgb;
+    color *= mix(1.0, vShade, uRelief);
     float lit = smoothstep(-0.12, 0.18, dot(normalize(vNormal), uSun));
     color *= mix(1.0, mix(0.13, 1.0, lit), uNight);
     gl_FragColor = vec4(color, 1.0);
   }`;
 
-const indexCache = new Map();
-function gridIndex(rows, cols) {
+// Triangles for a rows×cols grid plus a skirt hanging from its rim, which
+// hides hairline gaps between neighbouring tiles of different height detail.
+const layoutCache = new Map();
+function layout(rows, cols) {
   const key = `${rows}x${cols}`;
-  if (!indexCache.has(key)) {
+  if (!layoutCache.has(key)) {
     const idx = [];
     for (let r = 0; r < rows - 1; r++) {
       for (let c = 0; c < cols - 1; c++) {
@@ -48,34 +77,81 @@ function gridIndex(rows, cols) {
         idx.push(a, b, a + 1, a + 1, b, b + 1);
       }
     }
-    indexCache.set(key, new THREE.BufferAttribute(new Uint16Array(idx), 1));
+    const rim = [];
+    for (let c = 0; c < cols; c++) rim.push(c);
+    for (let r = 1; r < rows; r++) rim.push(r * cols + cols - 1);
+    for (let c = cols - 2; c >= 0; c--) rim.push((rows - 1) * cols + c);
+    for (let r = rows - 2; r >= 1; r--) rim.push(r * cols);
+    const base = rows * cols;
+    for (let k = 0; k < rim.length; k++) {
+      const n = (k + 1) % rim.length;
+      idx.push(rim[k], base + k, rim[n], rim[n], base + k, base + n);
+    }
+    layoutCache.set(key, { index: new THREE.BufferAttribute(new Uint16Array(idx), 1), rim });
   }
-  return indexCache.get(key);
+  return layoutCache.get(key);
+}
+
+const mercatorX = (lon) => (lon + 180) / 360;
+const mercatorY = (lat) => (1 - Math.asinh(Math.tan(Math.max(-85.05, Math.min(85.05, lat)) * RAD)) / Math.PI) / 2;
+
+// Height in metres at fractional pixel (px, py) of a decoded elevation tile.
+function sample(h, px, py) {
+  const x = Math.max(0, Math.min(SIZE - 1.001, px));
+  const y = Math.max(0, Math.min(SIZE - 1.001, py));
+  const x0 = Math.floor(x);
+  const y0 = Math.floor(y);
+  const fx = x - x0;
+  const fy = y - y0;
+  const i = y0 * SIZE + x0;
+  const top = h[i] * (1 - fx) + h[i + 1] * fx;
+  const bottom = h[i + SIZE] * (1 - fx) + h[i + SIZE + 1] * fx;
+  return top * (1 - fy) + bottom * fy;
 }
 
 export class TileGlobe {
-  constructor(scene) {
+  constructor(scene, shared) {
     this.group = new THREE.Group();
     scene.add(this.group);
-    // Dark sphere just under the tiles, so hairline gaps between tiles of
-    // different detail never show space through them.
-    this.group.add(new THREE.Mesh(new THREE.SphereGeometry(0.9994, 96, 64), new THREE.MeshBasicMaterial({ color: 0x08121d })));
+    // Dark sphere just under the tiles, so nothing ever shows space through.
+    this.group.add(new THREE.Mesh(new THREE.SphereGeometry(0.9985, 96, 64), new THREE.MeshBasicMaterial({ color: 0x08121d })));
 
     this.layers = [];
+    this.pictures = [];
+    this.outlines = [];
     this.tiles = new Map();
     this.images = new Map();
     this.queue = [];
     this.downloading = 0;
+    this.elevation = new Map();
+    this.elevationQueue = [];
+    this.elevationLoading = 0;
+    this.elevationVersion = 0;
+    this.terrain = true;
     this.frame = 0;
     this.leaves = [];
-    this.stale = [];
     this.changed = true;
-    this.uniforms = { uSun: { value: new THREE.Vector3(1, 0, 0) }, uNight: { value: 0 } };
+    this.uniforms = {
+      uSun: { value: new THREE.Vector3(1, 0, 0) },
+      uNight: { value: 0 },
+      uExaggeration: { value: 2 },
+      uRelief: { value: 1 },
+      uSplit: { value: 0.5 },
+      uViewport: shared.uViewport,
+    };
     this.frustum = new THREE.Frustum();
     this.matrix = new THREE.Matrix4();
+    this.reader = document.createElement('canvas');
+    this.reader.width = this.reader.height = SIZE;
+    this.readerCtx = this.reader.getContext('2d', { willReadFrequently: true });
   }
 
-  // layers: [{ url: 'https://…/{z}/{y}/{x}.png', maxLevel, alpha, base }]
+  repaintAll() {
+    for (const tile of this.tiles.values()) tile.dirty = true;
+    this.changed = true;
+  }
+
+  // Tile layers: [{ url: 'https://…/{z}/{y}/{x}.png', maxLevel, alpha, base }]
   setLayers(layers) {
     this.layers = layers;
     for (const entry of this.queue) {
@@ -92,7 +168,34 @@ export class TileGlobe {
         for (let i = 0; i < 4 ** z; i++) this.image(base, z, i % 2 ** z, Math.floor(i / 2 ** z), null).pinned = true;
       }
     }
-    for (const tile of this.tiles.values()) tile.dirty = true;
+    this.repaintAll();
+  }
+
+  // Single images laid over a lat/lon box:
+  // [{ image, bounds: { west, south, east, north }, side: 'left' | 'right' | undefined, alpha }]
+  setPictures(pictures) {
+    this.pictures = pictures;
+    this.repaintAll();
+  }
+
+  // Outlines drawn on the ground: [{ ring: [{ lat, lon }…], color: 'rgba(…)', width }]
+  setOutlines(outlines) {
+    for (const o of outlines) {
+      const lon0 = o.ring[0].lon;
+      // Unwrap around the first corner so shapes crossing 180° stay whole.
+      o.points = o.ring.map((p) => ({ x: mercatorX(lon0 + lonDelta(p.lon, lon0)), y: mercatorY(p.lat) }));
+      o.minX = Math.min(...o.points.map((p) => p.x));
+      o.maxX = Math.max(...o.points.map((p) => p.x));
+      o.minY = Math.min(...o.points.map((p) => p.y));
+      o.maxY = Math.max(...o.points.map((p) => p.y));
+    }
+    this.outlines = outlines;
+    this.repaintAll();
+  }
+
+  setTerrain(on) {
+    this.terrain = on;
+    for (const tile of this.tiles.values()) tile.shapeDirty = true;
     this.changed = true;
   }
 
@@ -102,7 +205,7 @@ export class TileGlobe {
     const cam = camera.position;
     const dist = cam.length();
     this.cam = cam;
-    this.alt = dist - 1;
+    this.alt = Math.max(1e-6, dist - 1);
     this.camLat = Math.asin(cam.y / dist) / RAD;
     this.camLon = Math.atan2(cam.x, cam.z) / RAD;
     // Angle one screen pixel covers, per unit of distance from the camera.
@@ -129,19 +232,25 @@ export class TileGlobe {
     const near = toVec(lat, lon, 1, scratchA);
 
     if (z >= MIN_ZOOM) {
-      if (near.dot(this.cam) < 0.998) return; // over the horizon
-      const centre = toVec((north + south) / 2, midLon, 1, scratchB);
-      const corner = toVec(Math.abs(north) < Math.abs(south) ? north : south, west, 1, scratchC);
-      sphere.center.copy(centre);
-      sphere.radius = centre.distanceTo(corner) * 1.05;
-      if (z > 3 && !this.frustum.intersectsSphere(sphere)) return;
+      if (near.dot(this.cam) < 0.996) return; // over the horizon
+      if (z > 3) {
+        // Bounding ball around the tile, raised to the ground height there.
+        const midLat = (north + south) / 2;
+        const centre = toVec(midLat, midLon, 1, scratchB);
+        const corner = toVec(Math.abs(north) < Math.abs(south) ? north : south, west, 1, scratchC);
+        const radius = centre.distanceTo(corner);
+        const lift = z > 6 ? (this.heightAt(midLat, midLon) * this.uniforms.uExaggeration.value) / EARTH_RADIUS_M : 0.003;
+        sphere.center.copy(centre).multiplyScalar(1 + (z > 6 ? lift : 0));
+        sphere.radius = radius * 1.25 + (z > 6 ? 0.00008 : lift);
+        if (!this.frustum.intersectsSphere(sphere)) return;
+      }
     }
 
     let split = z < MIN_ZOOM;
     if (!split && z < MAX_ZOOM && leaves.length < MAX_LEAVES) {
-      const range = Math.max(this.alt, near.distanceTo(this.cam));
+      const range = Math.max(this.alt * 0.6, near.distanceTo(this.cam));
       // Ground width of one texel, foreshortened when seen at a slant.
-      const facing = Math.max(0.35, (near.dot(this.cam) - 1) / range);
+      const facing = Math.max(0.14, (near.dot(this.cam) - 1) / range);
       const texel = ((2 * Math.PI * Math.cos(lat * RAD)) / 2 ** z / SIZE) * facing;
       split = texel > this.pixel * range * 0.95;
     }
@@ -184,15 +293,22 @@ export class TileGlobe {
       this.changed = true;
     }
 
-    // Repaint a bounded number of tiles per frame to keep frames short.
+    // Repaint and reshape a bounded number of tiles per frame.
     let budget = 24;
     for (const tile of this.tiles.values()) {
-      if (!tile.dirty || !tile.mesh.visible) continue;
-      this.paint(tile);
-      this.changed = true;
-      if (--budget === 0) break;
+      if (!tile.mesh.visible) continue;
+      if (tile.shapeDirty) {
+        this.shape(tile);
+        this.changed = true;
+      }
+      if (tile.dirty) {
+        this.paint(tile);
+        this.changed = true;
+        if (--budget === 0) break;
+      }
     }
     this.pump();
+    this.pumpElevation();
     const changed = this.changed;
     this.changed = false;
     return changed;
@@ -200,50 +316,61 @@ export class TileGlobe {
 
   build(leaf, key) {
     const { z, x, y } = leaf;
-    const n = z <= 2 ? 24 : z <= 5 ? 12 : 6;
+    // Relief is invisible on continent-sized tiles; spend fewer triangles there.
+    const n = z <= 4 ? GRID / 2 : GRID;
     const edge = 2 ** z - 1;
     // Rows from north to south; the outermost tiles reach on to the pole.
     const rows = [];
-    if (y === 0) rows.push({ lat: 90, v: 1 });
-    for (let j = 0; j <= n; j++) rows.push({ lat: tileLat(y + j / n, z), v: 1 - j / n });
-    if (y === edge) rows.push({ lat: -90, v: 0 });
+    if (y === 0) rows.push({ lat: 90, v: 1, t: 0 });
+    for (let j = 0; j <= n; j++) rows.push({ lat: tileLat(y + j / n, z), v: 1 - j / n, t: j / n });
+    if (y === edge) rows.push({ lat: -90, v: 0, t: 1 });
 
     const cols = n + 1;
+    const { index, rim } = layout(rows.length, cols);
+    const count = rows.length * cols + rim.length;
     const centre = toVec((leaf.north + leaf.south) / 2, (leaf.west + leaf.east) / 2);
-    const position = new Float32Array(rows.length * cols * 3);
-    const normal = new Float32Array(rows.length * cols * 3);
-    const uv = new Float32Array(rows.length * cols * 2);
+    const position = new Float32Array(count * 3);
+    const normal = new Float32Array(count * 3);
+    const uv = new Float32Array(count * 2);
+    const drop = new Float32Array(count);
     const p = new THREE.Vector3();
     let k = 0;
-    let u = 0;
     for (const row of rows) {
-      for (let i = 0; i <= n; i++) {
+      for (let i = 0; i <= n; i++, k++) {
         toVec(row.lat, leaf.west + ((leaf.east - leaf.west) * i) / n, 1, p);
-        normal.set([p.x, p.y, p.z], k);
+        normal.set([p.x, p.y, p.z], k * 3);
         // Stored relative to the tile centre to keep full precision up close.
-        position.set([p.x - centre.x, p.y - centre.y, p.z - centre.z], k);
-        k += 3;
-        uv[u++] = i / n;
-        uv[u++] = row.v;
+        position.set([p.x - centre.x, p.y - centre.y, p.z - centre.z], k * 3);
+        uv.set([i / n, row.v], k * 2);
       }
     }
+    const midLat = (leaf.north + leaf.south) / 2;
+    const width = (2 * Math.PI * EARTH_RADIUS_M * Math.cos(midLat * RAD)) / 2 ** z;
+    rim.forEach((from, s) => {
+      const to = rows.length * cols + s;
+      position.copyWithin(to * 3, from * 3, from * 3 + 3);
+      normal.copyWithin(to * 3, from * 3, from * 3 + 3);
+      uv.copyWithin(to * 2, from * 2, from * 2 + 2);
+      drop[to] = Math.max(300, width * 0.04);
+    });
+
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(position, 3));
     geometry.setAttribute('normal', new THREE.BufferAttribute(normal, 3));
     geometry.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
-    geometry.setIndex(gridIndex(rows.length, cols));
+    geometry.setAttribute('aDrop', new THREE.BufferAttribute(drop, 1));
+    geometry.setAttribute('aHeight', new THREE.BufferAttribute(new Float32Array(count), 1));
+    geometry.setAttribute('aShade', new THREE.BufferAttribute(new Float32Array(count).fill(1), 1));
+    geometry.setIndex(index);
 
     const canvas = document.createElement('canvas');
     canvas.width = canvas.height = SIZE;
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.colorSpace = THREE.NoColorSpace;
-    texture.generateMipmaps = false;
-    texture.minFilter = texture.magFilter = THREE.LinearFilter;
-
+    const texture = this.texture(canvas);
     const material = new THREE.ShaderMaterial({
-      uniforms: { map: { value: texture }, uSun: this.uniforms.uSun, uNight: this.uniforms.uNight },
+      uniforms: { ...this.uniforms, map: { value: texture }, mapB: { value: texture }, uUseB: { value: 0 } },
       vertexShader: VERTEX,
       fragmentShader: FRAGMENT,
+      side: THREE.DoubleSide,
     });
     const mesh = new THREE.Mesh(geometry, material);
     mesh.position.copy(centre);
@@ -251,7 +378,30 @@ export class TileGlobe {
     mesh.matrixAutoUpdate = false;
     mesh.updateMatrix();
     this.group.add(mesh);
-    return { z, x, y, key, mesh, canvas, ctx: canvas.getContext('2d'), texture, dirty: true, lastUsed: this.frame };
+    return {
+      ...leaf,
+      key,
+      mesh,
+      rows,
+      cols,
+      rim,
+      width,
+      canvas,
+      ctx: canvas.getContext('2d'),
+      texture,
+      dirty: true,
+      shapeDirty: true,
+      heightLevel: -1,
+      lastUsed: this.frame,
+    };
+  }
+
+  texture(canvas) {
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.NoColorSpace;
+    texture.generateMipmaps = false;
+    texture.minFilter = texture.magFilter = THREE.LinearFilter;
+    return texture;
   }
 
   drop(key, tile) {
@@ -259,9 +409,12 @@ export class TileGlobe {
     tile.mesh.geometry.dispose();
     tile.mesh.material.dispose();
     tile.texture.dispose();
+    tile.textureB?.dispose();
     tile.dead = true;
     this.tiles.delete(key);
   }
+
+  // ---------- painting ----------
 
   // Draws every layer into the tile's canvas, using a coarser cached image
   // as a stand-in wherever the exact tile has not arrived yet.
@@ -288,7 +441,220 @@ export class TileGlobe {
         break;
       }
     }
+    ctx.globalAlpha = 1;
+
+    const here = this.pictures.filter((p) => p.bounds.east > tile.west && p.bounds.west < tile.east && p.bounds.north > tile.south && p.bounds.south < tile.north);
+    const sided = here.some((p) => p.side);
+    if (sided) {
+      // A second canvas holds what the left of the divider should show.
+      if (!tile.canvasB) {
+        tile.canvasB = document.createElement('canvas');
+        tile.canvasB.width = tile.canvasB.height = SIZE;
+        tile.ctxB = tile.canvasB.getContext('2d');
+        tile.textureB = this.texture(tile.canvasB);
+        tile.mesh.material.uniforms.mapB.value = tile.textureB;
+      }
+      tile.ctxB.globalAlpha = 1;
+      tile.ctxB.drawImage(tile.canvas, 0, 0);
+    }
+    for (const picture of here) {
+      if (picture.side !== 'left') this.drape(ctx, tile, picture);
+      if (sided && picture.side !== 'right') this.drape(tile.ctxB, tile, picture);
+    }
+    this.stroke(ctx, tile);
+    if (sided) {
+      this.stroke(tile.ctxB, tile);
+      tile.textureB.needsUpdate = true;
+    }
+    tile.mesh.material.uniforms.uUseB.value = sided ? 1 : 0;
     tile.texture.needsUpdate = true;
+  }
+
+  // Lays a plain lat/lon image into this Mercator tile, in thin horizontal
+  // strips so latitude lands where it should.
+  drape(ctx, tile, picture) {
+    const b = picture.bounds;
+    const img = picture.image;
+    const strips = 32;
+    const west = Math.max(b.west, tile.west);
+    const east = Math.min(b.east, tile.east);
+    const dx = ((west - tile.west) / (tile.east - tile.west)) * SIZE;
+    const dw = ((east - west) / (tile.east - tile.west)) * SIZE;
+    const sx = ((west - b.west) / (b.east - b.west)) * img.width;
+    const sw = ((east - west) / (b.east - b.west)) * img.width;
+    ctx.globalAlpha = picture.alpha ?? 1;
+    for (let k = 0; k < strips; k++) {
+      const top = tileLat(tile.y + k / strips, tile.z);
+      const bottom = tileLat(tile.y + (k + 1) / strips, tile.z);
+      const north = Math.min(top, b.north);
+      const south = Math.max(bottom, b.south);
+      if (north <= south) continue;
+      const stripY = (k / strips) * SIZE;
+      const stripH = SIZE / strips;
+      const dy = stripY + ((top - north) / (top - bottom)) * stripH;
+      const dh = ((north - south) / (top - bottom)) * stripH;
+      const sy = ((b.north - north) / (b.north - b.south)) * img.height;
+      const sh = ((north - south) / (b.north - b.south)) * img.height;
+      // Half a pixel of overlap keeps the strips from showing seams.
+      ctx.drawImage(img, sx, sy, sw, sh, dx, dy - 0.25, dw, dh + 0.5);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  stroke(ctx, tile) {
+    if (!this.outlines.length) return;
+    const n = 2 ** tile.z;
+    const x0 = tile.x / n;
+    const y0 = tile.y / n;
+    const pad = 4 / SIZE / n;
+    for (const o of this.outlines) {
+      // The shape may sit one world-width away after unwrapping.
+      for (const shift of [-1, 0, 1]) {
+        if (o.maxX + shift < x0 - pad || o.minX + shift > x0 + 1 / n + pad || o.maxY < y0 - pad || o.minY > y0 + 1 / n + pad) continue;
+        ctx.beginPath();
+        o.points.forEach((p, i) => {
+          const px = (p.x + shift - x0) * n * SIZE;
+          const py = (p.y - y0) * n * SIZE;
+          if (i) ctx.lineTo(px, py);
+          else ctx.moveTo(px, py);
+        });
+        ctx.closePath();
+        if (o.fill) {
+          ctx.fillStyle = o.fill;
+          ctx.fill();
+        }
+        ctx.lineWidth = o.width ?? 1.5;
+        ctx.strokeStyle = o.color;
+        ctx.stroke();
+      }
+    }
+  }
+
+  // ---------- terrain ----------
+
+  // Lifts the tile's vertices to real heights and bakes a gentle hillshade.
+  shape(tile) {
+    tile.shapeDirty = false;
+    const g = tile.mesh.geometry;
+    const height = g.attributes.aHeight;
+    const shade = g.attributes.aShade;
+    if (!this.terrain) {
+      if (tile.heightLevel !== -1) {
+        height.array.fill(0);
+        shade.array.fill(1);
+        height.needsUpdate = shade.needsUpdate = true;
+        tile.heightLevel = -1;
+      }
+      return;
+    }
+    const { z, x, y, cols } = tile;
+    const top = Math.min(ELEVATION_MAX, Math.max(0, z - ELEVATION_SHIFT));
+    const exact = this.heights(top, x >> (z - top), y >> (z - top), tile);
+    let level = top;
+    let data = null;
+    for (; level >= 0; level--) {
+      const entry = level === top ? exact : this.elevation.get(`${level}/${x >> (z - level)}/${y >> (z - level)}`);
+      if (entry?.state === 'ready') {
+        data = entry;
+        break;
+      }
+    }
+    if (!data || level === tile.heightLevel) return;
+    tile.heightLevel = level;
+    data.lastUsed = this.frame;
+
+    const scale = 2 ** (z - level);
+    const u0 = (x % scale) / scale;
+    const v0 = (y % scale) / scale;
+    const n = cols - 1;
+    const rows = tile.rows.length;
+    const h = height.array;
+    for (let r = 0; r < rows; r++) {
+      const py = (v0 + tile.rows[r].t / scale) * SIZE - 0.5;
+      for (let c = 0; c < cols; c++) h[r * cols + c] = sample(data.h, (u0 + c / n / scale) * SIZE - 0.5, py);
+    }
+    // Light from the north-west, the mapmaker's convention.
+    const cell = tile.width / n;
+    const s = shade.array;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const i = r * cols + c;
+        const dx = (h[r * cols + Math.min(n, c + 1)] - h[r * cols + Math.max(0, c - 1)]) / (2 * cell);
+        const dy = (h[Math.max(0, r - 1) * cols + c] - h[Math.min(rows - 1, r + 1) * cols + c]) / (2 * cell);
+        s[i] = Math.max(0.6, Math.min(1.35, 1 + 1.2 * (dx - dy)));
+      }
+    }
+    tile.rim.forEach((from, k) => {
+      h[rows * cols + k] = h[from];
+      s[rows * cols + k] = s[from];
+    });
+    height.needsUpdate = shade.needsUpdate = true;
+  }
+
+  heights(z, x, y, tile) {
+    const key = `${z}/${x}/${y}`;
+    let entry = this.elevation.get(key);
+    if (!entry) {
+      entry = { key, z, x, y, state: 'queued', h: null, waiting: new Set(), lastUsed: this.frame };
+      this.elevation.set(key, entry);
+      this.elevationQueue.push(entry);
+    }
+    if (entry.state === 'queued' || entry.state === 'loading') entry.waiting.add(tile);
+    entry.lastUsed = this.frame;
+    return entry;
+  }
+
+  pumpElevation() {
+    while (this.elevationLoading < 6 && this.elevationQueue.length) {
+      const entry = this.elevationQueue.pop();
+      if (![...entry.waiting].some((t) => !t.dead && t.mesh.visible)) {
+        this.elevation.delete(entry.key);
+        continue;
+      }
+      this.elevationLoading++;
+      entry.state = 'loading';
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      const done = (ok) => {
+        this.elevationLoading--;
+        entry.state = ok ? 'ready' : 'missing';
+        if (ok) {
+          this.readerCtx.drawImage(img, 0, 0, SIZE, SIZE);
+          const px = this.readerCtx.getImageData(0, 0, SIZE, SIZE).data;
+          const h = new Float32Array(SIZE * SIZE);
+          // Sea floor is flattened to sea level: the imagery shows the surface.
+          for (let i = 0; i < h.length; i++) h[i] = Math.max(0, px[i * 4] * 256 + px[i * 4 + 1] + px[i * 4 + 2] / 256 - 32768);
+          entry.h = h;
+          this.elevationVersion++;
+        }
+        for (const t of entry.waiting) if (!t.dead) t.shapeDirty = true;
+        entry.waiting.clear();
+        this.changed = true;
+        this.wake?.();
+      };
+      img.onload = () => done(true);
+      img.onerror = () => done(false);
+      img.src = ELEVATION_URL.replace('{z}', entry.z).replace('{x}', entry.x).replace('{y}', entry.y);
+    }
+    if (this.elevation.size > ELEVATION_CACHE) {
+      const old = [...this.elevation.values()].filter((e) => e.state === 'ready').sort((a, b) => a.lastUsed - b.lastUsed);
+      for (const entry of old.slice(0, this.elevation.size - ELEVATION_CACHE * 0.8)) this.elevation.delete(entry.key);
+    }
+  }
+
+  // Ground height in metres from the best elevation data loaded so far.
+  heightAt(lat, lon) {
+    if (!this.terrain) return 0;
+    const X = mercatorX(lon);
+    const Y = mercatorY(lat);
+    for (let z = ELEVATION_MAX; z >= 0; z--) {
+      const n = 2 ** z;
+      const x = Math.min(n - 1, Math.floor(X * n));
+      const y = Math.min(n - 1, Math.floor(Y * n));
+      const entry = this.elevation.get(`${z}/${x}/${y}`);
+      if (entry?.state === 'ready') return sample(entry.h, (X * n - x) * SIZE - 0.5, (Y * n - y) * SIZE - 0.5);
+    }
+    return 0;
   }
 
   // ---------- image loading ----------
@@ -358,7 +724,7 @@ export class TileGlobe {
   }
 
   get busy() {
-    return this.downloading > 0 || this.queue.length > 0;
+    return this.downloading > 0 || this.queue.length > 0 || this.elevationLoading > 0 || this.elevationQueue.length > 0;
   }
 }
 

@@ -461,6 +461,20 @@ async function start() {
   $('date-prev').onclick = () => shiftDate(-1);
   $('date-next').onclick = () => shiftDate(1);
   $('date-play').onclick = togglePlay;
+  $('terrain').onchange = (e) => globe.setTerrain(e.target.checked);
+  $('stretch').oninput = (e) => {
+    $('stretch-value').textContent = `×${e.target.value}`;
+    globe.setExaggeration(+e.target.value);
+  };
+  $('nav-in').onclick = () => globe.zoom(0.5);
+  $('nav-out').onclick = () => globe.zoom(2);
+  $('nav-north').onclick = () => globe.faceNorth();
+  $('nav-tilt').onclick = () => globe.toggleTilt();
+  globe.onView = (view) => {
+    $('needle').style.transform = `rotate(${-view.heading}deg)`;
+    $('nav-tilt').classList.toggle('on', view.pitch > 5);
+    $('nav-tilt').textContent = view.pitch > 5 ? '2D' : '3D';
+  };
   $('close').onclick = closePanel;
   $('menu').onclick = () => {
     const closed = $('left').classList.toggle('closed');

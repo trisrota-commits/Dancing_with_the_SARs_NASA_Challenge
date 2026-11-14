@@ -4,7 +4,7 @@
 import * as THREE from '../../vendor/three.module.min.js';
 import { toVec } from './geo.js';
 
-const LIFT = 4e-5; // overlays sit about 250 m above the tiles
+export const LIFT = 2e-5; // marks sit about 130 m above the ground
 
 // ---------- event dots ----------
 
@@ -83,9 +83,11 @@ export class Dots {
     this.items = [];
   }
 
-  // items: [{ lat, lon, color: [r,g,b], size, ring, born }]
-  set(items) {
+  // items: [{ lat, lon, color: [r,g,b], size, ring, born }]; lift(lat, lon)
+  // gives the ground height there, in Earth radii.
+  set(items, lift) {
     this.items = items;
+    this.lift = lift;
     const n = items.length;
     const position = new Float32Array(n * 3);
     const color = new Float32Array(n * 3);
@@ -94,7 +96,7 @@ export class Dots {
     const born = new Float32Array(n);
     const v = new THREE.Vector3();
     items.forEach((it, i) => {
-      toVec(it.lat, it.lon, 1 + LIFT, v);
+      toVec(it.lat, it.lon, 1 + LIFT + (lift ? lift(it.lat, it.lon) : 0), v);
       it.vec = v.clone();
       position.set([v.x, v.y, v.z], i * 3);
       color.set(it.color, i * 3);
@@ -110,6 +112,17 @@ export class Dots {
     g.setAttribute('aBorn', new THREE.BufferAttribute(born, 1));
     this.points.geometry.dispose();
     this.points.geometry = g;
+  }
+
+  // Moves the dots back onto the ground after new terrain has loaded.
+  relift() {
+    const position = this.points.geometry.attributes.position;
+    if (!position || !this.lift) return;
+    this.items.forEach((it, i) => {
+      toVec(it.lat, it.lon, 1 + LIFT + this.lift(it.lat, it.lon), it.vec);
+      position.setXYZ(i, it.vec.x, it.vec.y, it.vec.z);
+    });
+    position.needsUpdate = true;
   }
 }
 
@@ -207,24 +220,6 @@ export class Lines {
   }
 }
 
-// A closed ring of lat/lon points as a path that hugs the surface.
-export function ringPath(ring, radius = 1 + LIFT) {
-  const points = [];
-  const v = new THREE.Vector3();
-  for (let i = 0; i < ring.length; i++) {
-    const a = ring[i];
-    const b = ring[(i + 1) % ring.length];
-    for (let k = 0; k < 6; k++) {
-      const t = k / 6;
-      // Short edges: a straight blend pushed back onto the sphere is enough.
-      toVec(a.lat + (b.lat - a.lat) * t, a.lon + (((b.lon - a.lon + 540) % 360) - 180) * t, radius, v);
-      points.push(v.clone());
-    }
-  }
-  points.push(points[0].clone());
-  return points;
-}
-
 // ---------- pulsing ring on the selected event ----------
 
 const RING_VERTEX = /* glsl */ `
@@ -270,109 +265,12 @@ export class SelectionRing {
     scene.add(this.points);
   }
 
-  set(lat, lon) {
+  set(lat, lon, lift = 0) {
     this.points.visible = lat != null;
     if (lat == null) return;
-    const v = toVec(lat, lon, 1 + LIFT);
+    const v = toVec(lat, lon, 1 + LIFT + lift);
     this.points.geometry.attributes.position.setXYZ(0, v.x, v.y, v.z);
     this.points.geometry.attributes.position.needsUpdate = true;
-  }
-}
-
-// ---------- radar preview images ----------
-
-const PATCH_VERTEX = /* glsl */ `
-  varying vec2 vUv;
-  void main() {
-    vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  }`;
-
-const PATCH_FRAGMENT = /* glsl */ `
-  uniform sampler2D map;
-  uniform float uSplit;
-  uniform float uSide;
-  uniform vec2 uViewport;
-  varying vec2 vUv;
-  void main() {
-    float x = gl_FragCoord.x / uViewport.x;
-    if (uSide > 0.5 && uSide < 1.5 && x > uSplit) discard;
-    if (uSide > 1.5 && x < uSplit) discard;
-    vec4 c = texture2D(map, vUv);
-    // The previews pad the swath with black; treat that as see-through.
-    if (c.a < 0.5 || max(c.r, max(c.g, c.b)) < 0.012) discard;
-    gl_FragColor = vec4(c.rgb, 1.0);
-  }`;
-
-export class Patches {
-  constructor(scene, shared) {
-    this.scene = scene;
-    this.shared = shared;
-    this.split = { value: 0.5 };
-    this.list = [];
-    this.loader = new THREE.TextureLoader();
-    this.loader.setCrossOrigin('anonymous');
-  }
-
-  // Loads an image and lays it over the given lat/lon box. side: 'left',
-  // 'right' or undefined for the whole screen.
-  async add(url, bounds, side) {
-    const texture = await this.loader.loadAsync(url);
-    texture.colorSpace = THREE.NoColorSpace;
-    texture.generateMipmaps = true;
-    texture.minFilter = THREE.LinearMipmapLinearFilter;
-    texture.anisotropy = 4;
-
-    const n = 32;
-    const centre = toVec((bounds.north + bounds.south) / 2, (bounds.west + bounds.east) / 2);
-    const position = new Float32Array((n + 1) * (n + 1) * 3);
-    const uv = new Float32Array((n + 1) * (n + 1) * 2);
-    const index = [];
-    const v = new THREE.Vector3();
-    for (let j = 0; j <= n; j++) {
-      for (let i = 0; i <= n; i++) {
-        const k = j * (n + 1) + i;
-        toVec(bounds.north + ((bounds.south - bounds.north) * j) / n, bounds.west + ((bounds.east - bounds.west) * i) / n, 1 + LIFT * 0.5, v);
-        position.set([v.x - centre.x, v.y - centre.y, v.z - centre.z], k * 3);
-        uv.set([i / n, 1 - j / n], k * 2);
-        if (i < n && j < n) index.push(k, k + n + 1, k + 1, k + 1, k + n + 1, k + n + 2);
-      }
-    }
-    const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.BufferAttribute(position, 3));
-    g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
-    g.setIndex(index);
-    const material = new THREE.ShaderMaterial({
-      uniforms: {
-        map: { value: texture },
-        uSplit: this.split,
-        uSide: { value: side === 'left' ? 1 : side === 'right' ? 2 : 0 },
-        uViewport: this.shared.uViewport,
-      },
-      vertexShader: PATCH_VERTEX,
-      fragmentShader: PATCH_FRAGMENT,
-      polygonOffset: true,
-      polygonOffsetFactor: -4,
-      polygonOffsetUnits: -4,
-    });
-    const mesh = new THREE.Mesh(g, material);
-    mesh.position.copy(centre);
-    mesh.frustumCulled = false;
-    mesh.renderOrder = 10;
-    this.scene.add(mesh);
-    this.list.push(mesh);
-    return mesh;
-  }
-
-  clear() {
-    for (const mesh of this.list) {
-      this.scene.remove(mesh);
-      mesh.geometry.dispose();
-      mesh.material.uniforms.map.value.dispose();
-      mesh.material.dispose();
-    }
-    this.list = [];
-    this.split.value = 0.5;
   }
 }
 

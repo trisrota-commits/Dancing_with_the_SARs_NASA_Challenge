@@ -1,17 +1,17 @@
 // The globe the rest of the app talks to. It runs on our own small engine
-// (js/engine) built on three.js: streamed tiles on a sphere, one draw call
-// for all event dots, and a frame is only drawn when something changed.
+// (js/engine) built on three.js: streamed tiles shaped into real terrain,
+// one draw call for all event dots, and a frame is only drawn when
+// something changed.
 
 import * as THREE from '../vendor/three.module.min.js';
 import { CATEGORIES, BASEMAPS, OVERLAYS, NISAR_TILES } from './config.js';
 import { pointInPolygon } from './incidents.js';
-import { RAD, EARTH_RADIUS_M, toVec, toLatLon, greatCircle, sunDirection, rgb } from './engine/geo.js';
+import { RAD, EARTH_RADIUS_M, toLatLon, greatCircle, sunDirection, rgb } from './engine/geo.js';
 import { GlobeControls } from './engine/controls.js';
 import { TileGlobe } from './engine/tiles.js';
-import { Dots, Lines, SelectionRing, Patches, ringPath, atmosphere, stars } from './engine/marks.js';
+import { Dots, Lines, SelectionRing, atmosphere, stars } from './engine/marks.js';
 
 const DAY = 86400_000;
-const TEAL = rgb('#39e6c4');
 const iso = (ms) => new Date(ms).toISOString().slice(0, 10);
 
 export class Globe {
@@ -38,26 +38,30 @@ export class Globe {
       uViewport: { value: new THREE.Vector2(1, 1) },
     };
 
-    this.tiles = new TileGlobe(this.scene);
+    this.tiles = new TileGlobe(this.scene, this.shared);
     this.tiles.wake = () => (this.dirty = true);
     this.glow = atmosphere(this.scene);
-    this.patches = new Patches(this.scene, this.shared);
-    this.footprintLines = new Lines(this.scene, this.shared, { width: 1.3 });
     this.trackLines = new Lines(this.scene, this.shared, { width: 2 });
     this.linkLines = new Lines(this.scene, this.shared, { width: 1.8, dash: 14 });
-    this.highlightLines = new Lines(this.scene, this.shared, { width: 2.6, order: 21 });
     this.dots = new Dots(this.scene, this.shared);
     this.ring = new SelectionRing(this.scene, this.shared);
 
+    // Ground height in Earth radii, as drawn (so including exaggeration).
+    this.lift = (lat, lon) => (this.tiles.heightAt(lat, lon) * this.tiles.uniforms.uExaggeration.value) / EARTH_RADIUS_M;
     this.controls = new GlobeControls(this.camera, this.renderer.domElement);
+    this.controls.groundAt = this.lift;
     this.controls.onTap = (e) => this.tap(e);
 
     this.state = { base: 'esri', overlays: {}, nisar: null };
     this.scenes = [];
     this.footprintsOn = false;
+    this.highlighted = [];
+    this.pictures = [];
+    this.selected = null;
     this.born = new Map();
     this.pick = null;
     this.dirty = true;
+    this.liftedAt = 0;
     this.started = performance.now();
 
     this.tooltip = document.createElement('div');
@@ -107,6 +111,13 @@ export class Globe {
 
     const moved = this.controls.update(dt);
     const tilesChanged = this.tiles.update(this.camera, this.el.clientHeight, moved);
+    // New terrain arrived: settle the dots back onto the ground.
+    if (this.tiles.elevationVersion !== this.liftedAt && this.tiles.frame % 30 === 0) {
+      this.liftedAt = this.tiles.elevationVersion;
+      this.dots.relift();
+      if (this.selected) this.ring.set(this.selected.lat, this.selected.lon, this.lift(this.selected.lat, this.selected.lon));
+      this.dirty = true;
+    }
     // Pulsing dots and the selection ring are the only things that animate
     // on their own; without them an idle globe costs nothing.
     const animating = this.ring.points.visible || seconds < this.pulseUntil;
@@ -124,6 +135,7 @@ export class Globe {
     this.renderer.render(this.sky, this.skyCamera);
     this.renderer.clearDepth();
     this.renderer.render(this.scene, this.camera);
+    this.onView?.(this.controls);
   }
 
   // ---------- picking ----------
@@ -136,6 +148,7 @@ export class Globe {
   project(vec) {
     if (vec.dot(this.camera.position) < 1) return null;
     const p = scratch.copy(vec).project(this.camera);
+    if (p.z > 1) return null;
     return { x: (p.x * 0.5 + 0.5) * this.el.clientWidth, y: (0.5 - p.y * 0.5) * this.el.clientHeight };
   }
 
@@ -155,8 +168,16 @@ export class Globe {
   locate(x, y) {
     const ndc = new THREE.Vector2((x / this.el.clientWidth) * 2 - 1, 1 - (y / this.el.clientHeight) * 2);
     raycaster.setFromCamera(ndc, this.camera);
-    const hit = raycaster.ray.intersectSphere(unitSphere, scratch);
-    return hit ? toLatLon(hit) : null;
+    let at = null;
+    // Two passes: the second meets the ground at the height found by the first.
+    for (let pass = 0, radius = 1; pass < 2; pass++) {
+      ball.radius = radius;
+      const hit = raycaster.ray.intersectSphere(ball, scratch);
+      if (!hit) return at;
+      at = toLatLon(hit);
+      radius = 1 + this.lift(at.lat, at.lon);
+    }
+    return at;
   }
 
   tap(e) {
@@ -238,26 +259,53 @@ export class Globe {
     this.applyLayers();
   }
 
-  clearScenes() {
-    this.patches.clear();
+  // ---------- terrain ----------
+
+  setTerrain(on) {
+    this.tiles.setTerrain(on);
+    this.tiles.uniforms.uRelief.value = on ? 1 : 0;
+    this.dots.relift();
+    this.controls.apply();
     this.dirty = true;
   }
 
-  async addScene(scene, bounds, side) {
-    const mesh = await this.patches.add(scene.image, bounds, side);
+  // 1 is true scale; larger values stretch mountains so they read from afar.
+  setExaggeration(factor) {
+    this.tiles.uniforms.uExaggeration.value = factor;
+    this.dots.relift();
+    this.controls.apply();
     this.dirty = true;
-    return mesh;
+  }
+
+  // ---------- radar pictures ----------
+
+  clearScenes() {
+    if (!this.pictures.length) return;
+    this.pictures = [];
+    this.tiles.setPictures([]);
+    this.tiles.uniforms.uSplit.value = 0.5;
+    this.dirty = true;
+  }
+
+  // Drapes a radar preview over the terrain. side: 'left', 'right' or
+  // undefined for the whole screen.
+  async addScene(scene, bounds, side) {
+    const picture = { image: await loadPicture(scene.image), bounds, side, scene };
+    this.pictures = [...this.pictures, picture];
+    this.tiles.setPictures(this.pictures);
+    this.dirty = true;
+    return picture;
   }
 
   setSplit(fraction) {
-    this.patches.split.value = fraction;
+    this.tiles.uniforms.uSplit.value = fraction;
     this.dirty = true;
   }
 
   // ---------- camera ----------
 
-  flyTo(lat, lon, height = 1_800_000) {
-    this.controls.flyTo(lat, lon, height / EARTH_RADIUS_M);
+  flyTo(lat, lon, height = 1_800_000, view) {
+    this.controls.flyTo(lat, lon, height / EARTH_RADIUS_M, 1.6, view);
   }
 
   flyToBounds(b) {
@@ -265,7 +313,26 @@ export class Globe {
     const tall = (b.north - b.south) * RAD;
     const wide = (b.east - b.west) * RAD * Math.cos(lat * RAD);
     const fit = Math.max(tall, wide / this.camera.aspect) * 1.5;
-    this.controls.flyTo(lat, (b.west + b.east) / 2, fit / 2 / Math.tan((this.camera.fov * RAD) / 2));
+    this.controls.flyTo(lat, (b.west + b.east) / 2, fit / 2 / Math.tan((this.camera.fov * RAD) / 2), 1.6, { pitch: 0, heading: 0 });
+  }
+
+  zoom(factor) {
+    this.controls.stop();
+    this.controls.flyTo(this.controls.lat, this.controls.lon, this.controls.alt * factor, 0.35);
+  }
+
+  // Switches between looking straight down and a tilted 3D view.
+  toggleTilt() {
+    const c = this.controls;
+    const tilted = c.pitch > 5;
+    // From orbit, come down to where relief is visible.
+    c.flyTo(c.lat, c.lon, tilted ? c.alt : Math.min(c.alt, 0.12), 0.9, { pitch: tilted ? 0 : 62 });
+    return !tilted;
+  }
+
+  faceNorth() {
+    const c = this.controls;
+    c.flyTo(c.lat, c.lon, c.alt, 0.6, { heading: 0 });
   }
 
   // ---------- data ----------
@@ -295,7 +362,7 @@ export class Globe {
       };
     });
     this.pulseUntil = pulseUntil;
-    this.dots.set(items);
+    this.dots.set(items, this.lift);
     this.trackLines.set(tracks);
     this.dirty = true;
   }
@@ -303,35 +370,76 @@ export class Globe {
   renderFootprints(scenes, on) {
     this.scenes = scenes;
     this.footprintsOn = on;
+    this.drawOutlines();
+  }
+
+  // Footprints are painted into the ground itself, so they follow the relief.
+  drawOutlines() {
     const now = Date.now();
-    this.footprintLines.set(
-      on
-        ? scenes.map((scene) => {
-            const strength = Math.max(0.25, 1 - (now - scene.time) / DAY / 4);
-            return { points: ringPath(scene.ring), color: [...TEAL, 0.8 * strength] };
-          })
-        : [],
-    );
+    const outlines = [];
+    if (this.footprintsOn) {
+      for (const scene of this.scenes) {
+        const strength = Math.max(0.25, 1 - (now - scene.time) / DAY / 4);
+        outlines.push({ ring: scene.ring, color: `rgba(57,230,196,${(0.8 * strength).toFixed(2)})`, fill: `rgba(57,230,196,${(0.07 * strength).toFixed(3)})`, width: 1.4 });
+      }
+    }
+    for (const scene of this.highlighted) outlines.push({ ring: scene.ring, color: 'rgba(57,230,196,1)', width: 2.6 });
+    this.tiles.setOutlines(outlines);
     this.dirty = true;
   }
 
   // Ring on the chosen incident, arcs to everything linked to it, and a
   // bright outline around the given radar scenes.
   select(incident, scenes = []) {
-    this.ring.set(incident ? incident.lat : null, incident?.lon);
+    this.selected = incident;
+    this.ring.set(incident ? incident.lat : null, incident?.lon, incident ? this.lift(incident.lat, incident.lon) : 0);
     this.linkLines.set(
       incident
         ? incident.related.slice(0, 25).map((link) => ({
-            points: greatCircle(incident, link.incident, 32, 1.00004, 0.12),
+            points: greatCircle(incident, link.incident, 32, 1.0002, 0.12),
             color: [...rgb(CATEGORIES[link.incident.category].color), 0.9],
           }))
         : [],
     );
-    this.highlightLines.set(scenes.map((scene) => ({ points: ringPath(scene.ring, 1.00006), color: [...TEAL, 1] })));
-    this.dirty = true;
+    this.highlighted = scenes;
+    this.drawOutlines();
   }
+}
+
+// Loads a radar preview and makes its black padding see-through, so only
+// the imaged swath covers the ground.
+const pictureCache = new Map();
+function loadPicture(url) {
+  if (!pictureCache.has(url)) {
+    pictureCache.set(
+      url,
+      new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onerror = () => {
+          pictureCache.delete(url);
+          reject(new Error('Preview image failed to load'));
+        };
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d', { willReadFrequently: true });
+          ctx.drawImage(img, 0, 0);
+          const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const px = data.data;
+          for (let i = 0; i < px.length; i += 4) if (px[i] < 4 && px[i + 1] < 4 && px[i + 2] < 4) px[i + 3] = 0;
+          ctx.putImageData(data, 0, 0);
+          resolve(canvas);
+        };
+        img.src = url;
+      }),
+    );
+    if (pictureCache.size > 12) pictureCache.delete(pictureCache.keys().next().value);
+  }
+  return pictureCache.get(url);
 }
 
 const scratch = new THREE.Vector3();
 const raycaster = new THREE.Raycaster();
-const unitSphere = new THREE.Sphere(new THREE.Vector3(), 1);
+const ball = new THREE.Sphere(new THREE.Vector3(), 1);
