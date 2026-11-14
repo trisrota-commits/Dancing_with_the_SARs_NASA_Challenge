@@ -1,0 +1,131 @@
+# Calibrated NISAR measurements, made on a schedule without anyone's laptop.
+#
+# Twice a day this picks the strongest recent events NISAR has passed over
+# before and after (tools/pick_events.mjs), measures them and the listed
+# places from NISAR's full-resolution data (tools/measure.py), and commits
+# the results to data/measured/, where the app picks them up by itself.
+#
+# One-time setup by a repository admin:
+#   1. Log in at https://urs.earthdata.nasa.gov (free), open "Generate
+#      Token" and make a token. It is valid for 60 days.
+#   2. In this repository: Settings → Secrets and variables → Actions →
+#      New repository secret, name EARTHDATA_TOKEN, value the token.
+# The token is stored encrypted by GitHub and never appears in the code or
+# in the website. Until it exists, every run stops early and changes nothing.
+
+name: Measure with NISAR
+
+on:
+  workflow_dispatch:
+    inputs:
+      sites:
+        description: 'Site ids, separated by spaces. Empty = everything listed, plus newly picked events.'
+        required: false
+        default: ''
+      lat:
+        description: 'Or one new point: latitude'
+        required: false
+        default: ''
+      lon:
+        description: 'Longitude of that point'
+        required: false
+        default: ''
+      name:
+        description: 'Name of that point'
+        required: false
+        default: ''
+      event:
+        description: 'Date of the event there, YYYY-MM-DD (optional)'
+        required: false
+        default: ''
+  schedule:
+    # A new NISAR pass over a place comes at most every few days, so twice
+    # a day is plenty. Passes already measured are not read again.
+    - cron: '23 3,15 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: measure
+  cancel-in-progress: false
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+      EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+      EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+    steps:
+      - name: Is there an Earthdata login?
+        id: login
+        run: |
+          if [ -n "$EARTHDATA_TOKEN" ] || { [ -n "$EARTHDATA_USERNAME" ] && [ -n "$EARTHDATA_PASSWORD" ]; }; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::No Earthdata login is stored yet (secret EARTHDATA_TOKEN). Nothing was measured. See the top of .github/workflows/measure.yml."
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.login.outputs.ready == 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.login.outputs.ready == 'true'
+        with:
+          node-version: '22'
+
+      - uses: actions/setup-python@v5
+        if: steps.login.outputs.ready == 'true'
+        with:
+          python-version: '3.12'
+
+      - name: Install
+        if: steps.login.outputs.ready == 'true'
+        run: pip install --quiet earthaccess h5py numpy pyproj pillow
+
+      - name: Check the script on simulated files
+        if: steps.login.outputs.ready == 'true'
+        run: python tests/test_measure.py
+
+      - name: Pick events worth measuring
+        # Only on the scheduled run, or a manual run of everything.
+        if: steps.login.outputs.ready == 'true' && inputs.sites == '' && inputs.lat == ''
+        run: node tools/pick_events.mjs
+
+      - name: Measure
+        if: steps.login.outputs.ready == 'true'
+        # What was typed into the form arrives as plain values, never as
+        # part of the command.
+        env:
+          IN_SITES: ${{ inputs.sites }}
+          IN_LAT: ${{ inputs.lat }}
+          IN_LON: ${{ inputs.lon }}
+          IN_NAME: ${{ inputs.name }}
+          IN_EVENT: ${{ inputs.event }}
+        run: |
+          if [ -n "$IN_LAT" ] && [ -n "$IN_LON" ]; then
+            args=(--point "$IN_LAT" "$IN_LON" --save)
+            [ -n "$IN_NAME" ] && args+=(--name "$IN_NAME")
+            [ -n "$IN_EVENT" ] && args+=(--event "$IN_EVENT")
+            python tools/measure.py "${args[@]}"
+          else
+            read -r -a ids <<< "$IN_SITES"
+            python tools/measure.py "${ids[@]}"
+          fi
+
+      - name: Commit the results
+        if: steps.login.outputs.ready == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/measured tools/measure_sites.json tools/measure_events.json 2>/dev/null || git add data/measured tools/measure_sites.json
+          if git diff --cached --quiet; then
+            echo "Nothing new."
+          else
+            git commit -m "Calibrated NISAR measurements, $(date -u +%Y-%m-%d)"
+            git pull --rebase --quiet
+            git push
+          fi

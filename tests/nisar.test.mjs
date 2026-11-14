@@ -97,31 +97,3 @@ test('a calibrated measurement is stated as a step in decibels, and only called 
   assert.equal(measuredStep({ ...d, change: { before: 1, after: 2 } }), null);
   assert.equal(measuredLine({ ...d, change: { before: 1, after: 2 } }), '');
 });
-
-test('a headline only counts as news about an event when it names that kind of event', async () => {
-  const { dedupe, ON_TOPIC } = await import('../js/news.js');
-  const a = (title) => ({ title, url: 'https://example.org/' + encodeURIComponent(title), time: 1 });
-  const kept = (titles, cat) => dedupe(titles.map(a), ON_TOPIC[cat]).map((x) => x.title);
-  // The headline that showed up under a forest fire in India.
-  assert.deepEqual(kept(['Jwala , KL spot for a fiery yet refined Indian feast', 'Forest fires spread in central India', 'Firefighters battle blaze in Madhya Pradesh hills'], 'wildfire'), [
-    'Forest fires spread in central India',
-    'Firefighters battle blaze in Madhya Pradesh hills',
-  ]);
-  assert.deepEqual(kept(['Train delays in Tonga', 'Heavy rain floods Tonga capital', 'Brain drain worries Tonga'], 'flood'), ['Heavy rain floods Tonga capital']);
-  assert.deepEqual(kept(['Winds of change in Fiji politics?', 'Cyclone nears Fiji', 'Window makers of Fiji'], 'storm'), ['Winds of change in Fiji politics?', 'Cyclone nears Fiji']);
-  assert.deepEqual(kept(['M 6.1 quake hits off Japan', 'Japan stocks rise'], 'earthquake'), ['M 6.1 quake hits off Japan']);
-});
-
-test('a headline must also name the place of the event', async () => {
-  const { dedupe, ON_TOPIC, placesOf } = await import('../js/news.js');
-  const a = (title) => ({ title, url: 'https://example.org/' + encodeURIComponent(title), time: 1 });
-  const france = { title: 'Flood in France', reports: [{ country: 'France' }] };
-  assert.deepEqual(placesOf(france), ['france']);
-  // The headline that showed up under a flood in France.
-  const kept = dedupe(['An opportunity to rethink flood resilience for Bangkok', 'Floods cut roads in western France'].map(a), ON_TOPIC.flood, placesOf(france));
-  assert.deepEqual(kept.map((x) => x.title), ['Floods cut roads in western France']);
-  // Several countries, as GDACS lists them for a cyclone.
-  assert.deepEqual(placesOf({ title: 'Tropical Cyclone CHAMPI-26', reports: [{ country: 'Philippines, Guam, Japan' }] }).sort(), ['guam', 'japan', 'philippines']);
-  // No place known: nothing is shown rather than something unchecked.
-  assert.deepEqual(dedupe(['Floods somewhere'].map(a), ON_TOPIC.flood, []), []);
-});

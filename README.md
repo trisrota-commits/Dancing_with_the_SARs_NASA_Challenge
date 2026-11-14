@@ -11,7 +11,7 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
   live feeds (USGS, NASA EONET, GDACS) on a 3D globe with real terrain, and
   merges reports of the same event into one dot.
 - **Clicking an event opens a small card**, not a wall of data: what it is,
-  the news about it, one line on what NISAR has seen there, and a button
+  what the agencies report about it, one line on what NISAR has seen there, and a button
   for the NISAR image. "Show details" opens the panel.
 - **A key on the globe** says what a radar picture, an interferogram or a
   change picture is and what its colours mean, whenever one is shown.
@@ -105,8 +105,11 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
   17 June 2026, so older events have radar passes on both sides.
 - Drapes daily NISAR backscatter and other satellite layers over the terrain.
 - One search box for events (fuzzy match, no keyword list) and places.
-- **Press coverage** per event: articles GDACS has linked to it, or a
-  place-and-type search of the GDELT news index, labelled as unverified.
+- **What the agencies report** per event, on its card: depth, estimated
+  impact, felt reports, burnt hectares, alert level, each with its source
+  and a link to the official page.
+- **A live way in** on the opening card: the strongest recent event that
+  NISAR has flown over since it began, one click away.
 - **Share links:** the address bar always points at the open event, story,
   place or spot, with a "Copy link" button.
 - **Two radar wavelengths side by side:** NISAR (L-band) left of a divider,
@@ -205,7 +208,6 @@ app in headless Chromium against the live services.
   agency outlines, daily fire detections
 - `js/replay/mvt.js` – small vector-tile reader for the fire detections
 - `js/search.js` – fuzzy event search and place lookup
-- `js/news.js` – press coverage per event
 - `js/narrative.js` – the plain-text account of an event with its source
   links, the one-line NISAR summary and the event timeline
 - `js/sound.js` – plays a time-lapse as notes
@@ -289,6 +291,14 @@ details. Nothing else has to be changed.
 `EARTHDATA_USERNAME` and `EARTHDATA_PASSWORD`, or from `~/.netrc`, and only
 asks on a terminal when none of these exist. Only reading the data needs a
 login; searching does not.
+
+**Without anyone's laptop.** `.github/workflows/measure.yml` runs twice a
+day on GitHub: `tools/pick_events.mjs` picks the strongest recent events
+that NISAR has passed over on one track before and after (using the app's
+own feed and archive code), `tools/measure.py` measures them and the listed
+places, and the results are committed to `data/measured/`. It needs one
+repository secret, `EARTHDATA_TOKEN`; the steps are at the top of that
+file. Until the secret exists, every run stops early and changes nothing.
 
 **Runs again cheaply.** A site measured before is brought up to date: the
 passes already in its file are kept and only new ones are read. Moving the

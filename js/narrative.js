@@ -35,9 +35,8 @@ export const SOURCE_NOTES = {
   measured: "Read from NASA's full-resolution NISAR product (terrain-corrected backscatter, in decibels) by this project's measurement script, not from the preview pictures.",
   usgs: 'U.S. Geological Survey. Earthquake time, place, magnitude and shaking maps, updated every minute.',
   eonet: "NASA's Earth Observatory Natural Event Tracker. Curated natural events and storm tracks.",
-  gdacs: 'Global Disaster Alert and Coordination System, run by the UN and the EU. Alert levels, affected areas and linked news.',
+  gdacs: 'Global Disaster Alert and Coordination System, run by the UN and the EU. Alert levels and affected areas.',
   nisar: 'The NASA-ISRO radar satellite. Passes and preview images come live from NASA’s archive at the Alaska Satellite Facility.',
-  news: 'Press articles: written by news outlets, not checked by this app.',
   linked: 'Other events from the same feeds, close in place and time.',
   replay: 'Every part of what is drawn on the globe for this event, with its source and whether it is observed, agency analysis or computed here.',
 };
@@ -88,8 +87,8 @@ export function nisarLine(inc, found) {
 }
 
 // The text for the details panel, as HTML paragraphs.
-// given: { found, news, history, sizeText }; each may still be missing.
-export function narrate(inc, { found, news, history, measured, sizeText }) {
+// given: { found, history, measured, sizeText }; each may still be missing.
+export function narrate(inc, { found, history, measured, sizeText }) {
   const out = [];
 
   // What happened, when, and who says so.
@@ -160,18 +159,8 @@ export function narrate(inc, { found, news, history, measured, sizeText }) {
     if (reading) out.push(reading);
   }
 
-  // Press, neighbours, and how the animation is made.
+  // Neighbours, and how the animation is made.
   const rest = [];
-  if (news) {
-    if (news.articles.length) {
-      const top = news.articles[0];
-      rest.push(
-        `${many(news.articles.length, 'press article')} ${news.via === 'gdacs' ? `${news.articles.length === 1 ? 'is' : 'are'} linked to this event by GDACS` : `turned up in a search of the GDELT news index`}; the latest is “${esc(top.title)}”${top.source ? ` (${esc(top.source)})` : ''}. ${link('news', 'Read the coverage', 'sec-news')}.`,
-      );
-    } else {
-      rest.push('No press coverage was found for this event.');
-    }
-  }
   if (inc.related.length) rest.push(`${many(inc.related.length, 'other event')} ${inc.related.length === 1 ? 'lies' : 'lie'} within ${RELATED_KM} km and ${RELATED_DAYS} days; ${link('linked', 'see them', 'sec-linked')}.`);
   rest.push(`What is drawn on the globe for this event comes only from data; ${link('replay', 'see what each part is', 'sec-replay')}.`);
   out.push(rest.join(' '));
