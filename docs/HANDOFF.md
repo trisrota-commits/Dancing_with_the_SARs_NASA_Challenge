@@ -135,7 +135,14 @@ against them, not only against this challenge's text.
   event type plays no part in it.
 - **Inspiration** is the first ten seconds: the opening card (`#welcome`)
   says what the app is about and offers "Start with a story".
-- **Impact** is the weakest: nothing yet says who would use this and how.
+- **Impact:** every event's text ends with one hand-written line on who
+  could use NISAR there (`WHO_USES` in `js/config.js`), badged "Our view";
+  stories have "Who could use this, and for what". The award itself will
+  turn more on the pitch and on the app being online than on this text.
+- **Onboarding** is the opening card with three steps and "Start with a
+  story". The lead and I agreed against a guided tour.
+- **Feature freeze agreed 14 Nov:** after this, testing by hand, a phone
+  pass, hosting and the submission come before anything new.
 
 Tried and dropped: a human-driver story on the GERD reservoir or on forest
 clearing in Rondônia. At the two points checked per site the pass-by-pass

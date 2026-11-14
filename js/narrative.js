@@ -6,7 +6,7 @@
 // from the feeds and the NISAR catalogue, and a sentence only appears when
 // its data has arrived.
 
-import { CATEGORIES, FEEDS, RELATED_KM, RELATED_DAYS } from './config.js';
+import { CATEGORIES, FEEDS, RELATED_KM, RELATED_DAYS, WHO_USES } from './config.js';
 import { nextPass, bestPair, REPEAT_DAYS } from './nisar.js';
 
 const DAY = 86400_000;
@@ -158,6 +158,10 @@ export function narrate(inc, { found, news, history, sizeText }) {
   if (inc.related.length) rest.push(`${many(inc.related.length, 'other event')} ${inc.related.length === 1 ? 'lies' : 'lie'} within ${RELATED_KM} km and ${RELATED_DAYS} days; ${link('linked', 'see them', 'sec-linked')}.`);
   rest.push(`The animation on the globe is built only from data; ${link('replay', 'see how', 'sec-replay')}.`);
   out.push(rest.join(' '));
+
+  // Who this is for. Ours to say, and marked so.
+  const who = Object.hasOwn(WHO_USES, inc.category) ? WHO_USES[inc.category] : WHO_USES.other;
+  out.push(`<span class="badge">Our view</span> Who could use NISAR here? ${esc(who)}`);
 
   return out.map((text) => `<p>${text}</p>`).join('');
 }

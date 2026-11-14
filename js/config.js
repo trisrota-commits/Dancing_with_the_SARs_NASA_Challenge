@@ -196,6 +196,25 @@ export const CHANGE_EXPLANATIONS = {
   other: 'Changes in water, vegetation, soil moisture or surface roughness can alter radar brightness. Weather, season and differences between acquisitions can produce similar patterns. Compare independent observations before attributing a change to a particular event.',
 };
 
+// Who could act on NISAR's view of each kind of event, and how. Written by
+// us and shown as our view, one sentence each, claiming only what the
+// radar can deliver.
+export const WHO_USES = {
+  earthquake: 'Emergency planners and geologists: an interferogram from the passes either side of a quake shows which fault moved and where the ground shifted most, before field surveys can.',
+  wildfire: 'Forest and fire agencies: radar maps burnt ground through smoke and cloud, and later passes show whether the vegetation is coming back.',
+  flood: 'Flood managers and relief teams: radar shows where water stands, under cloud and at night, which tells them which roads and villages are cut off.',
+  storm: 'Coastal and disaster agencies: after landfall, radar shows flooded and battered land while cloud still hides it from cameras.',
+  volcano: 'Volcano observatories: ground that swells or sinks by centimetres between passes can be a sign of magma moving below.',
+  ice: 'Ship routing, coastal communities and climate scientists: radar follows sea ice and glacier fronts through the polar night.',
+  drought: 'Water managers and advisers to farmers: a falling radar echo over fields follows drying soil and thinning crops across whole regions.',
+  landslide: 'Planners of roads and towns in the mountains: radar shows slopes that creep before they fail, and the scar afterwards.',
+  snow: 'Water managers: the echo drops when snow turns wet, which marks the start of the melt that feeds rivers.',
+  dust: 'Few people directly: radar looks straight through dust and haze. It can show the dry ground the dust came from.',
+  heat: 'Advisers to farmers and water managers: radar follows soil and crops drying out through a heat wave.',
+  manmade: 'Regulators and insurers: radar shows where a surface changed after an accident, whatever the weather.',
+  other: 'Anyone who needs to know whether the ground changed: compare the pass before with the pass after.',
+};
+
 // What L-band radar is expected to show for each kind of event.
 export const RADAR_NOTES = {
   earthquake:
