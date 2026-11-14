@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dancing with the SARs – live Earth events and NISAR radar</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cesium/1.147.0/Widgets/widgets.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <script>
+      window.CESIUM_BASE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/cesium/1.147.0/';
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cesium/1.147.0/Cesium.js"></script>
+  </head>
+  <body>
+    <div id="globe"></div>
+
+    <header id="topbar">
+      <button id="menu" aria-label="Show or hide controls" aria-expanded="true">☰</button>
+      <div class="brand">
+        <h1>Dancing with the SARs</h1>
+        <p>Live Earth events, cross-referenced with NISAR radar</p>
+      </div>
+      <div id="status" aria-live="polite"></div>
+      <div id="clock"></div>
+    </header>
+
+    <aside id="left">
+      <section>
+        <h2>Events <span id="event-count" class="count"></span></h2>
+        <div id="chips"></div>
+        <label class="row">
+          <span>Time window</span>
+          <select id="window">
+            <option value="1">Last 24 hours</option>
+            <option value="3">Last 3 days</option>
+            <option value="7" selected>Last 7 days</option>
+            <option value="14">Last 14 days</option>
+          </select>
+        </label>
+        <p class="hint">A white ring means NISAR imaged that spot in its latest passes.</p>
+      </section>
+
+      <section>
+        <h2>NISAR radar</h2>
+        <label class="check"><input type="checkbox" id="footprints" checked /> Latest radar passes <span id="scene-count" class="count"></span></label>
+        <label class="check"><input type="checkbox" id="nisar-tiles" /> Radar imagery on the globe</label>
+        <div class="row date">
+          <button id="date-prev" aria-label="Previous day">◀</button>
+          <input type="date" id="date" aria-label="Imagery date" />
+          <button id="date-next" aria-label="Next day">▶</button>
+          <button id="date-play" aria-label="Play through days">Play</button>
+        </div>
+        <label class="row">
+          <span>Days stacked</span>
+          <select id="stack">
+            <option value="1">1 day</option>
+            <option value="3" selected>3 days</option>
+            <option value="6">6 days</option>
+            <option value="12">12 days (full cycle)</option>
+          </select>
+        </label>
+      </section>
+
+      <section>
+        <h2>Context layers</h2>
+        <div id="overlays"></div>
+        <label class="row">
+          <span>Basemap</span>
+          <select id="basemap"></select>
+        </label>
+        <label class="check"><input type="checkbox" id="lighting" /> Real day and night</label>
+      </section>
+
+      <section class="grow">
+        <h2>Live feed</h2>
+        <ol id="feed"></ol>
+      </section>
+    </aside>
+
+    <aside id="right" hidden>
+      <button id="close" aria-label="Close details">✕</button>
+      <div id="detail"></div>
+    </aside>
+
+    <div id="split" hidden>
+      <div id="split-handle"><span id="split-before"></span><span id="split-after"></span></div>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+  </body>
+</html>
