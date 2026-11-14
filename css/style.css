@@ -1309,3 +1309,36 @@ ul.plain {
 .article small {
   color: var(--dim);
 }
+
+/* Calibrated measurements from tools/measure.py */
+.measured {
+  border-color: rgba(57, 230, 196, 0.45);
+}
+
+.measured-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 6px 0;
+  background: #0a101a;
+  border-radius: 6px;
+}
+
+.measured-svg .grid {
+  stroke: rgba(255, 255, 255, 0.08);
+}
+
+.measured-svg .mark {
+  stroke: rgba(255, 255, 255, 0.35);
+  stroke-dasharray: 3 3;
+}
+
+.measured-svg .tick {
+  fill: var(--dim);
+  font-size: 10px;
+}
+
+.measured-svg .end {
+  font-size: 11px;
+  font-weight: 600;
+}
