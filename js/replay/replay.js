@@ -4,6 +4,11 @@
 // event has one template whose parameters (where, how big, how strong,
 // when) are filled from the feeds.
 //
+// A plan also carries `key`: one short line per kind of mark it puts on
+// the globe ({ mark: 'dot' | 'glow' | 'line' | 'outline' | 'bands' | 'fill', color,
+// text }), shown as the key on the globe. Only marks that are really drawn
+// for this event are listed.
+//
 // A template returns a plan: { from, to, timeOf(ms), draw(t, started, ms),
 // caption(t), parts, frameKm, ... }. from and to are real times; timeOf
 // turns a real time into the plan's own clock t, which draw understands.
@@ -169,6 +174,11 @@ async function quake(inc, globe) {
     // The wave fronts cross in seconds, far too fast for a timeline of
     // days, so they play once when the event opens.
     intro: WAVE + 0.5,
+    key: [
+      ...(zones.length ? [{ mark: 'bands', color: 'linear-gradient(90deg,#4ade80,#ffa62b,#ff5a4f)', text: 'Outlines: how strong the shaking was, weakest outside (USGS)' }] : []),
+      ...(after.length ? [{ mark: 'dot', color: '#ff9e33', text: 'Orange dots: later quakes nearby, bigger for stronger' }] : []),
+      ...(before.length ? [{ mark: 'dot', color: '#9ea8b8', text: 'Grey dots: quakes in the 30 days before' }] : []),
+    ],
     timeOf: (ms) => WAVE + 0.5 + (AFTER ? Math.max(0, Math.min(1, (ms - inc.time) / span)) * AFTER : 0),
     frameKm: rmax * 1.3,
     parts: [
@@ -287,6 +297,11 @@ async function storm(inc, globe) {
     timeOf: (ms) => Math.max(0, Math.min(1, (ms - t0) / (t1 - t0))),
     frameKm: Math.max(300, reach(centre, track) * 1.2),
     focus: centre,
+    key: [
+      { mark: 'line', color: '#b48cff', text: `Line: the storm's path${timing === 'observed' ? '' : ' (GDACS)'}` },
+      { mark: 'glow', color: '#d9c6ff', text: 'Cloud spiral: where the storm was. Its size follows the wind speed by a rule; it is not a picture of the clouds.' },
+      ...(zones.length ? [{ mark: 'bands', color: 'linear-gradient(90deg,#4ade80,#ffa62b,#ff5a4f)', text: 'Green, orange, red areas: wind-speed zones (GDACS)' }] : []),
+    ],
     parts: [
       { kind: timing, text: timing === 'observed' ? `${track.length} dated position fixes${peak ? ` with wind speed (peak ${Math.round(peak)} kt)` : ''}` : 'Track line, with timing spread evenly along it', source: timing === 'observed' ? 'NASA EONET' : 'GDACS' },
       { kind: 'computed', text: 'Position between fixes is a straight blend' },
@@ -351,6 +366,10 @@ async function fire(inc, globe) {
     to: first + days.length * DAY,
     timeOf: (ms) => Math.max(0, Math.min(days.length, (ms - first) / DAY)) * STEP,
     frameKm: radius * 1.1,
+    key: [
+      ...(total ? [{ mark: 'glow', color: '#ff8a3c', text: 'Glowing spots: fires a satellite saw that day (VIIRS). They cool to dark red over three days.' }] : []),
+      ...(burnt.length ? [{ mark: 'outline', color: '#ffa62b', text: 'Orange outline: the burnt area as published by GDACS' }] : []),
+    ],
     parts: [
       total
         ? { kind: 'observed', text: `${total} active-fire detections over ${days.length} days within ${Math.round(radius)} km`, source: 'VIIRS on NOAA-20, NASA GIBS' }
@@ -415,6 +434,10 @@ async function flood(inc, globe) {
     // The passes used are two days apart; each has fully arrived a day later.
     timeOf: (ms) => Math.max(0, Math.min(dates.length, (ms - first) / (2 * DAY) + 0.5)) * STEP,
     frameKm: Math.min(600, Math.max(120, area.length ? reach(centre, area.flatMap((a) => a.ring)) * 1.2 : 150)),
+    key: [
+      { mark: 'fill', color: '#3f9fdc', text: 'Blue water: water a radar satellite saw on land (Sentinel-1). Rivers and lakes show too.' },
+      ...(area.length ? [{ mark: 'outline', color: '#3fa7ff', text: 'Blue outline: the affected area as published by GDACS' }] : []),
+    ],
     parts: [
       { kind: 'observed', text: `Water the radar saw on land (blue), building up pass by pass from ${dates[0]}. Rivers and lakes that are always there show too.`, source: 'OPERA DSWx, Sentinel-1' },
       ...(area.length ? [{ kind: 'analysis', text: 'Affected-area outline', source: 'GDACS' }] : []),
@@ -451,6 +474,11 @@ async function generic(inc, globe) {
     plan.parts[0] = { kind: 'observed', text: `${inc.track.length} dated positions`, source: 'NASA EONET' };
     plan.parts.length = 2;
     if (zones.length) plan.parts.push({ kind: 'analysis', text: 'Affected-area outline', source: 'GDACS' });
+    plan.key = [
+      { mark: 'line', color: '#b48cff', text: 'Line: the path it took (NASA EONET)' },
+      { mark: 'dot', color: '#ffffff', text: 'White dot: where it was at that time' },
+      ...(zones.length ? [{ mark: 'outline', color: '#e8edf5', text: 'Outline: the affected area as published by GDACS' }] : []),
+    ];
     const draw = plan.draw.bind(plan);
     plan.draw = (t, started, ms) => {
       draw(t, started, ms);
@@ -468,6 +496,7 @@ async function generic(inc, globe) {
     to: inc.endTime,
     timeOf: () => 0,
     frameKm: Math.max(100, reach({ lat: inc.lat, lon: inc.lon }, shapes.polygons.flatMap((p) => p.ring)) * 1.2),
+    key: [{ mark: 'outline', color: '#e8edf5', text: 'Outline: the affected area as published by GDACS' }],
     parts: [{ kind: 'analysis', text: 'Affected-area outline', source: 'GDACS' }],
     draw(t, started) {
       showZones(started);

@@ -4,7 +4,8 @@
 // GDACS keeps a news list for each of its events, already matched by the
 // agency. For events GDACS does not carry, the GDELT news index is searched
 // with words taken from the event itself, and only articles whose headline
-// names the place are kept, because a loose search returns unrelated news.
+// names the place and the kind of event are kept, because a loose search
+// returns unrelated news.
 
 const KEYWORDS = {
   earthquake: 'earthquake',
@@ -16,17 +17,18 @@ const KEYWORDS = {
   ice: '(ice OR iceberg)',
 };
 
-// Words that show a headline is about this kind of event. GDACS links
-// articles by topic and country, and some of them are about something else,
-// so headlines that name the event type are listed first.
-const ON_TOPIC = {
-  earthquake: /quake|seism|tremor|magnitude|tsunami/i,
-  wildfire: /fire|blaze|burn/i,
-  flood: /flood|inundat|deluge|rain/i,
-  storm: /storm|cyclone|hurricane|typhoon|wind/i,
-  volcano: /volcan|erupt|lava|ash/i,
-  drought: /drought|dry|water short/i,
-  ice: /ice|glacier|berg/i,
+// Words that show a headline is about this kind of event. Both sources
+// match loosely (GDACS by topic and country, the search by any words in the
+// article), so a headline that does not name the event type is left out: a
+// restaurant review must never appear as news about a forest fire.
+export const ON_TOPIC = {
+  earthquake: /quake|seism|\btremor|\bmagnitude|tsunami/i,
+  wildfire: /\b(wild|forest|bush)?fires?\b|\bblazes?\b|\bburn(s|t|ed|ing)?\b|\bflames\b/i,
+  flood: /\bflood|inundat|\bdeluge|\brain(s|fall)?\b|\bmonsoon/i,
+  storm: /\bstorms?\b|cyclone|hurricane|typhoon|\bwinds?\b|\btornado/i,
+  volcano: /volcan|\berupt|\blava\b|\bash\b/i,
+  drought: /drought|\bdry\b|water shortage/i,
+  ice: /\bice\b|glacier|iceberg/i,
 };
 
 async function fromGdacs(key) {
@@ -94,18 +96,19 @@ export async function newsFor(incident) {
   const key = incident.reports.find((r) => r.gdacsKey)?.gdacsKey;
   if (key) {
     const articles = await fromGdacs(key).catch(() => []);
-    if (articles.length) return { articles: dedupe(articles, ON_TOPIC[incident.category]), via: 'gdacs' };
+    const fitting = dedupe(articles, ON_TOPIC[incident.category]);
+    if (fitting.length) return { articles: fitting, via: 'gdacs' };
   }
   const articles = await fromGdelt(incident).catch(() => []);
-  return { articles: dedupe(articles), via: 'gdelt' };
+  return { articles: dedupe(articles, ON_TOPIC[incident.category]), via: 'gdelt' };
 }
 
-// One entry per headline, on-topic ones first, then the newest first.
-function dedupe(articles, onTopic) {
+// One entry per headline, newest first, and only headlines that name the
+// kind of event (when there is a word list for it).
+export function dedupe(articles, onTopic) {
   const seen = new Set();
-  const fits = (a) => (onTopic && onTopic.test(a.title) ? 1 : 0);
   return articles
-    .filter((a) => a.title && /^https?:\/\//.test(a.url || '') && !seen.has(a.title) && seen.add(a.title))
-    .sort((a, b) => fits(b) - fits(a) || (b.time || 0) - (a.time || 0))
+    .filter((a) => a.title && /^https?:\/\//.test(a.url || '') && (!onTopic || onTopic.test(a.title)) && !seen.has(a.title) && seen.add(a.title))
+    .sort((a, b) => (b.time || 0) - (a.time || 0))
     .slice(0, 8);
 }

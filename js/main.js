@@ -272,7 +272,7 @@ function renderCard() {
       sel.news.articles
         .slice(0, 3)
         .map((a) => `<a class="headline" href="${safeUrl(a.url)}" target="_blank" rel="noopener noreferrer">${esc(a.title)}<small>${esc(a.source || '')}${Number.isFinite(a.time) ? ` · ${ago(a.time)}` : ''}</small></a>`)
-        .join('') + `<p class="hint">${sel.news.via === 'gdacs' ? 'Linked to this event by GDACS, by topic and country' : 'Found by a news search'}; some may be about something else. Press coverage, not data.</p>`;
+        .join('') + `<p class="hint">${sel.news.via === 'gdacs' ? 'Linked to this event by GDACS' : 'Found by a news search for the place'}; only headlines that name this kind of event are shown. Press coverage, not data.</p>`;
   } else {
     // No press: say what the feeds themselves report.
     const lines = [...new Set(inc.reports.flatMap((r) => r.detail.map((d) => `${d} (${FEEDS[r.source].label})`)))].slice(0, 4);
@@ -356,6 +356,13 @@ const BADGE = { observed: 'Observed', analysis: 'Analysis', computed: 'Computed'
 function renderReplay(u) {
   const bar = $('replay');
   const list = $('replay-parts');
+  // The key says what this event's marks are, plus the lines to its neighbours.
+  const event = u.timeline ? state.selected?.incident : null;
+  setEventKey(
+    event
+      ? [...(u.plan.key || []), ...(event.related.length ? [{ mark: 'dash', color: '#c8d0dc', text: 'Dashed lines: other events nearby in place and time' }] : [])]
+      : null,
+  );
   if (u.state === 'off') {
     bar.hidden = true;
     return;
@@ -807,13 +814,21 @@ function setSplit(fraction) {
 
 // ---------- the key to what is on the globe ----------
 
+// The key on the globe has two parts: what the radar picture shows, and
+// what the marks of the open event are. Either can be missing.
+const legend = { picture: null, marks: '' };
+
 // Says what the picture on the globe is and what its colours mean, in the
 // corner of the map, whenever a radar picture or a change picture is up.
 // kind: 'radar' | 'interferogram' | 'change' | null to hide.
 function setLegend(kind, info = {}) {
-  const box = $('legend');
-  if (!kind) return (box.hidden = true);
+  if (!kind) {
+    legend.picture = null;
+    return drawLegend();
+  }
   const row = (color, text) => `<li><i style="--c:${color}"></i><span>${text}</span></li>`;
+  // The teal frame around a radar picture is the edge of what that pass saw.
+  const frame = '<li><i class="outline" style="--c:#39e6c4"></i><span>Teal frame: the area this pass covered</span></li>';
   let html;
   if (kind === 'radar') {
     const pol = info.pol?.co ? info.pol : { co: 'HH', cross: 'HV' };
@@ -825,13 +840,19 @@ function setLegend(kind, info = {}) {
         single
           ? row('#f2f2f2', 'Bright: rough ground, buildings, plants standing in water') + row('#10141c;border:1px solid #556', 'Dark: calm water, smooth or wet ground')
           : row('#4be04b', 'Green: forest and other vegetation') + row('#d85bd8', 'Magenta: bare ground and buildings') + row('#f2f2f2', 'White: both echoes strong') + row('#10141c;border:1px solid #556', 'Dark: calm water, smooth ground')
-      }</ul>
+      }${info.time ? frame : ''}</ul>
       <small>${single ? `One radar channel (${esc(channel)}).` : `Two radar channels: magenta is ${esc(pol.co)}, green is ${esc(pol.cross)}.`}</small>`;
   } else if (kind === 'interferogram') {
     html = `<b>NISAR interferogram${info.from ? ` · ${day(info.from)} to ${day(info.to)}` : ''}</b>
       <p>Two passes compared: the colours show how the distance to the satellite changed.</p>
       <ul>${row('linear-gradient(90deg,#f33,#ff3,#3f3,#3ff,#33f,#f3f)', 'One run through the colours: about 12 cm')}</ul>
       <small>Tight bands around one place are ground movement. Broad bands are mostly the atmosphere. Speckle means the passes did not match, as over water.</small>`;
+  } else if (kind === 'measured') {
+    const c = info.d.change;
+    html = `<b>Measured change · ${day(c.before)} to ${day(c.after)}</b>
+      <p>How much the ${esc(c.pol)} radar echo changed here between two NISAR passes, from NISAR's calibrated data.</p>
+      <ul>${row('#40aaff', 'Blue: the echo got weaker') + row('#ffaa3c', 'Orange: the echo got stronger')}</ul>
+      <small>Full colour means 3 dB or more, which is half or double the echo's power. Changes under 1.5 dB are not drawn. A measurement, not a statement of cause.</small>`;
   } else {
     const km = (v) => (v >= 100 ? Math.round(v).toLocaleString('en') : v.toFixed(1));
     html = `<b>What changed · ${day(info.from)} to ${day(info.to)}</b>
@@ -839,9 +860,33 @@ function setLegend(kind, info = {}) {
       <ul>${row('#40aaff', `Echo got weaker: ${km(info.result.weakerKm2)} km²`) + row('#ffaa3c', `Echo got stronger: ${km(info.result.strongerKm2)} km²`)}</ul>
       <small>Worked out from preview pictures: a guide to where to look, not a measurement, and not a statement of cause.</small>`;
   }
+  legend.picture = html;
+  drawLegend();
+}
+
+// The marks an open event puts on the globe: [{ mark, color, text }].
+function setEventKey(rows) {
+  const html = (rows || []).map((r) => `<li><i class="${esc(r.mark)}" style="--c:${r.color}"></i><span>${esc(r.text)}</span></li>`).join('');
+  if (html === legend.marks) return;
+  legend.marks = html;
+  drawLegend();
+}
+
+function drawLegend() {
+  const box = $('legend');
+  if (!legend.picture && !legend.marks) return (box.hidden = true);
+  const marks = legend.marks ? `<ul>${legend.marks}</ul>` : '';
+  let title = '<b>On the globe</b>';
+  let body = marks;
+  if (legend.picture) {
+    title = legend.picture.slice(0, legend.picture.indexOf('</b>') + 4);
+    body = legend.picture.slice(title.length) + (marks ? `<b class="also">Also on the globe</b>${marks}` : '');
+  }
   // On a phone the key is one line until tapped, to leave the map visible.
-  const title = html.slice(0, html.indexOf('</b>') + 4);
-  box.innerHTML = `<details ${window.innerWidth > 760 ? 'open' : ''}><summary>${title}</summary>${html.slice(title.length)}</details>`;
+  // Once the reader has folded or opened it, it stays that way.
+  const was = box.hidden ? null : box.querySelector('details');
+  const open = was ? was.open : window.innerWidth > 760;
+  box.innerHTML = `<details ${open ? 'open' : ''}><summary>${title}</summary>${body}</details>`;
   box.hidden = false;
 }
 
@@ -955,8 +1000,8 @@ async function loadNews(inc, selection) {
   }
   const how =
     via === 'gdacs'
-      ? 'Articles GDACS has linked to this event by topic and country; some may be about something else.'
-      : 'Found by searching the GDELT news index for the place and event type; only headlines naming the place are kept, but some may still be about something else.';
+      ? 'Articles GDACS has linked to this event. Only headlines that name this kind of event are shown; one may still be about a different event of the same kind.'
+      : 'Found by searching the GDELT news index. Only headlines that name the place and this kind of event are kept; one may still be about a different event of the same kind.';
   box.innerHTML = `${articles
     .map(
       (a) => `<a class="article" href="${safeUrl(a.url)}" target="_blank" rel="noopener noreferrer">
@@ -1640,6 +1685,7 @@ async function showMeasuredMap(button) {
     if (token !== stage.token) return;
     globe.addPicture(picture, d.change.bounds, undefined, 0.95);
     globe.flyToBounds(d.change.bounds);
+    setLegend('measured', { d });
     button.textContent = 'Change map shown';
   } catch {
     if (token === stage.token) button.textContent = 'Change map failed to load';

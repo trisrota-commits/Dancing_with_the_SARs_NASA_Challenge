@@ -162,6 +162,30 @@ the layout below. Both went into one pull request.
   passes" is not capped on phones because it is opt-in and states its
   size; `main.js` was not split so close to the deadline.
 
+### Nobody presents the app: it has to explain itself (lead, 14 Nov, night)
+
+The lead: there is no live demonstration or pitch. Judges try the app by
+themselves, and we have no say in what they click. So every view has to
+say what it shows without us.
+
+- **The key on the globe covers everything drawn.** It used to explain
+  only the radar picture. Each event type now lists its own marks in
+  `plan.key` (`js/replay/replay.js`): fire spots, burnt-area outline,
+  shaking outlines, later and earlier quakes, storm path and spiral, flood
+  water. `main.js` adds the dashed lines to neighbouring events and the
+  teal frame of a radar pass (`setEventKey`, `drawLegend`). The measured
+  change map has its own key. A new mark on the globe needs a line there.
+- **News must be about the event.** A restaurant review ("a fiery yet
+  refined Indian feast") showed up under a forest fire in India. Headlines
+  are now kept only when they name the kind of event (`ON_TOPIC` in
+  `js/news.js`), for both GDACS and the GDELT search. Fewer headlines,
+  none of them absurd; with none left the card shows what the feeds report.
+- **The Earthdata token cannot live in the website.** Everything a static
+  site ships can be read by anyone who opens it. A secret needs a machine
+  of ours that runs the measuring script on a schedule and publishes only
+  the results. The lead has been given the options (GitHub's scheduler
+  with an encrypted secret, or a server of our own) and has not chosen.
+
 ### The awards the lead is aiming at (told 14 Nov)
 
 Space Apps gives these across all challenges: Best Use of Science, Best

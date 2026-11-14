@@ -97,3 +97,17 @@ test('a calibrated measurement is stated as a step in decibels, and only called 
   assert.equal(measuredStep({ ...d, change: { before: 1, after: 2 } }), null);
   assert.equal(measuredLine({ ...d, change: { before: 1, after: 2 } }), '');
 });
+
+test('a headline only counts as news about an event when it names that kind of event', async () => {
+  const { dedupe, ON_TOPIC } = await import('../js/news.js');
+  const a = (title) => ({ title, url: 'https://example.org/' + encodeURIComponent(title), time: 1 });
+  const kept = (titles, cat) => dedupe(titles.map(a), ON_TOPIC[cat]).map((x) => x.title);
+  // The headline that showed up under a forest fire in India.
+  assert.deepEqual(kept(['Jwala , KL spot for a fiery yet refined Indian feast', 'Forest fires spread in central India', 'Firefighters battle blaze in Madhya Pradesh hills'], 'wildfire'), [
+    'Forest fires spread in central India',
+    'Firefighters battle blaze in Madhya Pradesh hills',
+  ]);
+  assert.deepEqual(kept(['Train delays in Tonga', 'Heavy rain floods Tonga capital', 'Brain drain worries Tonga'], 'flood'), ['Heavy rain floods Tonga capital']);
+  assert.deepEqual(kept(['Winds of change in Fiji politics?', 'Cyclone nears Fiji', 'Window makers of Fiji'], 'storm'), ['Winds of change in Fiji politics?', 'Cyclone nears Fiji']);
+  assert.deepEqual(kept(['M 6.1 quake hits off Japan', 'Japan stocks rise'], 'earthquake'), ['M 6.1 quake hits off Japan']);
+});
