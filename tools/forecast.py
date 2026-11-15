@@ -66,8 +66,11 @@ data/measured/forecast.json with one line per site.
 from __future__ import annotations
 
 import json
+import math
 import re
+import struct
 import sys
+import zlib
 import warnings
 from datetime import datetime, timezone
 from pathlib import Path
@@ -246,6 +249,50 @@ def day(ms: int) -> str:
     return datetime.fromtimestamp(ms / 1000, timezone.utc).strftime("%Y-%m-%d")
 
 
+WEAKER, STRONGER = (0x40, 0xAA, 0xFF), (0xFF, 0xAA, 0x3C)  # the app's blue and orange
+STOOD_PIXELS = 8  # pixels a cell in the picture
+
+
+def stood_rgba(residual: np.ndarray, expected: float, n: int) -> np.ndarray:
+    """The cells that did something other than their neighbours, as a
+    picture: n by n cells, north at the top. `residual` is each cell's
+    step minus the median step of all cells, in dB. Orange where the echo
+    rose by more than `expected` beyond its neighbours', blue where it
+    fell by more; the colour is full at twice that. Every other cell, and
+    a cell without data, is see-through."""
+    r = residual.reshape(n, n)
+    out = np.zeros((n, n, 4), dtype=np.uint8)
+    with np.errstate(invalid="ignore"):
+        beyond = np.abs(r) > expected
+    beyond &= np.isfinite(r)
+    strength = np.clip((np.abs(r) - expected) / expected, 0, 1)
+    for mask, colour in ((beyond & (r > 0), STRONGER), (beyond & (r < 0), WEAKER)):
+        out[mask, :3] = colour
+        out[mask, 3] = (150 + 105 * strength[mask]).astype(np.uint8)
+    return out.repeat(STOOD_PIXELS, axis=0).repeat(STOOD_PIXELS, axis=1)
+
+
+def png(rgba: np.ndarray) -> bytes:
+    """An RGBA picture as PNG bytes (no library needed for so little)."""
+    h, w, _ = rgba.shape
+    raw = b"".join(b"\x00" + rgba[y].tobytes() for y in range(h))
+
+    def chunk(kind: bytes, data: bytes) -> bytes:
+        return struct.pack(">I", len(data)) + kind + data + struct.pack(">I", zlib.crc32(kind + data) & 0xFFFFFFFF)
+
+    return b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", w, h, 8, 6, 0, 0, 0)) + chunk(b"IDAT", zlib.compress(raw, 9)) + chunk(b"IEND", b"")
+
+
+def window_bounds(lat: float, lon: float, radius_m: float) -> dict:
+    """The window of the cells in degrees, as tools/measure.py lays out its
+    change map. The cells are square on the map projection of NISAR's
+    file, which is turned against north by up to a few degrees: the
+    picture is placed to within about half a cell at its edges."""
+    dlat = radius_m / 111_320
+    dlon = radius_m / (111_320 * max(0.05, math.cos(math.radians(lat))))
+    return {"west": lon - dlon, "east": lon + dlon, "south": lat - dlat, "north": lat + dlat}
+
+
 def versions(files: list[str] | None, n: int) -> list[str | None]:
     """The version of NASA's processing each pass was made with, from the
     file name (the part like P05036). When it changes, the values can
@@ -280,6 +327,7 @@ def forecast(grid: dict, event: int | None = None) -> dict | None:
     short = len(times) < MIN_PASSES
     by_date, pooled = [], {}
     earlier = {}  # each way's misses on the passes predicted so far
+    apart = {}  # by pass: each cell's step minus its neighbours' (dB), for the picture
     for t in range(2 if short else FIRST, len(times)):
         preds = predict(hh, hv, times, t, short)
         for key in preds:
@@ -288,6 +336,8 @@ def forecast(grid: dict, event: int | None = None) -> dict | None:
         row = {"time": times[t], "date": day(times[t]), "seenMean": round(float(np.nanmean(hh[t])), 2), "lastMean": round(float(np.nanmean(hh[t - 1])), 2)}
         if made[t] and made[t - 1] and made[t] != made[t - 1]:
             row["newVersion"] = {"from": made[t - 1], "to": made[t]}
+        if "peers" in preds:
+            apart[times[t]] = hh[t] - preds["peers"]
         for key, p in preds.items():
             s = scores(p, hh[t], hh[t - 1])
             row[key] = s and {**s, "predMean": round(float(np.nanmean(p)), 2)}
@@ -324,7 +374,14 @@ def forecast(grid: dict, event: int | None = None) -> dict | None:
     # An event: the first pass after it.
     after = next((r for r in by_date if event and r["time"] >= event), None)
     hit = after and after.get("peers") and after["peers"].get("outside")
+    # The pass to draw: at an event the first pass afterwards, elsewhere
+    # the one that stood out most. Only where the range could be judged.
+    shown = after if event else odd
+    picture = None
+    if shown and shown.get("peers") and "expected" in shown["peers"] and grid.get("n") and grid["n"] ** 2 == hh.shape[1]:
+        picture = {"date": shown["date"], "time": shown["time"], "before": by_date[by_date.index(shown) - 1]["date"] if by_date.index(shown) else day(times[times.index(shown["time"]) - 1]), "expected": shown["peers"]["expected"], "outside": shown["peers"]["outside"], "n": grid["n"], "image": f"{grid['id']}_stood.png", "_rgba": stood_rgba(apart[shown["time"]], shown["peers"]["expected"], grid["n"])}
     return {
+        "stood": picture,
         "id": grid["id"],
         "name": grid["name"],
         "track": grid["track"],
@@ -396,6 +453,14 @@ def main() -> None:
         except (OSError, ValueError):
             event = None
         result = forecast(grid, event)
+        stood_file = OUT_DIR / f"{grid['id']}_stood.png"
+        if result and result["stood"]:
+            # The picture of the cells that stood out, and where it lies.
+            site = json.loads((OUT_DIR / f"{grid['id']}.json").read_text())
+            stood_file.write_bytes(png(result["stood"].pop("_rgba")))
+            result["stood"]["bounds"] = window_bounds(site["lat"], site["lon"], grid["radiusM"])
+        elif stood_file.exists():
+            stood_file.unlink()
         if not result:
             print(f"{grid['id']}: too few passes to test anything ({len(grid['times'])}; {MIN_SHORT} are needed)")
             stale = OUT_DIR / f"{grid['id']}_forecast.json"

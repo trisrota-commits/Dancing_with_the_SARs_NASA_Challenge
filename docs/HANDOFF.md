@@ -1159,6 +1159,80 @@ A better point would have to be found by eye first.
   (`#d55181` co-polarised, `#0ca30c` cross-polarised on the dark panel),
   crosshair tooltip, direct labels, table view.
 
+## Detection, not prediction (15 November 2026, evening)
+
+The team settled the direction: the app **detects** change, it does not
+foretell it. One sentence: *it learns what a place normally reads on
+radar and shows where the ground did something else.* The named user is
+a disaster or aid organisation; the rice fields of Bardhaman are the
+proof that the method reads real ground.
+
+What was built for it:
+
+- **Neighbour comparison** (`tools/forecast.py`, the way called `peers`):
+  a cell's step between two passes against the median step of all cells
+  of the window in the same pass. What hits every cell alike (rain, a
+  season, a shift in calibration) drops out. It is closer than every
+  forecast at 12 of the 13 places tested (not Rondônia). It needs the
+  new pass, so it is not a forecast, and it is never named "best".
+- **Events with five to seven passes** are tested too (`MIN_SHORT`),
+  with the simplest ways only. Their "usual range" rests on two or three
+  earlier steps and is rough; the card says so, and the cell's own range
+  is not quoted for them.
+- **In the app:** the opening card offers the measured lead cases first
+  (`renderProof`, sentence built from the files); the menu starts with
+  "Measured by NISAR" (`renderMeasuredList`, from `data/measured/index.json`
+  and `forecast.json`), sorted by the share that stood out; the card
+  under a measurement is headed "What stood out here?" and shows the
+  pass-by-pass table first, baselines and error measures one fold below.
+
+Results as of this evening (first pass after the event; about 10 % is
+ordinary):
+
+| Event | Stood out | Can it be read? |
+|---|---|---|
+| Flood in Italy, 7 Oct | 31 % (then 2 %, 18 %) | yes |
+| Prescribed fire, Utah, 3 Nov | 4 % | yes |
+| M 5.7 Khuzdar, 17 Oct | 25 % | no: first pass of a new processing version |
+| Flood in Indonesia, 24 Oct | 8 % | no: same |
+| M 7.0 Nagqu, 22 Oct | 4 % | no: same |
+
+So one clear case out of two that can be read. That is a demonstration,
+not a detection rate, and nothing in the app or the submission says
+more.
+
+Two findings about NASA's data, both handled at the root:
+
+- **A strip with no signal.** At a wildfire in Wyoming a diagonal band
+  across the window read -145 dB in the same cells on every pass, and
+  the point itself -43 to -48 dB, which the first guard (-50 dB) let
+  through. Perito Moreno's -135 dB is the same kind. The guard is now
+  -40 dB (15 dB under NISAR's noise), applied to grid cells as well, and
+  `forecast.py` drops any cell that ever read an impossible value. Why
+  the files hold such strips is not established (our guess: the radar
+  cannot listen while it transmits).
+- **A step at a new processing version.** NASA's processing went from
+  P05023 to P05036 with the passes from about 21 October 2026 (the part
+  of the file name like `P05036`). At that pass the window mean fell at
+  12 of 15 places, by 0.4 dB in the middle, and by 0.78 dB in a desert
+  that had moved 0.00 to 0.07 dB on the three steps before. Whether it
+  is a calibration change we could not confirm from NASA's notes.
+  `forecast.py` marks such a pass (`newVersion`), the table tags it, and
+  an event whose first pass afterwards is one gets a sentence saying the
+  figure cannot be put down to the event. It is also the likely reason
+  for the uniform darkening of a few units in the planet-wide change
+  picture (rainforest 5 to 7 units), which compares September (old
+  version) with late October and November (mostly new).
+
+PR 78 (MadhuraSaha02, why preview brightness is relative) is merged,
+with three corrections after checking NASA's sources: the previews are
+not shown to be converted to dB, the stretch limits are "not stored in
+the picture" (not "cannot be undone"), and the unsourced "about 1 dB"
+is dropped. The planet-wide change picture is built from NASA's map
+picture instead, which is on one fixed scale for every date (checked:
+its green channel follows the calibrated HV values on one line at two
+places over 20 passes), though not a decibel scale.
+
 ## How to run and test
 
 - No build step. Serve the folder and open it: `start.command` (macOS),

@@ -3,7 +3,7 @@
 // Which version of the app this is. `tools/pack.sh` sets it; it shows at the
 // end of the credits line, so nobody has to wonder whether the browser is
 // still showing an older copy.
-const BUILD = '2026-11-15 15:00 UTC';
+const BUILD = '2026-11-15 16:03 UTC';
 
 import { CATEGORIES, FAMILIES, PALETTE, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START, RECENT_MS, OVERLAY_REACH_DAYS, NISAR_MOSAIC, NISAR_CHANGE, PREVIEW_STRETCH } from './config.js';
 import { fetchFeed, fetchArchive } from './feeds.js';
@@ -12,7 +12,7 @@ import { edgeMarginKm, latestScenes, scenesAt, passesAt, bestPair, comparisonSta
 import { STORIES } from './stories.js';
 import { PLACES, PLACE_KINDS, otherHemisphere } from './places.js';
 import { loadFrames, spread, view, history, describeSeries, rankByCoverage, sampleAt, channelView } from './timelapse.js';
-import { measuredIndex, measuredSummary, measuredById, measuredNear, measuredHtml, measuredChart, measuredLine, changeImageUrl, forecastFor, forecastHtml } from './measured.js';
+import { measuredIndex, measuredSummary, measuredById, measuredNear, measuredHtml, measuredChart, measuredLine, changeImageUrl, forecastFor, forecastHtml, stoodImageUrl, stoodLine } from './measured.js';
 import { fetchElements, positionAt, groundTrack, swathEdges, elementsEpoch } from './orbit.js';
 import { SPECIES, MONTHS, POIS, loadSightings } from './wildlife.js';
 import { historyChart } from './chart.js';
@@ -305,7 +305,7 @@ function renderCard() {
     <h4>What the agencies report</h4>
     ${body}
     <p class="nisar-line">${esc(nisarLine(inc, sel.found))}</p>
-    ${sel.measured ? `<p class="nisar-line measured-line">${esc(measuredLine(sel.measured, inc.time))}</p>` : ''}
+    ${sel.measured ? `<p class="nisar-line measured-line">${esc(measuredLine(sel.measured, inc.time))}${sel.check && stoodLine(sel.check) ? ` ${esc(stoodLine(sel.check))}` : ''}</p>` : ''}
     <div class="actions">
       <button class="primary" id="card-details">Show details</button>
       ${sel.found && bestPair(sel.found.backscatter, inc.time, true, inc) ? `<button id="card-change" aria-pressed="${stage.owner === 'change'}">${stage.owner === 'change' ? 'Back to the radar picture' : 'Show what changed'}</button>` : ''}
@@ -591,11 +591,11 @@ function incidentHtml(inc, radar) {
   // away under headings the text links to. NISAR comes first and is open.
   return `<span class="tag">${dot(inc.category)}${esc(cat.label)}</span>
     <h3>${esc(inc.title)}</h3>
+    <div id="measured-slot"></div>
     <div id="story-text" class="prose"></div>
     <div id="timeline"></div>
     <details class="fold" id="sec-nisar" open>
       <summary>NISAR radar at this place</summary>
-      <div id="measured-slot"></div>
       <h4>Preview brightness here, pass by pass (relative)</h4>
       <div id="incident-history" aria-live="polite"><p class="spinner">Searching NISAR repeat passes…</p></div>
       <h4>Passes, changes and ground movement</h4>
@@ -931,6 +931,12 @@ function setLegend(kind, info = {}) {
       <p>Two passes compared: the colours show how the distance to the satellite changed.</p>
       <ul>${row('linear-gradient(90deg,#f33,#ff3,#3f3,#3ff,#33f,#f3f)', 'One run through the colours: about 12 cm')}</ul>
       <small>Tight bands around one place are ground movement. Broad bands are mostly the atmosphere. Speckle means the passes did not match, as over water.</small>`;
+  } else if (kind === 'stood') {
+    const st = info.f.stood;
+    html = `<b>What stood out · ${esc(st.before)} to ${esc(st.date)}</b>
+      <p>Cells of ${info.f.cellM} m whose radar echo changed differently from the ground around them between two NISAR passes, from NISAR's calibrated data.</p>
+      <ul>${row(PALETTE.stronger, 'Orange: the echo rose more than around it') + row(PALETTE.weaker, 'Blue: it fell more than around it')}</ul>
+      <small>A cell is coloured where it differs from the middle of all cells by more than ${st.expected} dB, the range nine cells in ten kept to on the passes before; full colour at twice that. ${Math.round(st.outside * 100)} % of the cells are coloured; about 10 % is ordinary. It shows where something changed, not what caused it. Placed to within about half a cell.</small>`;
   } else if (kind === 'measured') {
     const c = info.d.change;
     html = `<b>Measured change · ${day(c.before)} to ${day(c.after)}</b>
@@ -1014,6 +1020,7 @@ function take(owner) {
   if ($('compare')) $('compare').textContent = 'Compare the source images';
   if ($('changes')) $('changes').textContent = 'Show what changed';
   if ($('measured-map')) $('measured-map').textContent = 'Show the measured change map';
+  if ($('stood-map')) $('stood-map').textContent = 'Show where it stood out';
   document.querySelectorAll('#detail [data-show]').forEach((b) => (b.textContent = b.id === 'igram-go' ? 'Show ground movement' : 'Show on globe'));
   // The timeline draws its pass afresh when it next owns the globe.
   if (state.selected) state.selected.passIndex = state.selected.passLoaded = undefined;
@@ -2031,12 +2038,16 @@ async function showMeasured(stillHere, pending, findCompare) {
   const compare = findCompare ? await findCompare() : null;
   if (!stillHere() || !$('measured-slot')) return;
   state.selected.measured = d;
-  $('measured-slot').innerHTML = `<h4>Measured with NISAR</h4>${measuredHtml(d, compare)}<div id="forecast-slot"></div>
+  // What stood out comes first (filled in below), then the series it rests on.
+  $('measured-slot').innerHTML = `<div id="forecast-slot"></div><h4>Measured with NISAR</h4>${measuredHtml(d, compare)}
     <p class="note">These are calibrated values from the full NISAR data, comparable between dates. Any preview charts below are relative: each preview is contrast-stretched on its own, so use them for <em>where</em> and <em>when</em>, and these dB values for <em>how much</em>.</p>`;
   measuredChart($('measured-chart'), d, compare);
   // How well the next pass could have been predicted here, if that was tested.
   forecastFor(d).then((f) => {
-    if (f && stillHere() && state.selected?.measured === d && $('forecast-slot')) $('forecast-slot').innerHTML = `<h4>What stood out here?</h4>${forecastHtml(f)}`;
+    if (!f || !stillHere() || state.selected?.measured !== d || !$('forecast-slot')) return;
+    state.selected.check = f;
+    if (state.selected.kind === 'incident') renderCard();
+    $('forecast-slot').innerHTML = `<h4>What stood out here?</h4>${forecastHtml(f)}`;
   });
   // An event's card and text lead with the calibrated value once it is here.
   renderCard();
@@ -2057,6 +2068,24 @@ async function showMeasuredMap(button) {
     button.textContent = 'Change map shown';
   } catch {
     if (token === stage.token) button.textContent = 'Change map failed to load';
+  }
+}
+
+// The cells that did something other than their neighbours, on the globe.
+async function showStoodMap(button) {
+  const f = state.selected?.check;
+  if (!f?.stood) return;
+  const token = take('measured');
+  button.textContent = 'Loading…';
+  try {
+    const picture = await loadPicture(stoodImageUrl(f));
+    if (token !== stage.token) return;
+    globe.addPicture(picture, f.stood.bounds, undefined, 0.9);
+    globe.flyToBounds(f.stood.bounds);
+    setLegend('stood', { f });
+    button.textContent = 'Shown on the globe';
+  } catch {
+    if (token === stage.token) button.textContent = 'The picture failed to load';
   }
 }
 
@@ -2106,6 +2135,7 @@ async function selectPlace(place, fly) {
   openPanel(`<span class="tag">${diamond(place.kind)}Changing place · ${esc(kind.label)}</span>
     <h3>${esc(place.name)}</h3>
     <dl><dt>Where</dt><dd>${esc(place.region)} · ${where(place.lat, place.lon)}</dd></dl>
+    <div id="measured-slot"></div>
     <h4>Why this place</h4>
     <div class="context"><p class="note">${esc(place.story)}</p>
     <p class="hint">Background from published research, not measured by this app.</p></div>
@@ -2113,7 +2143,6 @@ async function selectPlace(place, fly) {
     <p class="note">${esc(kind.look)}</p>
     <p class="note">${esc(kind.note)}</p>
     ${place.animals ? `<h4>Animals and the water</h4><p class="note">${esc(place.animals)} NISAR maps the flooding and drying that they follow. Turn on wildlife sightings under “Live sky and wildlife” to see migrating species.</p>` : ''}
-    <div id="measured-slot"></div>
     <h4>NISAR passes over this spot</h4>
     ${lapseBox(place.lat, place.lon)}
     ${MOVING_GROUND.has(place.kind) ? '<h4>Interferograms (ground movement)</h4><div id="place-ifg"><p class="spinner">Searching for interferograms…</p></div>' : ''}
@@ -2272,7 +2301,6 @@ async function loadChange() {
     .then((res) => (res.ok ? res.json() : null))
     .catch(() => null);
   if (!about?.tiles) return;
-  state.change = about;
   globe.setChange(about);
   $('change-row').hidden = false;
   const pct = (v) => `${Math.round(v * 100)} %`;
@@ -2734,6 +2762,7 @@ async function start() {
     if (t.dataset.mode) return setLapseMode(t.dataset.mode);
     if (t.id === 'under') return drapeChanges(t.checked);
     if (t.id === 'measured-map') return showMeasuredMap(t);
+    if (t.id === 'stood-map') return showStoodMap(t);
     if (t.id === 'sat-follow' && live.pos) return globe.flyTo(live.pos.lat, live.pos.lon, 6_000_000);
     const li = t.closest('li');
     if (!li) return;
