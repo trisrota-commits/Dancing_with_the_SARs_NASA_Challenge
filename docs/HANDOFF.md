@@ -1099,7 +1099,6 @@ time; there is no backend and there are no keys.
 | `js/replay/mvt.js` | Vector-tile reader for the fire detections |
 | `js/search.js` | Fuzzy event search and place lookup |
 | `js/narrative.js` | Plain-text account of an event with source links, one-line NISAR summary, event timeline |
-| `js/sound.js` | Plays a time-lapse as notes |
 | `js/orbit.js` | NISAR's live position, track and swath edges from public orbit elements (teammate) |
 | `js/sky.js`, `js/stars-data.js` | Real star sky, the Sun, shooting stars (teammate) |
 | `js/wildlife.js` | GBIF wildlife sightings by month, ocean landmarks (teammate) |
@@ -1267,7 +1266,9 @@ that appears on a place, or an event nearby, once results exist.
   11 dates of tiles at once, which is slow on a weak connection.
 - **Nothing has been tried by hand.** All testing is scripted, in a
   container without a GPU. The feel of the camera, real frame rates, the
-  Windows and macOS launchers, keyboard use and the sound are unverified.
+  Windows and macOS launchers and keyboard use are unverified. (The sound
+  for time-lapses was taken out on 15 November: the team found it added
+  nothing, and a judge who clicked it would be disappointed.)
 - **Phone layout** has not been checked since the menu grew.
 - **Bandwidth:** opening an event loads up to 8 previews of about 1 MB for
   the history chart; a time-lapse loads 14.

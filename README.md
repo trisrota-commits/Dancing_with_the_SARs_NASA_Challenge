@@ -128,8 +128,6 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
   lights). The six that cover the whole map show one at a time; the others
   lie on top and can be combined. A daily layer NASA has not published yet
   for the chosen day is shown for its newest day, and the menu says which.
-- A time-lapse can be **played as sound**: pitch follows the brightness at
-  the chosen point.
 
 ## The engine
 
@@ -260,7 +258,6 @@ app in headless Chromium against the live services.
 - `js/search.js` – fuzzy event search and place lookup
 - `js/narrative.js` – the plain-text account of an event with its source
   links, the one-line NISAR summary and the event timeline
-- `js/sound.js` – plays a time-lapse as notes
 - `tools/mosaic.py` – assembles the whole-planet mosaic in `data/mosaic/`
 - `tools/census.py` – checks on a sample of the whole planet which of
   NASA's NISAR tiles are sound (run by hand; half an hour)
