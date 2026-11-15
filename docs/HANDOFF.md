@@ -1407,6 +1407,34 @@ If the file is missing the app asks GBIF itself, two requests at a time
 with waits, and says how many requests stayed unanswered. To refresh the
 copy: `node tools/wildlife_snapshot.mjs`.
 
+## The menu, the opening card and "Show more" (15 November 2026, night)
+
+Decided by the project lead after the team saw three different menu
+behaviours and could not say why.
+
+- **The menu has the lowest claim on the screen.** It opens by its button
+  (or by "Explore the globe"), folds as soon as anything outside it is
+  pressed or anything is opened, never comes back by itself, and is never
+  open beside the details panel (opening it steps an event back to its
+  small card and closes any other panel). `setMenu`, `menuOpen` in
+  `js/main.js`. The old rule (fold for a selection, come back after it,
+  unless opened by hand, and stay for stories) is gone.
+- **Every section of the menu starts folded.** Order: Measured by NISAR,
+  Events on the map, NISAR radar, More stories, Changing places, Other
+  satellite layers, Terrain, Live sky and wildlife.
+- **The opening card is home.** It shows on every visit (nothing is
+  remembered in the browser any more). Closing what was opened (✕ or
+  Escape) brings it back, until the visitor chooses "Explore the globe";
+  the title at the top left shows it at any time (`showWelcome`, `letGo`).
+- **"Live feed" left the menu.** The reports bar has "Show more": the
+  newest 60 events on the map and NISAR passes as a list in the details
+  panel (`openFeed`). The bar and the list differ on purpose and the list
+  says how: the bar shows events first reported in the last 24 hours and
+  up to three of the strongest ongoing ones; the list shows everything on
+  the map, by when it was last reported.
+
+`tools/smoke.js` checks all of this.
+
 ## How to run and test
 
 - No build step. Serve the folder and open it: `start.command` (macOS),
