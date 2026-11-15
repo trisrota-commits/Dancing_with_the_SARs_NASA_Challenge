@@ -2,14 +2,29 @@
 // orbits a point on the ground. Drag pans, wheel or pinch zooms, and
 // right-drag (or Ctrl/Shift-drag, or a two-finger vertical drag) tilts and
 // turns the view.
+//
+// A drag holds the globe by the point that was grabbed: that point stays
+// under the cursor, wherever on the globe it is. Away from the poles the
+// view does not turn while it is dragged: north stays where it is on the
+// screen. Inside the polar caps that is given up, because it cannot be had
+// there: with north fixed, the pole is a wall the view cannot be pulled
+// across, and a small sideways drag beside it spins the whole planet. There
+// the globe turns freely like a ball in the hand. A view pulled across a
+// pole comes out upside down, as a ball would; once the pointer is let go
+// outside the cap, north swings back to where the reader had it.
 
 import * as THREE from '../../vendor/three.module.min.js';
-import { RAD, toVec, lonDelta } from './geo.js';
+import { RAD, toVec, toLatLon, lonDelta } from './geo.js';
 
 const MIN_RANGE = 1.2e-4; // about 750 m from the point being looked at
 const MAX_RANGE = 9;
 const MAX_PITCH = 80;
 const CLEARANCE = 4e-5; // the camera stays about 250 m above the ground
+// Latitudes between which north is let go of: held below the first, free
+// above the second.
+const CAP_FROM = 62;
+const CAP_FREE = 80;
+const MAX_TURN = 0.35; // radians one pointer event may turn the globe (a grazing ray near the edge would ask for more)
 
 export class GlobeControls {
   constructor(camera, element) {
@@ -20,6 +35,8 @@ export class GlobeControls {
     this.alt = 3.8; // distance from the target point, in Earth radii
     this.pitch = 0; // 0 looks straight down
     this.heading = 0; // 0 has north at the top
+    this.home = 0; // the heading the reader chose; a drag near a pole may leave it for a while
+    this.grab = null; // the point of the globe held by a drag, as a unit vector
     this.ground = 0;
     this.groundAt = null; // (lat, lon) => height in Earth radii
     this.velocity = { lat: 0, lon: 0 };
@@ -62,6 +79,95 @@ export class GlobeControls {
     this.travel = 0;
     this.tilting = e.button === 2 || e.ctrlKey || e.shiftKey;
     if (this.pointers.size === 2) this.pinch = this.spread();
+    this.grab = this.pointers.size === 1 && !this.tilting ? this.under(e.clientX, e.clientY) : null;
+  }
+
+  // The point of the globe under a place on the screen, as a unit vector;
+  // null where the screen shows the sky.
+  under(x, y) {
+    const box = this.element.getBoundingClientRect();
+    ndc.set(((x - box.left) / box.width) * 2 - 1, 1 - ((y - box.top) / box.height) * 2);
+    caster.setFromCamera(ndc, this.camera);
+    ball.radius = 1 + this.ground;
+    return caster.ray.intersectSphere(ball, hit) ? hit.clone().normalize() : null;
+  }
+
+  // Turns the globe so that the grabbed point comes under the cursor.
+  // False if the cursor is over the sky and nothing could be done.
+  hold(x, y) {
+    let held = false;
+    // A few rounds: letting north back to its place moves the point a
+    // little, and the next round takes that up again.
+    for (let round = 0; round < 8; round++) {
+      const now = this.under(x, y);
+      if (!now) break;
+      held = true;
+      const angle = now.angleTo(this.grab);
+      if (angle < 2e-6) break; // a dozen metres on the ground
+      const was = this.heading;
+      turn.setFromUnitVectors(now, this.grab);
+      if (angle > MAX_TURN) turn.slerp(still, 1 - MAX_TURN / angle);
+      // The camera's whole rig turns: the point it looks down on, and the
+      // way that is up on the screen.
+      toVec(this.lat, this.lon, 1, up);
+      north.set(0, 1, 0).addScaledVector(up, -up.y).normalize();
+      east.crossVectors(north, up);
+      const h = this.heading * RAD;
+      forward.copy(north).multiplyScalar(Math.cos(h)).addScaledVector(east, Math.sin(h));
+      up.applyQuaternion(turn);
+      forward.applyQuaternion(turn);
+      const at = toLatLon(up);
+      this.lat = at.lat;
+      this.lon = at.lon;
+      north.set(0, 1, 0).addScaledVector(up, -up.y).normalize();
+      east.crossVectors(north, up);
+      const free = Math.atan2(forward.dot(east), forward.dot(north)) / RAD;
+      // How firmly the view is kept from turning here: fully outside the
+      // polar caps, not at all near a pole.
+      const t = Math.max(0, Math.min(1, (CAP_FREE - Math.abs(this.lat)) / (CAP_FREE - CAP_FROM)));
+      this.heading = free + lonDelta(was, free) * t * t * (3 - 2 * t);
+      this.apply();
+    }
+    if (held && Math.abs(this.lat) < CAP_FROM - 1) this.settle(x, y);
+    return held;
+  }
+
+  // Where north is held, the rounds above come close but slowly for a
+  // point far from the middle of the view. This finishes the job: the
+  // view's latitude and longitude are solved for directly (Newton's
+  // method on the point's place on the screen). It is undone if it does
+  // not bring the point nearer.
+  settle(x, y) {
+    const start = { lat: this.lat, lon: this.lon, miss: this.under(x, y)?.angleTo(this.grab) ?? Infinity };
+    if (start.miss < 2e-6) return;
+    const box = this.element.getBoundingClientRect();
+    const want = { x: ((x - box.left) / box.width) * 2 - 1, y: 1 - ((y - box.top) / box.height) * 2 };
+    const seen = (lat, lon) => {
+      this.lat = lat;
+      this.lon = lon;
+      this.apply();
+      hit.copy(this.grab).multiplyScalar(1 + this.ground).project(this.camera);
+      return { x: hit.x - want.x, y: hit.y - want.y };
+    };
+    let lat = this.lat;
+    let lon = this.lon;
+    const d = Math.max(1e-5, this.degreesPerPixel() * 0.5);
+    for (let round = 0; round < 4; round++) {
+      const r = seen(lat, lon);
+      if (Math.hypot(r.x, r.y) < 1e-6) break;
+      const a = seen(lat + d, lon);
+      const b = seen(lat, lon + d);
+      const j = [(a.x - r.x) / d, (b.x - r.x) / d, (a.y - r.y) / d, (b.y - r.y) / d];
+      const det = j[0] * j[3] - j[1] * j[2];
+      if (Math.abs(det) < 1e-12) break;
+      const limit = (v) => Math.max(-10, Math.min(10, v));
+      lat += limit((-r.x * j[3] + r.y * j[1]) / det);
+      lon += limit((-r.y * j[0] + r.x * j[2]) / det);
+      if (Math.abs(lat) >= CAP_FROM) break;
+    }
+    seen(lat, lon);
+    const miss = this.under(x, y)?.angleTo(this.grab) ?? Infinity;
+    if (!(miss < start.miss)) seen(start.lat, start.lon);
   }
 
   spread() {
@@ -90,10 +196,22 @@ export class GlobeControls {
     if (this.tilting) {
       this.heading -= dx * 0.3;
       this.pitch -= dy * 0.3;
+      this.home = this.heading;
       this.apply();
       return;
     }
-    // Pan along the ground, following the way the view is turned.
+    if (this.grab) {
+      const from = { lat: this.lat, lon: this.lon };
+      if (this.hold(e.clientX, e.clientY)) {
+        // The glide after letting go, only where north is held: over a
+        // pole a step in latitude and longitude is not a direction.
+        const glide = Math.abs(this.lat) < CAP_FROM;
+        this.velocity.lat = glide ? this.lat - from.lat : 0;
+        this.velocity.lon = glide ? lonDelta(this.lon, from.lon) : 0;
+      }
+      return;
+    }
+    // The drag began on the sky: pan along the ground, following the way the view is turned.
     const k = this.degreesPerPixel();
     const h = this.heading * RAD;
     const forward = (dy * k) / Math.max(0.3, Math.cos(this.pitch * RAD));
@@ -130,7 +248,7 @@ export class GlobeControls {
   }
 
   // Glides to a new view. pitch and heading are optional.
-  flyTo(lat, lon, alt, seconds = 1.6, { pitch = this.pitch, heading = this.heading } = {}) {
+  flyTo(lat, lon, alt, seconds = 1.6, { pitch = this.pitch, heading = this.home } = {}) {
     this.stop();
     const turn = Math.hypot(lat - this.lat, lonDelta(lon, this.lon)) * RAD;
     const to = Math.max(MIN_RANGE, Math.min(MAX_RANGE, alt));
@@ -156,10 +274,20 @@ export class GlobeControls {
       this.pitch = mix(f.from.pitch, f.to.pitch);
       this.heading = mix(f.from.heading, f.to.heading);
       this.alt = Math.exp(mix(Math.log(f.from.alt), Math.log(f.to.alt))) + Math.sin(Math.PI * e) * f.rise;
-      if (f.t >= 1) this.flight = null;
+      if (f.t >= 1) {
+        this.flight = null;
+        this.home = this.heading;
+      }
       this.apply();
     } else if (this.spin) {
       this.lon += dt * 2.2;
+      this.apply();
+    } else if (this.pointers.size === 0 && Math.abs(this.lat) < CAP_FREE && Math.abs(lonDelta(this.home, this.heading)) > 0.01) {
+      // Let go of after a pull across a pole: north swings back to where
+      // the reader had it, about the middle of the view.
+      const left = lonDelta(this.home, this.heading);
+      this.heading = Math.abs(left) < 0.2 ? this.home : this.heading + left * Math.min(1, dt * 5);
+      this.velocity.lat = this.velocity.lon = 0;
       this.apply();
     } else if (this.pointers.size === 0 && (Math.abs(this.velocity.lat) > 1e-5 || Math.abs(this.velocity.lon) > 1e-5)) {
       this.lat += this.velocity.lat;
@@ -226,3 +354,9 @@ const north = new THREE.Vector3();
 const east = new THREE.Vector3();
 const forward = new THREE.Vector3();
 const target = new THREE.Vector3();
+const ndc = new THREE.Vector2();
+const caster = new THREE.Raycaster();
+const ball = new THREE.Sphere(new THREE.Vector3(), 1);
+const hit = new THREE.Vector3();
+const turn = new THREE.Quaternion();
+const still = new THREE.Quaternion();
