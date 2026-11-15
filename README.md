@@ -1,4 +1,138 @@
-# Dancing with the SARs
+<p align="center">
+  <img src="docs/img/readme-banner.jpg" alt="Dancing with the SARs: Earth's changing surface, seen by the NISAR radar satellite" width="100%">
+</p>
+
+<p align="center">
+  <a href="https://www.spaceappschallenge.org/"><img alt="NASA Space Apps Challenge 2026" src="https://img.shields.io/badge/NASA%20Space%20Apps-2026-0B3D91?style=flat-square"></a>
+  <img alt="Data: NASA-ISRO NISAR, L-band SAR" src="https://img.shields.io/badge/data-NISAR%20L--band%20SAR-39e6c4?style=flat-square">
+  <img alt="No build step, no API keys" src="https://img.shields.io/badge/build-none%2C%20no%20keys-555?style=flat-square">
+  <img alt="Rendering: three.js" src="https://img.shields.io/badge/3D-three.js-000?style=flat-square">
+  <a href="LICENSE"><img alt="MIT licence" src="https://img.shields.io/badge/licence-MIT-blue?style=flat-square"></a>
+</p>
+
+<h1 align="center">Dancing with the SARs</h1>
+
+<p align="center">
+  <b>Earth's surface never holds still.</b><br>
+  A live 3D globe that follows the planet's changing surface through the eyes of
+  the NASA-ISRO <b>NISAR</b> radar satellite: floods, earthquakes, fires, glaciers
+  and harvests, through cloud and at night.<br>
+  <b>It shows what a place normally reads on radar, and where the ground did something else.</b>
+</p>
+
+<p align="center">
+  <img src="docs/img/globe-spin.gif" alt="The globe turning, covered in NISAR's radar picture of the planet, with diamonds marking measured places" width="560"><br>
+  <sub>The app's globe wearing NISAR's own picture of the planet (NASA GIBS, 27 Sep – 13 Nov 2026).
+  Diamonds mark places measured with calibrated NISAR data.</sub>
+</p>
+
+<table>
+<tr>
+<td width="33%" valign="top">
+
+**🌍 Live events × radar**<br>
+Earthquakes, fires, floods and storms from USGS, NASA EONET and GDACS, each
+checked against NISAR's passes before and after.
+
+</td>
+<td width="33%" valign="top">
+
+**📏 Measured, not guessed**<br>
+Calibrated NISAR backscatter in dB, read from the full GCOV products twice
+a day by a GitHub job, for places and fresh events.
+
+</td>
+<td width="33%" valign="top">
+
+**🛰️ NISAR, live**<br>
+The satellite itself orbiting the globe, its 242 km radar swath, the next
+pass over any spot, the real star sky and sunlight.
+
+</td>
+</tr>
+</table>
+
+## What stood out: a flood in Italy
+
+For 16 places and events the app has NISAR's calibrated backscatter, cut
+into cells of 500 m. Each cell's change between two passes is set against
+what the cells around it did in the same pass; rain and season move all of
+them alike and drop out. The share of cells left outside their usual range
+is the result, and about 10 % is ordinary. At a flood reported in Tuscany
+on 7 October 2026 it was **31 %** on NISAR's first pass afterwards (10
+October), then 2 % and 18 % on the next two. The app draws those cells on
+the globe ("Show where it stood out").
+
+This is a demonstration, not a detection rate: of five events tested, two
+have a first pass afterwards that can be read cleanly (the flood stood out,
+a prescribed fire did not), and no place has been seen through the same
+season twice. See "What it cannot claim" in `docs/SUBMISSION.md`.
+
+## Does it read real ground? A monsoon season, measured
+
+<p align="center">
+  <img src="docs/img/rice-season.gif" alt="Animated map and chart of NISAR backscatter over the rice fields of Bardhaman, West Bengal, June to November 2026" width="100%">
+</p>
+
+Over the rice fields of Bardhaman in West Bengal, NISAR's calibrated HH echo
+fell to about **−10.9 dB** in July, when the paddies were flooded (calm water
+sends the pulse away), then rose to **−3.7 dB** by October as the rice grew
+(stems standing in water bounce it back twice). HV, which rises with
+vegetation, climbed with the crop. That is one whole monsoon crop cycle in
+12 passes, every pass on the same track and on one fixed colour scale.
+The captions inside the animation give the usual explanation of each
+phase; they are not measured. Its last pass, 11 November, is the harvest:
+the echo fell again (−6.3 dB).
+
+<details>
+<summary><b>Six more measured places</b></summary>
+<br>
+<p align="center"><img src="docs/img/measured-sites.png" alt="Calibrated NISAR backscatter at six places, June to November 2026" width="100%"></p>
+
+Flat lines matter too: where little changes, the calibrated values mostly stay within about 1.5 dB from pass to pass, which is what makes a real change, like the rice season, stand out. A single-pass dip, like Sacramento's HV in October, is worth checking before reading anything into it.
+</details>
+
+## NISAR's view of the planet
+
+<table>
+<tr>
+<td width="50%"><img src="docs/img/world-nisar.jpg" alt="The whole planet as NISAR saw it, September to November 2026"></td>
+<td width="50%"><img src="docs/img/world-change-48d.jpg" alt="Where NISAR's picture of the planet got darker or brighter over 48 days"></td>
+</tr>
+<tr>
+<td><sub>The whole planet as NISAR saw it, stacked from NASA's daily NISAR map layer, newest pass on top (<code>tools/mosaic.py</code>).</sub></td>
+<td><sub>Where NASA's NISAR picture got darker (blue: weaker echo) or brighter (orange: stronger echo) over 48 days, each pass compared with the same pass four repeat cycles earlier (<code>tools/change.py</code>). The broad blue across Canada and Siberia, and along the Sahel, fits autumn snow arriving and the land drying after the monsoon. A guide to where to look, not calibrated values.</sub></td>
+</tr>
+</table>
+
+## How it fits together
+
+```mermaid
+flowchart LR
+  subgraph live["Live, in the browser"]
+    feeds["USGS · NASA EONET · GDACS<br/>event feeds"] --> merge["Merge reports<br/>of one event"]
+    cmr["NASA CMR · ASF<br/>NISAR passes and previews"] --> pair["Same-track<br/>before / after pair"]
+    tle["Orbit elements<br/>(CelesTrak)"] --> sgp4["SGP4: NISAR's<br/>position now"]
+    gibs["NASA GIBS<br/>NISAR map layer"]
+    gbif["GBIF<br/>wildlife sightings"]
+  end
+  subgraph job["Twice a day, on GitHub Actions"]
+    gcov["NISAR GCOV HDF5<br/>calibrated backscatter"] --> measure["tools/measure.py<br/>dB series and change maps"]
+  end
+  merge --> globe(("3D globe"))
+  pair --> globe
+  sgp4 --> globe
+  gibs --> globe
+  gbif --> globe
+  measure --> data[("data/measured")] --> globe
+```
+
+**Previews find, measurements measure.** NASA's preview pictures are
+contrast-stretched one by one, so the app uses them to find *where* and
+*when* something changed within a scene. *How much* comes from the
+calibrated GCOV values (see "How honest the pictures are" below).
+
+---
 
 Our entry for the NASA Space Apps Challenge 2026, "Dancing with the SARs".
 
