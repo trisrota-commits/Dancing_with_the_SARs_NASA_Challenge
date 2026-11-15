@@ -53,6 +53,7 @@ const RETRY_MS = 12_000; // a tile that was not delivered is asked for again aft
 const RETRY_LONGEST = 16; // then after twice as long each time, up to this many times as long
 const RETRIES_PLAIN = 3; // a layer that cannot tell "no data here" from a failure stops after this many
 const HALF_WORLD = 20037508.342789244; // Web Mercator, in metres
+const FULL_SHARE = 0.995; // a radar tile this solid hides the days under it
 const RECHECK_MS = 5 * 60_000; // how often the whole-world pictures are fetched again
 // Phones and tablets have far less memory to give a page than a laptop.
 const SMALL = !!globalThis.matchMedia?.('(pointer: coarse)').matches;
@@ -731,9 +732,37 @@ export class TileGlobe {
       }
     }
     for (const group of groups) {
-      if (!group[0].stack) this.drawLayer(targetOf(group[0]), tile, group[0], group[0].alpha ?? 1);
-      else for (const only of ['soft', 'sharp']) for (const layer of group) this.drawLayer(targetOf(layer), tile, layer, layer.alpha ?? 1, only);
+      if (!group[0].stack) {
+        this.drawLayer(targetOf(group[0]), tile, group[0], group[0].alpha ?? 1);
+        continue;
+      }
+      // A day whose tile is here and solid from edge to edge (see `full`)
+      // hides every earlier day under it. Those are neither drawn nor
+      // fetched: over most land several passes lie on top of each other,
+      // and only the newest is seen. (From far away the world pictures are
+      // drawn, which cost nothing to stack.)
+      let from = 0;
+      if (tile.z > SHEET_LEVEL + 1) {
+        for (let k = group.length - 1; k > 0; k--) {
+          const entry = this.exactOf(group[k], tile);
+          if (entry?.state === 'ready' && entry.full && (group[k].alpha ?? 1) >= 1) {
+            from = k;
+            break;
+          }
+        }
+        // Whatever this tile had asked of the hidden days is let go.
+        for (let k = 0; k < from; k++) this.exactOf(group[k], tile)?.waiting.delete(tile);
+      }
+      for (const only of ['soft', 'sharp']) for (let k = from; k < group.length; k++) this.drawLayer(targetOf(group[k]), tile, group[k], group[k].alpha ?? 1, only);
     }
+  }
+
+  // The entry a layer's own tile for this map tile is kept under, if it
+  // has been asked for. Nothing is requested.
+  exactOf(layer, tile) {
+    const { z, x, y } = tile;
+    const top = Math.min(layer.sparse && z > 2 && z < COARSER_BELOW ? z - 1 : z, layer.maxLevel);
+    return this.images.get(this.key(layer, top, x >> (z - top), y >> (z - top)));
   }
 
   // Composites everything for this tile. Layers and pictures with a side
@@ -1213,7 +1242,7 @@ export class TileGlobe {
     }
     if (!entry) {
       // The coarse levels of a sparse layer go first: they unblock the rest.
-      entry = { key, url: this.url(layer, z, x, y), keep: layer.keep, tint: layer.tint, state: 'queued', img: null, waiting: new Set(), lastUsed: this.frame, first: !!layer.base || (!!layer.sparse && z <= 3), sparse: !!layer.sparse, overlay: !layer.base && !layer.sparse, probe: !!layer.sparse && !layer.sheet && z === 0, layer: layer.sparse ? layer : null, z, x, y };
+      entry = { key, url: this.url(layer, z, x, y), keep: layer.keep, tint: layer.tint, state: 'queued', img: null, waiting: new Set(), lastUsed: this.frame, first: !!layer.base || (!!layer.sparse && z <= 3), sparse: !!layer.sparse, age: layer.age || 0, overlay: !layer.base && !layer.sparse, probe: !!layer.sparse && !layer.sheet && z === 0, layer: layer.sparse ? layer : null, z, x, y };
       this.images.set(key, entry);
       this.queue.push(entry);
     } else if (entry.state === 'idle') {
@@ -1238,7 +1267,9 @@ export class TileGlobe {
     }
     if (near < 2) {
       entry.orphaned = 0;
-      return (entry.first ? 0 : 3) + near;
+      // Within a stack the newest day goes first: where it covers a tile
+      // whole, the days under it are never needed.
+      return (entry.first ? 0 : 3) + near + (entry.age || 0) * 0.004;
     }
     if (entry.pinned || entry.probe) return 0.5;
     // Where the camera is flying to comes before overlays still on screen
@@ -1487,6 +1518,7 @@ export class TileGlobe {
         if (store && source !== 'kept') store.put(entry.url, new Response(blob, source === 'map' ? { headers: { 'x-from': 'map' } } : undefined)).catch(() => {});
         if (source === 'map') this.mended++;
         entry.cells = seen.cells;
+        entry.full = !!seen.full;
         return seen.picture;
       } else why = seen.faulty;
       if (source === 'tiles') this.faulty++;
@@ -1759,7 +1791,12 @@ export class TileGlobe {
     if (solid > 600 && black > 0.9 * solid) return { faulty: 'it is solid black' };
     if (colour && solid > 600 && grey > 0.6 * solid) return { faulty: 'it is grey, and this layer is in colour' };
     if (!solid) return { faulty: 'it holds nothing, yet is not the empty tile', blank: true };
-    if (!half) return { cells, picture: bitmap };
+    // `full`: solid from edge to edge, so nothing under it can show. NASA's
+    // radar tiles count pure black as see-through, which leaves a
+    // scattering of single holes in nearly every tile (measured: two
+    // thirds of tiles inside a pass are 99.5 to 99.99 % solid), so a tile
+    // counts as full from 99.5 %.
+    if (!half) return { cells, picture: bitmap, full: solid >= FULL_SHARE * SIZE * SIZE };
     // Cleaned: the tile is kept as its own small canvas.
     const canvas = document.createElement('canvas');
     canvas.width = canvas.height = SIZE;

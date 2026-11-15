@@ -203,7 +203,9 @@ export class Globe {
     // A finished cross-fade is tidied up: one picture, no second canvas.
     if (this.fadeEnd && seconds > this.fadeEnd) this.settle();
     // Day and night shading eases back while data is on the ground.
-    const night = !this.nightOn ? 0 : this.pictures.length || this.focusTarget ? 0.25 : 1;
+    // (Also while the whole planet is shown as the radar sees it: the
+    // radar works at night, and the picture is the point.)
+    const night = !this.nightOn ? 0 : this.pictures.length || this.focusTarget || this.state.nisar?.days > 12 ? 0.25 : 1;
     if (Math.abs(this.night - night) > 0.002) {
       this.night = Math.abs(this.night - night) < 0.01 ? night : this.night + (night - this.night) * Math.min(1, dt * 2.5);
       this.tiles.uniforms.uNight.value = this.night;
@@ -357,8 +359,8 @@ export class Globe {
       const end = Date.parse(s.bands.date);
       for (let i = s.bands.days - 1; i >= 0; i--) {
         const date = iso(end - i * DAY);
-        if (date >= NISAR_TILES.firstDate) layers.push({ url: NISAR_TILES.url.replace('{date}', date), sheet: NISAR_TILES.sheet.replace('{date}', date), map: NISAR_TILES.map.replace('{date}', date), colour: true, stack: 'nisar', maxLevel: NISAR_TILES.maxLevel, side: 'left', sparse: true });
-        layers.push({ url: OVERLAYS.s1.url.replace('{date}', date), sheet: OVERLAYS.s1.sheet.replace('{date}', date), map: OVERLAYS.s1.map.replace('{date}', date), stack: 's1', maxLevel: OVERLAYS.s1.maxLevel, side: 'right', sparse: true });
+        if (date >= NISAR_TILES.firstDate) layers.push({ url: NISAR_TILES.url.replace('{date}', date), sheet: NISAR_TILES.sheet.replace('{date}', date), map: NISAR_TILES.map.replace('{date}', date), colour: true, stack: 'nisar', age: i, maxLevel: NISAR_TILES.maxLevel, side: 'left', sparse: true });
+        layers.push({ url: OVERLAYS.s1.url.replace('{date}', date), sheet: OVERLAYS.s1.sheet.replace('{date}', date), map: OVERLAYS.s1.map.replace('{date}', date), stack: 's1', age: i, maxLevel: OVERLAYS.s1.maxLevel, side: 'right', sparse: true });
       }
     }
     // (Not while the two wavelengths are compared: the stack has no side,
@@ -368,7 +370,7 @@ export class Globe {
       for (let i = s.nisar.days - 1; i >= 0; i--) {
         const date = iso(end - i * DAY);
         // Radar passes are thin strips on an empty globe: see `sparse` in the tile engine.
-        if (date >= NISAR_TILES.firstDate) layers.push({ url: NISAR_TILES.url.replace('{date}', date), sheet: NISAR_TILES.sheet.replace('{date}', date), map: NISAR_TILES.map.replace('{date}', date), colour: true, stack: 'nisar', maxLevel: NISAR_TILES.maxLevel, sparse: true });
+        if (date >= NISAR_TILES.firstDate) layers.push({ url: NISAR_TILES.url.replace('{date}', date), sheet: NISAR_TILES.sheet.replace('{date}', date), map: NISAR_TILES.map.replace('{date}', date), colour: true, stack: 'nisar', age: i, maxLevel: NISAR_TILES.maxLevel, sparse: true });
       }
     }
     // An event's own filled layer (flood water) steps aside while a change

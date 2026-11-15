@@ -3,7 +3,7 @@
 // Which version of the app this is. `tools/pack.sh` sets it; it shows at the
 // end of the credits line, so nobody has to wonder whether the browser is
 // still showing an older copy.
-const BUILD = '2026-11-15 01:38 UTC';
+const BUILD = '2026-11-15 02:30 UTC';
 
 import { CATEGORIES, FAMILIES, PALETTE, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START, RECENT_MS, OVERLAY_REACH_DAYS } from './config.js';
 import { fetchFeed, fetchArchive } from './feeds.js';
@@ -2212,6 +2212,7 @@ function applyLayers() {
     });
   }
   $('nisar-tiles-key').hidden = !$('nisar-tiles').checked;
+  $('stack-note').hidden = !($('nisar-tiles').checked && +$('stack').value > 12);
   // Two wavelengths side by side, for the same days.
   const compared = state.bands;
   state.bands = $('bands').checked;
