@@ -1,0 +1,17 @@
+flowchart LR
+  subgraph live["Live, in the browser"]
+    feeds["USGS · NASA EONET · GDACS<br/>event feeds"] --> merge["Merge reports<br/>of one event"]
+    cmr["NASA CMR · ASF<br/>NISAR passes and previews"] --> pair["Same-track<br/>before / after pair"]
+    tle["Orbit elements<br/>(CelesTrak)"] --> sgp4["SGP4: NISAR's<br/>position now"]
+    gibs["NASA GIBS<br/>NISAR map layer"]
+    gbif["GBIF<br/>wildlife sightings"]
+  end
+  subgraph job["Twice a day, on GitHub Actions"]
+    gcov["NISAR GCOV HDF5<br/>calibrated backscatter"] --> measure["tools/measure.py<br/>dB series and change maps"]
+  end
+  merge --> globe(("3D globe"))
+  pair --> globe
+  sgp4 --> globe
+  gibs --> globe
+  gbif --> globe
+  measure --> data[("data/measured")] --> globe
