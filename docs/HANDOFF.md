@@ -1381,6 +1381,14 @@ not something that was reproduced: either the 3D button followed by
 zooming out, or a drag that the trackpad reported as a right-drag. Both
 ways are closed. Checked in Chromium by script, not on a Mac.
 
+Third round: the lead found the cause. It was the hint in the Terrain
+menu, "right-drag to tilt and turn the view": a feature, taken for a bug.
+On the lead's decision the gesture is gone altogether, at every zoom: a
+right-, Ctrl- or Shift-drag holds the globe like any drag, and two
+fingers only zoom. The view is tilted by the 3D button alone. The height
+slider is gone too: relief is drawn at a fixed 4 times its true height
+(`uExaggeration` in `js/engine/tiles.js`), and the Terrain menu says so.
+
 ## Wildlife sightings come from a kept copy (15 November 2026, evening)
 
 Found while looking at the new animal figurines on the live site: GBIF

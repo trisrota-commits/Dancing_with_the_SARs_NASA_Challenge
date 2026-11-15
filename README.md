@@ -335,7 +335,8 @@ this app's workload:
   close; flood
   water is a mask the terrain shader animates; radar pictures cross-fade.
 - The camera orbits a point on the ground like Google Earth: drag to pan,
-  wheel or pinch to zoom, right-drag or two-finger drag to tilt and turn.
+  wheel or pinch to zoom; the 3D button tilts the view. Relief is drawn
+  4 times its true height.
 - A frame is drawn only when something changed. An idle globe draws only
   while the soft rings of recent events are spreading, about half the time.
 
