@@ -595,16 +595,19 @@ Three causes in the engine, and one that is NASA's.
 - **Where the time goes** (profiled, 24 days, Europe at 2,500 km): 1,059
   tile paints took 0.9 s in all, of a 51 s load. The engine's own work is
   about 2 %; the rest is waiting for NASA's answers (494 of them at that
-  distance). There is no ready-made mosaic at NASA: its catalogue holds
-  the daily layer only.
+  distance). (Written here at first: "there is no ready-made mosaic at
+  NASA". That was wrong: see "Has a whole-planet NISAR picture been done
+  before?")
 - Checked headless: no unpainted tile on screen in any frame of a fast
   zoom in and out; zooming back to a place already loaded completes in
   2.4 s with 34 requests (first time: 37 s, 353 requests).
 
 ### A ready-made mosaic of the whole planet (lead's idea, 15 Nov, early morning)
 
-NASA has no mosaic of NISAR, only the daily layer, so the whole-planet
-view stacked 24 daily layers live: up to 24 pictures per map tile, about
+NASA's map service holds NISAR as a daily layer only (NASA Worldview
+stacks 12 days of it in the browser; see "Has a whole-planet NISAR
+picture been done before?"), so the whole-planet view stacked 24 daily
+layers live: up to 24 pictures per map tile, about
 500 requests for a continent. The lead asked why the engine does not
 assemble the pieces itself. It does now, once, ahead of time.
 
@@ -922,6 +925,43 @@ picked events) in 20 minutes, committed by the job itself.
   when the measuring step failed or was cut off.
 - Not verified: the budget and the cut-off on GitHub; why Perito Moreno
   reads as it does.
+
+### Has a whole-planet NISAR picture been done before? (team's question, 15 Nov, afternoon)
+
+Yes. The team assumed not, and so did this document and the submission
+text ("NASA has no mosaic"). A search and a look at the primary sources
+on 15 November found otherwise. Do not claim a first.
+
+- **NASA Worldview has a "rolling 12-day" NISAR layer** since July 2026:
+  `NISAR_L2_Geocoded_Polarimetric_Covariance_12Day` in
+  `https://worldview.earthdata.nasa.gov/config/wv.json` ("layer":
+  the daily layer, "dayRange": 12). It stacks the last 12 days of the
+  same GIBS layer this app uses, in the browser, on a flat map. Read
+  first-hand here. ASF's documentation says each 12-day mosaic "should
+  provide global coverage".
+- **JPL has shown per-cycle global mosaics of NISAR's HH backscatter**
+  as figures in talks (Fringe 2026, an ARSET course); not browsable.
+  (From the search; the slides were not opened here.)
+- **Others have built global NISAR mosaics offline** (a pipeline on
+  GitHub, `fastice/globalMosaic`); no public viewer was found. (From the
+  search.)
+- **What is ours, and measured.** (1) 48 days, not 12. Because NASA
+  publishes passes up to two weeks late, the 12 days ending on the
+  newest day (12 November) cover 25.1 % of the map picture, which is
+  41.8 % of what the 48-day picture covers; 12 days ending three weeks
+  earlier cover 97.7 %. (From the daily world pictures fetched on 14 and
+  15 November.) (2) On a 3D globe with terrain. (3) Damaged tiles
+  replaced: 43 % of NASA's tiles in a worldwide sample; another team's
+  viewer (`OPERA-Cal-Val/nisar-water-viewer`) warns of the same damage
+  at fine zoom. (4) Ready-made, so the opening view is a third of a
+  megabyte.
+- **The claim to make:** "NASA Worldview offers a rolling 12-day NISAR
+  mosaic on a flat map. This app takes the same NASA layer, stacks 48
+  days so the picture is whole on any date, repairs the damaged tiles,
+  and puts it on a 3D globe." **Not to say:** "the first global NISAR
+  map" or "nobody has assembled this before".
+- Also learnt: NASA's layer starts on 29 October 2025, not in 2026; the
+  app's date picker starts on 1 April 2026.
 
 ### Visual rules (lead, 14 Nov, night)
 
