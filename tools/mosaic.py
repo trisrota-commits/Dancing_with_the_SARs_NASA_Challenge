@@ -26,7 +26,8 @@ pass on top without any bookkeeping, and the stored tiles are compressed
 once, not again and again. A tile that has not changed comes out byte for
 byte the same, so only changed tiles add to the repository.
 
-It is meant to be run every night, so that the app has little to add live.
+Nothing depends on running it again: the app draws every later day live
+on top. Run it when the far view should be brought up to date.
 """
 
 import argparse

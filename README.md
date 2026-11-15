@@ -159,10 +159,9 @@ this app's workload:
 - NASA publishes NISAR's map layer a day at a time and has no mosaic of
   it. `tools/mosaic.py` assembles one ahead of time, the newest pass on
   top, into `data/mosaic/`; the app shows that from far away and at
-  continent distance, and NASA's own tiles close up. It compares each
-  day's fingerprint with NASA's, so passes NASA adds later are drawn live
-  on top and the mosaic never hides newer data. Rebuilt every night it
-  keeps that live part small.
+  continent distance, and NASA's own tiles close up. Every day flown
+  after the mosaic was made is drawn live on top of it, so it never has
+  to be rebuilt to stay right.
 - Tiles are painted and fetched from the middle of the view outwards,
   ahead of a flying camera and ahead of a turning globe.
 - Event effects live in shaders: the earthquake front is drawn and lifted
