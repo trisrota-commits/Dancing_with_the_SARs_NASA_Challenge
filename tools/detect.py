@@ -371,6 +371,22 @@ def pct(v: float | None) -> str:
     return "–" if v is None else (f"{v * 100:.1f} %" if v < 0.095 else f"{v * 100:.0f} %")
 
 
+def leave_out_water(hh: np.ndarray, hv: np.ndarray | None, before: list[int]) -> float:
+    """Blanks the cells that read as open water on the passes given (in
+    place) and returns their share of the window. Judged from the passes
+    before an event: a flood makes water of land afterwards, and that is
+    what is looked for."""
+    if hv is None or not before:
+        return 0.0
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        water = np.nanmedian(hv[before], axis=0) < WATER_HV_DB
+    had = np.isfinite(hh).any(axis=0)
+    hh[:, water] = np.nan
+    hv[:, water] = np.nan
+    return float(water[had].mean()) if had.any() else 0.0
+
+
 def share(v) -> float | None:
     return None if v is None or not np.isfinite(v) else round(float(v), 4)
 
@@ -392,18 +408,7 @@ def detect(grid: dict, event: int | None = None) -> dict | None:
         return None
     made = F.versions(grid.get("files"), len(times))
     before = [i for i, t in enumerate(times) if event is None or t < event]
-    # Open water is left out, judged from the passes before the event (a
-    # flood makes water of land afterwards; that is what is looked for).
-    water = np.zeros(hh.shape[1], dtype=bool)
-    if hv is not None and before:
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            water = np.nanmedian(hv[before], axis=0) < WATER_HV_DB
-    had = np.isfinite(hh).any(axis=0)
-    wet = float(water[had].mean()) if had.any() else 0.0
-    hh[:, water] = np.nan
-    if hv is not None:
-        hv[:, water] = np.nan
+    wet = leave_out_water(hh, hv, before)
     if 1 - wet < LAND_NEEDED:
         about = f"{'Nearly all' if wet > 0.9 else f'{wet:.0%}'} of the window around this point reads as open water (the cross-polarised echo is under {WATER_HV_DB:.0f} dB there). On water the echo follows the wind from pass to pass, so nothing can be said about change here."
         return {
@@ -564,6 +569,9 @@ def sensitivity(grids: list[tuple[dict, int | None]], seed: int = 2026) -> dict:
         times, n = grid["times"], grid.get("n")
         hh, hv = read(grid)
         if not n or n * n != hh.shape[1]:
+            continue
+        # As in detect(): open water is left out, a window of water not used.
+        if 1 - leave_out_water(hh, hv, [i for i, t in enumerate(times) if event is None or t < event]) < LAND_NEEDED:
             continue
         tally = {k: np.zeros(3) for k in keys}  # found in the patch, flagged outside it, put in
         still = {who: [] for who in WHO}
