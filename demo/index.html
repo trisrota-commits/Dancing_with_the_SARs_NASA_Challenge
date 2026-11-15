@@ -121,6 +121,18 @@
         align-items: center;
         min-height: 0;
       }
+      .tight li,
+      .tight p {
+        font-size: 29px;
+        line-height: 1.38;
+      }
+      .tight {
+        gap: 20px;
+      }
+      .tight td,
+      .tight th {
+        white-space: nowrap;
+      }
       .cols.wide-right {
         grid-template-columns: 0.82fr 1.18fr;
       }
@@ -364,11 +376,11 @@
           <h2>“Track and visualize surface change at locations around the world” with NISAR</h2>
         </div>
         <div class="cols wide-left">
-          <ul>
+          <ul class="tight">
             <li><b>The problem.</b> After a flood, an earthquake or a failed harvest, the first question is where the ground changed. Cameras in orbit are blind under cloud, in smoke and at night.</li>
-            <li><b>NISAR sees through all three</b> and passes every place on land and ice every 12 days. But a radar picture is hard to read, and its measurements sit in files that need a login and special software.</li>
-            <li><b>Our answer:</b> an interactive change-detection map on a 3D globe. It turns NISAR's calibrated data into one statement a decision-maker can use: <b>this much of the ground changed, here, and this is what is ordinary.</b></li>
-            <li><b>For whom:</b> disaster and aid organisations first; farm advisers and food-security planners; teachers and the public.</li>
+            <li><b>NISAR's radar sees through all three,</b> every 12 days. But a radar picture is hard to read, and its measurements sit in files that need special software.</li>
+            <li><b>Our answer:</b> an interactive change-detection map on a 3D globe. It turns NISAR's data into a statement a decision-maker can use: <b>this much of the ground changed, here, and this is what is ordinary.</b></li>
+            <li><b>For whom:</b> disaster and aid organisations first; farm advisers; teachers and the public.</li>
           </ul>
           <figure>
             <img src="img/welcome.jpg" alt="The app's opening view: the whole planet as NISAR's radar sees it, with a card that offers the measured cases, a live event and the stories" />
@@ -389,18 +401,18 @@
           <h2>Three steps from a reported event to what the radar measured</h2>
         </div>
         <div class="cols wide-right">
-          <ul class="steps">
-            <li><b>Open the globe.</b> Live earthquakes, floods, fires and storms from USGS, NASA EONET and GDACS sit on NISAR's radar picture of the planet.</li>
-            <li><b>Pick an event or a place.</b> A timeline shows NISAR's passes before and after; dragging it puts each radar picture on the ground. Any other spot on land gives a time-lapse of every pass there.</li>
-            <li><b>Read what stood out.</b> Where we have measured, the panel opens on the share of the ground that changed, a map of where, and the series in decibels behind it.</li>
+          <ul class="steps tight">
+            <li><b>Open the globe.</b> Live earthquakes, floods, fires and storms (USGS, NASA EONET, GDACS) on NISAR's radar picture of the planet.</li>
+            <li><b>Pick an event or a place.</b> A timeline puts NISAR's passes before and after it on the ground. Any other spot on land gives a time-lapse of every pass there.</li>
+            <li><b>Read what stood out.</b> Where we have measured: the share of the ground that changed, a map of where, and the series in decibels behind it.</li>
           </ul>
           <figure>
             <img src="img/menu.jpg" alt="The app: the globe with live event markers, and the menu listing the 16 places and events measured from NISAR's calibrated data, sorted by how much of the ground stood out" />
-            <figcaption>16 places and events are measured so far, by a job that reads NISAR's data twice a day</figcaption>
+            <figcaption>16 places and events measured so far, by a job that reads NISAR's data twice a day</figcaption>
           </figure>
         </div>
         <div class="foot">
-          <span>Also in the app: five stories, 33 changing places, NISAR's L-band beside Sentinel-1's C-band, the satellite's live position</span>
+          <span>Also in the app: five stories, 33 changing places, L-band beside Sentinel-1's C-band, NISAR's live position</span>
           <span class="ai">Slides laid out with an AI assistant (Claude Code). Every picture is a screenshot of our app.</span>
           <span class="n">3 / 7</span>
         </div>
@@ -413,8 +425,8 @@
           <h2>Three days after the flood was reported, 12 % of the ground stood out. Before: 0.2 %</h2>
         </div>
         <div class="cols wide-right">
-          <div style="display: grid; gap: 26px">
-            <table>
+          <div class="tight" style="display: grid; gap: 26px">
+            <table style="font-size: 27px">
               <tr>
                 <th>NISAR pass</th>
                 <th style="text-align: right; padding-right: 28px">Stood out</th>
@@ -428,7 +440,7 @@
               <tr class="hit">
                 <td>10 October</td>
                 <td class="num">12 %</td>
-                <td>3 days after the report</td>
+                <td>3 days after</td>
               </tr>
               <tr>
                 <td>22 October</td>
@@ -438,7 +450,7 @@
               <tr>
                 <td>3 November</td>
                 <td class="num">0.0 %</td>
-                <td class="dim">back to its usual reading</td>
+                <td class="dim">as before</td>
               </tr>
             </table>
             <p class="note"><b>Why might it look like this?</b> <span style="color: var(--weaker)">Blue</span> cells: the echo fell, which is what standing water does to radar (it sends the pulse away). <span style="color: var(--stronger)">Orange</span>: it rose, as wet soil does. A hypothesis, and the app labels it as one: the map says where, not why.</p>
@@ -462,22 +474,22 @@
           <h2>One rice season in two polarisations: flooded in July, tall in October, harvested in November</h2>
         </div>
         <div class="cols wide-right">
-          <div style="display: grid; gap: 28px">
-            <ul>
+          <div class="tight" style="display: grid">
+            <ul class="tight">
               <li><b>HH, −10.9 dB in July:</b> the paddies are under water, and smooth water sends little back.</li>
-              <li><b>HH, −3.7 dB in October:</b> the rice stands tall in the water; the echo is five times as strong.</li>
-              <li><b>HV rises with the crop</b> and stays up: it is the channel that leaves and stems send back.</li>
-              <li><b>November:</b> the harvest. HH falls again, and 8.7 % of the ground stands out.</li>
+              <li><b>HH, −3.7 dB in October:</b> the rice stands tall; the echo is five times as strong.</li>
+              <li><b>HV rises with the crop</b> and stays up: the channel that leaves and stems send back.</li>
+              <li><b>November, the harvest:</b> HH falls again, and 8.7 % of the ground stands out.</li>
             </ul>
-            <p class="note">12 passes, 1,024 cells of 500 m. The place's text in the app said to expect this before the measurements existed.</p>
+            <p class="note">12 passes, 1,024 cells. The place's text in the app said to expect this before the data existed.</p>
           </div>
           <figure>
-            <img src="img/crop-measured.jpg" alt="The app's chart of calibrated NISAR backscatter over the rice fields of Bardhaman, June to November 2026, HH and HV in decibels" />
-            <figcaption>The app's chart, from NISAR's calibrated data. Which polarisation shows what is part of every place's text.</figcaption>
+            <img src="img/crop-app.jpg" alt="The app over the rice fields of Bardhaman: the cells that stood out at the harvest pass drawn on the satellite map, and the chart of calibrated HH and HV backscatter from June to November 2026" />
+            <figcaption>The harvest pass on the map, and the season's chart from NISAR's calibrated data</figcaption>
           </figure>
         </div>
         <div class="foot">
-          <span>A flooded paddy and a lost harvest are disasters too: the same view serves a farm adviser and a relief planner.</span>
+          <span>A flooded paddy and a lost harvest are disasters too: one view for a farm adviser and a relief planner.</span>
           <span class="ai">Slides laid out with an AI assistant (Claude Code). Every picture is a screenshot of our app.</span>
           <span class="n">5 / 7</span>
         </div>
