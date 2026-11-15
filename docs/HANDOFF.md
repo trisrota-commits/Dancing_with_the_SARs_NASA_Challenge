@@ -814,6 +814,49 @@ one or two zoom steps only (far and close were fine).
   9; after it none, with 389 damaged answers replaced from the map
   service. Unit test: `tests/engine.test.mjs`.
 
+### Which NISAR tiles are sound: a census of the planet (lead's question, 15 Nov, morning)
+
+The lead asked whether "kind 2 is the only sound kind of file" holds
+everywhere, or whether the list of sound kinds needs extending.
+
+- **`tools/census.py`** samples tiles over the whole planet (26 days, 300
+  places a day, levels 7, 9, 11 and 13) and compares them with NASA's map
+  service: every tile of another kind, and 600 of kind 2. About 27,000
+  requests to the tile service, 5,000 to the map service, half an hour;
+  run by hand.
+- **Result, 15 November:** of 10,421 tiles holding a picture, 5,974 were
+  kind 2 and 4,447 another kind (0, 3, 4, 6). All 4,447 were damaged;
+  none was sound. Of the 600 kind-2 tiles compared, 591 were the same
+  picture as the map service's and 6 were empty in both. So the list is
+  complete as it is: kind 2, nothing else.
+- **How much is damaged** grows with the level: 10 % of tiles at level 7,
+  45 % at level 9, 65 % at level 11, 72 % at level 13. Close up, most
+  NISAR tiles the app shows come from the map service.
+- **The same tile is not always the same file.** Asked for again an hour
+  later, 3 of 35 kind-2 tiles came back as a damaged kind, and damaged
+  ones came back as another damaged kind. The engine judges every answer
+  on its own, so this does not matter to it; a sound answer is kept in
+  the browser's store.
+- **A second fault, of the right kind.** Three kind-2 tiles of 1 November
+  held 1 %, 5 % and 24 % of the tile where the map service showed 100 %,
+  100 % and 29 %. Twenty minutes later the same tiles were complete: NASA
+  was adding a pass to that day, and the tile service still handed out
+  the tiles from before. The engine now refuses such a tile
+  (`expectedCover`, used in `fetchTile`): each day's picture of the world
+  carries how much of each cell is solid, and a tile holding less than
+  half of what that shows at its place is taken from the map service.
+  Further in than level 7 this is only said where the cell and all eight
+  around it are solid throughout. Checked for false alarms in nine views
+  (far views in the 12-day mode; Finnish lakes, the Amazon, Lake
+  Victoria's shore and the Dutch coast close up): none refused. The
+  fault itself could not be reproduced on demand (NASA was no longer
+  adding to that day); the rule has unit tests only.
+- A caution from the census: colour difference alone does not tell a
+  damaged tile from a sound one over dark ground (a damaged grey tile
+  comes within 20 of a dark blue picture). The script compares what the
+  two pictures show in blocks of 4 x 4 pixels (`alike`): sound tiles
+  score 0.69 to 1.0, damaged ones 0.11 or less.
+
 ### Visual rules (lead, 14 Nov, night)
 
 The lead, after one screenshot confused them: no arbitrary colours; one
