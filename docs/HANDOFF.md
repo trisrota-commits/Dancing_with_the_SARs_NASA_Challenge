@@ -561,6 +561,45 @@ last complete round is 12 to 24 days old.
   2,500 km 45 s against 18 s: at that distance few tiles are solid, so
   the rule helps little there.
 
+### Black squares, blinking and sharp-then-blurry (lead's three videos, 15 Nov, night)
+
+Filmed in the whole-planet view, where every tile composites 25 layers.
+Three causes in the engine, and one that is NASA's.
+
+- **Black squares: a tile was shown before it had been painted.** A tile
+  turns visible the moment the view needs it, but painting takes its turn
+  (a few tiles a frame). Measured right after a fast zoom-out: 50 of 65
+  visible tiles not painted yet. Now a new tile is never empty
+  (`prepaint` in `js/engine/tiles.js`): it borrows from its relatives
+  until its turn comes, the four finer tiles put together, or its
+  quarter of the coarser one, or failing both the basemap with each radar
+  layer's world picture over it.
+- **Sharp, then blurry: zooming out fell back to a coarser picture.**
+  While a level's own tile is on its way, the stand-in was always looked
+  for among coarser levels. `drawFiner` now takes the level finer first,
+  if it is all here, which after zooming out it is.
+- **Blinking: the picture cache dropped pictures the screen was showing.**
+  With this many layers the cache (900 pictures) filled, the least
+  recently *drawn* went first, and a tile painted a while ago had its
+  pictures dropped; its next repaint found them gone, showed a blurred
+  stand-in and fetched them again. Each tile now records what it is made
+  of (`tile.used`), and `trim` never drops a picture of a visible tile.
+- **Hard edges between strips: NASA's.** Each pass is rendered on its
+  own. And a whole strip in orange beside green ones was recorded in one
+  channel only. Checked for the Amazon, 20 Oct to 6 Nov: of 59 scenes, 22
+  are single-polarisation (`SHSH`) and come out orange in the map layer,
+  37 are dual (`DHDH`) and come out green. The menu's key used to say
+  orange means "towns and thinly vegetated ground", which is not true of
+  those strips; it now explains them.
+- **Where the time goes** (profiled, 24 days, Europe at 2,500 km): 1,059
+  tile paints took 0.9 s in all, of a 51 s load. The engine's own work is
+  about 2 %; the rest is waiting for NASA's answers (494 of them at that
+  distance). There is no ready-made mosaic at NASA: its catalogue holds
+  the daily layer only.
+- Checked headless: no unpainted tile on screen in any frame of a fast
+  zoom in and out; zooming back to a place already loaded completes in
+  2.4 s with 34 requests (first time: 37 s, 353 requests).
+
 ### Visual rules (lead, 14 Nov, night)
 
 The lead, after one screenshot confused them: no arbitrary colours; one
