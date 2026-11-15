@@ -76,6 +76,11 @@ body {
   color: #04221c;
 }
 
+#nav button.turned {
+  border-color: #ff5a4f;
+  box-shadow: 0 0 0 1px #ff5a4f;
+}
+
 #needle {
   display: inline-block;
   color: #ff5a4f;

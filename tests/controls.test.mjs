@@ -64,9 +64,14 @@ test('a pole can be pulled across the view, and north comes back afterwards', ()
   assert.ok(c.lat < 62, `out of the polar cap again: ${c.lat}`);
   // Like a ball in the hand, it comes out upside down ...
   assert.ok(Math.abs(Math.abs(c.heading) - 180) < 5, `upside down while held: ${c.heading}`);
-  // ... and rights itself once it is let go.
+  // ... and stays as it was left: nothing pulls it round once it is let go.
   c.up(at(640, y));
-  for (let i = 0; i < 80; i++) c.update(0.05);
+  const left = c.heading;
+  for (let i = 0; i < 40; i++) c.update(0.05);
+  assert.equal(c.heading, left);
+  // Going anywhere turns it upright again.
+  c.flyTo(43, 11, 3, 0.1);
+  for (let i = 0; i < 10; i++) c.update(0.05);
   assert.ok(Math.abs(c.heading) < 1e-6, `north is back at the top: ${c.heading}`);
 });
 
@@ -86,8 +91,31 @@ test('inside a polar cap the globe turns freely', () => {
   assert.ok(Math.abs(c.heading) < 1e-6 && Math.abs(c.lat - 43) < 1e-6);
 });
 
+test('from far out nothing tilts the globe or pushes it off the middle', () => {
+  const c = rig(); // the whole globe in view
+  c.down(at(640, 300, { button: 2 })); // a right-drag, as a trackpad makes of a drag with two fingers down
+  assert.ok(c.grab, 'it holds the globe like any drag');
+  c.move(at(640, 200, { button: 2 }));
+  c.move(at(700, 150, { button: 2 }));
+  c.up(at(700, 150, { button: 2 }));
+  assert.equal(c.pitch, 0);
+  assert.equal(c.heading, 0);
+  // Nor does a tilt set from outside survive up here.
+  c.pitch = 60;
+  c.apply();
+  assert.equal(c.pitch, 0);
+  // Close to the ground it is all there.
+  c.alt = 0.01;
+  c.pitch = 60;
+  c.apply();
+  assert.equal(c.pitch, 60);
+  // Zooming out lays the view flat again.
+  c.zoomBy(200);
+  assert.equal(c.pitch, 0);
+});
+
 test('a turn of the view by hand is kept through a drag', () => {
-  const c = rig();
+  const c = rig({ alt: 0.05 });
   c.down(at(640, 360, { button: 2 }));
   c.move(at(700, 360, { button: 2 })); // right-drag: turns the view
   c.up(at(700, 360, { button: 2 }));
