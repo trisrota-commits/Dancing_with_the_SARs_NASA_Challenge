@@ -1,0 +1,142 @@
+{
+ "id": "mekong",
+ "name": "Mekong Delta",
+ "track": "047-D-083-DHDH",
+ "cellM": 500.0,
+ "cells": 1024,
+ "passes": 11,
+ "from": "2026-06-17",
+ "to": "2026-10-27",
+ "falseAlarm": 0.01,
+ "event": null,
+ "most": {
+  "date": "2026-10-27",
+  "time": 1793100201000,
+  "stood": 0.0254,
+  "quiet": 0.0008
+ },
+ "picture": {
+  "date": "2026-10-27",
+  "time": 1793100201000,
+  "baselineFrom": "2026-06-17",
+  "baselineTo": "2026-10-15",
+  "stood": 0.0254,
+  "quiet": 0.0008,
+  "n": 32,
+  "image": "mekong_stood.png",
+  "bounds": {
+   "west": 105.52698108646555,
+   "east": 105.67301891353443,
+   "south": 10.128135106000718,
+   "north": 10.27186489399928
+  }
+ },
+ "byDate": [
+  {
+   "time": 1784805802000,
+   "date": "2026-07-23",
+   "baseline": 3,
+   "channels": 2,
+   "threshold": 18.46,
+   "over": 0.0039,
+   "stood": 0.0,
+   "quiet": 0.0029,
+   "rose": 0.0,
+   "fell": 0.0
+  },
+  {
+   "time": 1786879401000,
+   "date": "2026-08-16",
+   "baseline": 4,
+   "channels": 2,
+   "threshold": 10.24,
+   "over": 0.0205,
+   "stood": 0.001,
+   "quiet": 0.0022,
+   "rose": 0.001,
+   "fell": 0.0,
+   "stillNext": 0.0
+  },
+  {
+   "time": 1787916200000,
+   "date": "2026-08-28",
+   "baseline": 5,
+   "channels": 2,
+   "threshold": 9.03,
+   "over": 0.001,
+   "stood": 0.0,
+   "quiet": 0.0014,
+   "rose": 0.0,
+   "fell": 0.0
+  },
+  {
+   "time": 1788953000000,
+   "date": "2026-09-09",
+   "baseline": 6,
+   "channels": 2,
+   "threshold": 6.24,
+   "over": 0.0039,
+   "stood": 0.0,
+   "quiet": 0.002,
+   "rose": 0.0,
+   "fell": 0.0
+  },
+  {
+   "time": 1789989800000,
+   "date": "2026-09-21",
+   "baseline": 7,
+   "channels": 2,
+   "threshold": 5.6,
+   "over": 0.0098,
+   "stood": 0.0,
+   "quiet": 0.0013,
+   "rose": 0.0,
+   "fell": 0.0
+  },
+  {
+   "time": 1791026600000,
+   "date": "2026-10-03",
+   "baseline": 8,
+   "channels": 2,
+   "threshold": 4.97,
+   "over": 0.0215,
+   "stood": 0.0068,
+   "quiet": 0.0011,
+   "rose": 0.0039,
+   "fell": 0.0029,
+   "stillNext": 0.0
+  },
+  {
+   "time": 1792063400000,
+   "date": "2026-10-15",
+   "baseline": 9,
+   "channels": 2,
+   "threshold": 4.88,
+   "over": 0.0068,
+   "stood": 0.0,
+   "quiet": 0.0012,
+   "rose": 0.0,
+   "fell": 0.0
+  },
+  {
+   "time": 1793100201000,
+   "date": "2026-10-27",
+   "baseline": 10,
+   "channels": 2,
+   "threshold": 4.64,
+   "over": 0.0518,
+   "stood": 0.0254,
+   "quiet": 0.0008,
+   "rose": 0.0234,
+   "fell": 0.002,
+   "newVersion": {
+    "from": "P05023",
+    "to": "P05036"
+   }
+  }
+ ],
+ "summary": "The pass that stood out most was that of 2026-10-27: 2.5 % of the cells differed from what they had read on the 10 passes before it. On those passes themselves the same rules flag 0.1 %.",
+ "method": "NISAR L2 GCOV backscatter in cells of 500 m. From each pass the middle of all cells is taken away, so that what moved the whole area alike drops out. Each cell is then set against its own usual value and spread over the passes before (at an event: before the event; at least 3, at most 10), in HH and, where recorded, HV. The threshold is the score that 1% of the cells exceeded when each baseline pass was judged against the others. A cell counts only if at least 2 of its eight neighbours are over the threshold too.",
+ "limits": "It says that the ground changed and where, not why. A baseline of a few passes knows nothing of the season: a crop growing or ground freezing stands out as well. Cells next to each other share speckle and weather, so a cluster is weaker evidence than its size suggests.",
+ "generated": "2026-11-15T16:42:26Z"
+}

@@ -48,7 +48,7 @@ require('fs').mkdirSync(OUT, { recursive: true });
   // ---- off camera: go there once, so the place is as it is on a second visit ----
   const home = await page.evaluate(() => { const c = window.app.globe.controls; window.app.globe.spinning = false; return { lat: c.lat, lon: c.lon, alt: c.alt }; });
   await page.evaluate(() => document.querySelector('[data-site="west-bengal"]').click());
-  await page.waitForSelector('#forecast-slot .forecast', { timeout: 90000 });
+  await page.waitForSelector('#detect-slot .forecast', { timeout: 90000 });
   await page.waitForTimeout(3000); await settle(120);
   await page.locator('#measured-map').click(); await page.waitForTimeout(5000); await settle(60);
   await page.keyboard.press('Escape'); await page.waitForTimeout(500); await page.keyboard.press('Escape'); await page.waitForTimeout(500);

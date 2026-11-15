@@ -1,0 +1,107 @@
+{
+ "id": "event-gdacs-fl1104220",
+ "name": "Flood in Italy",
+ "track": "144-A-023-DHDH",
+ "cellM": 500.0,
+ "cells": 576,
+ "passes": 7,
+ "from": "2026-08-23",
+ "to": "2026-11-03",
+ "falseAlarm": 0.01,
+ "event": {
+  "time": 1791331200000.0,
+  "date": "2026-10-07",
+  "firstPassAfter": "2026-10-10",
+  "stood": 0.1181,
+  "quiet": 0.0022,
+  "stillNext": 0.691,
+  "newVersion": null,
+  "baseline": 4
+ },
+ "most": {
+  "date": "2026-10-10",
+  "time": 1791605875000,
+  "stood": 0.1181,
+  "quiet": 0.0022
+ },
+ "picture": {
+  "date": "2026-10-10",
+  "time": 1791605875000,
+  "baselineFrom": "2026-08-23",
+  "baselineTo": "2026-09-28",
+  "stood": 0.1181,
+  "quiet": 0.0022,
+  "n": 24,
+  "image": "event-gdacs-fl1104220_stood.png",
+  "bounds": {
+   "west": 11.06464614800242,
+   "east": 11.213153851997578,
+   "south": 43.404801329500536,
+   "north": 43.512598670499465
+  }
+ },
+ "byDate": [
+  {
+   "time": 1790569075000,
+   "date": "2026-09-28",
+   "baseline": 3,
+   "channels": 2,
+   "threshold": 8.49,
+   "over": 0.0052,
+   "stood": 0.0,
+   "quiet": 0.0006,
+   "rose": 0.0,
+   "fell": 0.0,
+   "afterEvent": false
+  },
+  {
+   "time": 1791605875000,
+   "date": "2026-10-10",
+   "baseline": 4,
+   "channels": 2,
+   "threshold": 5.26,
+   "over": 0.184,
+   "stood": 0.1181,
+   "quiet": 0.0022,
+   "rose": 0.0434,
+   "fell": 0.0747,
+   "afterEvent": true,
+   "stillNext": 0.691
+  },
+  {
+   "time": 1792642675000,
+   "date": "2026-10-22",
+   "baseline": 4,
+   "channels": 2,
+   "threshold": 5.26,
+   "over": 0.1667,
+   "stood": 0.0816,
+   "quiet": 0.0022,
+   "rose": 0.033,
+   "fell": 0.0486,
+   "afterEvent": true,
+   "newVersion": {
+    "from": "P05023",
+    "to": "P05036"
+   },
+   "stillNext": 0.021
+  },
+  {
+   "time": 1793679475000,
+   "date": "2026-11-03",
+   "baseline": 4,
+   "channels": 2,
+   "threshold": 5.26,
+   "over": 0.0174,
+   "stood": 0.0,
+   "quiet": 0.0022,
+   "rose": 0.0,
+   "fell": 0.0,
+   "afterEvent": true
+  }
+ ],
+ "summary": "On NISAR's first pass after the event of 2026-10-07 (2026-10-10), 12 % of the cells stood out from what they had read on the 4 passes before it. On those passes themselves the same rules flag 0.2 %. A pass later, 69 % of the flagged cells were still changed.",
+ "method": "NISAR L2 GCOV backscatter in cells of 500 m. From each pass the middle of all cells is taken away, so that what moved the whole area alike drops out. Each cell is then set against its own usual value and spread over the passes before (at an event: before the event; at least 3, at most 10), in HH and, where recorded, HV. The threshold is the score that 1% of the cells exceeded when each baseline pass was judged against the others. A cell counts only if at least 2 of its eight neighbours are over the threshold too.",
+ "limits": "It says that the ground changed and where, not why. A baseline of a few passes knows nothing of the season: a crop growing or ground freezing stands out as well. Cells next to each other share speckle and weather, so a cluster is weaker evidence than its size suggests.",
+ "generated": "2026-11-15T16:42:25Z"
+}

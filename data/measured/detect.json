@@ -1,0 +1,269 @@
+[
+ {
+  "id": "aletsch",
+  "name": "Aletsch Glacier (Konkordiaplatz)",
+  "cells": 1020,
+  "passes": 11,
+  "event": null,
+  "most": {
+   "date": "2026-10-22",
+   "time": 1792642740000,
+   "stood": 0.0118,
+   "quiet": 0.0022
+  }
+ },
+ {
+  "id": "event-eonet-eonet-26057",
+  "name": "Wildfire Wild River, Coos, New Hampshire",
+  "cells": 576,
+  "passes": 4,
+  "event": {
+   "time": 1793577600000.0,
+   "date": "2026-11-02",
+   "firstPassAfter": "2026-11-02",
+   "stood": 0.0,
+   "quiet": 0.0035,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 3
+  },
+  "most": {
+   "date": "2026-11-02",
+   "time": 1793662976000,
+   "stood": 0.0,
+   "quiet": 0.0035
+  }
+ },
+ {
+  "id": "event-eonet-eonet-26260",
+  "name": "Prescribed Fire Cold Springs RX, Wasatch, Utah",
+  "cells": 576,
+  "passes": 5,
+  "event": {
+   "time": 1793664000000.0,
+   "date": "2026-11-03",
+   "firstPassAfter": "2026-11-08",
+   "stood": 0.0,
+   "quiet": 0.0056,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 4
+  },
+  "most": {
+   "date": "2026-10-27",
+   "time": 1793104107000,
+   "stood": 0.0,
+   "quiet": 0.0046
+  }
+ },
+ {
+  "id": "event-gdacs-fl1104220",
+  "name": "Flood in Italy",
+  "cells": 576,
+  "passes": 7,
+  "event": {
+   "time": 1791331200000.0,
+   "date": "2026-10-07",
+   "firstPassAfter": "2026-10-10",
+   "stood": 0.1181,
+   "quiet": 0.0022,
+   "stillNext": 0.691,
+   "newVersion": null,
+   "baseline": 4
+  },
+  "most": {
+   "date": "2026-10-10",
+   "time": 1791605875000,
+   "stood": 0.1181,
+   "quiet": 0.0022
+  }
+ },
+ {
+  "id": "event-gdacs-fl1104253",
+  "name": "Flood in Indonesia",
+  "cells": 576,
+  "passes": 5,
+  "event": {
+   "time": 1792800000000.0,
+   "date": "2026-10-24",
+   "firstPassAfter": "2026-10-31",
+   "stood": 0.0,
+   "quiet": 0.0013,
+   "stillNext": null,
+   "newVersion": {
+    "from": "P05023",
+    "to": "P05036"
+   },
+   "baseline": 4
+  },
+  "most": {
+   "date": "2026-10-19",
+   "time": 1792411100000,
+   "stood": 0.0,
+   "quiet": 0.0029
+  }
+ },
+ {
+  "id": "event-gdacs-fl1104270",
+  "name": "Flood in France",
+  "cells": 576,
+  "passes": 4,
+  "event": {
+   "time": 1793750400000.0,
+   "date": "2026-11-04",
+   "firstPassAfter": "2026-11-05",
+   "stood": 0.0,
+   "quiet": 0.0041,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 3
+  },
+  "most": {
+   "date": "2026-11-05",
+   "time": 1793853301000,
+   "stood": 0.0,
+   "quiet": 0.0041
+  }
+ },
+ {
+  "id": "event-usgs-us6000u2y1",
+  "name": "M 5.7 - 47 km WNW of Khuzdar, Pakistan",
+  "cells": 576,
+  "passes": 5,
+  "event": {
+   "time": 1792195200000.0,
+   "date": "2026-10-17",
+   "firstPassAfter": "2026-10-22",
+   "stood": 0.0642,
+   "quiet": 0.0013,
+   "stillNext": null,
+   "newVersion": {
+    "from": "P05023",
+    "to": "P05036"
+   },
+   "baseline": 4
+  },
+  "most": {
+   "date": "2026-10-22",
+   "time": 1792630453000,
+   "stood": 0.0642,
+   "quiet": 0.0013
+  }
+ },
+ {
+  "id": "event-usgs-us6000u43g",
+  "name": "M 7.0 - 189 km ENE of Nagqu, China",
+  "cells": 576,
+  "passes": 6,
+  "event": {
+   "time": 1792627200000.0,
+   "date": "2026-10-22",
+   "firstPassAfter": "2026-10-30",
+   "stood": 0.0,
+   "quiet": 0.0069,
+   "stillNext": null,
+   "newVersion": {
+    "from": "P05023",
+    "to": "P05036"
+   },
+   "baseline": 4
+  },
+  "most": {
+   "date": "2026-11-11",
+   "time": 1794400327000,
+   "stood": 0.0174,
+   "quiet": 0.0069
+  }
+ },
+ {
+  "id": "gerd",
+  "name": "Grand Ethiopian Renaissance Dam reservoir",
+  "cells": 3600,
+  "passes": 11,
+  "event": null,
+  "most": {
+   "date": "2026-09-03",
+   "time": 1788405041000,
+   "stood": 0.6217,
+   "quiet": 0.0072
+  }
+ },
+ {
+  "id": "jakobshavn",
+  "name": "Sermeq Kujalleq (Jakobshavn)",
+  "cells": 2304,
+  "passes": 11,
+  "event": null,
+  "most": {
+   "date": "2026-09-29",
+   "time": 1790725921000,
+   "stood": 0.1259,
+   "quiet": 0.0064
+  }
+ },
+ {
+  "id": "mekong",
+  "name": "Mekong Delta",
+  "cells": 1024,
+  "passes": 11,
+  "event": null,
+  "most": {
+   "date": "2026-10-27",
+   "time": 1793100201000,
+   "stood": 0.0254,
+   "quiet": 0.0008
+  }
+ },
+ {
+  "id": "okavango",
+  "name": "Okavango Delta",
+  "cells": 3600,
+  "passes": 11,
+  "event": null,
+  "most": {
+   "date": "2026-10-12",
+   "time": 1791778634000,
+   "stood": 0.0981,
+   "quiet": 0.0058
+  }
+ },
+ {
+  "id": "rondonia",
+  "name": "Rond\u00f4nia",
+  "cells": 1361,
+  "passes": 9,
+  "event": null,
+  "most": {
+   "date": "2026-09-05",
+   "time": 1788602477000,
+   "stood": 0.0325,
+   "quiet": 0.0055
+  }
+ },
+ {
+  "id": "sacramento",
+  "name": "Sacramento Valley rice",
+  "cells": 1024,
+  "passes": 28,
+  "event": null,
+  "most": {
+   "date": "2026-10-02",
+   "time": 1790946570000,
+   "stood": 0.3896,
+   "quiet": 0.0046
+  }
+ },
+ {
+  "id": "west-bengal",
+  "name": "Rice fields of Bardhaman",
+  "cells": 1024,
+  "passes": 12,
+  "event": null,
+  "most": {
+   "date": "2026-11-11",
+   "time": 1794440258000,
+   "stood": 0.0869,
+   "quiet": 0.0039
+  }
+ }
+]

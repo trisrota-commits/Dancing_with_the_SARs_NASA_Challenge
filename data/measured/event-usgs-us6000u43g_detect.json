@@ -1,0 +1,95 @@
+{
+ "id": "event-usgs-us6000u43g",
+ "name": "M 7.0 - 189 km ENE of Nagqu, China",
+ "track": "091-D-072-DHDH",
+ "cellM": 500.0,
+ "cells": 576,
+ "passes": 6,
+ "from": "2026-09-12",
+ "to": "2026-11-11",
+ "falseAlarm": 0.01,
+ "event": {
+  "time": 1792627200000.0,
+  "date": "2026-10-22",
+  "firstPassAfter": "2026-10-30",
+  "stood": 0.0,
+  "quiet": 0.0069,
+  "stillNext": null,
+  "newVersion": {
+   "from": "P05023",
+   "to": "P05036"
+  },
+  "baseline": 4
+ },
+ "most": {
+  "date": "2026-11-11",
+  "time": 1794400327000,
+  "stood": 0.0174,
+  "quiet": 0.0069
+ },
+ "picture": {
+  "date": "2026-10-30",
+  "time": 1793363526000,
+  "baselineFrom": "2026-09-12",
+  "baselineTo": "2026-10-18",
+  "stood": 0.0,
+  "quiet": 0.0069,
+  "n": 24,
+  "image": "event-usgs-us6000u43g_stood.png",
+  "bounds": {
+   "west": 93.71990787112033,
+   "east": 93.84749212887967,
+   "south": 32.28370132950054,
+   "north": 32.391498670499466
+  }
+ },
+ "byDate": [
+  {
+   "time": 1792326726000,
+   "date": "2026-10-18",
+   "baseline": 3,
+   "channels": 2,
+   "threshold": 7.12,
+   "over": 0.0069,
+   "stood": 0.0,
+   "quiet": 0.0035,
+   "rose": 0.0,
+   "fell": 0.0,
+   "afterEvent": false
+  },
+  {
+   "time": 1793363526000,
+   "date": "2026-10-30",
+   "baseline": 4,
+   "channels": 2,
+   "threshold": 5.56,
+   "over": 0.0104,
+   "stood": 0.0,
+   "quiet": 0.0069,
+   "rose": 0.0,
+   "fell": 0.0,
+   "afterEvent": true,
+   "newVersion": {
+    "from": "P05023",
+    "to": "P05036"
+   }
+  },
+  {
+   "time": 1794400327000,
+   "date": "2026-11-11",
+   "baseline": 4,
+   "channels": 2,
+   "threshold": 5.56,
+   "over": 0.0625,
+   "stood": 0.0174,
+   "quiet": 0.0069,
+   "rose": 0.0156,
+   "fell": 0.0017,
+   "afterEvent": true
+  }
+ ],
+ "summary": "On NISAR's first pass after the event of 2026-10-22 (2026-10-30), 0.0 % of the cells stood out from what they had read on the 4 passes before it. On those passes themselves the same rules flag 0.7 %.",
+ "method": "NISAR L2 GCOV backscatter in cells of 500 m. From each pass the middle of all cells is taken away, so that what moved the whole area alike drops out. Each cell is then set against its own usual value and spread over the passes before (at an event: before the event; at least 3, at most 10), in HH and, where recorded, HV. The threshold is the score that 1% of the cells exceeded when each baseline pass was judged against the others. A cell counts only if at least 2 of its eight neighbours are over the threshold too.",
+ "limits": "It says that the ground changed and where, not why. A baseline of a few passes knows nothing of the season: a crop growing or ground freezing stands out as well. Cells next to each other share speckle and weather, so a cluster is weaker evidence than its size suggests.",
+ "generated": "2026-11-15T16:42:25Z"
+}

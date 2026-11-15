@@ -406,7 +406,7 @@ export class Globe {
       layers.push({ fill: 'rgba(5, 9, 15, 0.74)' });
       layers.push({ url: `${NISAR_CHANGE.url}?v=${encodeURIComponent(change.built || '')}`, maxLevel: change.levels, has: change.has });
     }
-    if (s.nisar && !s.bands && !change) {
+    if (s.nisar && !s.bands && !change && !s.ground) {
       const end = Date.parse(s.nisar.date);
       // The whole planet with the ready-made mosaic: that one picture
       // serves the far and the continent view, and the daily layers it
@@ -458,6 +458,15 @@ export class Globe {
   showChange(on) {
     if (!!on === !!this.state.change) return;
     this.state.change = !!on;
+    this.applyLayers();
+  }
+
+  // The ground itself under a measured picture: NASA's radar layer is
+  // taken off for as long as one is shown, so that the satellite map
+  // (fields, roads, rivers) says what the coloured cells lie on.
+  showGround(on) {
+    if (!!on === !!this.state.ground) return;
+    this.state.ground = !!on;
     this.applyLayers();
   }
 

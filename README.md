@@ -55,18 +55,23 @@ pass over any spot, the real star sky and sunlight.
 ## What stood out: a flood in Italy
 
 For 16 places and events the app has NISAR's calibrated backscatter, cut
-into cells of 500 m. Each cell's change between two passes is set against
-what the cells around it did in the same pass; rain and season move all of
-them alike and drop out. The share of cells left outside their usual range
-is the result, and about 10 % is ordinary. At a flood reported in Tuscany
-on 7 October 2026 it was **31 %** on NISAR's first pass afterwards (10
-October), then 2 % and 18 % on the next two. The app draws those cells on
-the globe ("Show where it stood out").
+into cells of 500 m. A detector (`tools/detect.py`) sets each cell against
+its own baseline of earlier passes, in HH and HV, after taking away what
+moved the whole area alike (rain, a season); the threshold lets 1 cell in
+100 through on a quiet pass, and only clusters count. At a flood reported
+in Tuscany on 7 October 2026, **12 %** of the cells stood out on NISAR's
+first pass afterwards (10 October), against **0.2 %** on the passes before;
+8.2 % a pass later and 0.0 % the pass after that. The app draws those cells
+on the globe ("Show where it stood out").
 
-This is a demonstration, not a detection rate: of five events tested, two
-have a first pass afterwards that can be read cleanly (the flood stood out,
-a prescribed fire did not), and no place has been seen through the same
-season twice. See "What it cannot claim" in `docs/SUBMISSION.md`.
+The detector is measured, not asserted: with a change of known size put
+into real, quiet passes, a drop of 3 dB over 2.5 km is found with recall
+0.86 at precision 0.80. Where a place is itself changing (rice growing, a
+reservoir filling) it is far weaker (0.44 at 0.12): one season of data
+cannot tell a crop from a change. Of seven reported events judged, the
+flood in Italy stood out, one earthquake shows 6.4 % on a pass we cannot
+read cleanly, and five show nothing. See "What it cannot claim" in
+`docs/SUBMISSION.md`.
 
 ## Does it read real ground? A monsoon season, measured
 
@@ -398,10 +403,12 @@ app in headless Chromium against the live services.
 - `tools/smoke.js` – browser smoke test against the live services
 - `tools/film.js` – films the app frame by frame (the 30-second demo); its
   header says how, and what was learnt making it
-- `tools/forecast.py` – for every measured place, sets each pass against
-  what was expected (from the place's own past and from its neighbours
-  in the same pass) and says how much of the ground stood out; the
-  expectation is scored against simple baselines
+- `tools/detect.py` – the change detector: for every measured place, which
+  cells of each pass stood out from their own baseline; `--sensitivity`
+  measures its recall and precision with changes put in
+- `tools/forecast.py` – tests how well NISAR's next pass over a measured
+  place can be predicted, against simple baselines
+- `tools/slides.js` – prints the seven demo slides (`demo/`) to PDF
 - `tools/change.py` – the planet-wide change picture: each pass against
   the same pass 48 days earlier, into `data/change/`
 - `docs/HANDOFF.md` – where the project stands and how to continue it

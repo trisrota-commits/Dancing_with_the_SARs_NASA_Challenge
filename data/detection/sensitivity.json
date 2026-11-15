@@ -1,0 +1,811 @@
+{
+ "what": "A test with changes put in by tools/detect.py, not a measurement: a square patch of cells in a real NISAR pass is raised or lowered by a set amount in both channels, and the detector is run on it.",
+ "trialsEach": 12,
+ "falseAlarm": 0.01,
+ "groups": {
+  "quiet": {
+   "what": "Places where the detector, with nothing put in, flags no more than its false-alarm rate (1%) of the cells",
+   "places": [
+    "Aletsch Glacier (Konkordiaplatz)",
+    "Prescribed Fire Cold Springs RX, Wasatch, Utah",
+    "Flood in Italy",
+    "Flood in Indonesia",
+    "M 5.7 - 47 km WNW of Khuzdar, Pakistan",
+    "M 7.0 - 189 km ENE of Nagqu, China",
+    "Mekong Delta",
+    "Rond\u00f4nia"
+   ],
+   "passes": 27,
+   "flaggedWithNothingPutIn": {
+    "new": 0.0038,
+    "old": 0.1161
+   },
+   "rows": [
+    {
+     "db": -6.0,
+     "cells": 3,
+     "km": 1.5,
+     "new": {
+      "recall": 0.976,
+      "precision": 0.638,
+      "f1": 0.772
+     },
+     "old": {
+      "recall": 1.0,
+      "precision": 0.062,
+      "f1": 0.116
+     }
+    },
+    {
+     "db": -3.0,
+     "cells": 3,
+     "km": 1.5,
+     "new": {
+      "recall": 0.873,
+      "precision": 0.616,
+      "f1": 0.722
+     },
+     "old": {
+      "recall": 0.989,
+      "precision": 0.061,
+      "f1": 0.115
+     }
+    },
+    {
+     "db": -2.0,
+     "cells": 3,
+     "km": 1.5,
+     "new": {
+      "recall": 0.711,
+      "precision": 0.57,
+      "f1": 0.633
+     },
+     "old": {
+      "recall": 0.925,
+      "precision": 0.057,
+      "f1": 0.108
+     }
+    },
+    {
+     "db": -1.0,
+     "cells": 3,
+     "km": 1.5,
+     "new": {
+      "recall": 0.335,
+      "precision": 0.388,
+      "f1": 0.36
+     },
+     "old": {
+      "recall": 0.596,
+      "precision": 0.038,
+      "f1": 0.071
+     }
+    },
+    {
+     "db": 1.0,
+     "cells": 3,
+     "km": 1.5,
+     "new": {
+      "recall": 0.337,
+      "precision": 0.393,
+      "f1": 0.363
+     },
+     "old": {
+      "recall": 0.633,
+      "precision": 0.04,
+      "f1": 0.075
+     }
+    },
+    {
+     "db": 2.0,
+     "cells": 3,
+     "km": 1.5,
+     "new": {
+      "recall": 0.673,
+      "precision": 0.568,
+      "f1": 0.616
+     },
+     "old": {
+      "recall": 0.938,
+      "precision": 0.058,
+      "f1": 0.109
+     }
+    },
+    {
+     "db": 3.0,
+     "cells": 3,
+     "km": 1.5,
+     "new": {
+      "recall": 0.892,
+      "precision": 0.636,
+      "f1": 0.742
+     },
+     "old": {
+      "recall": 0.984,
+      "precision": 0.06,
+      "f1": 0.114
+     }
+    },
+    {
+     "db": -6.0,
+     "cells": 5,
+     "km": 2.5,
+     "new": {
+      "recall": 0.982,
+      "precision": 0.816,
+      "f1": 0.891
+     },
+     "old": {
+      "recall": 0.998,
+      "precision": 0.156,
+      "f1": 0.27
+     }
+    },
+    {
+     "db": -3.0,
+     "cells": 5,
+     "km": 2.5,
+     "new": {
+      "recall": 0.863,
+      "precision": 0.8,
+      "f1": 0.83
+     },
+     "old": {
+      "recall": 0.987,
+      "precision": 0.155,
+      "f1": 0.267
+     }
+    },
+    {
+     "db": -2.0,
+     "cells": 5,
+     "km": 2.5,
+     "new": {
+      "recall": 0.689,
+      "precision": 0.767,
+      "f1": 0.726
+     },
+     "old": {
+      "recall": 0.925,
+      "precision": 0.146,
+      "f1": 0.253
+     }
+    },
+    {
+     "db": -1.0,
+     "cells": 5,
+     "km": 2.5,
+     "new": {
+      "recall": 0.342,
+      "precision": 0.639,
+      "f1": 0.445
+     },
+     "old": {
+      "recall": 0.596,
+      "precision": 0.1,
+      "f1": 0.171
+     }
+    },
+    {
+     "db": 1.0,
+     "cells": 5,
+     "km": 2.5,
+     "new": {
+      "recall": 0.335,
+      "precision": 0.645,
+      "f1": 0.441
+     },
+     "old": {
+      "recall": 0.61,
+      "precision": 0.101,
+      "f1": 0.173
+     }
+    },
+    {
+     "db": 2.0,
+     "cells": 5,
+     "km": 2.5,
+     "new": {
+      "recall": 0.683,
+      "precision": 0.789,
+      "f1": 0.732
+     },
+     "old": {
+      "recall": 0.937,
+      "precision": 0.147,
+      "f1": 0.254
+     }
+    },
+    {
+     "db": 3.0,
+     "cells": 5,
+     "km": 2.5,
+     "new": {
+      "recall": 0.888,
+      "precision": 0.83,
+      "f1": 0.858
+     },
+     "old": {
+      "recall": 0.989,
+      "precision": 0.154,
+      "f1": 0.266
+     }
+    }
+   ]
+  },
+  "changing": {
+   "what": "Places that are themselves changing from pass to pass (the detector flags more than that with nothing put in)",
+   "places": [
+    "Grand Ethiopian Renaissance Dam reservoir",
+    "Sermeq Kujalleq (Jakobshavn)",
+    "Okavango Delta",
+    "Sacramento Valley rice",
+    "Rice fields of Bardhaman"
+   ],
+   "passes": 58,
+   "flaggedWithNothingPutIn": {
+    "new": 0.0339,
+    "old": 0.1087
+   },
+   "rows": [
+    {
+     "db": -6.0,
+     "cells": 3,
+     "km": 1.5,
+     "new": {
+      "recall": 0.781,
+      "precision": 0.079,
+      "f1": 0.144
+     },
+     "old": {
+      "recall": 0.994,
+      "precision": 0.043,
+      "f1": 0.083
+     }
+    },
+    {
+     "db": -3.0,
+     "cells": 3,
+     "km": 1.5,
+     "new": {
+      "recall": 0.436,
+      "precision": 0.046,
+      "f1": 0.083
+     },
+     "old": {
+      "recall": 0.92,
+      "precision": 0.04,
+      "f1": 0.077
+     }
+    },
+    {
+     "db": -2.0,
+     "cells": 3,
+     "km": 1.5,
+     "new": {
+      "recall": 0.26,
+      "precision": 0.028,
+      "f1": 0.051
+     },
+     "old": {
+      "recall": 0.724,
+      "precision": 0.032,
+      "f1": 0.061
+     }
+    },
+    {
+     "db": -1.0,
+     "cells": 3,
+     "km": 1.5,
+     "new": {
+      "recall": 0.111,
+      "precision": 0.012,
+      "f1": 0.022
+     },
+     "old": {
+      "recall": 0.277,
+      "precision": 0.012,
+      "f1": 0.024
+     }
+    },
+    {
+     "db": 1.0,
+     "cells": 3,
+     "km": 1.5,
+     "new": {
+      "recall": 0.099,
+      "precision": 0.011,
+      "f1": 0.02
+     },
+     "old": {
+      "recall": 0.267,
+      "precision": 0.012,
+      "f1": 0.023
+     }
+    },
+    {
+     "db": 2.0,
+     "cells": 3,
+     "km": 1.5,
+     "new": {
+      "recall": 0.336,
+      "precision": 0.036,
+      "f1": 0.066
+     },
+     "old": {
+      "recall": 0.703,
+      "precision": 0.031,
+      "f1": 0.06
+     }
+    },
+    {
+     "db": 3.0,
+     "cells": 3,
+     "km": 1.5,
+     "new": {
+      "recall": 0.596,
+      "precision": 0.065,
+      "f1": 0.117
+     },
+     "old": {
+      "recall": 0.911,
+      "precision": 0.04,
+      "f1": 0.077
+     }
+    },
+    {
+     "db": -6.0,
+     "cells": 5,
+     "km": 2.5,
+     "new": {
+      "recall": 0.783,
+      "precision": 0.189,
+      "f1": 0.305
+     },
+     "old": {
+      "recall": 0.994,
+      "precision": 0.113,
+      "f1": 0.203
+     }
+    },
+    {
+     "db": -3.0,
+     "cells": 5,
+     "km": 2.5,
+     "new": {
+      "recall": 0.439,
+      "precision": 0.118,
+      "f1": 0.186
+     },
+     "old": {
+      "recall": 0.912,
+      "precision": 0.104,
+      "f1": 0.187
+     }
+    },
+    {
+     "db": -2.0,
+     "cells": 5,
+     "km": 2.5,
+     "new": {
+      "recall": 0.248,
+      "precision": 0.071,
+      "f1": 0.11
+     },
+     "old": {
+      "recall": 0.693,
+      "precision": 0.081,
+      "f1": 0.146
+     }
+    },
+    {
+     "db": -1.0,
+     "cells": 5,
+     "km": 2.5,
+     "new": {
+      "recall": 0.095,
+      "precision": 0.029,
+      "f1": 0.044
+     },
+     "old": {
+      "recall": 0.257,
+      "precision": 0.032,
+      "f1": 0.057
+     }
+    },
+    {
+     "db": 1.0,
+     "cells": 5,
+     "km": 2.5,
+     "new": {
+      "recall": 0.12,
+      "precision": 0.036,
+      "f1": 0.056
+     },
+     "old": {
+      "recall": 0.282,
+      "precision": 0.035,
+      "f1": 0.062
+     }
+    },
+    {
+     "db": 2.0,
+     "cells": 5,
+     "km": 2.5,
+     "new": {
+      "recall": 0.343,
+      "precision": 0.103,
+      "f1": 0.159
+     },
+     "old": {
+      "recall": 0.712,
+      "precision": 0.084,
+      "f1": 0.15
+     }
+    },
+    {
+     "db": 3.0,
+     "cells": 5,
+     "km": 2.5,
+     "new": {
+      "recall": 0.596,
+      "precision": 0.185,
+      "f1": 0.282
+     },
+     "old": {
+      "recall": 0.918,
+      "precision": 0.106,
+      "f1": 0.189
+     }
+    }
+   ]
+  },
+  "all": {
+   "what": "All places",
+   "places": [
+    "Aletsch Glacier (Konkordiaplatz)",
+    "Prescribed Fire Cold Springs RX, Wasatch, Utah",
+    "Flood in Italy",
+    "Flood in Indonesia",
+    "M 5.7 - 47 km WNW of Khuzdar, Pakistan",
+    "M 7.0 - 189 km ENE of Nagqu, China",
+    "Grand Ethiopian Renaissance Dam reservoir",
+    "Sermeq Kujalleq (Jakobshavn)",
+    "Mekong Delta",
+    "Okavango Delta",
+    "Rond\u00f4nia",
+    "Sacramento Valley rice",
+    "Rice fields of Bardhaman"
+   ],
+   "passes": 85,
+   "flaggedWithNothingPutIn": {
+    "new": 0.0243,
+    "old": 0.1111
+   },
+   "rows": [
+    {
+     "db": -6.0,
+     "cells": 3,
+     "km": 1.5,
+     "new": {
+      "recall": 0.843,
+      "precision": 0.116,
+      "f1": 0.204
+     },
+     "old": {
+      "recall": 0.996,
+      "precision": 0.048,
+      "f1": 0.091
+     }
+    },
+    {
+     "db": -3.0,
+     "cells": 3,
+     "km": 1.5,
+     "new": {
+      "recall": 0.573,
+      "precision": 0.083,
+      "f1": 0.144
+     },
+     "old": {
+      "recall": 0.942,
+      "precision": 0.045,
+      "f1": 0.087
+     }
+    },
+    {
+     "db": -2.0,
+     "cells": 3,
+     "km": 1.5,
+     "new": {
+      "recall": 0.402,
+      "precision": 0.059,
+      "f1": 0.104
+     },
+     "old": {
+      "recall": 0.787,
+      "precision": 0.038,
+      "f1": 0.073
+     }
+    },
+    {
+     "db": -1.0,
+     "cells": 3,
+     "km": 1.5,
+     "new": {
+      "recall": 0.181,
+      "precision": 0.028,
+      "f1": 0.048
+     },
+     "old": {
+      "recall": 0.377,
+      "precision": 0.019,
+      "f1": 0.036
+     }
+    },
+    {
+     "db": 1.0,
+     "cells": 3,
+     "km": 1.5,
+     "new": {
+      "recall": 0.174,
+      "precision": 0.027,
+      "f1": 0.046
+     },
+     "old": {
+      "recall": 0.382,
+      "precision": 0.019,
+      "f1": 0.036
+     }
+    },
+    {
+     "db": 2.0,
+     "cells": 3,
+     "km": 1.5,
+     "new": {
+      "recall": 0.442,
+      "precision": 0.066,
+      "f1": 0.115
+     },
+     "old": {
+      "recall": 0.777,
+      "precision": 0.038,
+      "f1": 0.072
+     }
+    },
+    {
+     "db": 3.0,
+     "cells": 3,
+     "km": 1.5,
+     "new": {
+      "recall": 0.689,
+      "precision": 0.102,
+      "f1": 0.178
+     },
+     "old": {
+      "recall": 0.934,
+      "precision": 0.045,
+      "f1": 0.086
+     }
+    },
+    {
+     "db": -6.0,
+     "cells": 5,
+     "km": 2.5,
+     "new": {
+      "recall": 0.845,
+      "precision": 0.263,
+      "f1": 0.401
+     },
+     "old": {
+      "recall": 0.995,
+      "precision": 0.124,
+      "f1": 0.22
+     }
+    },
+    {
+     "db": -3.0,
+     "cells": 5,
+     "km": 2.5,
+     "new": {
+      "recall": 0.572,
+      "precision": 0.198,
+      "f1": 0.294
+     },
+     "old": {
+      "recall": 0.935,
+      "precision": 0.117,
+      "f1": 0.208
+     }
+    },
+    {
+     "db": -2.0,
+     "cells": 5,
+     "km": 2.5,
+     "new": {
+      "recall": 0.386,
+      "precision": 0.143,
+      "f1": 0.209
+     },
+     "old": {
+      "recall": 0.766,
+      "precision": 0.098,
+      "f1": 0.173
+     }
+    },
+    {
+     "db": -1.0,
+     "cells": 5,
+     "km": 2.5,
+     "new": {
+      "recall": 0.172,
+      "precision": 0.07,
+      "f1": 0.1
+     },
+     "old": {
+      "recall": 0.363,
+      "precision": 0.049,
+      "f1": 0.086
+     }
+    },
+    {
+     "db": 1.0,
+     "cells": 5,
+     "km": 2.5,
+     "new": {
+      "recall": 0.188,
+      "precision": 0.077,
+      "f1": 0.109
+     },
+     "old": {
+      "recall": 0.385,
+      "precision": 0.052,
+      "f1": 0.091
+     }
+    },
+    {
+     "db": 2.0,
+     "cells": 5,
+     "km": 2.5,
+     "new": {
+      "recall": 0.449,
+      "precision": 0.176,
+      "f1": 0.253
+     },
+     "old": {
+      "recall": 0.783,
+      "precision": 0.1,
+      "f1": 0.177
+     }
+    },
+    {
+     "db": 3.0,
+     "cells": 5,
+     "km": 2.5,
+     "new": {
+      "recall": 0.688,
+      "precision": 0.27,
+      "f1": 0.387
+     },
+     "old": {
+      "recall": 0.94,
+      "precision": 0.118,
+      "f1": 0.209
+     }
+    }
+   ]
+  }
+ },
+ "sites": [
+  {
+   "id": "aletsch",
+   "name": "Aletsch Glacier (Konkordiaplatz)",
+   "passes": 8,
+   "new": 0.0038,
+   "old": 0.0857,
+   "group": "quiet"
+  },
+  {
+   "id": "event-eonet-eonet-26260",
+   "name": "Prescribed Fire Cold Springs RX, Wasatch, Utah",
+   "passes": 1,
+   "new": 0.0,
+   "old": 0.0017,
+   "group": "quiet"
+  },
+  {
+   "id": "event-gdacs-fl1104220",
+   "name": "Flood in Italy",
+   "passes": 1,
+   "new": 0.0,
+   "old": 0.0312,
+   "group": "quiet"
+  },
+  {
+   "id": "event-gdacs-fl1104253",
+   "name": "Flood in Indonesia",
+   "passes": 1,
+   "new": 0.0,
+   "old": 0.1701,
+   "group": "quiet"
+  },
+  {
+   "id": "event-usgs-us6000u2y1",
+   "name": "M 5.7 - 47 km WNW of Khuzdar, Pakistan",
+   "passes": 1,
+   "new": 0.0,
+   "old": 0.0278,
+   "group": "quiet"
+  },
+  {
+   "id": "event-usgs-us6000u43g",
+   "name": "M 7.0 - 189 km ENE of Nagqu, China",
+   "passes": 1,
+   "new": 0.0,
+   "old": 0.1024,
+   "group": "quiet"
+  },
+  {
+   "id": "gerd",
+   "name": "Grand Ethiopian Renaissance Dam reservoir",
+   "passes": 8,
+   "new": 0.0856,
+   "old": 0.0975,
+   "group": "changing"
+  },
+  {
+   "id": "jakobshavn",
+   "name": "Sermeq Kujalleq (Jakobshavn)",
+   "passes": 8,
+   "new": 0.0237,
+   "old": 0.1209,
+   "group": "changing"
+  },
+  {
+   "id": "mekong",
+   "name": "Mekong Delta",
+   "passes": 8,
+   "new": 0.0042,
+   "old": 0.1096,
+   "group": "quiet"
+  },
+  {
+   "id": "okavango",
+   "name": "Okavango Delta",
+   "passes": 8,
+   "new": 0.0333,
+   "old": 0.0856,
+   "group": "changing"
+  },
+  {
+   "id": "rondonia",
+   "name": "Rond\u00f4nia",
+   "passes": 6,
+   "new": 0.0067,
+   "old": 0.2065,
+   "group": "quiet"
+  },
+  {
+   "id": "sacramento",
+   "name": "Sacramento Valley rice",
+   "passes": 25,
+   "new": 0.0261,
+   "old": 0.1303,
+   "group": "changing"
+  },
+  {
+   "id": "west-bengal",
+   "name": "Rice fields of Bardhaman",
+   "passes": 9,
+   "new": 0.0189,
+   "old": 0.0684,
+   "group": "changing"
+  }
+ ],
+ "names": {
+  "new": "This detector (baseline per cell, both channels, clusters)",
+  "old": "The rule used before (step against the neighbours' step, HH)"
+ },
+ "limits": "Only passes before any reported event are used. What is flagged outside the patch counts as a false alarm, though some of it may be real change nobody reported, so precision is a lower bound. Precision also depends on how much of the window the patch fills (a patch of 5 by 5 cells is 0.7 to 4 % of it). A real change is not a square and not the same in both channels. The two groups are told apart by the detector's own behaviour on the same passes, after the fact.",
+ "generated": "2026-11-15T16:29:17Z"
+}

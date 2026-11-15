@@ -121,15 +121,17 @@ jobs:
           else
             read -r -a ids <<< "$IN_SITES"
             # --grid: every pass is also written cell by cell, which is
-            # what tools/forecast.py tests its predictions on.
+            # what tools/detect.py and tools/forecast.py work on.
             python tools/measure.py --budget 85 --grid 500 "${ids[@]}"
           fi
 
-      - name: Test how well the next pass could have been predicted
+      - name: Say what stood out, and test how well the next pass could have been predicted
         # From the cells just written: no login, a few seconds. Also when
         # the measuring step was cut off.
         if: always() && steps.login.outputs.ready == 'true'
         run: |
+          python tests/test_detect.py
+          python tools/detect.py
           python tests/test_forecast.py
           python tools/forecast.py
 
