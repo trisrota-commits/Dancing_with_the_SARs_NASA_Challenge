@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/img/banner.jpg" alt="Dancing with the SARs: live events and NASA-ISRO NISAR radar on one 3D globe" width="100%">
+  <img src="docs/img/readme-banner.jpg" alt="Dancing with the SARs: Earth's changing surface, seen by the NISAR radar satellite" width="100%">
 </p>
 
 <p align="center">
@@ -65,21 +65,23 @@ vegetation, climbed with the crop. That is one whole monsoon crop cycle in
 12 passes, every pass on the same track and on one fixed colour scale.
 
 <details>
-<summary><b>All measured places</b></summary>
+<summary><b>Six more measured places</b></summary>
 <br>
-<p align="center"><img src="docs/img/measured-places.png" alt="Calibrated NISAR backscatter at eight places, June to November 2026" width="100%"></p>
+<p align="center"><img src="docs/img/measured-sites.png" alt="Calibrated NISAR backscatter at six places, June to November 2026" width="100%"></p>
+
+Flat lines matter too: where little changes, the calibrated values mostly stay within about 1.5 dB from pass to pass, which is what makes a real change, like the rice season, stand out. A single-pass dip, like Sacramento's HV in October, is worth checking before reading anything into it.
 </details>
 
 ## NISAR's view of the planet
 
 <table>
 <tr>
-<td width="50%"><img src="docs/img/nisar-world.jpg" alt="The whole planet as NISAR saw it, September to November 2026"></td>
-<td width="50%"><img src="docs/img/nisar-change-world.jpg" alt="Where NISAR's picture of the planet got darker or brighter over 48 days"></td>
+<td width="50%"><img src="docs/img/world-nisar.jpg" alt="The whole planet as NISAR saw it, September to November 2026"></td>
+<td width="50%"><img src="docs/img/world-change-48d.jpg" alt="Where NISAR's picture of the planet got darker or brighter over 48 days"></td>
 </tr>
 <tr>
 <td><sub>The whole planet as NISAR saw it, stacked from NASA's daily NISAR map layer, newest pass on top (<code>tools/mosaic.py</code>).</sub></td>
-<td><sub>Where NASA's NISAR picture got darker or brighter over 48 days, each pass compared with the same pass four repeat cycles earlier (<code>tools/change.py</code>). A guide to where to look, not calibrated values.</sub></td>
+<td><sub>Where NASA's NISAR picture got darker (blue: weaker echo) or brighter (orange: stronger echo) over 48 days, each pass compared with the same pass four repeat cycles earlier (<code>tools/change.py</code>). The broad blue across Canada and Siberia, and along the Sahel, fits autumn snow arriving and the land drying after the monsoon. A guide to where to look, not calibrated values.</sub></td>
 </tr>
 </table>
 
