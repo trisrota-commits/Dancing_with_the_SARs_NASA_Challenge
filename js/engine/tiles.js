@@ -70,6 +70,14 @@ const ELEVATION_MAX = 13;
 // One elevation tile serves 8×8 map tiles: 256 samples spread over 32 cells.
 const ELEVATION_SHIFT = 3;
 const ELEVATION_CACHE = 260;
+// Finished map tiles that left the screen are kept as compressed pictures
+// for the rest of the visit, up to this many bytes (see `keep`): some
+// 2,500 close-up tiles on a desk computer, fewer where memory is short.
+const KEPT_BYTES = (SMALL ? 96 : (globalThis.navigator?.deviceMemory || 6) >= 8 ? 480 : 288) * 1024 * 1024;
+// A layer that lists its tiles (the ready-made mosaic) is held in memory
+// down to this level, so that any view has it to show at once.
+const HELD_LEVEL = 3;
+const DROPS_A_FRAME = 12;
 
 const VERTEX = /* glsl */ `
   attribute float aHeight;
@@ -272,6 +280,9 @@ function placements(b, tile) {
   return out;
 }
 
+// What a peek finds where nothing was ever asked for.
+const NOT_HERE = { state: 'idle' };
+
 export class TileGlobe {
   constructor(scene, shared) {
     this.group = new THREE.Group();
@@ -332,6 +343,16 @@ export class TileGlobe {
     this.fadeGen = 0;
     this.focus = new THREE.Vector3(0, 0, 1);
     this.checkedAt = performance.now();
+    // Finished tiles kept for the visit: name → { blob }, oldest first.
+    this.kept = new Map();
+    this.keptBytes = 0;
+    // The bytes of a listed layer's tiles (the mosaic), by address: small
+    // enough to hold for the whole planet (see `fill`).
+    this.filled = new Map();
+    // Every set of layers shown so far, by what it draws: text → number.
+    this.looks = new Map();
+    this.look = '';
+    this.epoch = 0;
     // The browser's store for radar tiles; null where there is none.
     this.store = typeof caches === 'undefined' ? Promise.resolve(null) : caches.open(STORE).catch(() => null);
     this.store.then((store) => store && this.sweepStore(store));
@@ -350,6 +371,22 @@ export class TileGlobe {
     this.changed = true;
   }
 
+  // Something every tile might have been waiting for has arrived. A tile
+  // that is finished (see `whole`) shows its own pictures and gains
+  // nothing from it: only the others are painted again.
+  repaintUnfinished() {
+    for (const tile of this.tiles.values()) if (!tile.whole) tile.dirty = true;
+    this.changed = true;
+  }
+
+  // What lies over the layers has changed (outlines, single pictures):
+  // the tile is painted again from its layers as they stand, which asks
+  // for nothing (see `paint`).
+  repaintTop(tile) {
+    tile.topDirty = true;
+    this.changed = true;
+  }
+
   // Tile layers: [{ url: 'https://…/{z}/{y}/{x}.png', maxLevel, alpha, base, bounds }]
   // A layer with bounds is only fetched and drawn for tiles inside that box.
   // A layer with keep(r, g, b) has every other pixel made see-through, and
@@ -357,17 +394,40 @@ export class TileGlobe {
   // drawn as a picture: it marks water first seen at that step, which the
   // shader animates. Its tint must be [255, step code, 0].
   setLayers(layers) {
+    // The same layers again (the app sets them whenever anything in its
+    // state changes): nothing on the globe is different.
+    const drawn = JSON.stringify(layers, (k, v) => (typeof v === 'function' ? String(v) : v));
+    if (drawn === this.drawn) return;
+    this.drawn = drawn;
+    if (!this.looks.has(drawn)) this.looks.set(drawn, this.looks.size + 1);
+    // A view the reader stayed on is kept before it is painted over: they
+    // may well come back to it (an event opened and closed again).
+    const settled = performance.now() - (this.lookAt || 0) > 3000;
+    for (const tile of this.tiles.values()) tile.keepFirst = settled && tile.whole && !tile.dirty && tile.look === this.look;
+    this.look = `${this.looks.get(drawn)}.${this.epoch}`;
+    this.lookAt = performance.now();
     this.layers = layers;
     for (const entry of this.queue) this.putDown(entry);
     this.queue.length = 0;
     // Keep the whole world at low detail on hand as a stand-in, so a tile
     // that is still downloading shows a soft picture instead of a blank.
     const base = layers.find((l) => l.base);
-    for (const entry of this.images.values()) entry.pinned = false;
+    for (const entry of this.images.values()) entry.pinned = entry.held = false;
     if (base) {
       for (let z = 0; z <= 2; z++) {
         for (let i = 0; i < 4 ** z; i++) this.image(base, z, i % 2 ** z, Math.floor(i / 2 ** z), null).pinned = true;
       }
+    }
+    // The same for a layer that lists its tiles (the mosaic of the whole
+    // planet): its coarse levels stay in memory, so a tile that comes into
+    // view after a fast zoom out shows the radar picture at once and never
+    // the bare basemap.
+    for (const layer of layers) {
+      if (!layer.has) continue;
+      for (let z = 0; z <= Math.min(HELD_LEVEL, layer.maxLevel); z++) {
+        for (let i = 0; i < 4 ** z; i++) this.image(layer, z, i % 2 ** z, Math.floor(i / 2 ** z), null).held = true;
+      }
+      this.fill(layer);
     }
     // For a sparse layer, ask for its picture of the whole world straight
     // away: one small answer says where on the globe it has anything.
@@ -393,6 +453,41 @@ export class TileGlobe {
     this.repaintAll();
   }
 
+  // A layer that lists its tiles is a finished picture of the planet, a
+  // few megabytes in all, on this site's own server. Once the view itself
+  // is complete, the rest of it is fetched in the background: level by
+  // level, and within a level nearest the view first. Only the bytes are
+  // held (a small part of the unpacked pictures), so from then on any place
+  // the reader turns to has its picture without asking a server.
+  // (Not on a phone, nor where the reader has asked to save data.)
+  fill(layer) {
+    const address = layer.url;
+    if (this.filling === address) return;
+    this.filling = address;
+    // (Another address is another build of the picture.)
+    this.filled.clear();
+    if (SMALL || globalThis.navigator?.connection?.saveData) return;
+    const todo = [];
+    for (let z = HELD_LEVEL + 1; z <= layer.maxLevel; z++) {
+      for (let y = 0; y < 2 ** z; y++) for (let x = 0; x < 2 ** z; x++) if (layer.has(z, x, y)) todo.push({ z, url: this.url(layer, z, x, y), at: toVec((tileLat(y, z) + tileLat(y + 1, z)) / 2, (tileLon(x, z) + tileLon(x + 1, z)) / 2) });
+    }
+    const next = () => {
+      if (this.filling !== address || !todo.length) return;
+      // What the reader is looking at comes first.
+      if (this.awaited > 0 || this.downloading > AHEAD_DOWNLOADS) return void setTimeout(next, 500);
+      let best = 0;
+      for (let i = 1; i < todo.length && todo[i].z === todo[0].z; i++) if (todo[i].at.dot(this.focus) > todo[best].at.dot(this.focus)) best = i;
+      const { url } = todo.splice(best, 1)[0];
+      if (this.filled.has(url)) return void Promise.resolve().then(next);
+      fetch(url)
+        .then((res) => (res.ok ? res.blob() : null))
+        .then((blob) => blob && this.filling === address && this.filled.set(url, blob))
+        .catch(() => {})
+        .then(next);
+    };
+    for (let i = 0; i < 4; i++) next();
+  }
+
   // Single images laid over a lat/lon box:
   // [{ image, bounds: { west, south, east, north }, side: 'left' | 'right' | undefined, alpha }]
   setPictures(pictures) {
@@ -400,7 +495,7 @@ export class TileGlobe {
     const touched = [...this.pictures, ...pictures].map((p) => p.bounds);
     this.pictures = pictures;
     for (const tile of this.tiles.values()) {
-      if (touched.some((b) => placements(b, tile).length)) tile.dirty = true;
+      if (touched.some((b) => placements(b, tile).length)) this.repaintTop(tile);
     }
     this.changed = true;
   }
@@ -416,8 +511,28 @@ export class TileGlobe {
       o.minY = Math.min(...o.points.map((p) => p.y));
       o.maxY = Math.max(...o.points.map((p) => p.y));
     }
+    // Only the tiles under the old or the new outlines need painting again.
+    const before = this.outlines;
     this.outlines = outlines;
-    this.repaintAll();
+    for (const tile of this.tiles.values()) {
+      if (this.outlined(tile, before) || this.outlined(tile, outlines)) this.repaintTop(tile);
+    }
+    this.changed = true;
+  }
+
+  // Whether any of these outlines falls on a tile.
+  outlined(tile, outlines = this.outlines) {
+    if (!outlines.length) return false;
+    const n = 2 ** tile.z;
+    const x0 = tile.x / n;
+    const y0 = tile.y / n;
+    const pad = 4 / SIZE / n;
+    for (const o of outlines) {
+      if (o.maxY < y0 - pad || o.minY > y0 + 1 / n + pad) continue;
+      // The shape may sit one world-width away after unwrapping.
+      for (const shift of [-1, 0, 1]) if (o.maxX + shift >= x0 - pad && o.minX + shift <= x0 + 1 / n + pad) return true;
+    }
+    return false;
   }
 
   setTerrain(on) {
@@ -507,7 +622,9 @@ export class TileGlobe {
         if (!tile) {
           tile = this.build(leaf, key);
           this.tiles.set(key, tile);
-          this.prepaint(tile);
+          // Its kept picture, if there is one, is a moment away: until
+          // then it shows what is in memory and asks for nothing.
+          this.prepaint(tile, this.recall(tile));
         }
         tile.lastUsed = this.frame;
         tile.mesh.visible = true;
@@ -518,18 +635,19 @@ export class TileGlobe {
           tile.dirty = true;
         }
       }
-      const hidden = [];
-      for (const tile of this.tiles.values()) {
-        if (wanted.has(tile.key)) continue;
-        tile.mesh.visible = false;
-        hidden.push(tile);
-      }
-      // Hidden tiles stay cached for quick returns; the oldest go first.
-      if (this.tiles.size > TILE_CACHE) {
-        hidden.sort((a, b) => a.lastUsed - b.lastUsed);
-        for (const tile of hidden.slice(0, this.tiles.size - TILE_CACHE)) this.drop(tile.key, tile);
-      }
+      for (const tile of this.tiles.values()) if (!wanted.has(tile.key)) tile.mesh.visible = false;
       this.changed = true;
+    }
+    // Hidden tiles stay as they are for quick returns; beyond a number the
+    // oldest go, a few each frame (what a tile showed is kept as it goes,
+    // which takes a moment), and more at once if they pile up.
+    if (this.tiles.size > TILE_CACHE) {
+      const hidden = [];
+      for (const tile of this.tiles.values()) if (!tile.mesh.visible) hidden.push(tile);
+      hidden.sort((a, b) => a.lastUsed - b.lastUsed);
+      const over = this.tiles.size - TILE_CACHE;
+      for (const tile of hidden.slice(0, Math.min(over, Math.max(DROPS_A_FRAME, over - TILE_CACHE / 4)))) this.drop(tile.key, tile);
+      if (this.tiles.size > TILE_CACHE && hidden.length > over) this.changed = true;
     }
 
     // Reshape, then repaint a bounded number of tiles per frame: those in
@@ -541,7 +659,8 @@ export class TileGlobe {
         this.shape(tile);
         this.changed = true;
       }
-      if (tile.dirty) stale.push(tile);
+      // (One whose kept picture is being unpacked waits for it.)
+      if ((tile.dirty || tile.topDirty) && !tile.recalling) stale.push(tile);
     }
     if (stale.length) {
       if (stale.length > 1) {
@@ -658,6 +777,8 @@ export class TileGlobe {
   }
 
   drop(key, tile) {
+    // What it shows is kept: when the reader comes back, it is there.
+    if (!tile.dirty || tile.keepFirst) this.keep(tile);
     this.group.remove(tile.mesh);
     tile.mesh.geometry.dispose();
     tile.mesh.material.dispose();
@@ -666,7 +787,7 @@ export class TileGlobe {
     tile.textureW?.dispose();
     // A canvas keeps its memory until it is collected; emptying it gives
     // the memory back at once, which matters on phones.
-    for (const c of [tile.canvas, tile.canvasB, tile.canvasW]) if (c) c.width = c.height = 0;
+    for (const c of [tile.canvas, tile.canvasB, tile.canvasW, tile.base]) if (c) c.width = c.height = 0;
     tile.dead = true;
     this.tiles.delete(key);
   }
@@ -677,28 +798,37 @@ export class TileGlobe {
   // image as a stand-in when the exact tile has not arrived yet. With `only`
   // it draws just one of the two: 'soft' the stand-in, 'sharp' the real tile
   // (see `paint` for why the days of a stack are drawn in two rounds).
-  drawLayer(target, tile, layer, alpha, only) {
+  // With 'peek' it draws whatever is in memory and asks for nothing.
+  drawLayer(target, tile, layer, alpha, round) {
     const { z, x, y } = tile;
+    const peek = round === 'peek';
+    const only = peek ? undefined : round;
     // A layer may only show from a certain level on: further out, a
     // ready-made picture of the same data (the mosaic) takes its place.
     if (layer.minLevel && z < layer.minLevel) return false;
-    const sheet = layer.sparse && layer.sheet ? this.sheetOf(layer, tile) : null;
+    const sheet = layer.sparse && layer.sheet ? (peek ? this.images.get(layer.sheet) : this.sheetOf(layer, tile)) : null;
     const world = sheet?.state === 'ready' ? sheet : null;
     // From far away the world picture is the layer: nothing else is fetched.
     if (world && z <= SHEET_LEVEL + 1) return only !== 'soft' && this.sheetHolds(world, z, x, y) && this.drawSheet(target, tile, world, alpha);
     const top = Math.min(layer.sparse && z > 2 && z < COARSER_BELOW ? z - 1 : z, layer.maxLevel);
-    const exact = this.image(layer, top, x >> (z - top), y >> (z - top), tile);
+    const exact = peek ? this.images.get(this.key(layer, top, x >> (z - top), y >> (z - top))) || NOT_HERE : this.image(layer, top, x >> (z - top), y >> (z - top), tile);
     // Known to hold nothing: no picture, and no stand-in from above either.
     if (exact.state === 'empty') return false;
+    // Still on its way (or the answer it depends on is): the tile is not
+    // finished yet.
+    if (!peek && exact.state !== 'ready' && exact.state !== 'missing') tile.pending = true;
     // A tile that was not delivered will be asked for again: the map tile
     // is marked so that it is painted again when that is due.
-    if (exact.state === 'missing' && this.dueAgain(exact) < Infinity) {
+    if (!peek && exact.state === 'missing' && this.dueAgain(exact) < Infinity) {
       tile.patchy = true;
       this.wakeFor(exact);
     }
     // A tile the server would not give may be a gap in the data or a server
     // hiccup: ask for the tile one level coarser and use what is at hand.
-    if (exact.state === 'missing' && !layer.base && top > 0) this.image(layer, top - 1, x >> (z - top + 1), y >> (z - top + 1), tile);
+    if (!peek && exact.state === 'missing' && !layer.base && top > 0) {
+      const coarser = this.image(layer, top - 1, x >> (z - top + 1), y >> (z - top + 1), tile);
+      if (coarser.state !== 'ready' && coarser.state !== 'empty' && coarser.state !== 'missing') tile.pending = true;
+    }
     // A much coarser stand-in is fine for a picture but would smear a water
     // mask over the whole tile, so masks only reach two levels down.
     const lowest = layer.mask != null ? Math.max(0, top - 2) : 0;
@@ -818,8 +948,9 @@ export class TileGlobe {
   // until then it shows what its relatives already hold: the four tiles one
   // level finer put together, which is as sharp as it will ever be; or its
   // quarter of the tile one level coarser; or at least the basemap.
-  prepaint(tile) {
+  prepaint(tile, peek) {
     const { z, x, y, ctx } = tile;
+    const round = peek ? 'peek' : undefined;
     // Only a relative whose own picture is up to date: one waiting to be
     // painted again (the layers or the date changed while it was out of
     // view) would lend an outdated picture.
@@ -843,8 +974,8 @@ export class TileGlobe {
       ctx.fillRect(0, 0, SIZE, SIZE);
       const up = Math.max(0, z - SHEET_REACH);
       for (const layer of this.layers) {
-        if (layer.base) this.drawLayer(ctx, tile, layer, 1);
-        else if (layer.has) this.drawLayer(ctx, tile, layer, layer.alpha ?? 1);
+        if (layer.base) this.drawLayer(ctx, tile, layer, 1, round);
+        else if (layer.has) this.drawLayer(ctx, tile, layer, layer.alpha ?? 1, round);
         else if (layer.sparse && layer.sheet && !layer.side && layer.mask == null && !layer.minLevel) {
           const sheet = this.images.get(layer.sheet);
           if (sheet?.state === 'ready' && this.sheetHolds(sheet, z - up, x >> up, y >> up)) this.drawSheet(ctx, tile, sheet, layer.alpha ?? 1);
@@ -858,17 +989,19 @@ export class TileGlobe {
   // Composites everything for this tile. Layers and pictures with a side
   // ('left' or 'right') only show on that side of the divider, which needs
   // a second canvas for what the left side should show.
+  //
+  // A tile is painted in two steps: its layers, then what lies over them
+  // (single pictures and outlines). The layers are the costly step, the
+  // one that asks the servers for pictures, and it is only taken when a
+  // layer's picture arrived or the layers themselves changed. When only
+  // an outline or a picture changed, the layers as they were painted are
+  // put back from a copy (`base`) and the top is drawn again.
+  //
+  // A tile is `whole` once every layer has given its final answer for it:
+  // nothing is on its way and nothing will be asked for again. A whole
+  // tile is kept when it leaves the screen (see `keep`).
   paint(tile) {
     const ctx = tile.ctx;
-    tile.dirty = false;
-    tile.patchy = false;
-    // The pictures this tile is made of, so that the cache never drops one
-    // the screen is showing (see `trim`).
-    tile.used = new Set();
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = '#0a1826';
-    ctx.fillRect(0, 0, SIZE, SIZE);
-
     const sidedLayers = [];
     const maskLayers = [];
     const plain = [];
@@ -879,15 +1012,44 @@ export class TileGlobe {
       else if (layer.side) sidedLayers.push(layer);
       else plain.push(layer);
     }
-    this.drawLayers(tile, plain, () => ctx);
-    this.paintMask(tile, maskLayers);
-    ctx.globalAlpha = 1;
-
     // Each picture where it falls on this tile; one across the date line
     // falls on tiles of both sides, and twice on a tile that spans the world.
     const here = [];
     for (const p of this.pictures) for (const b of placements(p.bounds, tile)) here.push(b === p.bounds ? p : Object.assign(Object.create(p), { bounds: b }));
     const sided = sidedLayers.length > 0 || here.some((p) => p.side);
+    // Two-sided tiles and water masks are always painted in full.
+    const simple = !sided && !maskLayers.length;
+    const topped = here.length > 0 || this.outlined(tile);
+    const layersToo = tile.dirty || !simple || !tile.simple;
+    tile.dirty = tile.topDirty = false;
+    tile.simple = simple;
+    ctx.globalAlpha = 1;
+    if (layersToo) {
+      // About to be painted over with other layers: what it showed is kept.
+      if (tile.keepFirst) this.keep(tile);
+      tile.keepFirst = false;
+      tile.keptAs = null;
+      tile.patchy = false;
+      tile.pending = false;
+      // The pictures this tile is made of, so that the cache never drops
+      // one the screen is showing (see `trim`).
+      tile.used = new Set();
+      ctx.fillStyle = '#0a1826';
+      ctx.fillRect(0, 0, SIZE, SIZE);
+      this.drawLayers(tile, plain, () => ctx);
+      this.paintMask(tile, maskLayers);
+      ctx.globalAlpha = 1;
+      tile.look = this.look;
+      tile.whole = simple && !tile.pending && !tile.patchy;
+      if (simple && topped) this.baseOf(tile).drawImage(tile.canvas, 0, 0);
+      else this.release(tile, 'base');
+    } else if (tile.base) {
+      ctx.drawImage(tile.base, 0, 0);
+      if (!topped) this.release(tile, 'base');
+    } else if (topped) {
+      this.baseOf(tile).drawImage(tile.canvas, 0, 0);
+    }
+
     if (sided) {
       if (!tile.canvasB) {
         tile.canvasB = document.createElement('canvas');
@@ -922,9 +1084,164 @@ export class TileGlobe {
     tile.painted = true;
   }
 
-  // Gives back a tile's second ('B') or water ('W') canvas once nothing
-  // uses it any more.
+  // The canvas a tile's layers are copied to while something is drawn
+  // over them. Only tiles under an outline or a picture have one.
+  baseOf(tile) {
+    if (!tile.base) {
+      tile.base = document.createElement('canvas');
+      tile.base.width = tile.base.height = SIZE;
+      tile.baseCtx = tile.base.getContext('2d');
+    }
+    return tile.baseCtx;
+  }
+
+  // ---------- finished tiles, kept for the visit ----------
+  //
+  // The engine holds a few hundred tiles as canvases and a few hundred
+  // pictures they are made of; both are far too heavy to hold for every
+  // place the reader has been. A finished tile as one compressed picture
+  // is a small part of that, so those are kept: what was sharp once is
+  // there again at once when the reader returns, at any zoom, without
+  // asking a server or putting the layers together again. The map of the
+  // planet grows sharper wherever the reader has looked and stays so
+  // until the page is closed.
+  //
+  // A kept tile belongs to one `look` (one exact list of layers) and
+  // holds the layers only, never an outline or a single picture.
+  keep(tile) {
+    // (Not what was painted before the data behind the layers changed.)
+    const epoch = this.epoch;
+    const cut = this.cut;
+    if (!tile.whole || !tile.look || tile.recalling || !tile.look.endsWith(`.${epoch}`)) return;
+    const name = `${tile.look}/${tile.key}`;
+    const have = this.kept.get(name);
+    if (have && tile.keptAs === name) {
+      // It came out of the store and was not painted since: still the same.
+      this.kept.delete(name);
+      this.kept.set(name, have);
+      return;
+    }
+    // (The picture is taken now; only its compression happens later.)
+    (tile.base || tile.canvas).toBlob(
+      (blob) => {
+        if (!blob || epoch !== this.epoch || cut !== this.cut) return;
+        const old = this.kept.get(name);
+        if (old) this.keptBytes -= old.size;
+        this.kept.delete(name);
+        this.kept.set(name, blob);
+        this.keptBytes += blob.size;
+        for (const [oldest, b] of this.kept) {
+          if (this.keptBytes <= KEPT_BYTES) break;
+          this.kept.delete(oldest);
+          this.keptBytes -= b.size;
+        }
+      },
+      // Without loss: what comes back is the picture that left, pixel for
+      // pixel. (A lossy copy at a quarter of the size was tried; it washed
+      // the fine colour detail of the radar picture out visibly.)
+      'image/png',
+    );
+  }
+
+  // A tile that has just been built takes its kept picture, if there is
+  // one for the layers now shown, instead of being painted.
+  recall(tile) {
+    const look = this.look;
+    const name = `${look}/${tile.key}`;
+    const blob = this.kept.get(name);
+    if (!blob) return false;
+    const cut = this.cut;
+    this.kept.delete(name);
+    this.kept.set(name, blob);
+    tile.dirty = false;
+    tile.recalling = true;
+    const failed = () => {
+      if (tile.dead) return;
+      tile.recalling = false;
+      tile.dirty = true;
+      this.changed = true;
+      this.wake?.();
+    };
+    createImageBitmap(blob).then((picture) => {
+      if (tile.dead || look !== this.look || cut !== this.cut) {
+        picture.close?.();
+        return failed();
+      }
+      tile.ctx.globalAlpha = 1;
+      tile.ctx.drawImage(picture, 0, 0);
+      picture.close?.();
+      Object.assign(tile, { recalling: false, look, whole: true, simple: true, painted: true, patchy: false, pending: false, keptAs: name, used: new Set() });
+      tile.texture.needsUpdate = true;
+      // Outlines and single pictures are not part of what is kept.
+      this.repaintTop(tile);
+      this.wake?.();
+    }, failed);
+    return true;
+  }
+
+  // A day's picture of the world has come again after NASA added to it.
+  // The cells that differ from the one before say where the new passes
+  // are; only map tiles there, on the globe or kept, are done again.
+  refresh(entry) {
+    const before = entry.before;
+    const now = entry.marks;
+    entry.before = null;
+    const changed = new Uint8Array(SHEET_CELLS * SHEET_CELLS);
+    let any = false;
+    for (let j = 0; j < SHEET_CELLS; j++) {
+      for (let i = 0; i < SHEET_CELLS; i++) {
+        const k = j * SHEET_CELLS + i;
+        if (before[k] === (now ? now[k] : 0)) continue;
+        any = true;
+        // With the cells around it: a strip's edge may lie in the next one.
+        for (let dj = -1; dj <= 1; dj++) {
+          if (j + dj < 0 || j + dj >= SHEET_CELLS) continue;
+          for (let di = -1; di <= 1; di++) changed[(j + dj) * SHEET_CELLS + ((i + di + SHEET_CELLS) % SHEET_CELLS)] = 1;
+        }
+      }
+    }
+    if (!any) return;
+    const hit = (z, x, y) => {
+      if (z >= SHEET_REACH) return changed[(y >> (z - SHEET_REACH)) * SHEET_CELLS + (x >> (z - SHEET_REACH))] === 1;
+      const side = SHEET_CELLS >> z;
+      for (let j = y * side; j < (y + 1) * side; j++) for (let i = x * side; i < (x + 1) * side; i++) if (changed[j * SHEET_CELLS + i]) return true;
+      return false;
+    };
+    // (A day that only shows close in changes nothing further out.)
+    const from = entry.layer?.minLevel || 0;
+    for (const tile of this.tiles.values()) {
+      if (tile.z < from || !hit(tile.z, tile.x, tile.y)) continue;
+      tile.dirty = true;
+      tile.whole = tile.keepFirst = false;
+    }
+    for (const [name, blob] of [...this.kept]) {
+      const [look, z, x, y] = name.split('/');
+      if ((look === this.look && +z < from) || !hit(+z, +x, +y)) continue;
+      this.kept.delete(name);
+      this.keptBytes -= blob.size;
+    }
+    // (A tile being kept or recalled at this very moment is let go.)
+    this.cut = (this.cut || 0) + 1;
+    this.changed = true;
+  }
+
+  // The data behind the layers has changed: nothing kept holds any more.
+  forgetKept() {
+    this.epoch++;
+    this.look = `${this.looks.get(this.drawn)}.${this.epoch}`;
+    this.kept.clear();
+    this.keptBytes = 0;
+    for (const tile of this.tiles.values()) tile.whole = tile.keepFirst = false;
+  }
+
+  // Gives back a tile's second ('B') or water ('W') canvas, or the copy of
+  // its layers ('base'), once nothing uses it any more.
   release(tile, which) {
+    if (which === 'base') {
+      if (tile.base) tile.base.width = tile.base.height = 0;
+      tile.base = tile.baseCtx = null;
+      return;
+    }
     const canvas = tile[`canvas${which}`];
     if (!canvas) return;
     tile[`texture${which}`].dispose();
@@ -1343,7 +1660,7 @@ export class TileGlobe {
     }
     if (!entry) {
       // The coarse levels of a sparse layer go first: they unblock the rest.
-      entry = { key, url: this.url(layer, z, x, y), keep: layer.keep, tint: layer.tint, state: 'queued', img: null, waiting: new Set(), lastUsed: this.frame, first: !!layer.base || (!!layer.sparse && z <= 3), sparse: !!layer.sparse, age: layer.age || 0, overlay: !layer.base && !layer.sparse, probe: !!layer.sparse && !layer.sheet && z === 0, layer: layer.sparse ? layer : null, z, x, y };
+      entry = { key, url: this.url(layer, z, x, y), keep: layer.keep, tint: layer.tint, state: 'queued', img: null, waiting: new Set(), lastUsed: this.frame, first: !!layer.base || (!!layer.sparse && z <= 3), sparse: !!layer.sparse, age: layer.age || 0, overlay: !layer.base && !layer.sparse, listed: !!layer.has, probe: !!layer.sparse && !layer.sheet && z === 0, layer: layer.sparse ? layer : null, z, x, y };
       this.images.set(key, entry);
       this.queue.push(entry);
     } else if (entry.state === 'idle') {
@@ -1374,6 +1691,7 @@ export class TileGlobe {
     }
     if (entry.lazy) return 9;
     if (entry.pinned || entry.probe) return 0.5;
+    if (entry.held) return 0.6;
     // Where the camera is flying to comes before overlays still on screen
     // (it is about to leave them); what a slowly turning globe will reach
     // next waits until the view itself is complete.
@@ -1393,7 +1711,7 @@ export class TileGlobe {
   putDown(entry) {
     entry.state = 'idle';
     for (const tile of entry.waiting) {
-      if (tile.dead) continue;
+      if (tile.dead || tile.whole) continue;
       if (tile.mesh.visible) tile.dirty = true;
       else tile.stale = true;
     }
@@ -1442,9 +1760,12 @@ export class TileGlobe {
       entry.img = state === 'ready' ? (entry.keep ? this.filtered(picture, entry.keep, entry.tint) : picture) : null;
       // The copy is what is kept; the picture it was made from is let go.
       if (state === 'ready' && entry.keep) picture.close?.();
-      for (const t of entry.waiting) if (!t.dead) t.dirty = true;
+      // (A finished tile has every answer it shows: this one, asked for
+      // before a newer day turned out to cover it, changes nothing.)
+      for (const t of entry.waiting) if (!t.dead && !t.whole) t.dirty = true;
       entry.waiting.clear();
-      if (entry.pinned) for (const t of this.tiles.values()) t.dirty = true;
+      // A stand-in for the whole globe: every unfinished tile may use it.
+      if (entry.pinned || entry.held) this.repaintUnfinished();
       // The basemap's coarsest tiles are the first thing asked of it. If
       // none of them comes while several fail, its server cannot be
       // reached from here, and whoever set the layers is told once.
@@ -1466,7 +1787,10 @@ export class TileGlobe {
       // any view of the globe has a picture to stand in at once, and
       // knows what is empty three levels further down.
       // A world picture has arrived: every tile may now show it.
-      if (entry.sheet) this.repaintAll();
+      if (entry.sheet) {
+        if (entry.before && state !== 'missing') this.refresh(entry);
+        this.repaintUnfinished();
+      }
       this.changed = true;
       this.wake?.();
     };
@@ -1481,12 +1805,17 @@ export class TileGlobe {
       // An overlay is fetched with its answer's status, because "there is
       // nothing here" (the server says so) and "the server failed" need
       // different handling: the first is final, the second is tried again.
-      fetch(entry.url)
-        .then(async (res) => {
-          if (res.status === 404 || res.status === 400 || res.status === 403) entry.gone = true;
-          if (!res.ok) throw new Error(res.status);
-          return createImageBitmap(await res.blob());
-        })
+      const have = this.filled.get(entry.url);
+      (have
+        ? createImageBitmap(have)
+        : fetch(entry.url).then(async (res) => {
+            if (res.status === 404 || res.status === 400 || res.status === 403) entry.gone = true;
+            if (!res.ok) throw new Error(res.status);
+            const blob = await res.blob();
+            if (entry.listed) this.filled.set(entry.url, blob);
+            return createImageBitmap(blob);
+          })
+      )
         .then(
           (bitmap) => done('ready', bitmap),
           () => done('missing'),
@@ -1674,6 +2003,10 @@ export class TileGlobe {
     const px = data.data;
     let soft = false;
     const seen = new Uint8Array(SHEET_CELLS * SHEET_CELLS);
+    // A mark for each cell made of the colours in it: when NASA adds a
+    // pass to this day, the cells whose mark differs are where (`refresh`).
+    const marks = new Uint32Array(SHEET_CELLS * SHEET_CELLS);
+    entry.marks = null;
     const span = SHEET_PX / SHEET_CELLS;
     let any = false;
     for (let y = 0; y < SHEET_PX; y++) {
@@ -1681,7 +2014,9 @@ export class TileGlobe {
       for (let x = 0; x < SHEET_PX; x++) {
         const at = (y * SHEET_PX + x) * 4 + 3;
         if (px[at] === 255) {
-          seen[row + Math.floor(x / span)] = 1;
+          const cell = row + Math.floor(x / span);
+          seen[cell] = 1;
+          marks[cell] = (Math.imul(marks[cell], 31) + ((px[at - 3] << 16) | (px[at - 2] << 8) | px[at - 1]) + 1) >>> 0;
           any = true;
         } else if (px[at]) {
           px[at] = 0;
@@ -1706,6 +2041,7 @@ export class TileGlobe {
     }
     entry.seen = seen;
     entry.grid = grid;
+    entry.marks = marks;
     if (!soft) return bitmap;
     const canvas = document.createElement('canvas');
     canvas.width = canvas.height = SHEET_PX;
@@ -1783,6 +2119,11 @@ export class TileGlobe {
           const print = `${bytes.byteLength}:${fingerprint(bytes)}`;
           if (print === root.print || !this.layers.includes(layer)) return;
           // NASA has added to this day: start it again from nothing.
+          // Where its picture of the world was, cell by cell, is noted:
+          // once the new one is here, only the map tiles under what
+          // changed are put together again (`refresh`). Everything else
+          // on the globe, and everything kept, stays as it is.
+          const before = root.before || root.marks || (layer.sheet ? new Uint32Array(SHEET_CELLS * SHEET_CELLS) : null);
           const prefix = layer.url.split('{z}')[0];
           for (const [key, entry] of this.images) {
             if (!key.startsWith(prefix) && key !== layer.sheet) continue;
@@ -1790,9 +2131,16 @@ export class TileGlobe {
             this.images.delete(key);
           }
           this.queue = this.queue.filter((entry) => !entry.key.startsWith(prefix) && entry.key !== layer.sheet);
-          if (layer.sheet) this.sheetOf(layer, null);
-          else this.image(layer, 0, 0, 0, null);
-          this.repaintAll();
+          if (layer.sheet) {
+            this.sheetOf(layer, null).before = before;
+            // (Tiles still waiting for a picture of this day ask again.)
+            this.repaintUnfinished();
+          } else {
+            // A layer without a picture of the world cannot say where.
+            this.image(layer, 0, 0, 0, null);
+            this.forgetKept();
+            this.repaintAll();
+          }
           this.wake?.();
         })
         .catch(() => {
@@ -1822,6 +2170,9 @@ export class TileGlobe {
           const y = cy + dy;
           if (y < 0 || y >= n) continue;
           const x = (((cx + dx) % n) + n) % n;
+          // A place that is finished, on a tile or kept, needs nothing.
+          const name = `${level}/${x}/${y}`;
+          if (this.tiles.get(name)?.whole || this.kept.has(`${this.look}/${name}`)) continue;
           for (const layer of this.layers) {
             if (layer.mask != null || layer.keep) continue;
             // From this far the world picture is the layer: no tile is drawn.
@@ -1942,7 +2293,7 @@ export class TileGlobe {
     // all the time and showed as blinking.
     const shown = new Set();
     for (const tile of this.tiles.values()) if (tile.mesh.visible && tile.used) for (const entry of tile.used) shown.add(entry);
-    const held = all.filter((e) => e.state === 'ready' && !e.pinned && !e.probe);
+    const held = all.filter((e) => e.state === 'ready' && !e.pinned && !e.held && !e.probe);
     if (held.length <= IMAGE_CACHE) return;
     const loose = held.filter((e) => !shown.has(e));
     loose.sort((a, b) => a.first - b.first || a.lastUsed - b.lastUsed);

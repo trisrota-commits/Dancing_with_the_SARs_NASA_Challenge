@@ -2244,7 +2244,7 @@ function applyLayers() {
     // Says which of the two ways the whole planet is being shown.
     const m = globe.mosaicFor({ date, days: +$('stack').value });
     $('stack-note').textContent = m
-      ? `Every place NISAR images, land and ice. From far away this is one picture that this app put together ahead of time from NASA's daily layer for ${m.from} to ${m.to}, the newest pass on top (built ${state.mosaic.built}). Close up, and for every day flown since, NASA's own tiles are loaded live.`
+      ? `Every place NISAR images, land and ice. From far away this is one picture that this app put together ahead of time from NASA's daily layer for ${m.from} to ${m.to}, the newest pass on top (built ${state.mosaic.built}). Close up, and for every day flown since, NASA's own tiles are loaded live; what you have looked at stays sharp until the page is closed. Where the ordinary map shows through on land, NISAR has no picture from those days.`
       : "Every place NISAR images, land and ice, from its passes of the last 24 days; the newest pass over each place lies on top. NASA publishes passes up to two weeks late, so the newest days are thin and the last complete round is 12 to 24 days old. It takes longer to load.";
   }
   // Two wavelengths side by side, for the same days.

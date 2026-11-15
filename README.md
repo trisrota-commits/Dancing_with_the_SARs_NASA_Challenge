@@ -110,8 +110,9 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
 - A **"Since NISAR data began"** time window loads larger events back to
   17 June 2026, so older events have radar passes on both sides.
 - Drapes daily NISAR backscatter and other satellite layers over the terrain.
-  Stacked over 24 days it is **the whole planet as NISAR sees it**: every
-  place it images, land and ice, with the newest pass on top.
+  "Whole planet" shows **the whole planet as NISAR sees it**: every place
+  it images, land and ice, with the newest pass on top. What has been
+  looked at up close stays sharp for the rest of the visit.
 - One search box for events (fuzzy match, no keyword list) and places.
 - **What the agencies report** per event, on its card: depth, estimated
   impact, felt reports, burnt hectares, alert level, each with its source
@@ -162,6 +163,10 @@ this app's workload:
   continent distance, and NASA's own tiles close up. Every day flown
   after the mosaic was made is drawn live on top of it, so it never has
   to be rebuilt to stay right.
+- Every finished map tile is kept, compressed without loss, when it
+  leaves the screen (up to a few hundred megabytes). Coming back to a
+  place, at any zoom, shows it at once and asks no server. When NASA
+  adds a pass, only the tiles under that pass are put together again.
 - Tiles are painted and fetched from the middle of the view outwards,
   ahead of a flying camera and ahead of a turning globe.
 - Event effects live in shaders: the earthquake front is drawn and lifted

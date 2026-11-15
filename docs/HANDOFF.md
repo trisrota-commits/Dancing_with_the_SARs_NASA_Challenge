@@ -610,7 +610,9 @@ assemble the pieces itself. It does now, once, ahead of time.
 - **`tools/mosaic.py`** takes each day's tiles (about 10,000 small
   requests, five and a half minutes, no login), stacks them oldest first
   so the newest pass ends on top, and writes one tile set to
-  `data/mosaic/`: levels 0 to 5, 1,068 tiles, 10 MB as WebP. It checks
+  `data/mosaic/`: levels 0 to 5, 1,068 tiles, 10 MB as WebP (since the
+  morning of 15 Nov it stacks 48 days: 1,069 tiles, see "Once sharp, it
+  stays sharp"). It checks
   every tile the way the engine does and takes damaged ones from NASA's
   map service (6 of 10,379 in the first build). `about.json` says which
   days it holds, when it was built, which tiles exist, and carries a
@@ -694,6 +696,91 @@ minutes.
 - The only bulk job in the project is `tools/mosaic.py` (about 10,000
   requests in five minutes). It runs when a person runs it, never in the
   app.
+
+### Once sharp, it stays sharp (lead's QA of the mosaic build, 15 Nov, morning)
+
+The lead's report: a place that had loaded sharp loaded again after
+zooming out, moving about and coming back; after a while close in, a fast
+zoom out showed the bare basemap first and then a coarse radar picture;
+and there were sand-coloured slivers in the Sahara.
+
+- **Cause of the reloading.** The engine kept the *ingredients* (up to
+  900 pictures) and a few hundred finished tiles as canvases, and threw
+  finished tiles away beyond that. Coming back meant fetching the
+  ingredients again (from the browser's store at best) and putting the
+  tile together again, blurred stand-in first.
+- **Finished tiles are kept** (`keep`, `recall` in `js/engine/tiles.js`).
+  A tile is `whole` once every layer has given its final answer for it.
+  When a whole tile leaves the live set it is compressed without loss
+  (PNG, about 150 to 190 kB close up) and held in memory, up to 480 MB
+  on a desk computer with 8 GB or more, 288 MB otherwise, 96 MB on a
+  phone, oldest out first. A tile that is built again takes its kept
+  picture instead of being painted: no request, no compositing. Lossy
+  WebP at a quarter of the size was tried and dropped: it washed out the
+  red and orange speckle visibly (pixels off by up to 100 of 255).
+- A kept tile belongs to one **look**: the exact list of layers, as text.
+  The same layers set again are recognised (`setLayers` now returns at
+  once when nothing changed), and a look the reader stayed on for three
+  seconds is kept before other layers are painted over it, so opening
+  and closing an event brings the view back without a request.
+- **Layers and what lies over them are painted separately** (`paint`).
+  Outlines and single pictures no longer cause the layers to be put
+  together again: the layers as painted are copied aside (`base`, only
+  for tiles under an outline or picture) and the top is redrawn.
+  `setOutlines` and `setPictures` touch only the tiles under the old or
+  new shapes.
+- **A finished tile is not disturbed** by a download that no longer
+  matters to it (a day that turned out to be hidden, a world picture, a
+  pinned stand-in): `repaintUnfinished`, and the `whole` checks in `done`
+  and `putDown`. Looking ahead (`prefetch`) skips places that are
+  finished or kept.
+- **When NASA adds a pass to a day** (many times an hour), only the tiles
+  under it are done again. Each day's world picture gets a mark per cell
+  (`marks` in `fetchSheet`); when the day's fingerprint changes, the new
+  picture's marks are compared with the old (`refresh`) and only live
+  and kept tiles over the cells that differ are dropped. (The first
+  version of this change forgot everything kept on every such change;
+  the storm test showed 287 kept tiles going to 0.)
+- **The mosaic's coarse levels are held** (levels 0 to 3, 77 pictures,
+  `held`), like the basemap's coarsest tiles, so a tile that comes into
+  view after a fast zoom out shows radar at once. The rest of the mosaic
+  (levels 4 and 5, about 9 MB as bytes) is fetched in the background
+  once the view is complete, nearest the view first, and held as bytes
+  (`fill`, `filled`); not on a phone, nor with the browser's data saver.
+- **The slivers.** They are real: thin lens shapes between passes that
+  NISAR did not image in the 24 days (0.30 % of the Sahara's interior,
+  0.43 % of Arabia, 0.21 % of the US plains). The mosaic now stacks **48
+  days** (`tools/mosaic.py` default; 26,689 day-tiles, 14 minutes): that
+  closes the US plains and Arabia (0.03 %) and a third of the Sahara's
+  (0.19 %). 96 days was baked too and closes hardly more on land
+  (0.17 %) while adding a triangle of the Arabian Sea from August, so it
+  was not used. The 48-day picture only adds: where the 24-day one had
+  data, the same newest pass is on top. Close up the app still loads the
+  last 24 days live, so a sliver filled from an older pass stays at the
+  mosaic's detail. The menu note says what shows through where NISAR has
+  no picture.
+- **Whether the ready-made mosaic is needed** (the lead asked twice). A
+  visitor never downloads the 10 MB at once: it is 1,069 small pictures,
+  and the opening view takes the coarsest 21 (0.3 MB). Without it the
+  coarse planet is 24 daily world pictures from NASA, about 10 MB, and a
+  continent is up to 24 pictures per map tile (494 requests against 72).
+  So the mosaic is the small, fast start, and the kept tiles are what
+  grows sharper from there.
+- **Measured headless** (software rendering, slow proxy; whole planet).
+  Alps at 150 km: first visit 14.7 s, 284 requests; back after six other
+  places 1.0 s, all 43 tiles from the kept store, no NISAR request beyond
+  those of the flight there. Bolivia 82 of 82, Japan 61 of 61, Europe at
+  3,000 km 87 of 90 (the other three were still live). Opening and
+  closing an earthquake, a fire and a flood over a sharp view: 0 NISAR
+  requests on closing, about 1 s. After 6 places close in over the
+  Sahara, a fast zoom out to 6,000 km shows radar on every tile in the
+  first frame checked (0.2 s) and is finished after 0.8 s.
+- Test scripts for these live in the session's scratch folder
+  (`stay.js`, `stay2.js`, `out.js`, `event.js`, `refresh.js`); they are
+  not in the repository.
+- Not verified: behaviour on a real GPU and in Safari, where keeping a
+  tile compresses on the page's own thread (at most 12 tiles a frame are
+  let go to bound that).
 
 ### Visual rules (lead, 14 Nov, night)
 
