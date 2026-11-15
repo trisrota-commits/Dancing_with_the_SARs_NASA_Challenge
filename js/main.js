@@ -3,7 +3,7 @@
 // Which version of the app this is. `tools/pack.sh` sets it; it shows at the
 // end of the credits line, so nobody has to wonder whether the browser is
 // still showing an older copy.
-const BUILD = '2026-11-15 19:27 UTC';
+const BUILD = '2026-11-15 20:30 UTC';
 
 import { CATEGORIES, FAMILIES, PALETTE, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START, RECENT_MS, OVERLAY_REACH_DAYS, NISAR_MOSAIC, NISAR_CHANGE, PREVIEW_STRETCH } from './config.js';
 import { fetchFeed, fetchArchive } from './feeds.js';
@@ -76,7 +76,7 @@ const placeById = (id) => PLACES.find((p) => p.id === id);
 
 // ---------- data ----------
 
-// Newly arrived items pulse on the globe and flash in the feed for a while.
+// Newly arrived items pulse on the globe for a while.
 function markFresh(id) {
   state.fresh.add(id);
   setTimeout(() => state.fresh.delete(id), 90_000);
@@ -123,7 +123,6 @@ function draw() {
   globe.renderIncidents(shown, state.fresh, new Set(shown.filter((i) => now - i.time < RECENT_MS).map((i) => i.id)));
   globe.renderFootprints(state.scenes, $('footprints').checked);
   renderChips();
-  renderFeed();
   $('event-count').textContent = shown.length;
   refreshTicker();
   renderSpotlight();
@@ -193,75 +192,55 @@ function renderChips() {
     .join('');
 }
 
-function renderFeed() {
-  const items = [
-    ...visibleIncidents().map((i) => ({ time: i.endTime, incident: i })),
-    ...state.scenes.map((s) => ({ time: s.time, scene: s })),
-  ]
-    .sort((a, b) => b.time - a.time)
-    .slice(0, 60);
-  $('feed').innerHTML = items
-    .map((item, n) => {
-      if (item.incident) {
-        const i = item.incident;
-        return `<li tabindex="0" role="button" data-n="${n}" class="${state.fresh.has(i.id) ? 'fresh' : ''}">${dot(i.category)}<span class="name">${esc(i.title)}</span><span class="t">${ago(item.time)}</span></li>`;
-      }
-      const s = item.scene;
-      return `<li tabindex="0" role="button" data-n="${n}" class="${state.fresh.has(s.id) ? 'fresh' : ''}"><i class="dot" style="--c:${PALETTE.nisar};border-radius:2px"></i><span class="name">NISAR pass, track ${esc(s.track)} frame ${esc(s.frame)}</span><span class="t">${ago(item.time)}</span></li>`;
-    })
-    .join('');
-  $('feed').onclick = (e) => {
-    const li = e.target.closest('li');
-    if (!li) return;
-    const item = items[+li.dataset.n];
-    if (item.incident) selectIncident(item.incident, true);
-    else selectScene(item.scene, true);
-  };
-}
-
 // ---------- detail panel ----------
 
-// The left menu steps aside while something is selected, so the map and
-// what was picked have the room, and comes back when it is closed. Someone
-// who opens or shuts the menu by hand during a selection keeps it that way.
-const menu = { folded: false, byHand: false };
+// The menu has the lowest claim on the screen. It opens only when its
+// button is pressed (or "Explore the globe" on the opening card), and it
+// folds away as soon as anything outside it is pressed or anything is
+// opened, from the menu or from the globe. It never comes back by itself,
+// and it is never open beside the details panel. Before 15 November 2026
+// it folded for a selection and came back after it, unless it had been
+// opened by hand meanwhile, and stayed for stories: three people saw three
+// different behaviours and none could say why.
+const menuOpen = () => !$('left').classList.contains('closed');
 
-function focusLayout(on) {
-  const left = $('left');
-  if (on) {
-    if (!menu.byHand && !left.classList.contains('closed')) {
-      left.classList.add('closed');
-      menu.folded = true;
-    }
-  } else {
-    if (menu.folded && !menu.byHand) left.classList.remove('closed');
-    menu.folded = false;
-    menu.byHand = false;
-  }
-  $('menu').setAttribute('aria-expanded', String(!left.classList.contains('closed')));
+function setMenu(open) {
+  $('left').classList.toggle('closed', !open);
+  $('menu').setAttribute('aria-expanded', String(open));
+}
+
+// The opening card is where a visit starts and where it comes back to:
+// closing whatever was opened shows the card again, until the visitor
+// chooses "Explore the globe". The title at the top left shows it at any
+// time.
+const home = { exploring: false };
+
+function showWelcome() {
+  if (state.selected) closePanel();
+  setMenu(false);
+  $('welcome').hidden = false;
+}
+
+// Letting go of a selection by hand (✕ or Escape).
+function letGo() {
+  closePanel();
+  if (!home.exploring) showWelcome();
 }
 
 // Fills the details panel. An event opens quietly: the panel is filled but
 // stays shut, and the small card shows until "Show details" is pressed.
-// The opening card is done once the visitor has opened anything, by its own
-// buttons or by a dot, a report, a search hit or a link.
+// The opening card steps aside once the visitor has opened anything, by its
+// own buttons or by a dot, a report, a search hit or a link.
 function closeWelcome() {
-  if ($('welcome').hidden) return;
   $('welcome').hidden = true;
-  try {
-    localStorage.setItem('sars-welcome', '1');
-  } catch {
-    /* nothing to remember it with */
-  }
 }
 
-function openPanel(html, quiet = false, fold = true) {
+function openPanel(html, quiet = false) {
   closeWelcome();
   $('detail').innerHTML = html;
   $('right').hidden = quiet;
   $('card').hidden = !quiet;
-  // A story is picked from the menu, so the menu stays for the next one.
-  if (fold) focusLayout(true);
+  setMenu(false);
   $('tip').hidden = true;
   $('right').scrollTop = 0;
 }
@@ -273,7 +252,6 @@ function closePanel() {
   $('right').hidden = true;
   $('card').hidden = true;
   $('tip').hidden = true;
-  focusLayout(false);
   globe.select(null);
   replay.stop();
   endCompare();
@@ -710,7 +688,7 @@ async function selectIncident(inc, fly, intro = '') {
   const detailed = !!intro || (!$('right').hidden && state.selected?.kind === 'incident');
   // The linked events as listed in the panel: a feed refresh re-sorts them.
   state.selected = { kind: 'incident', incident: inc, historyStarted: detailed, related: inc.related, story: !!intro };
-  openPanel(intro + incidentHtml(inc, '<p class="spinner">Searching the NISAR archive…</p>'), !detailed, !intro);
+  openPanel(intro + incidentHtml(inc, '<p class="spinner">Searching the NISAR archive…</p>'), !detailed);
   renderCard();
   renderNarrative();
   const opened = state.selected;
@@ -810,14 +788,32 @@ function selectScene(scene, fly) {
   if (fly) globe.flyTo(scene.ring[0].lat, scene.ring[0].lon, 2_500_000);
 }
 
-function choose(found) {
+// "Show more" on the reports bar: everything the bar draws from, as a list.
+// The bar itself shows only what was first reported in the last day and up
+// to three of the strongest ongoing events.
+function openFeed() {
+  const all = [
+    ...visibleIncidents().map((incident) => ({ kind: 'incident', incident, time: incident.endTime })),
+    ...state.scenes.map((scene) => ({ kind: 'scene', scene, time: scene.time })),
+  ].sort((a, b) => b.time - a.time);
+  const found = all.slice(0, FEED_ROWS);
+  choose(
+    found,
+    'Latest reports and NISAR passes',
+    `<p class="hint">Newest first: ${found.length === all.length ? `all ${all.length}` : `the newest ${found.length} of ${all.length}`} events on the map and NISAR passes. The events are the kinds and the period chosen in the menu under "Events on the map"; the time is when each was last reported. The bar at the top shows only events first reported in the last 24 hours, and up to three of the strongest that are still going on. Click a line to go there.</p>`,
+    true,
+    '<span class="tag">Live feeds</span>',
+  );
+}
+
+function choose(found, heading = `${found.length} things overlap here`, note = '', fly = false, tag = '') {
   endCompare();
   globe.select(null);
   setLink('');
   replay.stop();
-  state.selected = { kind: 'choice', found };
+  state.selected = { kind: 'choice', found, fly };
   state.lookup++;
-  openPanel(`<h3>${found.length} things overlap here</h3>
+  openPanel(`${tag}<h3>${esc(heading)}</h3>${note}
     <ul class="links">${found
       .map((f, n) =>
         f.kind === 'incident'
@@ -1188,11 +1184,11 @@ async function openStory(id) {
   setLink(`story=${story.id}`);
 
   if (story.action === 'lapse') {
-    openPanel(storyHtml(story, `<h4>NISAR's passes over this point</h4>${lapseBox(story.lat, story.lon)}`), false, false);
+    openPanel(storyHtml(story, `<h4>NISAR's passes over this point</h4>${lapseBox(story.lat, story.lon)}`));
     return startLapse();
   }
   if (story.action === 'interferogram') {
-    openPanel(storyHtml(story, `<h4>The interferogram</h4><div id="igram"><p class="spinner">Searching the NISAR archive…</p></div>`), false, false);
+    openPanel(storyHtml(story, `<h4>The interferogram</h4><div id="igram"><p class="spinner">Searching the NISAR archive…</p></div>`));
     globe.flyTo(story.lat, story.lon, 600_000);
     const token = state.lookup;
     try {
@@ -1216,7 +1212,7 @@ async function openStory(id) {
     return;
   }
   // An event story: find the event in the archive and open it under the story.
-  openPanel(`${storyHtml(story)}<p class="spinner">Loading events since NISAR's data began…</p>`, false, false);
+  openPanel(`${storyHtml(story)}<p class="spinner">Loading events since NISAR's data began…</p>`);
   globe.flyTo(story.lat, story.lon, 900_000);
   const token = state.lookup;
   if (!state.archive) {
@@ -1352,6 +1348,8 @@ async function openMeasured(entry) {
   if (state.selected?.incident === incident) $('card-details')?.click();
 }
 
+const FEED_ROWS = 60; // lines in the list behind "Show more"
+
 function tickerItems() {
   const now = Date.now();
   const list = visibleIncidents();
@@ -1423,6 +1421,7 @@ function startTicker() {
     $('ticker-pause').textContent = ticker.paused ? '▶' : '❚❚';
     $('ticker-pause').setAttribute('aria-label', ticker.paused ? 'Resume cycling through reports' : 'Pause cycling through reports');
   };
+  $('ticker-more').onclick = openFeed;
   $('ticker-close').onclick = () => {
     ticker.dismissed = true;
     renderTicker();
@@ -1852,13 +1851,15 @@ const live = {
   hiddenSpecies: new Set(),
 };
 
-function openFound(f) {
-  if (f.kind === 'incident') return selectIncident(f.incident, false);
-  if (f.kind === 'place') return selectPlace(f.place, false);
+// `fly` moves the view there: wanted from a list of the whole planet, not
+// for things that overlap where the visitor already is.
+function openFound(f, fly = false) {
+  if (f.kind === 'incident') return selectIncident(f.incident, fly);
+  if (f.kind === 'place') return selectPlace(f.place, fly);
   if (f.kind === 'satellite') return selectSatellite();
   if (f.kind === 'animal') return selectAnimal(f.animal);
   if (f.kind === 'poi') return selectPoi(f.poi);
-  return selectScene(f.scene, false);
+  return selectScene(f.scene, fly);
 }
 
 const speciesOf = (a) => SPECIES.find((sp) => sp.id === a.species);
@@ -2606,7 +2607,7 @@ async function start() {
       $('card').hidden = false;
       $('tip').hidden = true;
       renderCard();
-    } else closePanel();
+    } else letGo();
   };
   $('close').onclick = stepBack;
   document.addEventListener('keydown', (e) => {
@@ -2719,22 +2720,14 @@ async function start() {
     if (!e.target.closest('#search')) $('search-results').hidden = true;
   });
 
-  // One-time hint for first-time visitors.
-  let seen = false;
-  try {
-    seen = localStorage.getItem('sars-welcome') === '1';
-  } catch {
-    /* storage unavailable: just show the hint */
-  }
-  $('welcome').hidden = seen;
-  // A first visit starts clean: the globe and the opening card, with the
-  // menu folded behind its button. It counts as folded for a selection, so
-  // it slides in once the visitor closes what they went to look at.
-  if (!seen) {
-    $('left').classList.add('closed');
-    $('menu').setAttribute('aria-expanded', 'false');
-    menu.folded = true;
-  }
+  // Every visit starts the same: the globe and the opening card, with the
+  // menu folded behind its button.
+  $('welcome').hidden = false;
+  setMenu(false);
+  $('home').onclick = (e) => {
+    e.preventDefault();
+    showWelcome();
+  };
   $('welcome-story').onclick = () => {
     closeWelcome();
     openStory(STORIES[0].id);
@@ -2763,20 +2756,33 @@ async function start() {
   // the menu slides in. On a phone it would cover the globe; it stays shut.
   $('welcome-close').onclick = () => {
     closeWelcome();
-    if (window.innerWidth > 760 && !state.selected) focusLayout(false);
+    home.exploring = true;
+    if (window.innerWidth > 760 && !state.selected) setMenu(true);
   };
   $('menu').onclick = () => {
-    const closed = $('left').classList.toggle('closed');
-    $('menu').setAttribute('aria-expanded', String(!closed));
-    // A choice made by hand during a selection is kept.
-    if (state.selected) menu.byHand = true;
+    const open = !menuOpen();
+    // The menu and the details panel are never open side by side: the
+    // panel steps back (an event to its small card) when the menu opens.
+    if (open && !$('right').hidden) {
+      const sel = state.selected;
+      if (sel?.kind === 'incident' && !sel.story) {
+        $('right').hidden = true;
+        $('card').hidden = false;
+        $('tip').hidden = true;
+        renderCard();
+      } else closePanel();
+    }
+    if (open) closeWelcome();
+    setMenu(open);
   };
-  // A phone starts with the menu shut (a first visit already shut it above).
-  if (window.innerWidth <= 760 && !$('left').classList.contains('closed')) $('menu').click();
+  // Anything pressed outside the menu folds it away.
+  document.addEventListener('pointerdown', (e) => {
+    if (menuOpen() && !e.target.closest('#left, #menu, #welcome-close')) setMenu(false);
+  });
 
   $('card').onclick = (e) => {
     const t = e.target;
-    if (t.id === 'card-close') return closePanel();
+    if (t.id === 'card-close') return letGo();
     if (t.id === 'card-details') return showDetails();
     if (t.id === 'card-nisar') return toggleCardImage();
     if (t.id === 'card-change') return showChanges(t);
@@ -2831,7 +2837,7 @@ async function start() {
     if (li.dataset.in) return selectIncident(sel.inside[+li.dataset.in], true);
     if (li.dataset.near) return selectIncident(sel.near[+li.dataset.near].incident, true);
     if (li.dataset.pick) {
-      return openFound(sel.found[+li.dataset.pick]);
+      return openFound(sel.found[+li.dataset.pick], sel.fly);
     }
   };
 
@@ -2871,7 +2877,6 @@ async function start() {
   handle.onpointerup = () => (handle.onpointermove = null);
 
   setInterval(() => ($('clock').textContent = utc(Date.now()).replace(' UTC', ':') + new Date().toISOString().slice(17, 19) + ' UTC'), 1000);
-  setInterval(renderFeed, 60_000);
   setInterval(tickCountdowns, 1000);
   startTicker();
 

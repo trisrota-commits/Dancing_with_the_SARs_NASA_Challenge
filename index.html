@@ -15,19 +15,19 @@
     <link rel="preconnect" href="https://earthquake.usgs.gov" crossorigin />
     <link rel="preconnect" href="https://eonet.gsfc.nasa.gov" crossorigin />
     <link rel="preconnect" href="https://www.gdacs.org" crossorigin />
-    <link rel="modulepreload" href="js/main.js?v=202611151927" />
+    <link rel="modulepreload" href="js/main.js?v=202611152030" />
     <link rel="modulepreload" href="vendor/three.module.min.js" />
-    <link rel="stylesheet" href="css/style.css?v=202611151927" />
+    <link rel="stylesheet" href="css/style.css?v=202611152030" />
   </head>
   <body>
     <div id="globe"></div>
 
     <header id="topbar">
-      <button id="menu" aria-label="Show or hide the menu" aria-expanded="true">☰ <span>Menu</span></button>
-      <div class="brand">
+      <button id="menu" aria-label="Show or hide the menu" aria-expanded="false">☰ <span>Menu</span></button>
+      <a class="brand" id="home" href="./" title="Back to the opening card">
         <h1>Dancing with the SARs</h1>
         <p>Earth's changing surface, seen by the NISAR radar satellite</p>
-      </div>
+      </a>
       <div id="search">
         <input id="search-box" type="search" placeholder="Search events or places…" autocomplete="off" aria-label="Search events or places" />
         <div id="search-results" hidden></div>
@@ -36,14 +36,14 @@
       <div id="clock"></div>
     </header>
 
-    <aside id="left">
-      <details open id="measured-menu" hidden>
+    <aside id="left" class="closed">
+      <details id="measured-menu" hidden>
         <summary>Measured by NISAR <span id="measured-count" class="count"></span></summary>
         <ul id="measured-list" class="links"></ul>
         <p class="hint">Places and events read from NISAR's calibrated data, in decibels. The share is how much of the ground stood out from what it had read before: at an event on the first pass after it, elsewhere on the pass that stood out most. Highlighted from 2 % on; with nothing happening the rules flag under 1 %. An earthquake seldom changes how the ground reflects radar: its mark is ground movement, which the event's own card shows where NISAR has measured it.</p>
       </details>
 
-      <details open>
+      <details>
         <summary>Events on the map <span id="event-count" class="count"></span></summary>
         <div id="chips"></div>
         <div class="row">
@@ -69,7 +69,7 @@
         <p class="hint">Click a dot to see the event and what NISAR saw there.</p>
       </details>
 
-      <details open>
+      <details>
         <summary>NISAR radar</summary>
         <label class="check"><input type="checkbox" id="footprints" checked /> Where NISAR looked recently <span id="scene-count" class="count"></span></label>
         <p class="hint">Teal frames: the newest are bold, and they fade over four days.</p>
@@ -113,10 +113,8 @@
         </div>
       </details>
 
-      <p class="menu-rule">More context</p>
-
-      <details open>
-        <summary>Stories: five kinds of change, explained</summary>
+      <details>
+        <summary>More stories</summary>
         <div id="stories"></div>
         <p class="hint">Five places, five kinds of change, each explained from NISAR data.</p>
       </details>
@@ -126,23 +124,6 @@
         <div id="place-chips"></div>
         <ul id="place-list" class="links"></ul>
         <p class="hint">Diamonds mark slow changes that no event feed reports: glacier loss, sinking cities, wetland floods, forest clearing, farming seasons, volcanoes, moving slopes and a filling reservoir. Click one to play NISAR’s passes over it.</p>
-      </details>
-
-      <details>
-        <summary>Live sky and wildlife</summary>
-        <label class="check"><input type="checkbox" id="live-nisar" checked /> NISAR satellite, live <span id="nisar-live-status" class="count"></span></label>
-        <label class="check"><input type="checkbox" id="lighting" checked /> Real day and night, and the real star sky</label>
-        <label class="check"><input type="checkbox" id="wildlife" /> Wildlife sightings (GBIF) <span id="wildlife-status" class="count"></span></label>
-        <div id="wildlife-controls" hidden>
-          <div id="species-chips"></div>
-          <div class="row">
-            <button id="wildlife-play" aria-label="Pause or play the months">Pause</button>
-            <span id="wildlife-month" class="month"></span>
-          </div>
-          <p class="hint">Real sighting records, 2010–2025, played by month of the year. They also show where people look, so busy coasts have more. Each figurine is one record; it shows the species, not how many animals were seen. The records are a copy fetched from GBIF on the day shown above; each links to its page there.</p>
-        </div>
-        <label class="check"><input type="checkbox" id="decor" /> Decorations: shooting stars and ocean landmarks</label>
-        <p class="hint">The satellite, sky, sunlight and sightings are real data. Shooting stars are decoration only.</p>
       </details>
 
       <details>
@@ -162,10 +143,23 @@
         <p class="hint">Mountains and valleys are drawn 4 times their true height, so that they show at this scale. The 3D button at the bottom right tilts the view.</p>
       </details>
 
-      <details class="grow">
-        <summary>Live feed</summary>
-        <ol id="feed"></ol>
+      <details>
+        <summary>Live sky and wildlife</summary>
+        <label class="check"><input type="checkbox" id="live-nisar" checked /> NISAR satellite, live <span id="nisar-live-status" class="count"></span></label>
+        <label class="check"><input type="checkbox" id="lighting" checked /> Real day and night, and the real star sky</label>
+        <label class="check"><input type="checkbox" id="wildlife" /> Wildlife sightings (GBIF) <span id="wildlife-status" class="count"></span></label>
+        <div id="wildlife-controls" hidden>
+          <div id="species-chips"></div>
+          <div class="row">
+            <button id="wildlife-play" aria-label="Pause or play the months">Pause</button>
+            <span id="wildlife-month" class="month"></span>
+          </div>
+          <p class="hint">Real sighting records, 2010–2025, played by month of the year. They also show where people look, so busy coasts have more. Each figurine is one record; it shows the species, not how many animals were seen. The records are a copy fetched from GBIF on the day shown above; each links to its page there.</p>
+        </div>
+        <label class="check"><input type="checkbox" id="decor" /> Decorations: shooting stars and ocean landmarks</label>
+        <p class="hint">The satellite, sky, sunlight and sightings are real data. Shooting stars are decoration only.</p>
       </details>
+
     </aside>
 
     <aside id="right" hidden>
@@ -206,6 +200,7 @@
       <button id="ticker-next" aria-label="Next report">›</button>
       <button id="ticker-pause" aria-label="Pause cycling through reports">❚❚</button>
       <span id="ticker-feeds" title="Reports come from USGS, NASA EONET and GDACS. They can be delayed and do not cover every emergency. This is not an official warning service."></span>
+      <button id="ticker-more" title="List the latest reports and NISAR passes">Show more</button>
       <button id="ticker-close" aria-label="Hide the reports bar">✕</button>
     </div>
 
@@ -238,9 +233,10 @@
         <span id="spotlight-text"></span>
         <button id="spotlight-go">Take me there</button>
       </div>
-      <div class="actions">
+      <div class="actions last">
         <button id="welcome-story">Start with a story</button>
         <button id="welcome-close">Explore the globe</button>
+        <span class="hint" id="welcome-back">Closing (✕) what you open brings you back here.</span>
       </div>
     </div>
 
@@ -257,6 +253,6 @@
     <input type="hidden" id="stretch" value="4" /><b id="stretch-value" hidden></b>
     <!-- The address carries the version (tools/pack.sh writes it), so a
          new page never runs an older script from the browser's cache. -->
-    <script type="module" src="js/main.js?v=202611151927"></script>
+    <script type="module" src="js/main.js?v=202611152030"></script>
   </body>
 </html>
