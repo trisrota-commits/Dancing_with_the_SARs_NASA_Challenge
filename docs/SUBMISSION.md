@@ -85,10 +85,27 @@ repository: https://github.com/trisrota-commits/Dancing_with_the_SARs_NASA_Chall
 
 ### Who it is for
 
-Anyone. The challenge asks for a broad audience, so the app uses plain
-words, folds detail away until it is asked for, and explains every mark
-it draws in a key on the screen. Nobody has to present it: a judge, a
-student or a journalist can open it alone and understand it.
+**First: people who need to know when and where a crop was planted and
+harvested**, without waiting for a field survey or a cloud-free day. That
+is a farm adviser deciding where to send people this week, and a
+food-security planner who has to estimate a district's harvest before it
+is reported. Our lead case is the rice bowl of West Bengal, the fields of
+Bardhaman: the app shows NISAR's calibrated measurements there through a
+whole monsoon crop, from flooded paddies in July to standing rice in
+October and the harvest in November, and what a pass 12 days later is
+expected to read.
+[Team: one sentence on your own connection to West Bengal and to
+farming, if you want it in. The challenge text invites it.]
+
+**Also: people who respond to disasters.** The same globe carries the
+floods, fires, storms and earthquakes the world's agencies report as they
+happen, with NISAR's passes before and after each. Radar sees through the
+cloud and smoke that hide such places from cameras.
+
+**And anyone learning to read radar.** The app uses plain words, folds
+detail away until it is asked for, and explains every mark it draws in a
+key on the screen. Nobody has to present it: a judge, a student or a
+journalist can open it alone and understand it.
 
 ### How it stays honest
 
