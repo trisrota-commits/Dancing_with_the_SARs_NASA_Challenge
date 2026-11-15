@@ -99,6 +99,11 @@ jobs:
 
       - name: Measure
         if: steps.login.outputs.ready == 'true'
+        # The script stops beginning new sites after 85 minutes (--budget)
+        # and the step is cut off at 110, so that the commit below always
+        # has time to run. Whatever was measured by then is committed; the
+        # next run goes on from there.
+        timeout-minutes: 110
         # What was typed into the form arrives as plain values, never as
         # part of the command.
         env:
@@ -115,12 +120,14 @@ jobs:
             python tools/measure.py "${args[@]}"
           else
             read -r -a ids <<< "$IN_SITES"
-            python tools/measure.py "${ids[@]}"
+            python tools/measure.py --budget 85 "${ids[@]}"
           fi
 
       - name: Commit the results
         id: commit
-        if: steps.login.outputs.ready == 'true'
+        # Also when the measuring step failed or was cut off: every site
+        # it finished is a whole result and is kept.
+        if: always() && steps.login.outputs.ready == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -138,7 +145,7 @@ jobs:
   # top of pages.yml), so the site is published here.
   publish:
     needs: measure
-    if: needs.measure.outputs.changed == 'true'
+    if: always() && needs.measure.outputs.changed == 'true'
     permissions:
       contents: read
       pages: write
