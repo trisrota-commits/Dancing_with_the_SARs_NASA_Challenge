@@ -72,7 +72,6 @@ def fmt(day):
 
 NAMES = {"left": "the flood in Italy", "right": "the earthquake in Pakistan"}
 TITLES = {"left": "Flood in Italy, 7 Oct 2026", "right": "Earthquake M 5.7, Pakistan, 17 Oct 2026"}
-WHAT = {"left": "flood", "right": "quake"}
 NEXT = {"left": "Click to zoom in", "right": "Click to see its seismic waves"}
 
 
@@ -127,26 +126,26 @@ def zoom(side):
 
 
 def play(side):
+    from datetime import date
     c = caps[side]
+    what = {"left": "flood", "right": "earthquake"}[side]
+    ev = date.fromisoformat(c["event"])
     seq = []
     for cap in c["caps"]:
         im = frame(f"play-{side}", cap["frame"])
-        if cap["when"] == "stood":
-            share = f"{fmt(cap['date'])[:-5]}: {c['stood'] * 100:.1f}%"
-            if c["stood"] >= c["stoodOut"]:
-                text = f"{share} of cells stood out against their own past"
-                sub = "Blue: echo fell · Orange: echo rose"
-                if c.get("before") is not None:
-                    sub += f" · Before the {WHAT[side]}: {c['before'] * 100:.1f}%"
-            else:  # too few to say in words that the place stood out
-                text = f"{share} of cells flagged: nothing clear stood out"
-                sub = f"We say “stood out” from {c['stoodOut'] * 100:.0f}% on."
-            if c.get("newVersion"):
-                sub += " NASA's processing version changed with this pass."
-            seq.append((label(im, text, sub), 4.0))
+        days = (date.fromisoformat(cap["date"]) - ev).days
+        when = f"{days} days after the {what}" if days > 0 else f"Before the {what}"
+        title = f"NISAR pass, {fmt(cap['date'])}"
+        if not cap["judged"]:
+            seq.append((label(im, title, f"{when} · learning what this ground normally reads"), 0.9))
+        elif not cap["stood"]:
+            seq.append((label(im, f"{title} · nothing stood out", when), 1.4))
         else:
-            first = " · first pass after" if cap["first_after"] else ""
-            seq.append((label(im, f"NISAR pass, {fmt(cap['date'])}", f"{cap['when'].capitalize()}{first}"), 0.9))
+            parts = [p for p, v in (("Orange: echo rose", cap["rose"]), ("Blue: echo fell", cap["fell"])) if v]
+            sub = f"{when} · " + " · ".join(parts)
+            if cap["newVersion"]:
+                sub += " · NASA's processing changed this pass"
+            seq.append((label(im, f"{title} · {cap['stood'] * 100:.1f}% of cells stood out", sub), 3.5))
     write(f"play-{side}", seq)
 
 

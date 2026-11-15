@@ -5,11 +5,9 @@ earthquake in Pakistan. Each branch: turn, zoom, play the NISAR passes.
 The earthquake also gets its two seismic wave fronts, as in the app.
 Frames go to .tour/frames/<scene>/NNN.png with a captions.json.
 Needs the app served on http://localhost:8765/ and Playwright with Chromium.
-Another address: TOUR_URL=http://localhost:8791/. A Chromium that is already
-on the computer: TOUR_CHROME=/path/to/chrome.
 Usage: python3 tools/tour/render.py [scene ...], then tools/tour/assemble.py.
 """
-import asyncio, base64, io, json, math, os, sys
+import asyncio, base64, io, json, math, shutil, sys
 from datetime import datetime, timezone
 from pathlib import Path
 import numpy as np
@@ -19,9 +17,6 @@ from playwright.async_api import async_playwright
 
 REPO = Path(__file__).resolve().parents[2]
 OUT = REPO / ".tour" / "frames"
-URL = os.environ.get("TOUR_URL", "http://localhost:8765/")
-CHROME = os.environ.get("TOUR_CHROME")  # none: the Chromium that Playwright installed
-STOOD_OUT = 0.02  # from this share on the app says "stood out" (js/measured.js)
 HIDE = "body > *:not(#globe) { display: none !important; }"
 HOME = dict(lat=30.0, lon=38.0, alt=2.2)
 EVENTS = {
@@ -65,10 +60,9 @@ def ease(t):
 async def main():
     OUT.mkdir(parents=True, exist_ok=True)
     async with async_playwright() as p:
-        b = await p.chromium.launch(executable_path=CHROME, args=[
-            "--use-gl=swiftshader", "--enable-unsafe-swiftshader", "--enable-webgl", "--ignore-gpu-blocklist", "--no-sandbox"])
+        b = await p.chromium.launch(args=["--use-gl=swiftshader", "--enable-webgl", "--ignore-gpu-blocklist"])
         pg = await b.new_page(viewport={"width": 1280, "height": 720})
-        await pg.goto(URL, wait_until="domcontentloaded")
+        await pg.goto("http://localhost:8765/", wait_until="domcontentloaded")
         await pg.wait_for_timeout(6000)
         await pg.add_style_tag(content=HIDE)
         await pg.evaluate("""() => { const g = window.app.globe; g.controls.stop();
@@ -175,45 +169,32 @@ async def main():
                     await shot(f"zoom-{side}", i, 2200)
 
             if want(f"play-{side}"):
+                # Every pass in turn. Where the detector judged a pass, its
+                # cells that stood out are drawn on top (orange rose, blue fell).
                 await show_markers(False)
                 await cam(lat, lon, alt_close)
-                await pg.wait_for_timeout(12000)  # the map under it, when this scene is rendered alone
                 images, scale = grid_images(g)
                 bounds = d["bounds"]
-                rows = {r["date"]: r for r in d["byDate"]}
                 after = d["event"]["firstPassAfter"]
-                event_day = d["event"]["date"]
+                rows = {r["date"]: r for r in d["byDate"]}
                 caps = []
-                k = 0
-                for idx, (img, ms) in enumerate(zip(images, g["times"])):
+                shutil.rmtree(OUT / f"play-{side}", ignore_errors=True)
+                for k, (img, ms) in enumerate(zip(images, g["times"])):
                     day = datetime.fromtimestamp(int(ms) / 1000, timezone.utc).strftime("%Y-%m-%d")
-                    await pg.evaluate("""async ([url, b]) => { const g = window.app.globe;
-                        const im = new Image(); im.src = url; await im.decode();
-                        g.clearScenes(); g.addPicture(im, b); g.dirty = true; }""", [data_url(img), bounds])
-                    when = "after the event" if day >= after else "before the event"
-                    for _ in range(1):
-                        await shot(f"play-{side}", k, 2500)
-                        caps.append(dict(frame=k, date=day, when=when, first_after=day == after))
-                        k += 1
-                # Last: the first pass after, with the cells that stood out.
-                fa = next(i for i, ms in enumerate(g["times"]) if datetime.fromtimestamp(int(ms) / 1000, timezone.utc).strftime("%Y-%m-%d") == after)
-                # A pass on which no cell stood out has no picture of them.
-                name = rows[after].get("image")
-                stood = Image.open(REPO / f"data/measured/{name}").convert("RGBA") if name else Image.new("RGBA", images[fa].size)
-                base = images[fa].convert("RGBA").resize(stood.size, Image.NEAREST)
-                await pg.evaluate("""async ([u1, u2, b]) => { const g = window.app.globe;
-                    const a = new Image(); a.src = u1; await a.decode();
-                    const s = new Image(); s.src = u2; await s.decode();
-                    g.clearScenes(); g.addPicture(a, b); g.addPicture(s, b); g.dirty = true; }""",
-                                  [data_url(base), data_url(stood), bounds])
-                await shot(f"play-{side}", k, 3000)
-                caps.append(dict(frame=k, date=after, when="stood", first_after=True))
-                # The share on the last pass before the event, for comparison.
-                before = max((r for r in d["byDate"] if not r["afterEvent"]), key=lambda r: r["date"], default=None)
-                captions[side] = dict(caps=caps, scale=scale, event=event_day, after=after,
-                                      stood=d["event"]["stood"], stoodOut=STOOD_OUT,
-                                      before=before and before["stood"], beforeDate=before and before["date"],
-                                      newVersion=d["event"].get("newVersion"), name=m["name"])
+                    row = rows.get(day)
+                    layers = [img.convert("RGBA")]
+                    if row and row.get("image"):
+                        stood = Image.open(REPO / "data/measured" / row["image"]).convert("RGBA")
+                        layers = [img.convert("RGBA").resize(stood.size, Image.NEAREST), stood]
+                    await pg.evaluate("""async ([urls, b]) => { const g = window.app.globe; g.clearScenes();
+                        for (const u of urls) { const im = new Image(); im.src = u; await im.decode(); g.addPicture(im, b); }
+                        g.dirty = true; }""", [[data_url(x) for x in layers], bounds])
+                    await shot(f"play-{side}", k, 2500)
+                    caps.append(dict(frame=k, date=day, after=day >= after, first_after=day == after,
+                                     judged=row is not None, stood=row["stood"] if row else None,
+                                     fell=row.get("fell") if row else None, rose=row.get("rose") if row else None,
+                                     newVersion=bool(row and row.get("newVersion")), outlines=bool(row and row.get("image"))))
+                captions[side] = dict(caps=caps, scale=scale, event=d["event"]["date"], after=after, name=m["name"])
         if captions:
             old = json.load(open(OUT / "captions.json")) if (OUT / "captions.json").exists() else {}
             old.update(captions)
