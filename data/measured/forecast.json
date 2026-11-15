@@ -300,56 +300,56 @@
   "peerSurprise": {
    "date": "2026-11-02",
    "time": 1793589041000,
-   "outside": 0.1,
-   "expected": 1.25
+   "outside": 0.069,
+   "expected": 1.61
   },
   "last": {
-   "rmse": 0.8,
-   "mae": 0.57,
-   "within90": 1.31,
-   "r2": 0.983,
-   "spearman": 0.952,
+   "rmse": 0.93,
+   "mae": 0.67,
+   "within90": 1.59,
+   "r2": 0.976,
+   "spearman": 0.922,
    "skill": 0.0
   },
   "line": {
-   "rmse": 1.25,
-   "mae": 0.88,
-   "within90": 2.06,
-   "r2": 0.957,
-   "spearman": 0.927,
-   "skill": -1.472
+   "rmse": 1.48,
+   "mae": 1.07,
+   "within90": 2.46,
+   "r2": 0.94,
+   "spearman": 0.894,
+   "skill": -1.517
   },
   "peers": {
-   "rmse": 0.77,
-   "mae": 0.49,
-   "within90": 1.25,
-   "r2": 0.984,
-   "spearman": 0.96,
-   "skill": 0.075
+   "rmse": 0.9,
+   "mae": 0.6,
+   "within90": 1.57,
+   "r2": 0.978,
+   "spearman": 0.923,
+   "skill": 0.072
   },
   "mean": {
-   "rmse": 1.06,
-   "mae": 0.76,
-   "within90": 1.55,
-   "r2": 0.969,
-   "spearman": 0.935,
-   "skill": -0.774
+   "rmse": 1.43,
+   "mae": 0.98,
+   "within90": 2.08,
+   "r2": 0.944,
+   "spearman": 0.907,
+   "skill": -1.358
   },
   "trend": {
-   "rmse": 0.9,
-   "mae": 0.67,
-   "within90": 1.42,
-   "r2": 0.978,
-   "spearman": 0.937,
-   "skill": -0.26
+   "rmse": 1.03,
+   "mae": 0.78,
+   "within90": 1.7,
+   "r2": 0.971,
+   "spearman": 0.909,
+   "skill": -0.222
   },
   "learnt": {
-   "rmse": 0.94,
-   "mae": 0.72,
-   "within90": 1.4,
-   "r2": 0.976,
-   "spearman": 0.931,
-   "skill": -0.382
+   "rmse": 1.18,
+   "mae": 0.88,
+   "within90": 1.8,
+   "r2": 0.962,
+   "spearman": 0.904,
+   "skill": -0.602
   }
  },
  {

@@ -1,13 +1,13 @@
 {
  "id": "gerd",
  "name": "Grand Ethiopian Renaissance Dam reservoir",
- "lat": 11.1,
- "lon": 35.15,
+ "lat": 11.0618,
+ "lon": 35.2072,
  "radiusKm": 25,
  "track": "129-A-007-DHDH",
  "setup": {
-  "lat": 11.1,
-  "lon": 35.15,
+  "lat": 11.0618,
+  "lon": 35.2072,
   "seriesRadiusM": 1000,
   "mapRadiusM": 15000,
   "mapPol": "co"
@@ -20,99 +20,99 @@
  "series": [
   {
    "time": 1782184245000,
-   "hh": -5.09,
-   "hv": -10.24,
-   "pixels": 7845,
+   "hh": -18.95,
+   "hv": -23.75,
+   "pixels": 7858,
    "file": "NISAR_L2_PR_GCOV_023_129_A_007_2005_DHDH_A_20260623T031045_20260623T031119_P05023_N_F_J_001.h5"
   },
   {
    "time": 1783221044000,
-   "hh": -5.91,
-   "hv": -10.9,
-   "pixels": 7846,
+   "hh": -21.69,
+   "hv": -24.18,
+   "pixels": 7858,
    "file": "NISAR_L2_PR_GCOV_024_129_A_007_2005_DHDH_A_20260705T031044_20260705T031118_P05023_N_F_J_001.h5"
   },
   {
    "time": 1784257843000,
-   "hh": -5.81,
-   "hv": -10.5,
-   "pixels": 7846,
+   "hh": -19.05,
+   "hv": -23.87,
+   "pixels": 7858,
    "file": "NISAR_L2_PR_GCOV_025_129_A_007_2005_DHDH_A_20260717T031043_20260717T031118_P05023_N_F_J_001.h5"
   },
   {
    "time": 1786331442000,
-   "hh": -5.52,
-   "hv": -10.83,
-   "pixels": 7846,
+   "hh": -21.44,
+   "hv": -23.82,
+   "pixels": 7858,
    "file": "NISAR_L2_PR_GCOV_027_129_A_007_2005_DHDH_A_20260810T031042_20260810T031116_P05023_N_F_J_001.h5"
   },
   {
    "time": 1787368241000,
-   "hh": -5.05,
-   "hv": -10.32,
-   "pixels": 7847,
+   "hh": -19.26,
+   "hv": -23.51,
+   "pixels": 7858,
    "file": "NISAR_L2_PR_GCOV_028_129_A_007_2005_DHDH_A_20260822T031041_20260822T031116_P05023_N_F_J_001.h5"
   },
   {
    "time": 1788405041000,
-   "hh": -5.58,
-   "hv": -11.04,
-   "pixels": 7845,
+   "hh": -18.87,
+   "hv": -23.72,
+   "pixels": 7858,
    "file": "NISAR_L2_PR_GCOV_029_129_A_007_2005_DHDH_A_20260903T031041_20260903T031116_P05023_N_F_J_001.h5"
   },
   {
    "time": 1789441841000,
-   "hh": -5.62,
-   "hv": -10.93,
-   "pixels": 7846,
+   "hh": -19.13,
+   "hv": -23.68,
+   "pixels": 7858,
    "file": "NISAR_L2_PR_GCOV_030_129_A_007_2005_DHDH_A_20260915T031041_20260915T031115_P05023_N_F_J_001.h5"
   },
   {
    "time": 1790478641000,
-   "hh": -5.77,
-   "hv": -10.79,
-   "pixels": 7846,
+   "hh": -20.32,
+   "hv": -23.84,
+   "pixels": 7858,
    "file": "NISAR_L2_PR_GCOV_031_129_A_007_2005_DHDH_A_20260927T031041_20260927T031115_P05023_N_F_J_001.h5"
   },
   {
    "time": 1791515441000,
-   "hh": -5.93,
-   "hv": -10.75,
-   "pixels": 7846,
+   "hh": -18.92,
+   "hv": -21.02,
+   "pixels": 7858,
    "file": "NISAR_L2_PR_GCOV_032_129_A_007_2005_DHDH_A_20261009T031041_20261009T031115_P05023_N_F_J_001.h5"
   },
   {
    "time": 1792552241000,
-   "hh": -5.74,
-   "hv": -10.54,
-   "pixels": 7847,
+   "hh": -19.24,
+   "hv": -21.84,
+   "pixels": 7858,
    "file": "NISAR_L2_PR_GCOV_033_129_A_007_2005_DHDH_A_20261021T031041_20261021T031116_P05023_N_F_J_001.h5"
   },
   {
    "time": 1793589041000,
-   "hh": -5.81,
-   "hv": -10.64,
-   "pixels": 7846,
+   "hh": -21.36,
+   "hv": -22.15,
+   "pixels": 7858,
    "file": "NISAR_L2_PR_GCOV_034_129_A_007_2005_DHDH_A_20261102T031041_20261102T031116_P05036_N_F_J_001.h5"
   }
  ],
  "change": {
   "before": 1782184245000,
-  "after": 1791515441000,
+  "after": 1783221044000,
   "pol": "HH",
   "image": "gerd_change.png",
   "bounds": {
-   "west": 35.012684516869356,
-   "east": 35.28731548313064,
-   "south": 10.965253323751346,
-   "north": 11.234746676248653
+   "west": 35.06990244548194,
+   "east": 35.344497554518064,
+   "south": 10.927053323751347,
+   "north": 11.196546676248653
   },
-  "weakerPct": 9.1,
-  "strongerPct": 0.1,
+  "weakerPct": 15.4,
+  "strongerPct": 0.0,
   "spansEvent": false
  },
  "firstDrop": null,
- "summary": "Between 2026-06-23 and 2026-10-09, HH backscatter here changed by -0.8 dB and HV by -0.5 dB (mean within 1000 m). Across the mapped area, 9% got at least 3 dB weaker and 0% at least 3 dB stronger.",
+ "summary": "Between 2026-06-23 and 2026-07-05, HH backscatter here changed by -2.7 dB and HV by -0.4 dB (mean within 1000 m). Across the mapped area, 15% got at least 3 dB weaker and 0% at least 3 dB stronger.",
  "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 11 passes on track 129-A-007-DHDH. Time series: mean linear power within 1000 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the pass that differs most from the first in HH.",
- "generated": "2026-11-15T14:08:02Z"
+ "generated": "2026-11-15T15:44:46Z"
 }
