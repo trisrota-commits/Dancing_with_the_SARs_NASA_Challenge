@@ -73,16 +73,19 @@
    "date": "2026-10-08",
    "firstPassAfter": "2026-10-13",
    "stood": 0.0,
-   "quiet": 0.0056,
+   "recent": 0.0,
+   "long": 0.0,
    "stillNext": null,
    "newVersion": null,
-   "baseline": 4
+   "baseline": 2,
+   "grade": "both"
   },
   "most": {
    "date": "2026-10-25",
    "time": 1792953342000,
-   "stood": 0.0104,
-   "quiet": 0.0056
+   "stood": 0.0052,
+   "recent": 0.0052,
+   "long": 0.0104
   }
  },
  {
@@ -95,16 +98,19 @@
    "date": "2026-10-09",
    "firstPassAfter": "2026-10-14",
    "stood": 0.0,
-   "quiet": 0.0046,
+   "recent": 0.0,
+   "long": 0.0,
    "stillNext": null,
    "newVersion": null,
-   "baseline": 3
+   "baseline": 2,
+   "grade": "both"
   },
   "most": {
    "date": "2026-10-14",
    "time": 1792021516000,
    "stood": 0.0,
-   "quiet": 0.0046
+   "recent": 0.0,
+   "long": 0.0
   }
  },
  {
@@ -195,16 +201,19 @@
    "date": "2026-10-08",
    "firstPassAfter": "2026-10-09",
    "stood": 0.0,
-   "quiet": 0.0029,
+   "recent": 0.0087,
+   "long": 0.0,
    "stillNext": null,
    "newVersion": null,
-   "baseline": 3
+   "baseline": 2,
+   "grade": "both"
   },
   "most": {
    "date": "2026-11-02",
    "time": 1793655032000,
    "stood": 0.0191,
-   "quiet": 0.0029
+   "recent": 0.151,
+   "long": 0.0191
   }
  },
  {
@@ -217,16 +226,19 @@
    "date": "2026-10-10",
    "firstPassAfter": "2026-10-14",
    "stood": 0.0,
-   "quiet": 0.0052,
+   "recent": 0.0,
+   "long": 0.0,
    "stillNext": null,
    "newVersion": null,
-   "baseline": 4
+   "baseline": 2,
+   "grade": "both"
   },
   "most": {
    "date": "2026-10-02",
    "time": 1790976065000,
    "stood": 0.0,
-   "quiet": 0.0064
+   "recent": 0.0122,
+   "long": 0.0
   }
  },
  {
@@ -239,16 +251,19 @@
    "date": "2026-10-09",
    "firstPassAfter": "2026-10-12",
    "stood": 0.0,
-   "quiet": 0.0035,
+   "recent": 0.0017,
+   "long": 0.0,
    "stillNext": null,
    "newVersion": null,
-   "baseline": 4
+   "baseline": 2,
+   "grade": "both"
   },
   "most": {
    "date": "2026-09-30",
    "time": 1790766260000,
    "stood": 0.0,
-   "quiet": 0.0041
+   "recent": 0.0,
+   "long": 0.0
   }
  },
  {
@@ -261,16 +276,19 @@
    "date": "2026-10-11",
    "firstPassAfter": "2026-10-12",
    "stood": 0.0,
-   "quiet": 0.0017,
+   "recent": 0.0122,
+   "long": 0.0,
    "stillNext": null,
    "newVersion": null,
-   "baseline": 3
+   "baseline": 2,
+   "grade": "both"
   },
   "most": {
    "date": "2026-10-12",
    "time": 1791832772000,
    "stood": 0.0,
-   "quiet": 0.0017
+   "recent": 0.0122,
+   "long": 0.0
   }
  },
  {
@@ -283,19 +301,22 @@
    "date": "2026-10-12",
    "firstPassAfter": "2026-10-21",
    "stood": 0.0,
-   "quiet": 0.0048,
+   "recent": 0.0,
+   "long": 0.0,
    "stillNext": null,
    "newVersion": {
     "from": "P05023",
     "to": "P05036"
    },
-   "baseline": 4
+   "baseline": 2,
+   "grade": "both"
   },
   "most": {
    "date": "2026-10-09",
    "time": 1791590015000,
    "stood": 0.0,
-   "quiet": 0.0046
+   "recent": 0.0295,
+   "long": 0.0
   }
  },
  {
@@ -307,20 +328,23 @@
    "time": 1792108800000.0,
    "date": "2026-10-16",
    "firstPassAfter": "2026-10-23",
-   "stood": 0.1466,
-   "quiet": 0.0052,
-   "stillNext": 0.143,
+   "stood": 0.1326,
+   "recent": 0.1588,
+   "long": 0.1466,
+   "stillNext": 0.0,
    "newVersion": {
     "from": "P05023",
     "to": "P05036"
    },
-   "baseline": 3
+   "baseline": 2,
+   "grade": "both"
   },
   "most": {
    "date": "2026-10-23",
    "time": 1792745900000,
-   "stood": 0.1466,
-   "quiet": 0.0052
+   "stood": 0.1326,
+   "recent": 0.1588,
+   "long": 0.1466
   }
  },
  {
@@ -414,19 +438,22 @@
    "date": "2026-10-25",
    "firstPassAfter": "2026-10-25",
    "stood": 0.0,
-   "quiet": 0.0098,
+   "recent": 0.0,
+   "long": 0.0,
    "stillNext": null,
    "newVersion": {
     "from": "P05023",
     "to": "P05036"
    },
-   "baseline": 3
+   "baseline": 2,
+   "grade": "both"
   },
   "most": {
    "date": "2026-10-25",
    "time": 1792953342000,
    "stood": 0.0,
-   "quiet": 0.0098
+   "recent": 0.0,
+   "long": 0.0
   }
  },
  {
@@ -439,16 +466,19 @@
    "date": "2026-10-29",
    "firstPassAfter": "2026-11-06",
    "stood": 0.1615,
-   "quiet": 0.0039,
+   "recent": 0.2743,
+   "long": 0.1615,
    "stillNext": null,
    "newVersion": null,
-   "baseline": 4
+   "baseline": 2,
+   "grade": "both"
   },
   "most": {
    "date": "2026-11-06",
    "time": 1793990142000,
    "stood": 0.1615,
-   "quiet": 0.0039
+   "recent": 0.2743,
+   "long": 0.1615
   }
  },
  {
