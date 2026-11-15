@@ -383,7 +383,10 @@ export class TileGlobe {
     }
     for (const layer of layers) {
       if (!layer.sparse) continue;
-      if (layer.sheet) this.sheetOf(layer, null);
+      // A layer that only shows close in (`minLevel`) does not need its
+      // world picture for the opening view: it is fetched behind
+      // everything else, to be there when the reader zooms in.
+      if (layer.sheet) this.sheetOf(layer, null).lazy = !!layer.minLevel;
       else this.image(layer, 0, 0, 0, null);
     }
     this.warmAt = 0;
@@ -676,6 +679,9 @@ export class TileGlobe {
   // (see `paint` for why the days of a stack are drawn in two rounds).
   drawLayer(target, tile, layer, alpha, only) {
     const { z, x, y } = tile;
+    // A layer may only show from a certain level on: further out, a
+    // ready-made picture of the same data (the mosaic) takes its place.
+    if (layer.minLevel && z < layer.minLevel) return false;
     const sheet = layer.sparse && layer.sheet ? this.sheetOf(layer, tile) : null;
     const world = sheet?.state === 'ready' ? sheet : null;
     // From far away the world picture is the layer: nothing else is fetched.
@@ -700,6 +706,10 @@ export class TileGlobe {
     // tile is on its way, the tiles one level finer stand in if they are
     // here (after zooming out they are).
     if (exact.state !== 'ready' && only !== 'sharp' && this.drawFiner(target, tile, layer, top, alpha)) return true;
+    // A layer with the mosaic under it has a better stand-in there than
+    // its own coarser tiles or its world picture: nothing more is drawn
+    // until its real tile is here.
+    if (layer.backed && exact.state !== 'ready') return false;
     for (let level = top; level >= lowest; level--) {
       const shift = z - level;
       const entry = level === top ? exact : this.images.get(this.key(layer, level, x >> shift, y >> shift));
@@ -834,7 +844,8 @@ export class TileGlobe {
       const up = Math.max(0, z - SHEET_REACH);
       for (const layer of this.layers) {
         if (layer.base) this.drawLayer(ctx, tile, layer, 1);
-        else if (layer.sparse && layer.sheet && !layer.side && layer.mask == null) {
+        else if (layer.has) this.drawLayer(ctx, tile, layer, layer.alpha ?? 1);
+        else if (layer.sparse && layer.sheet && !layer.side && layer.mask == null && !layer.minLevel) {
           const sheet = this.images.get(layer.sheet);
           if (sheet?.state === 'ready' && this.sheetHolds(sheet, z - up, x >> up, y >> up)) this.drawSheet(ctx, tile, sheet, layer.alpha ?? 1);
         }
@@ -1285,6 +1296,13 @@ export class TileGlobe {
       entry.lastUsed = this.frame;
       return entry;
     }
+    // A layer that comes with a list of its tiles is never asked for one
+    // it does not have.
+    if (layer.has && !layer.has(z, x, y)) {
+      const none = { key, state: 'empty', img: null, waiting: new Set(), lastUsed: this.frame };
+      this.images.set(key, none);
+      return none;
+    }
     if (layer.sparse) {
       const empty = () => {
         const none = { key, state: 'empty', img: null, waiting: new Set(), lastUsed: this.frame, sparse: true };
@@ -1354,6 +1372,7 @@ export class TileGlobe {
       // whole, the days under it are never needed.
       return (entry.first ? 0 : 3) + near + (entry.age || 0) * 0.004;
     }
+    if (entry.lazy) return 9;
     if (entry.pinned || entry.probe) return 0.5;
     // Where the camera is flying to comes before overlays still on screen
     // (it is about to leave them); what a slowly turning globe will reach
@@ -1493,7 +1512,7 @@ export class TileGlobe {
     this.warmAt = this.frame + 20;
     let asked = 0;
     for (const layer of this.layers) {
-      const sheet = layer.sparse && layer.sheet ? this.images.get(layer.sheet) : null;
+      const sheet = layer.sparse && layer.sheet && !layer.minLevel ? this.images.get(layer.sheet) : null;
       if (sheet?.state !== 'ready') continue;
       for (let k = sheet.warmed || 0; k < 64; k++) {
         sheet.warmed = k + 1;
@@ -1807,6 +1826,7 @@ export class TileGlobe {
             if (layer.mask != null || layer.keep) continue;
             // From this far the world picture is the layer: no tile is drawn.
             if (layer.sparse && layer.sheet && level <= SHEET_LEVEL + 1) continue;
+            if (layer.minLevel && level < layer.minLevel) continue;
             const top = Math.min(layer.sparse && level > 2 && level < COARSER_BELOW ? level - 1 : level, layer.maxLevel);
             const entry = this.image(layer, top, x >> (level - top), y >> (level - top), null);
             if (entry.state === 'queued' || entry.state === 'idle') {
@@ -1954,7 +1974,7 @@ export class TileGlobe {
 
 // A short fingerprint of some bytes (FNV-1a), to tell whether a picture
 // fetched again is the one fetched before.
-function fingerprint(buffer) {
+export function fingerprint(buffer) {
   const bytes = new Uint8Array(buffer);
   let h = 0x811c9dc5;
   for (let i = 0; i < bytes.length; i++) h = Math.imul(h ^ bytes[i], 0x01000193);

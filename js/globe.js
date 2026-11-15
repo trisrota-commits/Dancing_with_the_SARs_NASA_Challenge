@@ -4,7 +4,7 @@
 // something changed.
 
 import * as THREE from '../vendor/three.module.min.js';
-import { CATEGORIES, BASEMAPS, OVERLAYS, NISAR_TILES, PALETTE } from './config.js';
+import { CATEGORIES, BASEMAPS, OVERLAYS, NISAR_TILES, NISAR_MOSAIC, PALETTE } from './config.js';
 import { pointInPolygon } from './incidents.js';
 import { RAD, EARTH_RADIUS_M, toVec, toLatLon, greatCircle, sunDirection, rgb } from './engine/geo.js';
 import { GlobeControls } from './engine/controls.js';
@@ -367,10 +367,17 @@ export class Globe {
     // so NISAR's strips would show on Sentinel-1's side of the divider too.)
     if (s.nisar && !s.bands) {
       const end = Date.parse(s.nisar.date);
+      // The whole planet with the ready-made mosaic: that one picture
+      // serves the far and the continent view, and the daily layers it
+      // was made from only come in close up, where they are sharper.
+      // Days after the mosaic's last are drawn at every distance, on top.
+      const mosaic = this.mosaicFor(s.nisar);
+      if (mosaic) layers.push({ url: NISAR_MOSAIC.url, maxLevel: mosaic.levels, has: mosaic.has });
       for (let i = s.nisar.days - 1; i >= 0; i--) {
         const date = iso(end - i * DAY);
+        const under = mosaic && date <= mosaic.settled ? { minLevel: mosaic.levels + 2, backed: true } : null;
         // Radar passes are thin strips on an empty globe: see `sparse` in the tile engine.
-        if (date >= NISAR_TILES.firstDate) layers.push({ url: NISAR_TILES.url.replace('{date}', date), sheet: NISAR_TILES.sheet.replace('{date}', date), map: NISAR_TILES.map.replace('{date}', date), colour: true, stack: 'nisar', age: i, maxLevel: NISAR_TILES.maxLevel, sparse: true });
+        if (date >= NISAR_TILES.firstDate) layers.push({ url: NISAR_TILES.url.replace('{date}', date), sheet: NISAR_TILES.sheet.replace('{date}', date), map: NISAR_TILES.map.replace('{date}', date), colour: true, stack: 'nisar', age: i, maxLevel: NISAR_TILES.maxLevel, sparse: true, ...under });
       }
     }
     // An event's own filled layer (flood water) steps aside while a change
@@ -390,6 +397,29 @@ export class Globe {
     this.nightOn = on;
     this.tiles.uniforms.uSun.value.copy(sunDirection());
     this.dirty = true;
+  }
+
+  // The ready-made whole-planet picture, from its `about.json`:
+  // { from, to, levels, tiles: { level: ['x/y', …] } }, or null for none.
+  // `settled` is the last day it can still stand for: NASA goes on adding
+  // passes to a day for up to two weeks, and from the first day that has
+  // changed since the mosaic was built, every day is drawn live again, on
+  // top of it. (Every day from there on, not only the changed ones: the
+  // newest pass has to end on top.)
+  setMosaic(about, settled = about?.to) {
+    this.mosaic = null;
+    if (about?.tiles && about.to && Number.isInteger(about.levels)) {
+      const held = Object.fromEntries(Object.entries(about.tiles).map(([z, list]) => [z, new Set(list)]));
+      this.mosaic = { from: about.from, to: about.to, settled, levels: about.levels, has: (z, x, y) => !!held[z]?.has(`${x}/${y}`) };
+    }
+    this.applyLayers();
+  }
+
+  // The mosaic, if it serves what is asked for: the whole planet, up to a
+  // day the mosaic reaches. (For an earlier day it would show passes that
+  // had not been flown yet.)
+  mosaicFor(nisar) {
+    return this.mosaic && nisar.days > 12 && nisar.date >= this.mosaic.to ? this.mosaic : null;
   }
 
   setOverlay(key, on, date) {
