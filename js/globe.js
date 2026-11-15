@@ -13,8 +13,12 @@ import { Dots, Lines, SelectionRing, RING_SECONDS, PING_EVERY, PING_LASTS, PING_
 import { Fire } from './engine/fire.js';
 import { Labels } from './engine/labels.js';
 import { Sky } from './sky.js';
+import { Figurines } from './engine/figurines.js';
+import { SPECIES } from './wildlife.js';
 
 const DAY = 86400_000;
+// How tall an animal figurine stands, in CSS pixels at medium zoom.
+const FIGURE = 40;
 const iso = (ms) => new Date(ms).toISOString().slice(0, 10);
 // A small number from a text, the same every time.
 const hash = (text) => {
@@ -84,8 +88,11 @@ export class Globe {
     this.placeDots = new Dots(this.scene, this.shared, { halo: true });
     this.placeDots.points.renderOrder = 29;
     // Wildlife sightings and points of interest.
+    // Sightings are drawn as small animal figurines; the dots stay, hidden,
+    // only to find what a click landed on.
     this.animalDots = new Dots(this.scene, this.shared);
-    this.animalDots.points.renderOrder = 28;
+    this.animalDots.points.visible = false;
+    this.animalFigures = new Figurines(this.scene, this.shared, SPECIES);
     this.animalPulseUntil = 0;
     this.poiDots = new Dots(this.scene, this.shared);
     this.poiDots.points.renderOrder = 28;
@@ -205,6 +212,7 @@ export class Globe {
       this.dots.relift();
       this.placeDots.relift();
       this.animalDots.relift();
+      this.animalFigures.relift();
       this.poiDots.relift();
       this.fxDots.relift();
       this.beams.set(this.beamItems, this.lift);
@@ -290,7 +298,7 @@ export class Globe {
     for (const item of dots.items) {
       const p = this.project(item.vec);
       if (!p) continue;
-      const d = Math.hypot(p.x - x, p.y - y);
+      const d = Math.hypot(p.x - x, p.y - (item.up || 0) * scale - y);
       if (d <= (item.size * scale) / 2 + slack) hits.push({ d, item });
     }
     return hits.sort((a, b) => a.d - b.d);
@@ -776,14 +784,20 @@ export class Globe {
   setAnimals(list) {
     const seconds = (performance.now() - this.started) / 1000;
     let splash = false;
+    // A figure's picture stands above its spot: up is how far its middle
+    // is above the foot, so a click on the figure finds it.
     this.animalDots.set(
       list.map((a) => {
         if (a.splash) splash = true;
-        return { animal: a.animal, lat: a.lat, lon: a.lon, color: rgb(a.color), size: a.size || 6, born: a.splash ? seconds : undefined };
+        return { animal: a.animal, lat: a.lat, lon: a.lon, color: rgb(a.color), size: (a.size || FIGURE) * 0.7, up: (a.size || FIGURE) * 0.42, born: a.splash ? seconds : undefined };
       }),
       this.lift,
     );
-    if (splash) this.animalPulseUntil = seconds + 1.8;
+    this.animalFigures.set(
+      list.map((a) => ({ species: a.animal.species, lat: a.lat, lon: a.lon, size: a.size || FIGURE, born: a.drop ? seconds : undefined })),
+      this.lift,
+    );
+    if (splash || list.some((a) => a.drop)) this.animalPulseUntil = seconds + 1.8;
     this.dirty = true;
   }
 
