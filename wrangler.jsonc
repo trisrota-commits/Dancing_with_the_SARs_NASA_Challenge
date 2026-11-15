@@ -1,0 +1,13 @@
+// For hosting the site on Cloudflare as well (the team's own domain,
+// cloudpiercer.space). The site is plain files with no build step: this
+// only tells Cloudflare's "wrangler deploy" to serve the repository as it
+// is. "name" must stay the same as the application's name in the
+// Cloudflare dashboard, or its builds fail. GitHub Pages does not read
+// this file.
+{
+  "name": "dancing-with-the-sars-nasa-challenge",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "."
+  }
+}

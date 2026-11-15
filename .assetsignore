@@ -1,0 +1,9 @@
+# Not part of the site Cloudflare serves (same form as .gitignore).
+.git
+.github
+.claude
+.tour
+.change-cache
+node_modules
+wrangler.jsonc
+.assetsignore
