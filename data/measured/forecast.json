@@ -1,0 +1,188 @@
+[
+ {
+  "id": "aletsch",
+  "name": "Aletsch Glacier (Konkordiaplatz)",
+  "cells": 1021,
+  "passes": 11,
+  "best": "last",
+  "last": {
+   "rmse": 0.88,
+   "mae": 0.58,
+   "within90": 1.24,
+   "r2": 0.938,
+   "spearman": 0.967,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.52,
+   "mae": 0.96,
+   "within90": 2.06,
+   "r2": 0.816,
+   "spearman": 0.912,
+   "skill": -1.983
+  },
+  "learnt": {
+   "rmse": 0.89,
+   "mae": 0.65,
+   "within90": 1.38,
+   "r2": 0.937,
+   "spearman": 0.964,
+   "skill": -0.024
+  }
+ },
+ {
+  "id": "gerd",
+  "name": "Grand Ethiopian Renaissance Dam reservoir",
+  "cells": 3600,
+  "passes": 11,
+  "best": "last",
+  "last": {
+   "rmse": 0.8,
+   "mae": 0.57,
+   "within90": 1.31,
+   "r2": 0.983,
+   "spearman": 0.952,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.25,
+   "mae": 0.88,
+   "within90": 2.06,
+   "r2": 0.957,
+   "spearman": 0.927,
+   "skill": -1.472
+  },
+  "learnt": {
+   "rmse": 0.94,
+   "mae": 0.72,
+   "within90": 1.4,
+   "r2": 0.976,
+   "spearman": 0.931,
+   "skill": -0.382
+  }
+ },
+ {
+  "id": "jakobshavn",
+  "name": "Sermeq Kujalleq (Jakobshavn)",
+  "cells": 2304,
+  "passes": 11,
+  "best": "last",
+  "last": {
+   "rmse": 0.87,
+   "mae": 0.64,
+   "within90": 1.39,
+   "r2": 0.927,
+   "spearman": 0.958,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.23,
+   "mae": 0.89,
+   "within90": 1.9,
+   "r2": 0.853,
+   "spearman": 0.93,
+   "skill": -1.0
+  },
+  "learnt": {
+   "rmse": 0.93,
+   "mae": 0.72,
+   "within90": 1.46,
+   "r2": 0.915,
+   "spearman": 0.952,
+   "skill": -0.158
+  }
+ },
+ {
+  "id": "okavango",
+  "name": "Okavango Delta",
+  "cells": 3600,
+  "passes": 11,
+  "best": "last",
+  "last": {
+   "rmse": 0.57,
+   "mae": 0.41,
+   "within90": 0.94,
+   "r2": 0.921,
+   "spearman": 0.967,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 0.64,
+   "mae": 0.47,
+   "within90": 1.01,
+   "r2": 0.899,
+   "spearman": 0.952,
+   "skill": -0.269
+  },
+  "learnt": {
+   "rmse": 0.61,
+   "mae": 0.45,
+   "within90": 1.0,
+   "r2": 0.908,
+   "spearman": 0.961,
+   "skill": -0.153
+  }
+ },
+ {
+  "id": "rondonia",
+  "name": "Rond\u00f4nia",
+  "cells": 1361,
+  "passes": 9,
+  "best": "last",
+  "last": {
+   "rmse": 1.19,
+   "mae": 0.82,
+   "within90": 1.91,
+   "r2": 0.775,
+   "spearman": 0.896,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 2.22,
+   "mae": 1.54,
+   "within90": 3.59,
+   "r2": 0.231,
+   "spearman": 0.696,
+   "skill": -2.61
+  },
+  "learnt": {
+   "rmse": 1.27,
+   "mae": 0.93,
+   "within90": 1.97,
+   "r2": 0.749,
+   "spearman": 0.884,
+   "skill": -0.218
+  }
+ },
+ {
+  "id": "west-bengal",
+  "name": "Rice fields of Bardhaman",
+  "cells": 1024,
+  "passes": 12,
+  "best": "learnt",
+  "last": {
+   "rmse": 1.95,
+   "mae": 1.54,
+   "within90": 3.17,
+   "r2": 0.722,
+   "spearman": 0.879,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.79,
+   "mae": 1.32,
+   "within90": 2.87,
+   "r2": 0.764,
+   "spearman": 0.924,
+   "skill": 0.151
+  },
+  "learnt": {
+   "rmse": 1.62,
+   "mae": 1.19,
+   "within90": 2.61,
+   "r2": 0.808,
+   "spearman": 0.918,
+   "skill": 0.31
+  }
+ }
+]

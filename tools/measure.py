@@ -616,7 +616,7 @@ def write_index() -> None:
     entries = []
     for path in sorted(OUT_DIR.glob("*.json")):
         # (Only the sites themselves: not the list, the cells or the forecasts.)
-        if path.name in ("index.json", "refused.json") or path.stem.endswith(("_grid", "_forecast")):
+        if path.name in ("index.json", "refused.json", "forecast.json") or path.stem.endswith(("_grid", "_forecast")):
             continue
         d = json.loads(path.read_text())
         entries.append({"id": d["id"], "name": d["name"], "lat": d["lat"], "lon": d["lon"], "radiusKm": d["radiusKm"], "event": d.get("event"), "file": path.name})

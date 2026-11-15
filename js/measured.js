@@ -91,6 +91,70 @@ function load(entry) {
 
 export const changeImageUrl = (d) => DIR + d.change.image;
 
+// ---- how well the next pass can be predicted (tools/forecast.py) ----
+
+const forecasts = new Map();
+
+// The prediction check for a measured site, or null if none was made.
+export function forecastFor(d) {
+  if (!forecasts.has(d.id)) {
+    forecasts.set(
+      d.id,
+      fetch(`${DIR}${d.id}_forecast.json`)
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null),
+    );
+  }
+  return forecasts.get(d.id);
+}
+
+const num = (v, digits = 2) => (v == null ? '–' : Number(v).toFixed(digits));
+
+// The card for the prediction check: what was tried, how far off each way
+// was, and the yes/no question. Every number is computed by
+// tools/forecast.py from the calibrated cells; nothing is written by hand.
+export function forecastHtml(f) {
+  const row = (w) => {
+    const s = f.overall[w.key];
+    if (!s) return '';
+    return `<tr${w.key === f.best ? ' class="best"' : ''}><th scope="row" title="${esc(w.how)}">${esc(w.name)}</th><td>${num(s.mae)}</td><td>${num(s.rmse)}</td><td>±${num(s.within90)}</td><td>${num(s.r2)}</td><td>${num(s.spearman)}</td></tr>`;
+  };
+  const strong = (w) => {
+    const c = f.overall[w.key]?.strong;
+    if (!c) return '';
+    return `<tr${w.key === f.best ? ' class="best"' : ''}><th scope="row">${esc(w.name)}</th><td>${num(c.accuracy)}</td><td>${num(c.precision)}</td><td>${num(c.recall)}</td><td>${num(c.f1)}</td></tr>`;
+  };
+  const happened = f.overall.last?.strong?.happened;
+  const dates = f.byDate
+    .map((r) => {
+      const b = r[f.best] || {};
+      const out = b.outside == null ? '–' : `${(b.outside * 100).toFixed(0)} %`;
+      return `<tr${f.surprise?.time === r.time ? ' class="best"' : ''}><td>${esc(r.date)}</td><td>${num(r.seenMean, 1)}</td><td>${num(b.predMean, 1)}</td><td>${num(b.rmse)}</td><td>${out}</td></tr>`;
+    })
+    .join('');
+  return `<div class="card measured forecast">
+    <div class="src">Computed from the measurements · a test of predictability, not a forecast</div>
+    <p>${esc(f.summary)}</p>
+    <table class="forecast-table">
+      <caption>Predicting the next pass in ${f.cells.toLocaleString('en')} cells of ${f.cellM} m, in dB</caption>
+      <tr><th scope="col">Way of predicting</th><th scope="col" title="Mean absolute error">MAE</th><th scope="col" title="Root mean square error">RMSE</th><th scope="col" title="Nine cells in ten are within this">9 in 10</th><th scope="col" title="Share of the differences between cells that the prediction explains">R²</th><th scope="col" title="Rank agreement between prediction and measurement">Spearman</th></tr>
+      ${f.ways.map(row).join('')}
+    </table>
+    <table class="forecast-table">
+      <caption>“Will this cell change by ${f.strongDb} dB or more by the next pass?” It did in ${happened == null ? '–' : (happened * 100).toFixed(1)} % of readings</caption>
+      <tr><th scope="col">Way of predicting</th><th scope="col">Accuracy</th><th scope="col">Precision</th><th scope="col">Recall</th><th scope="col">F1</th></tr>
+      ${f.ways.map(strong).join('')}
+    </table>
+    <table class="forecast-table">
+      <caption>Pass by pass, with the best way: the mean over all cells, and how many cells fell outside the range nine in ten had kept to before (about 10 % is ordinary)</caption>
+      <tr><th scope="col">Pass</th><th scope="col">Measured</th><th scope="col">Predicted</th><th scope="col">RMSE</th><th scope="col">Outside</th></tr>
+      ${dates}
+    </table>
+    <p class="hint"><strong>Method.</strong> ${esc(f.method)}</p>
+    <p class="hint"><strong>Limits.</strong> ${esc(f.limits)} Made ${esc(f.generated.slice(0, 10))}.</p>
+  </div>`;
+}
+
 // The card's HTML. The chart is drawn into #measured-chart afterwards.
 export function measuredHtml(d, compare) {
   const c = d.change;

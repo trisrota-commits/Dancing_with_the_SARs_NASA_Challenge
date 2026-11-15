@@ -125,6 +125,14 @@ jobs:
             python tools/measure.py --budget 85 --grid 500 "${ids[@]}"
           fi
 
+      - name: Test how well the next pass could have been predicted
+        # From the cells just written: no login, a few seconds. Also when
+        # the measuring step was cut off.
+        if: always() && steps.login.outputs.ready == 'true'
+        run: |
+          python tests/test_forecast.py
+          python tools/forecast.py
+
       - name: Commit the results
         id: commit
         # Also when the measuring step failed or was cut off: every site

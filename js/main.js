@@ -3,7 +3,7 @@
 // Which version of the app this is. `tools/pack.sh` sets it; it shows at the
 // end of the credits line, so nobody has to wonder whether the browser is
 // still showing an older copy.
-const BUILD = '2026-11-15 12:41 UTC';
+const BUILD = '2026-11-15 14:20 UTC';
 
 import { CATEGORIES, FAMILIES, PALETTE, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START, RECENT_MS, OVERLAY_REACH_DAYS, NISAR_MOSAIC } from './config.js';
 import { fetchFeed, fetchArchive } from './feeds.js';
@@ -12,8 +12,7 @@ import { edgeMarginKm, latestScenes, scenesAt, passesAt, bestPair, comparisonSta
 import { STORIES } from './stories.js';
 import { PLACES, PLACE_KINDS, otherHemisphere } from './places.js';
 import { loadFrames, spread, view, history, describeSeries, rankByCoverage, sampleAt, channelView } from './timelapse.js';
-import { playPass } from './sound.js';
-import { measuredById, measuredNear, measuredHtml, measuredChart, measuredLine, changeImageUrl } from './measured.js';
+import { measuredById, measuredNear, measuredHtml, measuredChart, measuredLine, changeImageUrl, forecastFor, forecastHtml } from './measured.js';
 import { fetchElements, positionAt, groundTrack, swathEdges, elementsEpoch } from './orbit.js';
 import { SPECIES, MONTHS, POIS, loadSightings } from './wildlife.js';
 import { historyChart } from './chart.js';
@@ -1544,7 +1543,6 @@ async function startLapse(stackIndex = 0, all = false) {
     <p id="lapse-status" class="note" role="status"></p>
     ${stacks.length > 1 ? `<label class="row"><span>Track</span><select id="lapse-stack">${stacks.map((st, n) => `<option value="${n}" ${n === stackIndex ? 'selected' : ''}>${esc(st.direction)} ${esc(st.track)} (${st.scenes.length} passes)</option>`).join('')}</select></label>` : ''}
     ${passes.length > wanted || all ? `<label class="check"><input type="checkbox" id="lapse-all" ${all ? 'checked' : ''} /> Read all ${passes.length} passes for the chart (a few megabytes each)</label>` : ''}
-    <label class="check"><input type="checkbox" id="lapse-sound" /> ♪ Play it as sound: pitch follows the brightness at this point</label>
     <p class="note">${passes.length} passes on ${esc(stack.direction.toLowerCase())} track ${esc(stack.track)}, frame ${esc(stack.frame)}, ${day(first)} to ${day(passes[passes.length - 1].time)}.${stack.unplaced ? ` ${stack.unplaced} earlier passes are left out: their previews were published without public corner coordinates, so they cannot be placed on the map accurately.` : ''}${stack.otherModes ? ` ${stack.otherModes} passes recorded in a different polarisation mode are left out too, because their previews are not comparable with these.` : ''}</p>
     ${state.selected?.kind === 'incident' ? '' : nextPassHtml(stacks.flatMap((st) => st.scenes))}
     <p class="hint">Each pass is NASA's preview of a NISAR backscatter scene, recorded here in ${pol.cross ? `dual polarisation. ${esc(pol.co)} is the echo that comes back in the polarisation that was sent; ${esc(pol.cross)} is the part that came back twisted, which mostly happens inside vegetation` : `single polarisation (${esc(pol.co)}), so there is no cross-polarised channel`}. Values are the 0–255 preview brightness averaged over 5×5 pixels, not calibrated radar units.</p>`;
@@ -1575,7 +1573,6 @@ function showLapsePass(lapse, ms) {
     setLegend(null);
     return;
   }
-  if (moved && lapse.sound && replay.playing) playPass(lapse.series[i]);
   const pass = passes[i];
   const mode = lapse.mode;
   const token = stage.token;
@@ -1959,8 +1956,12 @@ async function showMeasured(stillHere, pending, findCompare) {
   const compare = findCompare ? await findCompare() : null;
   if (!stillHere() || !$('measured-slot')) return;
   state.selected.measured = d;
-  $('measured-slot').innerHTML = `<h4>Measured with NISAR</h4>${measuredHtml(d, compare)}`;
+  $('measured-slot').innerHTML = `<h4>Measured with NISAR</h4>${measuredHtml(d, compare)}<div id="forecast-slot"></div>`;
   measuredChart($('measured-chart'), d, compare);
+  // How well the next pass could have been predicted here, if that was tested.
+  forecastFor(d).then((f) => {
+    if (f && stillHere() && state.selected?.measured === d && $('forecast-slot')) $('forecast-slot').innerHTML = `<h4>Can the next pass be predicted?</h4>${forecastHtml(f)}`;
+  });
   // An event's card and text lead with the calibrated value once it is here.
   renderCard();
   renderNarrative();
@@ -2633,7 +2634,6 @@ async function start() {
   };
 
   $('detail').onchange = (e) => {
-    if (e.target.id === 'lapse-sound' && state.lapse) state.lapse.sound = e.target.checked;
     if (e.target.id === 'lapse-stack') startLapse(+e.target.value, false);
     if (e.target.id === 'lapse-all') startLapse(state.lapse?.stackIndex || 0, e.target.checked);
   };

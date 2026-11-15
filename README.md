@@ -128,8 +128,6 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
   lights). The six that cover the whole map show one at a time; the others
   lie on top and can be combined. A daily layer NASA has not published yet
   for the chosen day is shown for its newest day, and the menu says which.
-- A time-lapse can be **played as sound**: pitch follows the brightness at
-  the chosen point.
 
 ## The engine
 
@@ -260,7 +258,6 @@ app in headless Chromium against the live services.
 - `js/search.js` – fuzzy event search and place lookup
 - `js/narrative.js` – the plain-text account of an event with its source
   links, the one-line NISAR summary and the event timeline
-- `js/sound.js` – plays a time-lapse as notes
 - `tools/mosaic.py` – assembles the whole-planet mosaic in `data/mosaic/`
 - `tools/census.py` – checks on a sample of the whole planet which of
   NASA's NISAR tiles are sound (run by hand; half an hour)
@@ -306,14 +303,19 @@ requests and issues.
   before-and-after comparison is possible for an event, the radar history
   that loads when an event is selected, and the explanations of radar
   change by kind of event. Proposed the countdown to NISAR's next pass and
-  the live reports bar.
+  the live reports bar. The data analysis behind the prediction check is
+  this member's idea and input: to predict NISAR's next pass from the passes
+  before it, and to judge that prediction by its measured error (RMSE,
+  MAE, R², Spearman, and accuracy, precision, recall and F1 for rare
+  events) before relying on it.
 - **[MadhuraSaha02](https://github.com/MadhuraSaha02)**. Wrote up which
   data the challenge allows besides NISAR and the plan for the remaining
   gaps (pull request 6). Contributed the changing places: glaciers
   worldwide and other slow changes (12), the calibrated measuring tool and
   its display, more kinds of events and more places (20), and the live
   NISAR satellite with its orbit, the real star sky and the wildlife
-  sightings (24).
+  sightings (24). Supervised that NISAR's data is used properly
+  throughout the project.
 
 Much of the code was written with an AI assistant under the team's
 direction; `docs/SUBMISSION.md` says how.
