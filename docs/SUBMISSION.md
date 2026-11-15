@@ -117,7 +117,7 @@ https://trisrota-commits.github.io/Dancing_with_the_SARs_NASA_Challenge/demo/dan
   brightness of NASA's picture, not a calibrated measurement, and the
   app says so; checked against our calibrated measurements at six
   places, the direction agrees at five.
-- **What stood out, measured.** For 26 places and reported events the
+- **What stood out, measured.** For 28 places and reported events the
   app has NISAR's calibrated backscatter in decibels, read by our own
   tool from the full data files, in cells of 500 m. A detector
   (`tools/detect.py`) says for every pass which cells stood out. What
@@ -161,13 +161,13 @@ https://trisrota-commits.github.io/Dancing_with_the_SARs_NASA_Challenge/demo/dan
   changing from pass to pass (rice growing, a reservoir filling, a
   glacier moving), the same test finds a drop of 3 dB only 33 times in
   100, and 27 in 100 flagged cells are right: with one season of data
-  the detector cannot tell a crop from a change. Of the 18 reported
-  events measured, four have their reported point in open water and are
+  the detector cannot tell a crop from a change. Of the 20 reported
+  events measured, five have their reported point in open water and are
   not judged; the flood in Italy stood out; around one earthquake in
   Kamchatka 16 % of the cells stood out for one pass, which we cannot
   put down to the quake (it is also the first pass of a new version of
   NASA's processing, and late October there brings snow); the other
-  twelve show under 1 %, and we cannot say whether nothing changed
+  thirteen show under 1 %, and we cannot say whether nothing changed
   there or the reported point lies off the affected ground. An event
   with fewer than three passes before it is judged more roughly, and
   the app says how roughly. It says that something changed and where,
@@ -272,7 +272,7 @@ journalist can open it alone and understand it.
   backscatter in dB over time and between two passes. A scheduled job on
   GitHub runs it twice a day for the strongest recent events and a list
   of places. Its first run on real NISAR products, on 15 November 2026,
-  measured its first places and events; 26 are in the app now, from 2 to
+  measured its first places and events; 28 are in the app now, from 2 to
   28 passes each. The job picks the events itself, from the same feeds
   and archives the app shows. The clearest
   result is the rice fields of Bardhaman in West Bengal: over one crop
@@ -289,7 +289,7 @@ journalist can open it alone and understand it.
 - The detector and the prediction check (`tools/detect.py`,
   `tools/forecast.py`) run in the same job after every measurement, on
   the cells just written, in a few seconds.
-- 38 unit tests for the app, 18 for the detector, further checks for
+- 49 unit tests for the app, 18 for the detector, further checks for
   the other tools, and a browser test against the live services guard
   the rules above.
 

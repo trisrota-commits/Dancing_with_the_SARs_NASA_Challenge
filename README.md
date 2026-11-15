@@ -63,7 +63,7 @@ pass over any spot, the real star sky and sunlight.
   <img src="demo/img/flood-passes.gif" alt="The app over Tuscany, pass by pass: the 500 m cells that stood out drawn on the satellite map; none before the flood, clusters three days after it, none three weeks later" width="100%">
 </p>
 
-For 26 places and reported events the app has NISAR's calibrated
+For 28 places and reported events the app has NISAR's calibrated
 backscatter, cut into cells of 500 m. A detector (`tools/detect.py`) says
 for every pass which cells stood out. What moved the whole area alike
 (rain, a season) is taken away, and then two checks must agree: the cell
@@ -83,10 +83,10 @@ into real passes, a drop of 3 dB over 2.5 km on quiet ground is found 79
 times in 100 and 96 in 100 flagged cells are right; with nothing put in,
 0.06 % of the cells are flagged. Where a place is itself changing (rice
 growing, a reservoir filling) it is far weaker (33 and 27 in 100): one
-season of data cannot tell a crop from a change. Of 18 reported events
-measured, four lie in open water and are not judged, the flood in Italy
+season of data cannot tell a crop from a change. Of 20 reported events
+measured, five lie in open water and are not judged, the flood in Italy
 stood out, one earthquake site shows 16 % for a cause we cannot name, and
-twelve show under 1 %. See "What it cannot claim" in `docs/SUBMISSION.md`.
+thirteen show under 1 %. See "What it cannot claim" in `docs/SUBMISSION.md`.
 
 ## Does it read real ground? A monsoon season, measured
 

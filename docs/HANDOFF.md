@@ -1222,7 +1222,9 @@ keys: small changes (1 to 2 dB) are found less often than by the long
 key alone.
 
 Events (18 measured; the job now also reads the agencies' archives, see
-`tools/pick_events.mjs`): four epicentres in open water are not judged;
+`tools/pick_events.mjs`; since the job's run of 15 November 2026, 20:31
+UTC, 20 are measured, five of them in open water, and 28 places and
+events in all): four epicentres in open water are not judged;
 the flood in Italy 3.5 % (0.0 % before, 2.8 % a pass later, 0.0 % after);
 M 6.9 near Ozernovskiy, Kamchatka, 16 % on 23 October, back to 5.6 % of
 those cells a pass later, cause unknown (first pass of the new
