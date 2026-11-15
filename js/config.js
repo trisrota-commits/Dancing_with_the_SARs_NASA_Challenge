@@ -105,6 +105,13 @@ export const FEEDS = {
 // previews in the archive date from about then. Reaching back this far
 // gives older events radar scenes on both sides.
 export const NISAR_START = Date.UTC(2026, 5, 17);
+
+// Why preview brightness cannot be compared between dates: NASA's QA
+// software (nisarqa) clips each browse image to its own 5th–95th
+// percentiles, converts to dB and rescales it to fill 1–255. Shown wherever
+// preview brightness is compared.
+export const PREVIEW_STRETCH =
+  "NASA stretches each preview's contrast separately (clipped to that picture's own 5th–95th percentiles, then spread over 1–255), so brightness compares patterns within one picture, not amounts between dates.";
 const since = new Date(NISAR_START).toISOString().slice(0, 10);
 
 // Larger events only, to keep five months of history readable on the globe.

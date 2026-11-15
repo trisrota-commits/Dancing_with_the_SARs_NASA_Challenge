@@ -5,7 +5,7 @@
 // still showing an older copy.
 const BUILD = '2026-11-15 14:20 UTC';
 
-import { CATEGORIES, FAMILIES, PALETTE, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START, RECENT_MS, OVERLAY_REACH_DAYS, NISAR_MOSAIC } from './config.js';
+import { CATEGORIES, FAMILIES, PALETTE, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START, RECENT_MS, OVERLAY_REACH_DAYS, NISAR_MOSAIC, PREVIEW_STRETCH } from './config.js';
 import { fetchFeed, fetchArchive } from './feeds.js';
 import { buildIncidents, tagNisarCoverage, pointInPolygon, distanceKm } from './incidents.js';
 import { edgeMarginKm, latestScenes, scenesAt, passesAt, bestPair, comparisonStatus, imageBounds, latestTileDate, likelyTileDate, historyAt, newestAt, nextPass, interferogramsAt, REPEAT_DAYS } from './nisar.js';
@@ -596,7 +596,7 @@ function incidentHtml(inc, radar) {
     <details class="fold" id="sec-nisar" open>
       <summary>NISAR radar at this place</summary>
       <div id="measured-slot"></div>
-      <h4>Radar brightness here, pass by pass</h4>
+      <h4>Preview brightness here, pass by pass (relative)</h4>
       <div id="incident-history" aria-live="polite"><p class="spinner">Searching NISAR repeat passes…</p></div>
       <h4>Passes, changes and ground movement</h4>
       <div id="radar">${radar}</div>
@@ -667,7 +667,7 @@ function radarHtml(inc, found) {
       <p>Two passes on the same track and frame: ${day(pair.before.time)} and ${day(pair.after.time)}, ${Math.round(pair.span / DAY)} days apart.</p>
       <details><summary>Why might this have changed?</summary>
         <p>${esc(explanation)}</p>
-        <p class="hint">Possible explanations, not a diagnosis. These comparisons use preview brightness, not calibrated radar measurements. Image scaling and alignment can also affect the apparent change. The event category selects this guidance; it is not a classification of the images or proof that the event caused a change.</p>
+        <p class="hint">Possible explanations, not a diagnosis. These comparisons use preview brightness, not calibrated radar measurements. ${esc(PREVIEW_STRETCH)} A change across the whole scene can vanish, and slight misalignment can add false change. The event category selects this guidance; it is not a classification of the images or proof that the event caused a change.</p>
       </details>
       <div class="actions">
         <button class="primary" id="changes">Show what changed</button>
@@ -942,7 +942,7 @@ function setLegend(kind, info = {}) {
     html = `<b>What changed · ${day(info.from)} to ${day(info.to)}</b>
       <p>Where the radar echo differs between two NISAR passes.</p>
       <ul>${row(PALETTE.weaker, `Blue: the echo got weaker, ${km(info.result.weakerKm2)} km²`) + row(PALETTE.stronger, `Orange: the echo got stronger, ${km(info.result.strongerKm2)} km²`)}</ul>
-      <small>Worked out from preview pictures: a guide to where to look, not a measurement, and not a statement of cause.</small>`;
+      <small>Worked out from preview pictures, each contrast-stretched on its own: a guide to where to look, not a measurement, and not a statement of cause.</small>`;
   }
   legend.picture = html;
   drawLegend();
@@ -1067,7 +1067,7 @@ async function showChanges(button) {
       </ul>
       <label class="check"><input type="checkbox" id="under" checked /> Show the radar image underneath</label>
       <details class="fold inner"><summary>How this is worked out</summary>
-      <p class="hint">Computed in your browser from NASA's preview images of both passes over ${km(result.comparedKm2)} km². A pixel is coloured where the ${esc(channels)} brightness moved by more than ${Math.round((CHANGE_THRESHOLD / 255) * 100)}% of full scale. Differences that a shift of up to two pixels between the images would explain are ignored. Previews are 8-bit and reduced in resolution, so treat this as where to look, not a measurement. Open sea changes with the wind between passes. The causes listed are the usual ones, not a diagnosis.</p></details>`;
+      <p class="hint">Computed in your browser from NASA's preview images of both passes over ${km(result.comparedKm2)} km². A pixel is coloured where the ${esc(channels)} brightness moved by more than ${Math.round((CHANGE_THRESHOLD / 255) * 100)}% of each preview's own scale. ${esc(PREVIEW_STRETCH)} So the colours show where change stands out within the scene, not how much the radar echo changed, and a change across the whole scene may not show at all. Differences that a shift of up to two pixels between the images would explain are ignored. Previews are 8-bit and reduced in resolution, so treat this as where to look, not a measurement. Open sea changes with the wind between passes. The causes listed are the usual ones, not a diagnosis.</p></details>`;
     }
     if ($('changes')) $('changes').textContent = 'Back to the radar picture';
     renderCard();
@@ -1401,7 +1401,7 @@ async function startIncidentHistory(inc, selection) {
       <p class="note">${usable} usable samples from ${wanted.length} requested previews of ${stack.scenes.length} available passes. Same ${esc(stack.direction)} track ${esc(stack.track)}, frame ${esc(stack.frame)}; ${day(wanted[0].time)} to ${day(wanted[wanted.length - 1].time)}.${stack.unplaced ? ` ${stack.unplaced} other passes lack placeable previews and are omitted.` : ''}</p>
       <div id="incident-history-chart"></div>
       <p id="incident-history-status" class="note" role="status">${usable < 2 ? 'Insufficient data for a trend: fewer than two previews have samples at this pin. ' : ''}${wanted.length - usable} requested passes have no sample (failed image or no coverage); these are gaps, not zero brightness.</p>
-      <p class="hint">${esc(channels)} ${pol.cross ? 'are' : 'is'} NASA preview brightness (0–255), not calibrated backscatter or a measurement of forest loss, area lost or ice melt. Samples average up to 5×5 preview pixels; the ground footprint varies with image resolution and coverage, not a fixed area. Click a chart date to show that pass on the globe.</p>`;
+      <p class="hint">${esc(channels)} ${pol.cross ? 'are' : 'is'} NASA preview brightness (0–255), not calibrated backscatter or a measurement of forest loss, area lost or ice melt. ${esc(PREVIEW_STRETCH)} Rises and falls in this line can come from the stretch rather than the ground; where a “Measured with NISAR” card appears above, use its dB values for amounts. Samples average up to 5×5 preview pixels; the ground footprint varies with image resolution and coverage, not a fixed area. Click a chart date to show that pass on the globe.</p>`;
     if (!usable) {
       $('incident-history-chart').innerHTML = '<p class="note">No brightness history could be sampled from these previews.</p>';
       return;
@@ -1545,7 +1545,7 @@ async function startLapse(stackIndex = 0, all = false) {
     ${passes.length > wanted || all ? `<label class="check"><input type="checkbox" id="lapse-all" ${all ? 'checked' : ''} /> Read all ${passes.length} passes for the chart (a few megabytes each)</label>` : ''}
     <p class="note">${passes.length} passes on ${esc(stack.direction.toLowerCase())} track ${esc(stack.track)}, frame ${esc(stack.frame)}, ${day(first)} to ${day(passes[passes.length - 1].time)}.${stack.unplaced ? ` ${stack.unplaced} earlier passes are left out: their previews were published without public corner coordinates, so they cannot be placed on the map accurately.` : ''}${stack.otherModes ? ` ${stack.otherModes} passes recorded in a different polarisation mode are left out too, because their previews are not comparable with these.` : ''}</p>
     ${state.selected?.kind === 'incident' ? '' : nextPassHtml(stacks.flatMap((st) => st.scenes))}
-    <p class="hint">Each pass is NASA's preview of a NISAR backscatter scene, recorded here in ${pol.cross ? `dual polarisation. ${esc(pol.co)} is the echo that comes back in the polarisation that was sent; ${esc(pol.cross)} is the part that came back twisted, which mostly happens inside vegetation` : `single polarisation (${esc(pol.co)}), so there is no cross-polarised channel`}. Values are the 0–255 preview brightness averaged over 5×5 pixels, not calibrated radar units.</p>`;
+    <p class="hint">Each pass is NASA's preview of a NISAR backscatter scene, recorded here in ${pol.cross ? `dual polarisation. ${esc(pol.co)} is the echo that comes back in the polarisation that was sent; ${esc(pol.cross)} is the part that came back twisted, which mostly happens inside vegetation` : `single polarisation (${esc(pol.co)}), so there is no cross-polarised channel`}. Values are the 0–255 preview brightness averaged over 5×5 pixels, not calibrated radar units. ${esc(PREVIEW_STRETCH)} Use this to see when something changed, not by how much; where a “Measured with NISAR” card appears, its dB values are the measurement.</p>`;
   drawLapseChart(lapse);
   setLegend('radar', { pol });
   const newest = passes[passes.length - 1];
@@ -1956,7 +1956,8 @@ async function showMeasured(stillHere, pending, findCompare) {
   const compare = findCompare ? await findCompare() : null;
   if (!stillHere() || !$('measured-slot')) return;
   state.selected.measured = d;
-  $('measured-slot').innerHTML = `<h4>Measured with NISAR</h4>${measuredHtml(d, compare)}<div id="forecast-slot"></div>`;
+  $('measured-slot').innerHTML = `<h4>Measured with NISAR</h4>${measuredHtml(d, compare)}<div id="forecast-slot"></div>
+    <p class="note">These are calibrated values from the full NISAR data, comparable between dates. Any preview charts below are relative: each preview is contrast-stretched on its own, so use them for <em>where</em> and <em>when</em>, and these dB values for <em>how much</em>.</p>`;
   measuredChart($('measured-chart'), d, compare);
   // How well the next pass could have been predicted here, if that was tested.
   forecastFor(d).then((f) => {

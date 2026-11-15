@@ -412,6 +412,17 @@ that way.
   passes loaded at that moment, by fixed rules: highest, lowest and latest
   value of each channel with dates, and where the channels sit furthest apart.
 - Explanations of cause are marked as hypotheses.
+- **Preview brightness is relative, and the app says so wherever it is
+  compared.** NASA's QA software (nisarqa) makes each browse image on its
+  own: it clips the backscatter to that image's 5th–95th percentiles,
+  converts to dB and rescales the result to fill 1–255. The stretch limits
+  are not published with the image, so it cannot be undone. A brightness of
+  150 in July and 150 in August need not mean the same radar echo, and a
+  change across a whole scene, such as a glacier frame turning wet, can
+  vanish. The previews are therefore used to find *where* and *when*
+  something changed within a scene. *How much* comes only from the
+  calibrated GCOV values in "Measured with NISAR", which NASA calibrates to
+  about 1 dB.
 
 - An event's timeline never draws anything between data points without
   saying so; the

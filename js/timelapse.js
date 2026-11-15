@@ -177,7 +177,7 @@ export function describeSeries(series, pol) {
   const cross = pol.cross ? stats('cross', pol.cross) : null;
   if (co) {
     const swing = Math.round(co.high.co - co.low.co);
-    lines.push(`${pol.co} swings by ${swing} of the 255-step preview scale across ${co.seen.length} passes that cover this point.`);
+    lines.push(`${pol.co} swings by ${swing} of the 255-step preview scale across ${co.seen.length} passes that cover this point. Each preview is contrast-stretched on its own, so this is a relative swing, not a measured change.`);
   }
   if (co && cross) {
     const both = series.filter((p) => p.co != null && p.cross != null);
