@@ -94,12 +94,80 @@ def test_an_event_keeps_its_baseline_before_the_event():
     event = g["times"][4] - 3 * DAY
     d = D.detect(g, event)
     after = [r for r in d["byDate"] if r["afterEvent"]]
-    assert len(after) == 3 and all(r["baseline"] == 4 for r in after)
+    assert len(after) == 3 and all(r["baseline"] == 2 and r["history"] == 4 and r["grade"] == "both" for r in after)
     # Were the changed passes taken into the baseline, the later ones would fade.
     assert all(r["stood"] > 0.8 * m.mean() for r in after), [r["stood"] for r in after]
     assert d["event"]["firstPassAfter"] == after[0]["date"] and d["event"]["stood"] == after[0]["stood"]
     assert after[0]["stillNext"] > 0.9
     assert d["picture"]["date"] == after[0]["date"]
+
+
+def test_an_event_with_few_passes_before_it_is_still_judged():
+    m = patch()
+    for before, grade in ((2, "two"), (1, "pair")):
+        g = put(grid(passes=before + 2, seed=5), m, -4.0, before)
+        d = D.detect(g, g["times"][before] - 3 * DAY)
+        after = [r for r in d["byDate"] if r["afterEvent"]]
+        assert len(after) == 2 and after[0]["grade"] == grade and after[0]["baseline"] == before, after
+        assert abs(after[0]["stood"] - m.mean()) < 0.03, (grade, after[0]["stood"], m.mean())
+        # Without the long key the result is the recent key's, and says why it is rougher.
+        assert after[0]["long"] is None and after[0]["stood"] == after[0]["recent"] and after[0]["history"] == 0
+        assert d["event"]["grade"] == grade and "Only" in d["summary"]
+    # With one pass before there is no past: the threshold is the one theory gives.
+    assert abs(after[0]["threshold"] - D.THEORY[2]) < 0.01
+    # A place without an event is not judged on so little.
+    assert D.detect(grid(passes=3)) is None
+
+
+def test_noise_is_not_flagged_in_the_rougher_grades():
+    hh, hv = D.read(grid(seed=7))
+    for base in ([5, 6], [6]):
+        r = D.judge(hh, hv, base, 7, N, need=1)
+        assert r["kept"].mean() < 0.02, (base, r["kept"].mean())
+
+
+def test_a_cell_stands_out_only_if_both_keys_turn():
+    m = patch()
+    hh, hv = D.read(put(grid(), m, -4.0, 7))
+    r = D.judge(hh, hv, list(range(7)), 7, N)
+    assert r["grade"] == "both" and r["baseline"] == 2 and r["history"] == 7
+    assert (r["kept"] == (r["recent"] & r["long"])).all()
+    assert r["recent"][m].mean() > 0.9 and r["long"][m].mean() > 0.9
+
+
+def test_a_change_over_much_of_the_window_does_not_hide_itself():
+    # A third of the window falls by 3 dB. Were the recent key's spread
+    # taken from the pass judged, the change would widen its own
+    # yardstick; the flood in Italy fell from 12 % to 0.2 % that way.
+    m = np.zeros((N, N), dtype=bool)
+    m[:8, :] = True
+    m = m.ravel()
+    hh, hv = D.read(put(grid(noise=0.3), m, -3.0, 7))
+    r = D.judge(hh, hv, list(range(7)), 7, N)
+    assert r["recent"][m].mean() > 0.7, r["recent"][m].mean()
+
+
+def test_the_kind_of_change_follows_the_two_channels():
+    m = patch()
+    fell = D.detect(put(grid(), m, -4.0, 7))["byDate"][-1]["kinds"]
+    assert fell["bothFell"] > 0.9, fell
+    g = grid()
+    a = np.array(g["hv"])
+    a[7:, m] -= 5.0  # the cross channel alone: leaves and branches gone
+    g["hv"] = a.tolist()
+    lost = D.detect(g)["byDate"][-1]["kinds"]
+    assert lost["hvFell"] > 0.9, lost
+    assert "kinds" not in D.detect(put(grid(hv=False), m, 4.0, 7))["byDate"][-1]
+    assert set(fell) == set(D.KINDS)
+
+
+def test_every_pass_with_flagged_cells_gets_a_picture():
+    m = patch()
+    d = D.detect(put(grid(), m, -4.0, 6))
+    # (Without an event the changed pass joins the baseline of the next
+    # one, and widens those cells' usual spread: it is flagged once.)
+    assert [("image" in r) for r in d["byDate"]][:4] == [False, False, False, True]
+    assert d["byDate"][3]["image"] == f"test_stood_{d['byDate'][3]['date']}.png" and "_rgba" in d["byDate"][3]
 
 
 def test_a_new_processing_version_is_marked():
