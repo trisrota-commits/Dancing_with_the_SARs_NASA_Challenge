@@ -92,7 +92,13 @@ export function buildIncidents(events) {
   return incidents.sort((a, b) => b.endTime - a.endTime);
 }
 
+// The same longitude, written within half a turn of `ref`. A scene across
+// the date line has an outline that runs past 180° (178° to 181°, say), and
+// a point at 179.5°W is inside it as 180.5°.
+export const lonNear = (lon, ref) => lon + 360 * Math.round((ref - lon) / 360);
+
 export function pointInPolygon(lat, lon, ring) {
+  if (ring.length) lon = lonNear(lon, ring[0].lon);
   let inside = false;
   for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
     const a = ring[i];

@@ -495,8 +495,10 @@ windows, a long session, share links opened cold.
 - The search made when an event is pointed at never matched the one made
   on the click, because the end time was the current millisecond. Both
   now end on the hour (`searchUntil`), so the click finds the answer.
-- The archive window downloaded all of EONET since 2011 (23 MB); with an
-  end date it is 10 MB.
+- The archive window downloaded all of EONET (4,773 events back to 1980,
+  23 MB), because EONET ignores a start date given without an end date.
+  With both it is 355 events and 10 MB. Checked: the app keeps the same
+  111 events from either answer, so nothing is capped.
 - Nothing is fetched ahead of need for levels the world picture covers.
 
 **Layout**
@@ -505,19 +507,29 @@ windows, a long session, share links opened cold.
   reports bar.
 - With menu and details both open the timeline bar sits between them.
 
-**Found and left**
-- A NISAR scene that crosses the date line (Fiji, Chukotka, the Ross Sea)
-  is half-read: CMR gives two outlines and only the first is used, so a
-  point in the other half gets no brightness sample. No story or place
-  sits there.
-- 244 of 280 archive floods from EONET carry an outline and no point, and
-  are skipped (`js/feeds.js`).
-- A share link to an event that no longer exists opens nothing and says
-  nothing.
-- A world picture that fails to load is only asked for again when
-  something repaints.
+**Fixed a little later the same night, after the lead asked why they were left**
+- **Scenes across the date line.** 108 scenes around Fiji and Chukotka
+  come from the catalogue as two polygons cut along 180°, and only the
+  first was read: half the scene, no brightness sample in the other half,
+  and the picture cut off at the line. `sceneOutline` (`js/nisar.js`)
+  joins the two into one outline whose longitudes run past 180°, the way
+  the preview's corner file already counts them. `lonNear`
+  (`js/incidents.js`) brings a point into that count for the inside test,
+  the edge margin and the brightness sample, and the engine drapes a
+  picture one turn of the globe west or east as well (`placements` in
+  `js/engine/tiles.js`). Checked on both sides of the line near Fiji:
+  11 of 11 and 10 of 10 passes read, picture and frame whole.
+- **A share link to an event that is gone** now says so in a short notice
+  (`notice` in `js/main.js`).
 
-Tests: 29 unit tests (4 new, `tests/events.test.mjs`), smoke test, and
+**Found and left**
+- 244 of 280 archive floods from EONET carry an outline and no point, and
+  are skipped (`js/feeds.js`). Showing them needs a decision on where to
+  put the dot.
+- A world picture that fails to load is only asked for again when
+  something repaints. The layer still shows through its tiles meanwhile.
+
+Tests: 30 unit tests (5 new, four of them in `tests/events.test.mjs`), smoke test, and
 the zoom-and-drag over Colorado (111 damaged tiles, 111 replaced).
 
 ### Visual rules (lead, 14 Nov, night)

@@ -139,3 +139,23 @@ test("the radar layers name NASA's map service for a single tile and for the who
     assert.ok(!/\{bbox\}|\{px\}/.test(layer.sheet) && layer.sheet.includes('WIDTH=1024') && layer.sheet.includes('TIME={date}'));
   }
 });
+
+test('a scene across the date line is read whole, and a point on either side of the line is inside it', async () => {
+  const { pointInPolygon } = await import('../js/incidents.js');
+  // A real scene over Fiji: the catalogue gives it as two polygons cut along 180°.
+  const polygons = [['-18.04 -180 -17.94 -179.46 -15.85 -179.91 -15.87 -180 -18.04 -180'], ['-15.87 180 -16.29 177.8 -18.37 178.22 -18.04 180 -15.87 180']];
+  const ring = nisar.sceneOutline(polygons);
+  // Four corners (closed), none of them on the cut, in one run of longitudes.
+  assert.equal(ring.length, 5);
+  assert.ok(ring.every((p) => p.lon > 177 && p.lon < 181 && Math.abs(p.lon - 180) > 0.01));
+  for (const [lat, lon] of [[-17, 179], [-17, -179.7], [-17, 179.99]]) {
+    assert.ok(pointInPolygon(lat, lon, ring), `${lat}, ${lon} is inside`);
+    assert.ok(nisar.edgeMarginKm(ring, lat, lon) > 0);
+  }
+  for (const [lat, lon] of [[-17, -179.0], [-17, 177], [-14, 179.5]]) {
+    assert.ok(!pointInPolygon(lat, lon, ring), `${lat}, ${lon} is outside`);
+    assert.ok(nisar.edgeMarginKm(ring, lat, lon) < 0);
+  }
+  // Two polygons that are not a date-line cut: the first, as before.
+  assert.equal(nisar.sceneOutline([['1 2 3 4 5 6 1 2'], ['7 8 9 10 11 12 7 8']]).length, 4);
+});

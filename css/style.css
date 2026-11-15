@@ -1130,6 +1130,28 @@ button:disabled {
   }
 }
 
+/* A short message that goes away by itself (a link that leads nowhere). */
+#notice {
+  position: fixed;
+  left: 50%;
+  top: 110px;
+  transform: translateX(-50%);
+  z-index: 7;
+  max-width: min(520px, calc(100vw - 32px));
+  padding: 10px 14px;
+  background: var(--bg-solid, #0a101a);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  font-size: 13.5px;
+  line-height: 1.45;
+  cursor: pointer;
+}
+
+#notice[hidden] {
+  display: none;
+}
+
 /* ---------- time-lapse and its chart ---------- */
 
 #here {
