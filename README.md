@@ -282,6 +282,36 @@ app in headless Chromium against the live services.
 - `docs/DATA_RULES_AND_DEMO_PLAN.md` – which data the challenge allows besides
   NISAR, and how to solve the remaining gaps
 
+## Team
+
+Three people built this during the NASA Space Apps Challenge 2026, on 14
+and 15 November. What each brought in is taken from the repository's pull
+requests and issues.
+
+- **[LucidPaths](https://github.com/LucidPaths)**, project lead. Set the
+  direction and the rules the app follows, decided what was built and what
+  was cut, and tested every version by hand. Brought in the globe engine,
+  the live events and their merging, the event timeline and animations,
+  the NISAR time-lapse for any spot, the stories, the change view, the
+  whole-planet picture, the visual rules and the speed work, and
+  integrated the teammates' branches.
+- **[trisrota-commits](https://github.com/trisrota-commits)**, repository
+  owner. Opened the repository. Contributed the check of whether a
+  before-and-after comparison is possible for an event, the radar history
+  that loads when an event is selected, and the explanations of radar
+  change by kind of event. Proposed the countdown to NISAR's next pass and
+  the live reports bar.
+- **[MadhuraSaha02](https://github.com/MadhuraSaha02)**. Wrote up which
+  data the challenge allows besides NISAR and the plan for the remaining
+  gaps (pull request 6). Contributed the changing places: glaciers
+  worldwide and other slow changes (12), the calibrated measuring tool and
+  its display, more kinds of events and more places (20), and the live
+  NISAR satellite with its orbit, the real star sky and the wildlife
+  sightings (24).
+
+Much of the code was written with an AI assistant under the team's
+direction; `docs/SUBMISSION.md` says how.
+
 ## Data and credits
 
 NISAR data: NASA/ISRO, distributed by the Alaska Satellite Facility DAAC.
