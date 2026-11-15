@@ -3,7 +3,7 @@
 // Which version of the app this is. `tools/pack.sh` sets it; it shows at the
 // end of the credits line, so nobody has to wonder whether the browser is
 // still showing an older copy.
-const BUILD = '2026-11-15 16:50 UTC';
+const BUILD = '2026-11-15 17:34 UTC';
 
 import { CATEGORIES, FAMILIES, PALETTE, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START, RECENT_MS, OVERLAY_REACH_DAYS, NISAR_MOSAIC, NISAR_CHANGE, PREVIEW_STRETCH } from './config.js';
 import { fetchFeed, fetchArchive } from './feeds.js';
@@ -932,11 +932,12 @@ function setLegend(kind, info = {}) {
       <ul>${row('linear-gradient(90deg,#f33,#ff3,#3f3,#3ff,#33f,#f3f)', 'One run through the colours: about 12 cm')}</ul>
       <small>Tight bands around one place are ground movement. Broad bands are mostly the atmosphere. Speckle means the passes did not match, as over water.</small>`;
   } else if (kind === 'stood') {
-    const st = info.f.picture;
-    html = `<b>What stood out · ${esc(st.date)}</b>
-      <p>Cells of ${info.f.cellM} m that read differently on this NISAR pass from their own past, from NISAR's calibrated data.</p>
-      <ul>${row(PALETTE.stronger, "Orange: the echo rose against the cell's own past") + row(PALETTE.weaker, 'Blue: it fell')}</ul>
-      <small>The past is the passes from ${esc(st.baselineFrom)} to ${esc(st.baselineTo)}. What moved the whole area alike (rain, a season) is taken away first. ${share(st.stood)} of the cells are coloured; on those earlier passes the same rules flag ${share(st.quiet)}. A cell counts only with flagged neighbours. It shows where something changed, not what caused it. Each square is one cell of the measurement, placed to within about half a cell; the satellite map underneath (Esri) is there to show what ground it is, and is not from the same day.</small>`;
+    const { f, row: r } = info;
+    const how = r.grade === 'both' ? `had left both what the place read on its two latest passes and their own usual reading over ${r.history} passes` : r.baseline === 1 ? 'stood out against the pass before (a rough reading)' : 'stood out against the two passes before';
+    html = `<b>What stood out · ${esc(r.date)}</b>
+      <p>${share(r.stood)} of the cells of ${f.cellM} m ${how}. From NISAR's calibrated data.</p>
+      <ul>${row(PALETTE.stronger, 'Orange: the echo rose against what was usual') + row(PALETTE.weaker, 'Blue: it fell')}</ul>
+      <small>What moved the whole area alike (rain, a season) is taken away first, and a cell counts only with flagged neighbours. It shows where something changed, not what caused it. Each square is one cell of the measurement, placed to within about half a cell; the satellite map underneath (Esri) is there to show what ground it is, and is not from the same day.</small>`;
   } else if (kind === 'measured') {
     const c = info.d.change;
     html = `<b>Measured change · ${day(c.before)} to ${day(c.after)}</b>
@@ -1285,9 +1286,10 @@ async function renderProof() {
   const check = flood ? await detectFor(flood) : null;
   const parts = [];
   const e = check?.event;
-  const found = e && stoodOut(e.stood, e.quiet) ? e.stood : null;
+  const found = e && stoodOut(e.stood) ? e.stood : null;
   if (found != null) {
-    parts.push(`At a flood in Italy, ${share(e.stood)} of the ground read differently from its own past on NISAR's first pass afterwards (${e.firstPassAfter}); on the passes before, the same rules flag ${share(e.quiet)}.`);
+    const before = check.byDate.filter((r) => !r.afterEvent).pop();
+    parts.push(`At a flood in Italy, ${share(e.stood)} of the ground stood out from what it had read before on NISAR's first pass afterwards (${e.firstPassAfter})${before ? `; on the pass before the flood, ${share(before.stood)}` : ''}.`);
   }
   if (crop?.series?.length > 2 && placeById(PROOF.crop)) {
     const hh = crop.series.filter((p) => p.hh != null);
@@ -1315,16 +1317,16 @@ async function renderMeasuredList() {
     .map((e) => {
       const c = byId.get(e.id);
       const at = e.event != null ? c?.event : c?.most;
-      return { e, stood: at?.stood ?? null, quiet: at?.quiet ?? null, when: e.event != null ? c?.event?.firstPassAfter : c?.most?.date };
+      return { e, stood: at?.stood ?? null, rough: e.event != null && c?.event?.grade === 'pair', sea: !!c?.event?.openWater, when: e.event != null ? c?.event?.firstPassAfter : c?.most?.date };
     })
     .sort((a, b) => (b.stood ?? -1) - (a.stood ?? -1));
   if (!rows.length) return;
   state.measuredList = rows;
   $('measured-list').innerHTML = rows
-    .map(({ e, stood, quiet, when }, i) => {
-      const label = stood == null ? 'measured' : `${share(stood)} stood out`;
-      const title = stood == null ? 'Too few passes yet for a baseline' : `${e.event != null ? 'First pass after the event' : 'The pass that stood out most'}: ${when}. On the passes before, the same rules flag ${share(quiet)}`;
-      return `<li tabindex="0" role="button" data-n="${i}" class="${stoodOut(stood, quiet) ? 'out' : ''}" title="${esc(title)}"><span>${esc(e.name)}</span><span class="km">${label}</span></li>`;
+    .map(({ e, stood, rough, sea, when }, i) => {
+      const label = sea ? 'open water' : stood == null ? 'measured' : `${share(stood)} stood out`;
+      const title = sea ? 'The reported point lies in open water, where the echo follows the wind: not judged' : stood == null ? 'No pass can be judged yet' : `${e.event != null ? 'First pass after the event' : 'The pass that stood out most'}: ${when}${rough ? '. A rough reading: one pass before the event' : ''}`;
+      return `<li tabindex="0" role="button" data-n="${i}" class="${stoodOut(stood) && !rough ? 'out' : ''}" title="${esc(title)}"><span>${esc(e.name)}</span><span class="km">${label}</span></li>`;
     })
     .join('');
   $('measured-count').textContent = rows.length;
@@ -2077,22 +2079,50 @@ async function showMeasuredMap(button) {
 }
 
 // The cells that did something other than their neighbours, on the globe.
-async function showStoodMap(button) {
+async function showStoodMap(button, index) {
   const f = state.selected?.check;
   if (!f?.picture) return;
+  // The pass asked for, or the one the card is about.
+  const row = index != null ? f.byDate[index] : f.byDate.find((r) => r.time === f.picture.time);
+  if (!row) return;
   const token = take('measured');
-  button.textContent = 'Loading…';
+  if (button) button.textContent = 'Loading…';
+  const base = f.byDate.slice(0, f.byDate.indexOf(row));
   try {
-    const picture = await loadPicture(stoodImageUrl(f));
+    // A pass on which nothing stood out has no picture: the map alone says so.
+    const picture = row.image ? await loadPicture(stoodImageUrl(row)) : null;
     if (token !== stage.token) return;
     // On the satellite map, so that it shows what ground the cells lie on.
     globe.showGround(true);
-    globe.addPicture(picture, f.picture.bounds, undefined, 1);
-    globe.flyToBounds(f.picture.bounds);
-    setLegend('stood', { f });
-    button.textContent = 'Shown on the globe';
+    if (picture) globe.addPicture(picture, f.bounds, undefined, 1);
+    if (!stood.playing) globe.flyToBounds(f.bounds);
+    setLegend('stood', { f, row });
+    document.querySelectorAll('#detect-slot tr[data-pass]').forEach((tr) => tr.classList.toggle('on', +tr.dataset.pass === f.byDate.indexOf(row)));
+    if ($('stood-map')) $('stood-map').textContent = `Shown: ${row.date}`;
   } catch {
-    if (token === stage.token) button.textContent = 'The picture failed to load';
+    if (token === stage.token && button) button.textContent = 'The picture failed to load';
+  }
+  return token;
+}
+
+// Plays the passes of the place one after another on the globe: the
+// detection as a time series. It stops when anything else takes the globe.
+const stood = { playing: false };
+async function playStood(button) {
+  const f = state.selected?.check;
+  if (!f?.picture || stood.playing) return;
+  globe.flyToBounds(f.bounds);
+  stood.playing = true;
+  button.textContent = 'Playing…';
+  try {
+    for (let i = 0; i < f.byDate.length; i++) {
+      const token = await showStoodMap(null, i);
+      await new Promise((r) => setTimeout(r, 1500));
+      if (token !== stage.token || state.selected?.check !== f) return;
+    }
+  } finally {
+    stood.playing = false;
+    if (button.isConnected) button.textContent = 'Play the passes';
   }
 }
 
@@ -2770,6 +2800,9 @@ async function start() {
     if (t.id === 'under') return drapeChanges(t.checked);
     if (t.id === 'measured-map') return showMeasuredMap(t);
     if (t.id === 'stood-map') return showStoodMap(t);
+    if (t.id === 'stood-play') return playStood(t);
+    const pass = t.closest('tr[data-pass]');
+    if (pass) return showStoodMap(null, +pass.dataset.pass);
     if (t.id === 'sat-follow' && live.pos) return globe.flyTo(live.pos.lat, live.pos.lon, 6_000_000);
     const li = t.closest('li');
     if (!li) return;

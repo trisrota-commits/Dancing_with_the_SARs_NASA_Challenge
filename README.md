@@ -106,24 +106,34 @@ Links and folded sections stand in for the clicks. For the real, free-to-explore
 
 ## What stood out: a flood in Italy
 
-For 16 places and events the app has NISAR's calibrated backscatter, cut
-into cells of 500 m. A detector (`tools/detect.py`) sets each cell against
-its own baseline of earlier passes, in HH and HV, after taking away what
-moved the whole area alike (rain, a season); the threshold lets 1 cell in
-100 through on a quiet pass, and only clusters count. At a flood reported
-in Tuscany on 7 October 2026, **12 %** of the cells stood out on NISAR's
-first pass afterwards (10 October), against **0.2 %** on the passes before;
-8.2 % a pass later and 0.0 % the pass after that. The app draws those cells
-on the globe ("Show where it stood out").
+<p align="center">
+  <img src="demo/img/flood-passes.gif" alt="The app over Tuscany, pass by pass: the 500 m cells that stood out drawn on the satellite map; none before the flood, clusters three days after it, none three weeks later" width="100%">
+</p>
+
+For 26 places and reported events the app has NISAR's calibrated
+backscatter, cut into cells of 500 m. A detector (`tools/detect.py`) says
+for every pass which cells stood out. What moved the whole area alike
+(rain, a season) is taken away, and then two keys must both turn: the cell
+has left what the place read on its two latest passes, and it has left its
+own usual reading over the longer history, in HH and HV together. At a
+flood reported in Tuscany on 7 October 2026 **nothing** stood out on the
+pass before it and **3.5 %** of the cells three days after it; 2.8 % a pass
+later and nothing after that. In the app, "Show where it stood out" draws
+the cells and "Play the passes" runs them through time.
+
+<p align="center">
+  <img src="demo/img/how-it-works.gif" alt="Animated explanation of the detector from the real flood data, step by step" width="88%">
+</p>
 
 The detector is measured, not asserted: with a change of known size put
-into real, quiet passes, a drop of 3 dB over 2.5 km is found with recall
-0.86 at precision 0.80. Where a place is itself changing (rice growing, a
-reservoir filling) it is far weaker (0.44 at 0.12): one season of data
-cannot tell a crop from a change. Of seven reported events judged, the
-flood in Italy stood out, one earthquake shows 6.4 % on a pass we cannot
-read cleanly, and five show nothing. See "What it cannot claim" in
-`docs/SUBMISSION.md`.
+into real passes, a drop of 3 dB over 2.5 km on quiet ground is found 79
+times in 100 and 96 in 100 flagged cells are right; with nothing put in,
+0.06 % of the cells are flagged. Where a place is itself changing (rice
+growing, a reservoir filling) it is far weaker (33 and 27 in 100): one
+season of data cannot tell a crop from a change. Of 18 reported events
+measured, four lie in open water and are not judged, the flood in Italy
+stood out, one earthquake site shows 16 % for a cause we cannot name, and
+twelve show under 1 %. See "What it cannot claim" in `docs/SUBMISSION.md`.
 
 ## Does it read real ground? A monsoon season, measured
 
@@ -456,8 +466,12 @@ app in headless Chromium against the live services.
 - `tools/film.js` – films the app frame by frame (the 30-second demo); its
   header says how, and what was learnt making it
 - `tools/detect.py` – the change detector: for every measured place, which
-  cells of each pass stood out from their own baseline; `--sensitivity`
-  measures its recall and precision with changes put in
+  cells of each pass stood out (two keys: the two latest passes, and the
+  cell's own history); `--sensitivity` measures its recall and precision
+  with changes put in
+- `tools/explain_gif.py`, `tools/demo_gifs.js` – the animations of the demo:
+  how the detector works, drawn from the measured data, and the detection
+  recorded from the running app
 - `tools/forecast.py` – tests how well NISAR's next pass over a measured
   place can be predicted, against simple baselines
 - `tools/slides.js` – prints the seven demo slides (`demo/`) to PDF

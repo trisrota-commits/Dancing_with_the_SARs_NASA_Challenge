@@ -8,55 +8,72 @@
  "from": "2026-09-30",
  "to": "2026-11-05",
  "falseAlarm": 0.01,
+ "water": 0.0,
  "event": {
   "time": 1793750400000.0,
   "date": "2026-11-04",
   "firstPassAfter": "2026-11-05",
   "stood": 0.0,
-  "quiet": 0.0041,
+  "recent": 0.0156,
+  "long": 0.0,
   "stillNext": null,
   "newVersion": null,
-  "baseline": 3
+  "baseline": 2,
+  "grade": "both"
  },
  "most": {
   "date": "2026-11-05",
   "time": 1793853301000,
   "stood": 0.0,
-  "quiet": 0.0041
+  "recent": 0.0156,
+  "long": 0.0
  },
  "picture": {
   "date": "2026-11-05",
   "time": 1793853301000,
   "baselineFrom": "2026-09-30",
   "baselineTo": "2026-10-24",
-  "stood": 0.0,
-  "quiet": 0.0041,
-  "n": 24,
-  "image": "event-gdacs-fl1104270_stood.png",
-  "bounds": {
-   "west": 6.861541287410028,
-   "east": 7.010258712589972,
-   "south": 43.49000132950054,
-   "north": 43.597798670499465
-  }
+  "n": 24
+ },
+ "kindsOfChange": {
+  "bothFell": "both channels fell: typical of open water, or of ground made smooth",
+  "bothRose": "both channels rose: typical of wetter or rougher ground",
+  "hhRose": "HH rose alone: typical of water standing under plants",
+  "hhFell": "HH fell alone: typical of a smoother or drier surface",
+  "hvRose": "HV rose alone: typical of growing plants (more leaves and branches)",
+  "hvFell": "HV fell alone: typical of lost leaves and branches (a burn, a harvest, a clearing)",
+  "other": "the channels moved against each other"
+ },
+ "rough": {
+  "two": "Only two passes lie before the event, so the second key, the cell's own longer history, is missing. In our test about three in four cells flagged this way on quiet ground are right.",
+  "pair": "Only one pass lies before the event: there is no past to learn what is ordinary from. The step between the two passes is set against its own spread over the area, and the threshold is the one theory gives. In our test about one cell in four flagged this way is right."
  },
  "byDate": [
   {
    "time": 1793853301000,
    "date": "2026-11-05",
-   "baseline": 3,
+   "baseline": 2,
+   "history": 3,
+   "grade": "both",
    "channels": 2,
-   "threshold": 10.87,
-   "over": 0.0,
+   "threshold": 8.36,
+   "over": 0.0174,
    "stood": 0.0,
-   "quiet": 0.0041,
+   "recent": 0.0156,
+   "long": 0.0,
    "rose": 0.0,
    "fell": 0.0,
    "afterEvent": true
   }
  ],
- "summary": "On NISAR's first pass after the event of 2026-11-04 (2026-11-05), 0.0 % of the cells stood out from what they had read on the 3 passes before it. On those passes themselves the same rules flag 0.4 %.",
- "method": "NISAR L2 GCOV backscatter in cells of 500 m. From each pass the middle of all cells is taken away, so that what moved the whole area alike drops out. Each cell is then set against its own usual value and spread over the passes before (at an event: before the event; at least 3, at most 10), in HH and, where recorded, HV. The threshold is the score that 1% of the cells exceeded when each baseline pass was judged against the others. A cell counts only if at least 2 of its eight neighbours are over the threshold too.",
- "limits": "It says that the ground changed and where, not why. A baseline of a few passes knows nothing of the season: a crop growing or ground freezing stands out as well. Cells next to each other share speckle and weather, so a cluster is weaker evidence than its size suggests.",
- "generated": "2026-11-15T17:16:48Z"
+ "summary": "On NISAR's first pass after the event of 2026-11-04 (2026-11-05), 0.0 % of the cells stood out: they had left both what the place read on its two latest passes and their own usual reading over 3 passes.",
+ "method": "NISAR L2 GCOV backscatter in cells of 500 m. From each pass the middle of all cells is taken away, so that what moved the whole area alike drops out. A cell stands out if two keys both turn. Recent: its step from the mean of the 2 latest passes before (at an event: before the event) is beyond the spread such steps had over the area. Long: it lies beyond its own usual value and spread over the whole baseline (at most 10 passes). Both in HH and, where recorded, HV. Each threshold is the score that 1% of the cells exceeded when the baseline passes were judged against each other, and a cell counts only if at least 2 of its eight neighbours are over it too. Open water (cells whose cross-polarised echo is usually under -24 dB) is left out.",
+ "limits": "It says that the ground changed and where, not why. A baseline of a few passes knows nothing of the season: a crop growing or ground freezing stands out as well. Over open water the echo follows the wind from pass to pass. Cells next to each other share speckle and weather, so a cluster is weaker evidence than its size suggests.",
+ "generated": "2026-11-15T17:25:44Z",
+ "bounds": {
+  "west": 6.861541287410028,
+  "east": 7.010258712589972,
+  "south": 43.49000132950054,
+  "north": 43.597798670499465
+ }
 }
