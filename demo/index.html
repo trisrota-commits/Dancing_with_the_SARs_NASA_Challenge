@@ -8,7 +8,9 @@
     <!--
       The demo for the project page: seven slides, read at one's own pace.
       Every picture is a screenshot of the running app; every number is
-      one the app shows (data/measured/, tools/forecast.py, tools/census.py).
+      one the app or its tools give (data/measured/, data/detection/,
+      tools/detect.py, tools/census.py). The team's name and members are
+      on slide 1: change them there.
       Arrow keys or a click move between slides; printing gives one slide
       a page (tools/slides.js makes the PDF that way).
     -->
@@ -151,6 +153,14 @@
         gap: 40px;
         font-size: 22px;
         color: var(--dim);
+      }
+      .foot .ai {
+        font-size: 17px;
+        opacity: 0.8;
+        text-align: right;
+        margin-left: auto;
+        max-width: 420px;
+        line-height: 1.3;
       }
       .foot .n {
         font-variant-numeric: tabular-nums;
@@ -330,199 +340,212 @@
   </head>
   <body>
     <main id="stage">
-      <!-- 1 -->
+      <!-- 1: title. Team name, members and the challenge are required here. -->
       <section class="slide title on" aria-label="Slide 1 of 7">
         <div>
-          <p class="kicker">NASA Space Apps Challenge 2026 · Dancing with the SARs</p>
+          <p class="kicker">NASA Space Apps Challenge 2026 · Challenge: Dancing with the SARs</p>
         </div>
         <div style="align-self: center; display: grid; gap: 30px">
           <h1>Dancing<br />with the SARs</h1>
-          <p class="lead">What a place normally reads on radar, and where the ground did something else.</p>
-          <p class="who">A live 3D globe of NASA and ISRO's NISAR radar satellite. It runs in a browser, with no login, no key and nothing to install.</p>
+          <p class="lead">A live globe that shows what a place normally reads on NISAR's radar, and where the ground did something else.</p>
+          <p class="who"><b>Team:</b> <span id="team-name">Dancing with the SARs</span><br /><b>Members:</b> <span id="team-members">LucidPaths · trisrota-commits · MadhuraSaha02</span></p>
         </div>
         <div class="foot">
-          <span>Team: LucidPaths · trisrota-commits · MadhuraSaha02</span>
+          <span>Open source · runs in a browser · no login, no key, nothing to install</span>
+          <span class="ai">Slides laid out with an AI assistant (Claude Code). Every picture is a screenshot of our app.</span>
           <span class="n">1 / 7</span>
         </div>
       </section>
 
-      <!-- 2 -->
+      <!-- 2: the challenge and our answer -->
       <section class="slide" aria-label="Slide 2 of 7">
         <div>
-          <p class="kicker">The problem</p>
-          <h2>After a flood, the first question is simple: where did the ground change?</h2>
+          <p class="kicker">The challenge, and our answer</p>
+          <h2>“Track and visualize surface change at locations around the world” with NISAR</h2>
         </div>
         <div class="cols wide-left">
           <ul>
-            <li><b>Cameras in orbit are blind when it matters.</b> Floods come with cloud, fires with smoke, and half of every day is night.</li>
-            <li><b>NISAR's radar sees through all three,</b> and passes every place on land and ice again every 12 days.</li>
-            <li><b>But a radar picture is hard to read,</b> and the measurements behind it sit in large files that need a login and special software.</li>
-            <li><b>Who needs the answer:</b> a relief organisation or a civil-protection office deciding where to send people first; a farm adviser asking how a crop is doing.</li>
+            <li><b>The problem.</b> After a flood, an earthquake or a failed harvest, the first question is where the ground changed. Cameras in orbit are blind under cloud, in smoke and at night.</li>
+            <li><b>NISAR sees through all three</b> and passes every place on land and ice every 12 days. But a radar picture is hard to read, and its measurements sit in files that need a login and special software.</li>
+            <li><b>Our answer:</b> an interactive change-detection map on a 3D globe. It turns NISAR's calibrated data into one statement a decision-maker can use: <b>this much of the ground changed, here, and this is what is ordinary.</b></li>
+            <li><b>For whom:</b> disaster and aid organisations first; farm advisers and food-security planners; teachers and the public.</li>
           </ul>
           <figure>
-            <img src="img/flood-page.jpg" alt="The app showing NISAR's radar picture over Tuscany after a reported flood, with what stood out at the top of the event's panel and a timeline of NISAR's passes" />
-            <figcaption>A reported flood in Italy, NISAR's radar picture of the same ground, and what stood out</figcaption>
+            <img src="img/welcome.jpg" alt="The app's opening view: the whole planet as NISAR's radar sees it, with a card that offers the measured cases, a live event and the stories" />
+            <figcaption>The app opens on the whole planet as NISAR sees it</figcaption>
           </figure>
         </div>
         <div class="foot">
-          <span>Challenge: “track and visualize surface change” with NISAR, for floods, wetlands, crops and more</span>
+          <span>Surface changes covered: floods and wetlands, crops, glaciers, earthquakes, fires</span>
+          <span class="ai">Slides laid out with an AI assistant (Claude Code). Every picture is a screenshot of our app.</span>
           <span class="n">2 / 7</span>
         </div>
       </section>
 
-      <!-- 3 -->
+      <!-- 3: what we built, as a user meets it -->
       <section class="slide" aria-label="Slide 3 of 7">
         <div>
-          <p class="kicker">What we built</p>
-          <h2>One globe: what is reported, what the radar saw, and what it measured</h2>
+          <p class="kicker">What we built · how someone uses it</p>
+          <h2>Three steps from a reported event to what the radar measured</h2>
         </div>
         <div class="cols wide-right">
-          <ul>
-            <li><b>The whole planet as NISAR sees it,</b> assembled from 48 days of passes and shown in 3D with real terrain.</li>
-            <li><b>Live events</b> from USGS, NASA EONET and GDACS: earthquakes, floods, fires, storms. Each opens on a timeline with NISAR's passes before and after it.</li>
-            <li><b>Measured, not just pictured.</b> Our own tool reads NISAR's calibrated data twice a day. 16 places and events now carry real values in decibels.</li>
-            <li><b>Any place on Earth:</b> click the ground for a time-lapse of every NISAR pass there.</li>
+          <ul class="steps">
+            <li><b>Open the globe.</b> Live earthquakes, floods, fires and storms from USGS, NASA EONET and GDACS sit on NISAR's radar picture of the planet.</li>
+            <li><b>Pick an event or a place.</b> A timeline shows NISAR's passes before and after; dragging it puts each radar picture on the ground. Any other spot on land gives a time-lapse of every pass there.</li>
+            <li><b>Read what stood out.</b> Where we have measured, the panel opens on the share of the ground that changed, a map of where, and the series in decibels behind it.</li>
           </ul>
           <figure>
-            <img src="img/menu.jpg" alt="The app: the globe with live event markers, and the menu listing the places and events measured by NISAR, sorted by how much of the ground stood out" />
-            <figcaption>The menu lists every measured place by how much of its ground stood out</figcaption>
+            <img src="img/menu.jpg" alt="The app: the globe with live event markers, and the menu listing the 16 places and events measured from NISAR's calibrated data, sorted by how much of the ground stood out" />
+            <figcaption>16 places and events are measured so far, by a job that reads NISAR's data twice a day</figcaption>
           </figure>
         </div>
         <div class="foot">
-          <span>A static website: HTML, CSS and JavaScript on three.js, with our own tile engine. All data loads from public NASA and agency services.</span>
+          <span>Also in the app: five stories, 33 changing places, NISAR's L-band beside Sentinel-1's C-band, the satellite's live position</span>
+          <span class="ai">Slides laid out with an AI assistant (Claude Code). Every picture is a screenshot of our app.</span>
           <span class="n">3 / 7</span>
         </div>
       </section>
 
-      <!-- 4 -->
+      <!-- 4: the change-detection map -->
       <section class="slide" aria-label="Slide 4 of 7">
         <div>
-          <p class="kicker">Detecting change · a flood in Italy, October 2026</p>
-          <h2>On the first pass after the flood, 31 % of the ground did something else</h2>
+          <p class="kicker">Change detection · a flood in Italy, October 2026</p>
+          <h2>Three days after the flood was reported, 12 % of the ground stood out. Before: 0.2 %</h2>
         </div>
         <div class="cols wide-right">
-          <div style="display: grid; gap: 28px">
-            <ul class="steps" style="gap: 18px">
-              <li>Cut the ground into cells of 500 m and read each one's radar echo from NISAR's calibrated data.</li>
-              <li>Compare each cell's change with what the cells around it did in the same pass. Rain and season move all alike, and drop out.</li>
-              <li>Count the cells that left their usual range. <b>About 10 % is ordinary.</b></li>
-            </ul>
+          <div style="display: grid; gap: 26px">
             <table>
               <tr>
                 <th>NISAR pass</th>
                 <th style="text-align: right; padding-right: 28px">Stood out</th>
                 <th></th>
               </tr>
+              <tr>
+                <td>28 September</td>
+                <td class="num">0.0 %</td>
+                <td class="dim">before</td>
+              </tr>
               <tr class="hit">
                 <td>10 October</td>
-                <td class="num">31 %</td>
+                <td class="num">12 %</td>
                 <td>3 days after the report</td>
               </tr>
               <tr>
                 <td>22 October</td>
-                <td class="num">2 %</td>
+                <td class="num">8.2 %</td>
                 <td class="dim"></td>
               </tr>
               <tr>
                 <td>3 November</td>
-                <td class="num">18 %</td>
-                <td class="dim"></td>
+                <td class="num">0.0 %</td>
+                <td class="dim">back to its usual reading</td>
               </tr>
             </table>
+            <p class="note"><b>Why might it look like this?</b> <span style="color: var(--weaker)">Blue</span> cells: the echo fell, which is what standing water does to radar (it sends the pulse away). <span style="color: var(--stronger)">Orange</span>: it rose, as wet soil does. A hypothesis, and the app labels it as one: the map says where, not why.</p>
           </div>
           <figure>
             <img src="img/flood-stood-map.jpg" alt="The app's globe over Tuscany with the 500 m cells that stood out drawn in orange and blue, the key on the left and the pass-by-pass table on the right" />
-            <figcaption>“Show where it stood out”: <span style="color: var(--stronger)">orange</span>, the echo rose more than around it; <span style="color: var(--weaker)">blue</span>, it fell more. It says where, not why.</figcaption>
+            <figcaption>“Show where it stood out”: cells of 500 m around the point GDACS reported on 7 October</figcaption>
           </figure>
         </div>
         <div class="foot">
-          <span>576 cells around the point GDACS reported in Tuscany on 7 October, seven passes. Computed by tools/forecast.py from NISAR L2 GCOV; the same figures are in the app.</span>
+          <span>576 cells, seven passes, NISAR L2 GCOV (calibrated backscatter, HH and HV). Computed by tools/detect.py; the same figures are in the app.</span>
+          <span class="ai">Slides laid out with an AI assistant (Claude Code). Every picture is a screenshot of our app.</span>
           <span class="n">4 / 7</span>
         </div>
       </section>
 
-      <!-- 5 -->
+      <!-- 5: a time series, both polarisations, a human driver -->
       <section class="slide" aria-label="Slide 5 of 7">
         <div>
-          <p class="kicker">Does it read real ground? · rice fields of Bardhaman, West Bengal</p>
-          <h2>One rice season, measured: flooded in July, tall in October, harvested in November</h2>
+          <p class="kicker">Time series · farming · rice fields of Bardhaman, West Bengal</p>
+          <h2>One rice season in two polarisations: flooded in July, tall in October, harvested in November</h2>
         </div>
         <div class="cols wide-right">
-          <div style="display: grid; gap: 30px">
+          <div style="display: grid; gap: 28px">
             <ul>
-              <li><b>−10.9 dB in July:</b> the paddies are under water, and smooth water sends little back.</li>
-              <li><b>−3.7 dB in October:</b> the rice stands tall and the echo is five times as strong.</li>
-              <li><b>November:</b> the harvest, and the echo falls again.</li>
+              <li><b>HH, −10.9 dB in July:</b> the paddies are under water, and smooth water sends little back.</li>
+              <li><b>HH, −3.7 dB in October:</b> the rice stands tall in the water; the echo is five times as strong.</li>
+              <li><b>HV rises with the crop</b> and stays up: it is the channel that leaves and stems send back.</li>
+              <li><b>November:</b> the harvest. HH falls again, and 8.7 % of the ground stands out.</li>
             </ul>
-            <p class="note">12 passes, 1,024 cells. How well the next pass can be expected is scored against four baselines: our small model is off by 1.62 dB (RMSE), the best baseline by 1.79 dB, the comparison with the neighbours by 1.28 dB.</p>
+            <p class="note">12 passes, 1,024 cells of 500 m. The place's text in the app said to expect this before the measurements existed.</p>
           </div>
           <figure>
-            <img src="img/crop-measured.jpg" alt="The app's chart of calibrated NISAR backscatter over the rice fields of Bardhaman, June to November 2026, in decibels" />
-            <figcaption>The app's chart: both radar channels, from NISAR's calibrated data</figcaption>
+            <img src="img/crop-measured.jpg" alt="The app's chart of calibrated NISAR backscatter over the rice fields of Bardhaman, June to November 2026, HH and HV in decibels" />
+            <figcaption>The app's chart, from NISAR's calibrated data. Which polarisation shows what is part of every place's text.</figcaption>
           </figure>
         </div>
         <div class="foot">
-          <span>The place's text in the app said to expect this pattern before the measurements existed. A lost harvest is a disaster too.</span>
+          <span>A flooded paddy and a lost harvest are disasters too: the same view serves a farm adviser and a relief planner.</span>
+          <span class="ai">Slides laid out with an AI assistant (Claude Code). Every picture is a screenshot of our app.</span>
           <span class="n">5 / 7</span>
         </div>
       </section>
 
-      <!-- 6 -->
+      <!-- 6: how far it can be trusted -->
       <section class="slide" aria-label="Slide 6 of 7">
         <div>
-          <p class="kicker">Everywhere else</p>
-          <h2>The whole planet: what changed in 48 days, and what a picture cannot do</h2>
+          <p class="kicker">Validity · how the detector works and how far it can be trusted</p>
+          <h2>We measured the detector instead of asserting it</h2>
         </div>
-        <div class="cols wide-right">
-          <div style="display: grid; gap: 28px">
-            <ul style="gap: 20px">
-              <li>Each pass against <b>the same pass 48 days earlier</b>, from NASA's map picture of NISAR. <span style="color: var(--weaker)">Blue</span>: the echo got weaker. <span style="color: var(--stronger)">Orange</span>: stronger. Siberia and Canada freezing and the Sahel drying stand out.</li>
-              <li><b>Can it find events everywhere? We built that and tested it</b> against 573 reported fires, floods and earthquakes. It does not: floods and quakes are no more marked than random ground. So it is not in the app. Finding events needs the calibrated data, place by place.</li>
+        <div class="two">
+          <div class="box">
+            <h3>How it works</h3>
+            <ul>
+              <li>Each 500 m cell against <b>its own baseline</b> of earlier passes, in <b>HH and HV</b>, after taking away what moved the whole area (rain, season).</li>
+              <li>A <b>fixed false-alarm rate</b> of 1 cell in 100, set from the passes before; only <b>clusters</b> count.</li>
+              <li>The method of NASA's OPERA DIST-ALERT for Sentinel-1, applied to NISAR.</li>
             </ul>
-            <div class="stat">
-              <div class="big" style="font-size: 92px">43 %</div>
-              <span>of the NISAR tiles NASA's tile service delivered in our worldwide sample of 10,000 were damaged. The engine detects and replaces every one.</span>
-            </div>
+            <h3 style="margin-top: 8px">The test</h3>
+            <p>We put a change of known size into real, quiet passes and ran the detector on it. A drop of <b>3 dB over 2.5 km</b> is found with <b>recall 0.86</b> at <b>precision 0.80</b>. With nothing put in it flags 0.4 % of the cells.</p>
           </div>
-          <figure>
-            <img src="img/change.jpg" alt="The globe with the planet-wide change picture: blue where the radar picture got darker in 48 days, orange where brighter" />
-            <figcaption>20 October to 12 November against 2 to 25 September 2026</figcaption>
-          </figure>
+          <div class="box no">
+            <h3>What it cannot do</h3>
+            <ul>
+              <li><b>One season of data.</b> Where a place is itself changing (rice growing, a reservoir filling) recall falls to 0.44 at precision 0.12: it cannot yet tell a crop from a change.</li>
+              <li><b>Seven events judged:</b> the flood in Italy stood out; one earthquake shows 6 % on a pass we cannot read cleanly; five show nothing.</li>
+              <li><b>Not the whole planet.</b> A rough version from NASA's map picture, tested on 573 reported events, does not find them. It is not in the app.</li>
+              <li>It says <b>where</b> the ground changed, never <b>why</b>.</li>
+            </ul>
+          </div>
         </div>
         <div class="foot">
-          <span>tools/change.py and tools/census.py: anyone can run both again.</span>
+          <span>Test: 8 quiet places, 27 passes, 12 patches a pass (tools/detect.py --sensitivity). 38 automated tests for the app, 11 for the detector; every figure can be rerun.</span>
+          <span class="ai">Slides laid out with an AI assistant (Claude Code). Every picture is a screenshot of our app.</span>
           <span class="n">6 / 7</span>
         </div>
       </section>
 
-      <!-- 7 -->
+      <!-- 7: the data that make it possible, and what comes next -->
       <section class="slide" aria-label="Slide 7 of 7">
         <div>
-          <p class="kicker">Honest limits</p>
-          <h2>What we can claim, and what we cannot</h2>
+          <p class="kicker">Open data make it possible · what comes next</p>
+          <h2>Built on NASA's and its partners' free and open data</h2>
         </div>
         <div class="two">
           <div class="box">
-            <h3>We can</h3>
+            <h3>Data we use</h3>
             <ul>
-              <li>Every number is computed from NASA's data, and every source is one click away in the app.</li>
-              <li>The flood in Italy stood out clearly; the rice season reads as rice does.</li>
-              <li>Two faults found in NASA's data are handled and documented: damaged map tiles, and strips with no signal in the data files.</li>
-              <li>38 automated tests; all tools are in the public repository.</li>
+              <li><b>NISAR (NASA and ISRO)</b>, from the Alaska Satellite Facility: calibrated backscatter (L2 GCOV), interferograms (L2 GUNW), found through NASA CMR.</li>
+              <li><b>NASA GIBS:</b> the daily NISAR map layer, and 15 context layers (water, fire, soil moisture, population).</li>
+              <li><b>NASA EONET, USGS, GDACS:</b> the events, as they are reported.</li>
+              <li><b>ESA's Sentinel-1</b>, through NASA's OPERA products: C-band beside NISAR's L-band.</li>
             </ul>
           </div>
-          <div class="box no">
-            <h3>We cannot</h3>
+          <div class="box">
+            <h3>What comes next</h3>
             <ul>
-              <li><b>Not a detection rate.</b> Of five events tested, two can be read cleanly: the flood stood out (31 %), a prescribed fire did not (4 %).</li>
-              <li>At the other three, the first pass afterwards is also the first from a new version of NASA's processing, which shifted values by itself at 12 of our 15 places. The app marks those passes.</li>
-              <li><b>One season of data.</b> NISAR's archive began in mid-2026, so “ordinary” rests on a few passes.</li>
-              <li>NASA's OPERA DIST-ALERT does this for Sentinel-1 with three years of history. Ours is a prototype of the idea for NISAR.</li>
+              <li><b>A year of NISAR:</b> a baseline that knows the seasons, so a crop no longer looks like a change.</li>
+              <li><b>Every reported event measured</b> automatically, and checked against what was mapped on the ground.</li>
+              <li><b>More of NISAR:</b> soil moisture and ground movement next to backscatter.</li>
             </ul>
+            <p class="dim" style="font-size: 25px">Two faults we found in NASA's data are handled and written up: 43 % of sampled NISAR map tiles arrive damaged, and some data files hold strips with no signal.</p>
           </div>
         </div>
         <div class="foot">
-          <span>Built on 14 and 15 November 2026 by three people with an AI coding assistant (Claude Code); no AI runs in the app. Code: <a href="https://github.com/trisrota-commits/Dancing_with_the_SARs_NASA_Challenge">github.com/trisrota-commits/Dancing_with_the_SARs_NASA_Challenge</a></span>
+          <span>Code and app: <a href="https://github.com/trisrota-commits/Dancing_with_the_SARs_NASA_Challenge">github.com/trisrota-commits/Dancing_with_the_SARs_NASA_Challenge</a> · Built 14–15 November 2026 with an AI coding assistant; no AI runs in the app.</span>
+          <span class="ai">Slides laid out with an AI assistant (Claude Code). Every picture is a screenshot of our app.</span>
           <span class="n">7 / 7</span>
         </div>
       </section>

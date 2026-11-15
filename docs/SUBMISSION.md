@@ -22,9 +22,9 @@ earthquake or a failed harvest the question is a simple one: where did
 the ground change? Our app opens on the whole planet as NASA's NISAR
 radar sees it and follows the radar echo of a place through time: what
 it normally reads, and where it did something else. At a flood in Italy
-in October 2026, NISAR's calibrated data show 31 % of the ground doing
-something other than the ground around it on the first pass afterwards,
-where about 10 % is ordinary. Over the rice fields of Bardhaman in West
+in October 2026, NISAR's calibrated data show 12 % of the ground
+reading differently from its own past on the first pass afterwards,
+where the same rules flag 0.2 % on the passes before. Over the rice fields of Bardhaman in West
 Bengal the same measurements follow one crop from flooded paddies in
 July to standing rice in October and the harvest in November. The globe
 carries the earthquakes, fires, floods and storms the world's agencies
@@ -39,7 +39,10 @@ repository: https://github.com/trisrota-commits/Dancing_with_the_SARs_NASA_Chall
 
 ## Link to the demo
 
-[Team: the 30-second video or the slides]
+Seven slides, in the repository (public, no login):
+https://github.com/trisrota-commits/Dancing_with_the_SARs_NASA_Challenge/blob/main/demo/dancing-with-the-sars-slides.pdf
+[Team: check that this link opens in a private browser window. The same
+slides as a web page are at `demo/index.html` once hosting is on.]
 
 ## Project details
 
@@ -96,38 +99,50 @@ repository: https://github.com/trisrota-commits/Dancing_with_the_SARs_NASA_Chall
   places, the direction agrees at five.
 - **What stood out, measured.** For 16 places and events the app has
   NISAR's calibrated backscatter in decibels, read by our own tool from
-  the full data files. In cells of 500 m it sets every pass against
-  what was expected of it, in two ways: from the cell's own earlier
-  passes, and from what the cells around it did in the same pass. Rain
-  or a season moves every cell alike and drops out of the second
-  comparison; what is left is ground that went its own way. The share
-  of cells outside the range nine in ten had kept to is the result:
-  about 10 % is ordinary. At a flood in Italy it was 31 % on the first
-  pass after the flood was reported, then 2 % and 18 % on the two
-  passes after that. A list in the menu shows every measured place by
-  this share.
-- **The expectation is tested, not assumed.** How well the next pass
-  can be predicted is scored against four baselines (the same as last
-  time, the mean so far, a line through the last two passes, a
-  least-squares trend) with RMSE, MAE, an error margin, R² and Spearman,
-  and with accuracy, precision, recall and F1 for "will the echo go
-  down, stay or go up". Over the rice fields of Bardhaman a small model
-  that has learnt how the fields moved beats the best baseline (RMSE
-  1.62 against 1.79 dB); the comparison with the neighbours is closer
-  still (1.28 dB), and at all but one of the places tested. Where little
-  changes, nothing beats "the same as last time". So the app does not
-  claim to foretell: it uses the expectation to tell a change from the
-  ordinary.
+  the full data files, in cells of 500 m. A detector (`tools/detect.py`)
+  says for every pass which cells stood out from what is ordinary at
+  that place. It follows the practice of operational radar change
+  detection: what moved the whole area alike (rain, a season) is taken
+  away; each cell is set against its own baseline of earlier passes, in
+  HH and HV together; the threshold is fixed so that 1 cell in 100
+  passes it on a quiet pass; and a cell counts only with flagged
+  neighbours. Next to every result stands the place's own quiet level:
+  what the same rules flag on the passes before. At a flood in Italy
+  12 % of the cells stood out on the first pass after the flood was
+  reported, against 0.2 % before; 8.2 % a pass later, and 0.0 % the
+  pass after that. The app draws those cells on the globe and lists
+  every measured place by this share.
+- **The detector is measured, not asserted.** We put a change of a known
+  size into real, quiet passes and ran the detector on it (12 patches a
+  pass, seven sizes of change). Where the ground is otherwise quiet (8
+  places, 27 passes), a drop of 3 dB over 2.5 km is found with recall
+  0.86 at precision 0.80 (F1 0.83), a drop of 2 dB with recall 0.69 at
+  precision 0.77; with nothing put in, 0.4 % of the cells are flagged.
+  The simpler rule we used first (a cell's step against its
+  neighbours') flags 11.6 % with nothing put in and reaches F1 0.27.
+  These are test results with changes we put in, kept apart from the
+  measurements (`data/detection/`).
+- **Can the next pass be predicted?** Also scored, against four
+  baselines (the same as last time, the mean so far, a line through the
+  last two passes, a least-squares trend) with RMSE, MAE, an error
+  margin, R² and Spearman, and with accuracy, precision, recall and F1
+  for "will the echo go down, stay or go up". Over the rice fields of
+  Bardhaman a small model that has learnt how the fields moved beats
+  the best baseline (RMSE 1.62 against 1.79 dB). Where little changes,
+  nothing beats "the same as last time". So the app does not claim to
+  foretell.
 - **What it cannot claim.** NISAR's data began in mid-2026: no place has
-  been seen through the same season twice, and events have five to
-  seven passes. Of the five events tested, two have a first pass
-  afterwards that can be read cleanly: the flood in Italy stood out
-  (31 %), a prescribed fire in Utah did not (4 %). At the other three
-  that pass is also the first made with a new version of NASA's
-  processing, which by itself shifted the values at 12 of our 15 places
-  (by 0.4 dB in the middle); the app marks such passes and does not put
-  them down to the event. It says that something changed and where, not
-  what caused it.
+  been seen through the same season twice. Where a place is itself
+  changing from pass to pass (rice growing, a reservoir filling, a
+  glacier moving), the same test gives recall 0.44 at precision 0.12:
+  with one season of data the detector cannot tell a crop from a
+  change. Of the seven reported events it could judge, the flood in
+  Italy stood out; an earthquake in Pakistan shows 6.4 % on a pass that
+  is also the first made with a new version of NASA's processing, so we
+  do not put it down to the quake; five show nothing, and we cannot say
+  whether nothing changed there or the reported point lies off the
+  affected ground. It says that something changed and where, not what
+  caused it.
 - **Not for the whole planet, and we checked.** The measurement needs
   NISAR's full data for every place. We built its rough counterpart from
   NASA's planet picture and tested it against 573 reported events: it
@@ -168,6 +183,22 @@ farming, if you want it in. The challenge text invites it.]
 detail away until it is asked for, and explains every mark it draws in a
 key on the screen. Nobody has to present it: a judge, a student or a
 journalist can open it alone and understand it.
+
+### What benefits it has, and what we hope to achieve
+
+- **A statement instead of a picture.** "12 % of this ground changed,
+  here, and 0.2 % is ordinary" is something a decision-maker can act
+  on without knowing radar.
+- **No barrier.** It runs in a browser, with no login, key or
+  installation, on NASA's open data. The measurements are made by a
+  public job and kept in the repository, so anyone can check them.
+- **Honest by construction.** Every number is computed, every method
+  and limit is written beside it, and what we could not show is said.
+- **What we hope for:** that with a year of NISAR data the same
+  detector, with a baseline that knows the seasons, can point relief
+  and farm organisations to changed ground within days of a pass, and
+  that NISAR's data become readable for people who are not radar
+  scientists.
 
 ### How it stays honest
 
@@ -225,8 +256,12 @@ journalist can open it alone and understand it.
   every pass; the tool refuses anything under the radar's own noise, and
   neither is shown. Why NASA's files hold such strips is not
   established.
-- 38 unit tests and a browser test against the live services guard the
-  rules above.
+- The detector and the prediction check (`tools/detect.py`,
+  `tools/forecast.py`) run in the same job after every measurement, on
+  the cells just written, in a few seconds.
+- 38 unit tests for the app, 11 for the detector, further checks for
+  the other tools, and a browser test against the live services guard
+  the rules above.
 
 ### Tools and languages
 
@@ -296,6 +331,8 @@ We used AI to build this project and we say so plainly.
 - **No AI in the running app.** The app does not call any AI model.
   Its sentences are fixed templates filled from data, and its hypotheses
   come from fixed, written rules.
+- **The demo slides** were laid out by the same assistant and say so on
+  every slide. Their pictures are screenshots of the running app.
 - **No AI-generated images, video or sound.** Every picture on the globe
   comes from the data sources listed below. The event animations are
   drawn by our own code from that data, and the app labels what is

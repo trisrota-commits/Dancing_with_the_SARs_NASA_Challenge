@@ -1167,6 +1167,59 @@ radar and shows where the ground did something else.* The named user is
 a disaster or aid organisation; the rice fields of Bardhaman are the
 proof that the method reads real ground.
 
+**The detector (later the same evening) replaces the neighbour rule
+below as the app's answer.** `tools/detect.py`, on the practice of
+NASA's OPERA DIST-ALERT-S1: the middle of all cells is taken away from
+each pass; each cell is set against its own usual value and spread over
+the passes before (at an event: before the event; 3 to 10 passes; the
+spread pulled towards the window's usual one); HH and HV make one
+score; the threshold is the score 1 cell in 100 exceeded when each
+baseline pass was judged against the others; a cell counts only with
+two flagged neighbours; the same rules on the baseline passes give the
+place's quiet level; and where a later pass exists, the share of
+flagged cells still over the threshold. It writes `<site>_detect.json`,
+`<site>_stood.png` and `detect.json`, runs in the measuring job, and
+has 11 tests (`tests/test_detect.py`).
+
+| Event (first pass after) | Stood out | Quiet level | Note |
+|---|---|---|---|
+| Flood in Italy, 7 Oct | 12 % (then 8.2 %, 0.0 %) | 0.2 % | 0.0 % on the pass before |
+| M 5.7 Khuzdar, 17 Oct | 6.4 % | 0.1 % | first pass of a new processing version |
+| Floods in Indonesia and France, fires in Utah and New Hampshire, M 7.0 Nagqu | 0.0 % | 0.1 to 0.7 % | nothing, or the point is off the affected ground |
+
+Elsewhere, the pass that stood out most: GERD 3 Sep 62 % (the reservoir
+filling), Sacramento rice 2 Oct 39 %, Jakobshavn 29 Sep 13 %, Okavango
+12 Oct 10 %, Bardhaman 11 Nov 8.7 % (harvest), Rondônia 3.2 %, Mekong
+2.5 %, Aletsch 1.2 %.
+
+**How good it is was measured** (`tools/detect.py --sensitivity`, about
+two and a half minutes, writes `data/detection/sensitivity.json`): a
+square patch of a real pass before any event is raised or lowered in
+both channels, 12 times a pass. The places fall into two groups by one
+rule: "quiet" where the detector flags no more than 1 % with nothing put
+in, "changing" where it flags more.
+
+| 5 × 5 cells (2.5 km) | Quiet: recall / precision / F1 | Changing | Rule used before, quiet F1 |
+|---|---|---|---|
+| −6 dB | 0.98 / 0.82 / 0.89 | 0.78 / 0.19 / 0.31 | 0.27 |
+| −3 dB | 0.86 / 0.80 / 0.83 | 0.44 / 0.12 / 0.19 | 0.27 |
+| −2 dB | 0.69 / 0.77 / 0.73 | 0.25 / 0.07 / 0.11 | 0.25 |
+| −1 dB | 0.34 / 0.64 / 0.45 | 0.10 / 0.03 / 0.04 | 0.17 |
+
+With nothing put in: 0.4 % of cells flagged at quiet places (the rule
+used before: 11.6 %), 3.4 % at changing ones. Quiet: Aletsch, Mekong,
+Rondônia and five events before they happened (8 places, 27 passes).
+Changing: GERD, Jakobshavn, Okavango, Sacramento, Bardhaman (58 passes).
+The grouping uses the detector's own behaviour on the same passes,
+after the fact; the limits say so. Variants tried and not kept, because
+they changed little: a baseline of 4 or 6 passes, a stronger pull
+towards the pooled spread, one or three neighbours, a 2 % false-alarm
+rate. What would help is a year of data (a baseline by season).
+
+The prediction check (`tools/forecast.py`) stays, one fold below in the
+panel; its `peers` way is the neighbour rule described next, and it no
+longer writes a picture.
+
 What was built for it:
 
 - **Neighbour comparison** (`tools/forecast.py`, the way called `peers`):
