@@ -15,9 +15,9 @@
     <link rel="preconnect" href="https://earthquake.usgs.gov" crossorigin />
     <link rel="preconnect" href="https://eonet.gsfc.nasa.gov" crossorigin />
     <link rel="preconnect" href="https://www.gdacs.org" crossorigin />
-    <link rel="modulepreload" href="js/main.js" />
+    <link rel="modulepreload" href="js/main.js?v=202611151927" />
     <link rel="modulepreload" href="vendor/three.module.min.js" />
-    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/style.css?v=202611151927" />
   </head>
   <body>
     <div id="globe"></div>
@@ -250,6 +250,13 @@
       <div id="split-handle"><span id="split-before"></span><span id="split-after"></span></div>
     </div>
 
-    <script type="module" src="js/main.js"></script>
+    <!-- Kept for visitors whose browser still holds a script from before
+         15 November 2026, 19:21 UTC: that script sets up a height slider
+         with these names and stops, before it loads NISAR and the events,
+         if they are missing. Nothing uses them any more. -->
+    <input type="hidden" id="stretch" value="4" /><b id="stretch-value" hidden></b>
+    <!-- The address carries the version (tools/pack.sh writes it), so a
+         new page never runs an older script from the browser's cache. -->
+    <script type="module" src="js/main.js?v=202611151927"></script>
   </body>
 </html>

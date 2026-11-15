@@ -92,3 +92,15 @@ test('context layers that cover the whole map are marked, so only one shows at a
   // A radar layer is strips on an empty globe and never fills.
   for (const k of fills) assert.ok(!OVERLAYS[k].sparse, k);
 });
+
+// A browser may hold an older script in its cache while it fetches the page
+// anew. The page therefore asks for its script and styles by version, and
+// the version is the one the script itself carries.
+test('the page asks for its script and styles by the version they carry', () => {
+  const page = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const build = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8').match(/^const BUILD = '(.*)';/m)[1].replace(/\D/g, '');
+  const asked = [...page.matchAll(/(?:js\/main\.js|css\/style\.css)\?v=(\d+)/g)].map((m) => m[1]);
+  assert.equal(asked.length, 3);
+  for (const v of asked) assert.equal(v, build);
+  assert.ok(!/(?:src|href)="js\/main\.js"/.test(page), 'no unversioned address for the script');
+});
