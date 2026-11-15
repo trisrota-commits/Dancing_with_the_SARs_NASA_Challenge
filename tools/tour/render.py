@@ -7,7 +7,7 @@ Frames go to .tour/frames/<scene>/NNN.png with a captions.json.
 Needs the app served on http://localhost:8765/ and Playwright with Chromium.
 Usage: python3 tools/tour/render.py [scene ...], then tools/tour/assemble.py.
 """
-import asyncio, base64, io, json, math, sys
+import asyncio, base64, io, json, math, shutil, sys
 from datetime import datetime, timezone
 from pathlib import Path
 import numpy as np
@@ -169,38 +169,32 @@ async def main():
                     await shot(f"zoom-{side}", i, 2200)
 
             if want(f"play-{side}"):
+                # Every pass in turn. Where the detector judged a pass, its
+                # cells that stood out are drawn on top (orange rose, blue fell).
                 await show_markers(False)
                 await cam(lat, lon, alt_close)
                 images, scale = grid_images(g)
-                bounds = d["picture"]["bounds"]
+                bounds = d["bounds"]
                 after = d["event"]["firstPassAfter"]
-                event_day = d["event"]["date"]
+                rows = {r["date"]: r for r in d["byDate"]}
                 caps = []
-                k = 0
-                for idx, (img, ms) in enumerate(zip(images, g["times"])):
+                shutil.rmtree(OUT / f"play-{side}", ignore_errors=True)
+                for k, (img, ms) in enumerate(zip(images, g["times"])):
                     day = datetime.fromtimestamp(int(ms) / 1000, timezone.utc).strftime("%Y-%m-%d")
-                    await pg.evaluate("""async ([url, b]) => { const g = window.app.globe;
-                        const im = new Image(); im.src = url; await im.decode();
-                        g.clearScenes(); g.addPicture(im, b); g.dirty = true; }""", [data_url(img), bounds])
-                    when = "after the event" if day >= after else "before the event"
-                    for _ in range(1):
-                        await shot(f"play-{side}", k, 2500)
-                        caps.append(dict(frame=k, date=day, when=when, first_after=day == after))
-                        k += 1
-                # Last: the first pass after, with the cells that stood out.
-                fa = next(i for i, ms in enumerate(g["times"]) if datetime.fromtimestamp(int(ms) / 1000, timezone.utc).strftime("%Y-%m-%d") == after)
-                stood = Image.open(REPO / f"data/measured/{d['picture']['image']}").convert("RGBA")
-                base = images[fa].convert("RGBA").resize(stood.size, Image.NEAREST)
-                await pg.evaluate("""async ([u1, u2, b]) => { const g = window.app.globe;
-                    const a = new Image(); a.src = u1; await a.decode();
-                    const s = new Image(); s.src = u2; await s.decode();
-                    g.clearScenes(); g.addPicture(a, b); g.addPicture(s, b); g.dirty = true; }""",
-                                  [data_url(base), data_url(stood), d["picture"]["bounds"]])
-                await shot(f"play-{side}", k, 3000)
-                caps.append(dict(frame=k, date=after, when="stood", first_after=True))
-                captions[side] = dict(caps=caps, scale=scale, event=event_day, after=after,
-                                      stood=d["event"]["stood"], quiet=d["event"]["quiet"],
-                                      newVersion=d["event"].get("newVersion"), name=m["name"])
+                    row = rows.get(day)
+                    layers = [img.convert("RGBA")]
+                    if row and row.get("image"):
+                        stood = Image.open(REPO / "data/measured" / row["image"]).convert("RGBA")
+                        layers = [img.convert("RGBA").resize(stood.size, Image.NEAREST), stood]
+                    await pg.evaluate("""async ([urls, b]) => { const g = window.app.globe; g.clearScenes();
+                        for (const u of urls) { const im = new Image(); im.src = u; await im.decode(); g.addPicture(im, b); }
+                        g.dirty = true; }""", [[data_url(x) for x in layers], bounds])
+                    await shot(f"play-{side}", k, 2500)
+                    caps.append(dict(frame=k, date=day, after=day >= after, first_after=day == after,
+                                     judged=row is not None, stood=row["stood"] if row else None,
+                                     fell=row.get("fell") if row else None, rose=row.get("rose") if row else None,
+                                     newVersion=bool(row and row.get("newVersion")), outlines=bool(row and row.get("image"))))
+                captions[side] = dict(caps=caps, scale=scale, event=d["event"]["date"], after=after, name=m["name"])
         if captions:
             old = json.load(open(OUT / "captions.json")) if (OUT / "captions.json").exists() else {}
             old.update(captions)

@@ -69,10 +69,10 @@ pass over any spot, the real star sky and sunlight.
 <details>
 <summary><a name="tour-flood-zoom"><img src="docs/img/tour/zoom-left.gif" width="640" alt="The camera zooms in to the measured site"></a><br><sub>▸ Click to play NISAR's passes</sub></summary>
 
-<img src="docs/img/tour/play-left.gif" width="640" alt="Seven NISAR passes over the site, then the cells that stood out after the flood">
+<img src="docs/img/tour/play-left.gif" width="640" alt="Seven NISAR passes over the site, with the cells that stood out drawn after the flood">
 
-<sub>Seven calibrated NISAR passes, 23 Aug to 3 Nov 2026. Each 500 m cell is compared with its own past.
-After the flood, 11.8% of cells stood out; on a normal date it is 0.2%.
+<sub>Seven calibrated NISAR passes, 23 Aug to 3 Nov 2026, in 500 m cells. Nothing stood out before the flood,
+3.5% of cells three days after it, 2.8% a pass later and nothing after that.
 <a href="#take-the-tour-click-the-globe">↺ Back to the globe</a> · <a href="#tour-an-earthquake-in-pakistan">Earthquake ▸</a></sub>
 
 </details>
@@ -91,10 +91,10 @@ After the flood, 11.8% of cells stood out; on a normal date it is 0.2%.
 <details>
 <summary><a name="tour-quake-zoom"><img src="docs/img/tour/zoom-right.gif" width="640" alt="The camera zooms in to the measured site"></a><br><sub>▸ Click to play NISAR's passes</sub></summary>
 
-<img src="docs/img/tour/play-right.gif" width="640" alt="Five NISAR passes over the site, then the cells that stood out after the earthquake">
+<img src="docs/img/tour/play-right.gif" width="640" alt="Five NISAR passes over the site, with the few cells that stood out after the earthquake">
 
-<sub>Five calibrated NISAR passes, 4 Sep to 22 Oct 2026. After the quake, 6.4% of cells stood out; on a normal date it is 0.1%.
-NASA's processing version changed between these passes, so some of that change may come from processing.
+<sub>Five calibrated NISAR passes, 4 Sep to 22 Oct 2026. After the quake, 0.9% of cells stood out, all where the echo fell.
+That is small, like most earthquakes measured so far. NASA's processing version also changed on that pass.
 <a href="#take-the-tour-click-the-globe">↺ Back to the globe</a> · <a href="#tour-a-flood-in-italy">Flood ▸</a></sub>
 
 </details>
