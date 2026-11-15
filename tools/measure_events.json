@@ -50,6 +50,18 @@
       "picked": "2026-11-15"
     },
     {
+      "id": "event-usgs-us7000tuku",
+      "event_id": "usgs:us7000tuku",
+      "name": "M 6.0 - 58 km SSE of Shima, Japan",
+      "category": "earthquake",
+      "kind": "Earthquake",
+      "lat": 33.822,
+      "lon": 136.9854,
+      "event": "2026-10-31",
+      "start": "2026-09-16",
+      "picked": "2026-11-15"
+    },
+    {
       "id": "event-usgs-us7000tu4f",
       "event_id": "usgs:us7000tu4f",
       "name": "M 6.2 - 43 km ESE of Port-Olry, Vanuatu",
@@ -134,6 +146,18 @@
       "picked": "2026-11-15"
     },
     {
+      "id": "event-usgs-us6000u24c",
+      "event_id": "usgs:us6000u24c",
+      "name": "M 6.0 - 128 km S of Kokopo, Papua New Guinea",
+      "category": "earthquake",
+      "kind": "Earthquake",
+      "lat": -5.4965,
+      "lon": 152.1501,
+      "event": "2026-10-13",
+      "start": "2026-08-29",
+      "picked": "2026-11-15"
+    },
+    {
       "id": "event-usgs-us6000u1wn",
       "event_id": "usgs:us6000u1wn",
       "name": "M 6.1 - 15 km W of Río Grande, Panama",
@@ -170,18 +194,6 @@
       "picked": "2026-11-15"
     },
     {
-      "id": "event-usgs-us6000u19w",
-      "event_id": "usgs:us6000u19w",
-      "name": "M 6.6 - 13 km WSW of Río Grande, Panama",
-      "category": "earthquake",
-      "kind": "Earthquake",
-      "lat": 7.676,
-      "lon": -81.4515,
-      "event": "2026-10-09",
-      "start": "2026-08-25",
-      "picked": "2026-11-15"
-    },
-    {
       "id": "event-gdacs-eq1570339",
       "event_id": "gdacs:EQ1570339",
       "name": "M 7.7 - 10 km WSW of Pitaloza Arriba, Panama",
@@ -194,15 +206,15 @@
       "picked": "2026-11-15"
     },
     {
-      "id": "event-gdacs-eq1570077",
-      "event_id": "gdacs:EQ1570077",
-      "name": "M 6.3 - 117 km NE of Norsup, Vanuatu",
+      "id": "event-usgs-us6000u19w",
+      "event_id": "usgs:us6000u19w",
+      "name": "M 6.6 - 13 km WSW of Río Grande, Panama",
       "category": "earthquake",
       "kind": "Earthquake",
-      "lat": -15.4332,
-      "lon": 168.2783,
-      "event": "2026-10-08",
-      "start": "2026-08-24",
+      "lat": 7.676,
+      "lon": -81.4515,
+      "event": "2026-10-09",
+      "start": "2026-08-25",
       "picked": "2026-11-15"
     },
     {
@@ -213,6 +225,18 @@
       "kind": "Volcano",
       "lat": 14.0106,
       "lon": 120.9975,
+      "event": "2026-10-08",
+      "start": "2026-08-24",
+      "picked": "2026-11-15"
+    },
+    {
+      "id": "event-gdacs-eq1570077",
+      "event_id": "gdacs:EQ1570077",
+      "name": "M 6.3 - 117 km NE of Norsup, Vanuatu",
+      "category": "earthquake",
+      "kind": "Earthquake",
+      "lat": -15.4332,
+      "lon": 168.2783,
       "event": "2026-10-08",
       "start": "2026-08-24",
       "picked": "2026-11-15"

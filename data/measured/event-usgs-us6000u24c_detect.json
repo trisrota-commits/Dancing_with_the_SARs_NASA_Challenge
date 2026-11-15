@@ -1,0 +1,31 @@
+{
+ "id": "event-usgs-us6000u24c",
+ "name": "M 6.0 - 128 km S of Kokopo, Papua New Guinea",
+ "track": "037-A-175-DHDH",
+ "cellM": 500.0,
+ "cells": 0,
+ "passes": 5,
+ "from": "2026-09-08",
+ "to": "2026-10-26",
+ "water": 0.924,
+ "event": {
+  "time": 1791849600000.0,
+  "date": "2026-10-13",
+  "firstPassAfter": null,
+  "stood": null,
+  "openWater": true
+ },
+ "most": null,
+ "picture": null,
+ "byDate": [],
+ "summary": "Nearly all of the window around this point reads as open water (the cross-polarised echo is under -24 dB there). On water the echo follows the wind from pass to pass, so nothing can be said about change here.",
+ "method": "",
+ "limits": "",
+ "generated": "2026-11-15T20:31:24Z",
+ "bounds": {
+  "west": 152.0959523614413,
+  "east": 152.2042476385587,
+  "south": -5.550398670499461,
+  "north": -5.4426013295005395
+ }
+}

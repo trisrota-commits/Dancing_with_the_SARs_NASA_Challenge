@@ -153,44 +153,44 @@
   "id": "event-gdacs-eq1570339",
   "name": "M 7.7 - 10 km WSW of Pitaloza Arriba, Panama",
   "cells": 576,
-  "passes": 6,
+  "passes": 7,
   "best": "last",
   "event": {
    "time": 1791504000000.0,
    "date": "2026-10-09",
    "firstPassAfter": "2026-10-14",
-   "outside": null,
+   "outside": 0.052,
    "newVersion": null
   },
   "peerSurprise": {
-   "date": "2026-10-26",
-   "time": 1793058316000,
-   "outside": 0.024,
-   "expected": 0.5
+   "date": "2026-10-14",
+   "time": 1792021516000,
+   "outside": 0.052,
+   "expected": 0.47
   },
   "last": {
-   "rmse": 0.43,
-   "mae": 0.34,
-   "within90": 0.73,
-   "r2": 0.889,
-   "spearman": 0.906,
+   "rmse": 0.4,
+   "mae": 0.3,
+   "within90": 0.69,
+   "r2": 0.907,
+   "spearman": 0.921,
    "skill": 0.0
   },
   "line": {
-   "rmse": 0.66,
-   "mae": 0.55,
-   "within90": 1.04,
-   "r2": 0.738,
-   "spearman": 0.831,
-   "skill": -1.359
+   "rmse": 0.63,
+   "mae": 0.52,
+   "within90": 0.99,
+   "r2": 0.764,
+   "spearman": 0.841,
+   "skill": -1.553
   },
   "peers": {
-   "rmse": 0.26,
-   "mae": 0.2,
-   "within90": 0.42,
-   "r2": 0.961,
-   "spearman": 0.972,
-   "skill": 0.647
+   "rmse": 0.24,
+   "mae": 0.18,
+   "within90": 0.4,
+   "r2": 0.965,
+   "spearman": 0.975,
+   "skill": 0.624
   }
  },
  {
@@ -246,42 +246,39 @@
   "event": {
    "time": 1792800000000.0,
    "date": "2026-10-24",
-   "firstPassAfter": "2026-10-31",
-   "outside": 0.078,
-   "newVersion": {
-    "from": "P05023",
-    "to": "P05036"
-   }
+   "firstPassAfter": "2026-11-02",
+   "outside": 0.054,
+   "newVersion": null
   },
   "peerSurprise": {
-   "date": "2026-10-31",
-   "time": 1793447900000,
-   "outside": 0.078,
-   "expected": 0.31
+   "date": "2026-11-02",
+   "time": 1793660858000,
+   "outside": 0.054,
+   "expected": 0.25
   },
   "last": {
-   "rmse": 0.52,
-   "mae": 0.42,
-   "within90": 0.83,
-   "r2": 0.264,
-   "spearman": 0.524,
+   "rmse": 0.22,
+   "mae": 0.16,
+   "within90": 0.35,
+   "r2": 0.856,
+   "spearman": 0.945,
    "skill": 0.0
   },
   "line": {
-   "rmse": 0.77,
-   "mae": 0.61,
-   "within90": 1.32,
-   "r2": -0.59,
-   "spearman": 0.303,
-   "skill": -1.16
+   "rmse": 0.34,
+   "mae": 0.26,
+   "within90": 0.5,
+   "r2": 0.658,
+   "spearman": 0.848,
+   "skill": -1.374
   },
   "peers": {
-   "rmse": 0.19,
-   "mae": 0.14,
-   "within90": 0.31,
-   "r2": 0.905,
-   "spearman": 0.947,
-   "skill": 0.871
+   "rmse": 0.17,
+   "mae": 0.11,
+   "within90": 0.23,
+   "r2": 0.917,
+   "spearman": 0.965,
+   "skill": 0.427
   }
  },
  {
@@ -508,6 +505,50 @@
   }
  },
  {
+  "id": "event-usgs-us6000u24c",
+  "name": "M 6.0 - 128 km S of Kokopo, Papua New Guinea",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1791849600000.0,
+   "date": "2026-10-13",
+   "firstPassAfter": "2026-10-14",
+   "outside": null,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-10-26",
+   "time": 1793043408000,
+   "outside": 0.189,
+   "expected": 0.73
+  },
+  "last": {
+   "rmse": 1.01,
+   "mae": 0.78,
+   "within90": 1.67,
+   "r2": -0.511,
+   "spearman": 0.368,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.65,
+   "mae": 1.41,
+   "within90": 2.55,
+   "r2": -3.042,
+   "spearman": 0.387,
+   "skill": -1.676
+  },
+  "peers": {
+   "rmse": 0.51,
+   "mae": 0.37,
+   "within90": 0.8,
+   "r2": 0.613,
+   "spearman": 0.805,
+   "skill": 0.744
+  }
+ },
+ {
   "id": "event-usgs-us6000u2mq",
   "name": "M 6.9 - 72 km NE of Ozernovskiy, Russia",
   "cells": 573,
@@ -558,7 +599,7 @@
   "id": "event-usgs-us6000u2y1",
   "name": "M 5.7 - 47 km WNW of Khuzdar, Pakistan",
   "cells": 576,
-  "passes": 5,
+  "passes": 6,
   "best": "last",
   "event": {
    "time": 1792195200000.0,
@@ -577,28 +618,28 @@
    "expected": 0.22
   },
   "last": {
-   "rmse": 0.48,
-   "mae": 0.32,
-   "within90": 0.87,
-   "r2": 0.963,
-   "spearman": 0.988,
+   "rmse": 0.42,
+   "mae": 0.26,
+   "within90": 0.81,
+   "r2": 0.972,
+   "spearman": 0.99,
    "skill": 0.0
   },
   "line": {
-   "rmse": 0.51,
-   "mae": 0.37,
-   "within90": 0.89,
-   "r2": 0.959,
-   "spearman": 0.988,
-   "skill": -0.119
+   "rmse": 0.61,
+   "mae": 0.48,
+   "within90": 0.97,
+   "r2": 0.942,
+   "spearman": 0.976,
+   "skill": -1.075
   },
   "peers": {
-   "rmse": 0.18,
-   "mae": 0.12,
-   "within90": 0.27,
+   "rmse": 0.17,
+   "mae": 0.11,
+   "within90": 0.24,
    "r2": 0.995,
-   "spearman": 0.998,
-   "skill": 0.861
+   "spearman": 0.999,
+   "skill": 0.839
   }
  },
  {
@@ -737,6 +778,50 @@
    "r2": -0.294,
    "spearman": -0.086,
    "skill": 0.085
+  }
+ },
+ {
+  "id": "event-usgs-us7000tuku",
+  "name": "M 6.0 - 58 km SSE of Shima, Japan",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1793404800000.0,
+   "date": "2026-10-31",
+   "firstPassAfter": "2026-11-03",
+   "outside": 0.019,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-03",
+   "time": 1793699104000,
+   "outside": 0.019,
+   "expected": 0.46
+  },
+  "last": {
+   "rmse": 0.89,
+   "mae": 0.84,
+   "within90": 1.19,
+   "r2": -2.633,
+   "spearman": -0.659,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.7,
+   "mae": 1.61,
+   "within90": 2.25,
+   "r2": -12.344,
+   "spearman": -0.657,
+   "skill": -2.673
+  },
+  "peers": {
+   "rmse": 0.26,
+   "mae": 0.2,
+   "within90": 0.43,
+   "r2": 0.688,
+   "spearman": 0.738,
+   "skill": 0.914
   }
  },
  {

@@ -1,0 +1,76 @@
+{
+ "id": "event-usgs-us6000u24c",
+ "name": "M 6.0 - 128 km S of Kokopo, Papua New Guinea",
+ "lat": -5.4965,
+ "lon": 152.1501,
+ "radiusKm": 25,
+ "track": "037-A-175-DHDH",
+ "setup": {
+  "lat": -5.4965,
+  "lon": 152.1501,
+  "seriesRadiusM": 500,
+  "mapRadiusM": 6000,
+  "mapPol": "co"
+ },
+ "event": 1791849600000.0,
+ "pols": [
+  "HH",
+  "HV"
+ ],
+ "series": [
+  {
+   "time": 1788896207000,
+   "hh": -17.33,
+   "hv": -25.93,
+   "pixels": 1963,
+   "file": "NISAR_L2_PR_GCOV_030_037_A_175_2005_DHDH_A_20260908T193647_20260908T193719_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1789933007000,
+   "hh": -16.71,
+   "hv": -25.93,
+   "pixels": 1963,
+   "file": "NISAR_L2_PR_GCOV_031_037_A_175_2005_DHDH_A_20260920T193647_20260920T193719_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1790969808000,
+   "hh": -16.45,
+   "hv": -25.63,
+   "pixels": 1963,
+   "file": "NISAR_L2_PR_GCOV_032_037_A_175_2005_DHDH_A_20261002T193648_20261002T193719_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1792006608000,
+   "hh": -17.88,
+   "hv": -26.31,
+   "pixels": 1963,
+   "file": "NISAR_L2_PR_GCOV_033_037_A_175_2005_DHDH_A_20261014T193648_20261014T193719_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1793043408000,
+   "hh": -17.86,
+   "hv": -26.2,
+   "pixels": 1963,
+   "file": "NISAR_L2_PR_GCOV_034_037_A_175_2005_DHDH_A_20261026T193648_20261026T193719_P05036_N_F_J_001.h5"
+  }
+ ],
+ "change": {
+  "before": 1790969808000,
+  "after": 1792006608000,
+  "pol": "HH",
+  "image": "event-usgs-us6000u24c_change.png",
+  "bounds": {
+   "west": 152.0959523614413,
+   "east": 152.2042476385587,
+   "south": -5.550398670499461,
+   "north": -5.4426013295005395
+  },
+  "weakerPct": 2.2,
+  "strongerPct": 0.0,
+  "spansEvent": true
+ },
+ "firstDrop": null,
+ "summary": "Across the event of 2026-10-13: between 2026-10-02 and 2026-10-14, HH backscatter here changed by -1.4 dB and HV by -0.7 dB (mean within 500 m). Across the mapped area, 2% got at least 3 dB weaker and 0% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 5 passes on track 037-A-175-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-10-13, and 'before' the last pass before it.",
+ "generated": "2026-11-15T20:30:51Z"
+}

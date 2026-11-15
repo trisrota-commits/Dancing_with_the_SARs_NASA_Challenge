@@ -1,0 +1,76 @@
+{
+ "id": "event-usgs-us7000tuku",
+ "name": "M 6.0 - 58 km SSE of Shima, Japan",
+ "lat": 33.822,
+ "lon": 136.9854,
+ "radiusKm": 25,
+ "track": "147-D-071-DHDH",
+ "setup": {
+  "lat": 33.822,
+  "lon": 136.9854,
+  "seriesRadiusM": 500,
+  "mapRadiusM": 6000,
+  "mapPol": "co"
+ },
+ "event": 1793404800000.0,
+ "pols": [
+  "HH",
+  "HV"
+ ],
+ "series": [
+  {
+   "time": 1789551904000,
+   "hh": -19.41,
+   "hv": -23.32,
+   "pixels": 7857,
+   "file": "NISAR_L2_PR_GCOV_030_147_D_071_4005_DHDH_A_20260916T094504_20260916T094538_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1790588704000,
+   "hh": -18.24,
+   "hv": -23.44,
+   "pixels": 7857,
+   "file": "NISAR_L2_PR_GCOV_031_147_D_071_4005_DHDH_A_20260928T094504_20260928T094538_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1791625504000,
+   "hh": -19.44,
+   "hv": -23.8,
+   "pixels": 7857,
+   "file": "NISAR_L2_PR_GCOV_032_147_D_071_4005_DHDH_A_20261010T094504_20261010T094538_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1792662304000,
+   "hh": -18.4,
+   "hv": -23.34,
+   "pixels": 7857,
+   "file": "NISAR_L2_PR_GCOV_033_147_D_071_4005_DHDH_A_20261022T094504_20261022T094539_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1793699104000,
+   "hh": -19.55,
+   "hv": -23.9,
+   "pixels": 7857,
+   "file": "NISAR_L2_PR_GCOV_034_147_D_071_4005_DHDH_A_20261103T094504_20261103T094539_P05036_N_F_J_001.h5"
+  }
+ ],
+ "change": {
+  "before": 1792662304000,
+  "after": 1793699104000,
+  "pol": "HH",
+  "image": "event-usgs-us7000tuku_change.png",
+  "bounds": {
+   "west": 136.92052209369825,
+   "east": 137.05027790630174,
+   "south": 33.76810132950054,
+   "north": 33.87589867049947
+  },
+  "weakerPct": 0.9,
+  "strongerPct": 0.0,
+  "spansEvent": true
+ },
+ "firstDrop": null,
+ "summary": "Across the event of 2026-10-31: between 2026-10-22 and 2026-11-03, HH backscatter here changed by -1.2 dB and HV by -0.6 dB (mean within 500 m). Across the mapped area, 1% got at least 3 dB weaker and 0% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 5 passes on track 147-D-071-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-10-31, and 'before' the last pass before it.",
+ "generated": "2026-11-15T20:28:29Z"
+}

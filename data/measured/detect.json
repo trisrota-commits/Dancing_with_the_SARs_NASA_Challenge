@@ -85,13 +85,13 @@
   "id": "event-gdacs-eq1570339",
   "name": "M 7.7 - 10 km WSW of Pitaloza Arriba, Panama",
   "cells": 576,
-  "passes": 6,
+  "passes": 7,
   "event": {
    "time": 1791504000000.0,
    "date": "2026-10-09",
    "firstPassAfter": "2026-10-14",
    "stood": 0.0,
-   "recent": 0.0,
+   "recent": 0.0104,
    "long": 0.0,
    "stillNext": null,
    "newVersion": null,
@@ -99,11 +99,11 @@
    "grade": "both"
   },
   "most": {
-   "date": "2026-10-14",
-   "time": 1792021516000,
-   "stood": 0.0,
-   "recent": 0.0,
-   "long": 0.0
+   "date": "2026-10-26",
+   "time": 1793058316000,
+   "stood": 0.0052,
+   "recent": 0.0122,
+   "long": 0.0052
   },
   "water": 0.0
  },
@@ -141,21 +141,18 @@
   "event": {
    "time": 1792800000000.0,
    "date": "2026-10-24",
-   "firstPassAfter": "2026-10-31",
+   "firstPassAfter": "2026-11-02",
    "stood": 0.0,
    "recent": 0.0,
    "long": 0.0,
    "stillNext": null,
-   "newVersion": {
-    "from": "P05023",
-    "to": "P05036"
-   },
+   "newVersion": null,
    "baseline": 2,
    "grade": "both"
   },
   "most": {
-   "date": "2026-10-19",
-   "time": 1792411100000,
+   "date": "2026-10-21",
+   "time": 1792624057000,
    "stood": 0.0,
    "recent": 0.0,
    "long": 0.0
@@ -322,6 +319,21 @@
   "water": 0.0
  },
  {
+  "id": "event-usgs-us6000u24c",
+  "name": "M 6.0 - 128 km S of Kokopo, Papua New Guinea",
+  "cells": 0,
+  "passes": 5,
+  "event": {
+   "time": 1791849600000.0,
+   "date": "2026-10-13",
+   "firstPassAfter": null,
+   "stood": null,
+   "openWater": true
+  },
+  "most": null,
+  "water": 0.924
+ },
+ {
   "id": "event-usgs-us6000u2mq",
   "name": "M 6.9 - 72 km NE of Ozernovskiy, Russia",
   "cells": 565,
@@ -354,7 +366,7 @@
   "id": "event-usgs-us6000u2y1",
   "name": "M 5.7 - 47 km WNW of Khuzdar, Pakistan",
   "cells": 576,
-  "passes": 5,
+  "passes": 6,
   "event": {
    "time": 1792195200000.0,
    "date": "2026-10-17",
@@ -362,7 +374,7 @@
    "stood": 0.0087,
    "recent": 0.0417,
    "long": 0.0642,
-   "stillNext": null,
+   "stillNext": 0.6,
    "newVersion": {
     "from": "P05023",
     "to": "P05036"
@@ -371,11 +383,11 @@
    "grade": "both"
   },
   "most": {
-   "date": "2026-10-22",
-   "time": 1792630453000,
-   "stood": 0.0087,
-   "recent": 0.0417,
-   "long": 0.0642
+   "date": "2026-11-03",
+   "time": 1793667253000,
+   "stood": 0.0191,
+   "recent": 0.059,
+   "long": 0.0556
   },
   "water": 0.0
  },
@@ -452,6 +464,32 @@
   },
   "most": null,
   "water": 1.0
+ },
+ {
+  "id": "event-usgs-us7000tuku",
+  "name": "M 6.0 - 58 km SSE of Shima, Japan",
+  "cells": 576,
+  "passes": 5,
+  "event": {
+   "time": 1793404800000.0,
+   "date": "2026-10-31",
+   "firstPassAfter": "2026-11-03",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-10-22",
+   "time": 1792662304000,
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0
+  },
+  "water": 0.0
  },
  {
   "id": "gerd",

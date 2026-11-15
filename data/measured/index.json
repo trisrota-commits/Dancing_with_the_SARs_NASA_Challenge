@@ -117,6 +117,15 @@
   "file": "event-usgs-us6000u1wn.json"
  },
  {
+  "id": "event-usgs-us6000u24c",
+  "name": "M 6.0 - 128 km S of Kokopo, Papua New Guinea",
+  "lat": -5.4965,
+  "lon": 152.1501,
+  "radiusKm": 25,
+  "event": 1791849600000.0,
+  "file": "event-usgs-us6000u24c.json"
+ },
+ {
   "id": "event-usgs-us6000u2mq",
   "name": "M 6.9 - 72 km NE of Ozernovskiy, Russia",
   "lat": 52.0153,
@@ -169,6 +178,15 @@
   "radiusKm": 25,
   "event": 1793232000000.0,
   "file": "event-usgs-us7000tu4f.json"
+ },
+ {
+  "id": "event-usgs-us7000tuku",
+  "name": "M 6.0 - 58 km SSE of Shima, Japan",
+  "lat": 33.822,
+  "lon": 136.9854,
+  "radiusKm": 25,
+  "event": 1793404800000.0,
+  "file": "event-usgs-us7000tuku.json"
  },
  {
   "id": "gerd",
