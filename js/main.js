@@ -959,7 +959,16 @@ function take(owner) {
   stage.token++;
   stage.owner = owner;
   // The passes of a place yield to whatever takes the globe from them.
-  if (owner !== 'lapse' && replay.plan?.lapse) replay.stop();
+  if (owner !== 'lapse' && replay.plan?.lapse) {
+    replay.stop();
+    // Inside an event that leaves the bar empty: the event's own timeline
+    // comes back, where the camera is. ("Back to the event" starts it itself.)
+    const sel = state.selected;
+    if (sel?.kind === 'incident' && owner !== 'timeline') {
+      replay.start(sel.incident, { still: true });
+      if (sel.passes) replay.extend(sel.reach, sel.passes.map((x) => x.time));
+    }
+  }
   // A change map is a blue and orange fill; the event's own blue water
   // makes way for it and comes back with anything else.
   globe.setEffectFillsShown(owner !== 'change' && owner !== 'measured');
@@ -1234,9 +1243,11 @@ function renderTicker() {
   const statuses = Object.entries(state.feedStatus).filter(([k]) => k !== 'nisar');
   const checked = Math.max(0, ...statuses.filter(([, s]) => s.ok).map(([, s]) => s.at));
   const down = statuses.filter(([, s]) => !s.ok).map(([k]) => FEEDS[k].label);
-  let feeds = checked ? `Feeds checked ${new Date(checked).toISOString().slice(11, 16)} UTC` : 'Loading the feeds…';
+  // Nothing has answered yet: still loading, unless every feed has failed.
+  const none = statuses.length > 0 && down.length === statuses.length;
+  let feeds = checked ? `Feeds checked ${new Date(checked).toISOString().slice(11, 16)} UTC` : none ? 'No event feed can be reached; trying again shortly' : 'Loading the feeds…';
   if (checked && Date.now() - checked > 15 * 60_000) feeds += ' (stale)';
-  if (down.length) feeds += ` · ${down.join(', ')} offline`;
+  if (down.length && !(none && !checked)) feeds += ` · ${down.join(', ')} offline`;
   $('ticker-feeds').textContent = feeds;
 
   if (!ticker.items.length) {
@@ -2222,7 +2233,19 @@ async function start() {
   globe.setBasemap('esri');
   renderStatus();
 
-  $('basemap').onchange = (e) => globe.setBasemap(e.target.value);
+  $('basemap').onchange = (e) => {
+    $('basemap-note').hidden = true;
+    globe.setBasemap(e.target.value);
+  };
+  // The satellite basemap comes from one company's server. If that cannot
+  // be reached, NASA's own picture of the Earth takes its place, and the
+  // menu says so, so the globe is never left black.
+  globe.onBasemapFailed = (key) => {
+    if (key !== 'esri') return;
+    $('basemap').value = 'bluemarble';
+    globe.setBasemap('bluemarble');
+    $('basemap-note').hidden = false;
+  };
   $('lighting').onchange = (e) => globe.setLighting(e.target.checked);
   globe.setLighting($('lighting').checked);
   $('live-nisar').onchange = tickNisar;

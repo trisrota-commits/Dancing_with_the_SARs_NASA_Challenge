@@ -1278,6 +1278,22 @@ export class TileGlobe {
       for (const t of entry.waiting) if (!t.dead) t.dirty = true;
       entry.waiting.clear();
       if (entry.pinned) for (const t of this.tiles.values()) t.dirty = true;
+      // The basemap's coarsest tiles are the first thing asked of it. If
+      // none of them comes while several fail, its server cannot be
+      // reached from here, and whoever set the layers is told once.
+      if (entry.pinned && !entry.sparse && this.onBaseFailed) {
+        let ok = 0;
+        let failed = 0;
+        for (const e of this.images.values()) {
+          if (!e.pinned || e.sparse) continue;
+          if (e.state === 'ready') ok++;
+          else if (e.state === 'missing') failed++;
+        }
+        if (!ok && failed >= 4 && this.baseFailedFor !== this.layers) {
+          this.baseFailedFor = this.layers;
+          this.onBaseFailed();
+        }
+      }
       // The world picture of a sparse layer has arrived: fetch the level
       // beneath it wherever it shows anything, ahead of need. From then on
       // any view of the globe has a picture to stand in at once, and

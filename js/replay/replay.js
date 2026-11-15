@@ -577,8 +577,10 @@ export class Replay {
 
   // Opens an event on its latest state. With keepView the event is already
   // open and has new reports: its plan is rebuilt behind the one on screen
-  // and swapped in, without touching the camera or showing "loading".
-  async start(incident, { keepView = false } = {}) {
+  // and swapped in, without touching the camera or showing "loading". With
+  // `still` the event's timeline comes back after something else had the
+  // bar: the camera stays where it is and the opening is not played again.
+  async start(incident, { keepView = false, still = false } = {}) {
     const refresh = keepView && this.plan && this.timeline && !this.plan.lapse;
     const held = refresh ? { from: this.range.from, marks: this.marks } : null;
     if (!refresh) {
@@ -612,13 +614,13 @@ export class Replay {
     this.range = { from: Math.min(plan.from - DAY, now - 14 * DAY), to: now };
     this.marks = [];
     this.ms = now;
-    this.intro = !!plan.intro && !refresh;
+    this.intro = !!plan.intro && !refresh && !still;
     this.time = 0;
     this.playing = this.intro;
     plan.setup?.();
     this.loop = ++this.loops;
     const focus = plan.focus || incident;
-    if (!refresh) this.globe.flyTo(focus.lat, focus.lon, Math.min(9_000_000, plan.frameKm * 1000 * 3.4), { pitch: plan.frameKm < 400 ? 40 : 15 });
+    if (!refresh && !still) this.globe.flyTo(focus.lat, focus.lon, Math.min(9_000_000, plan.frameKm * 1000 * 3.4), { pitch: plan.frameKm < 400 ? 40 : 15 });
     this.globe.setFocus({ lat: focus.lat, lon: focus.lon, radiusKm: plan.frameKm * 1.15 });
     if (!this.intro) this.show();
     // The reach and marks asked for while this was loading, or the ones the

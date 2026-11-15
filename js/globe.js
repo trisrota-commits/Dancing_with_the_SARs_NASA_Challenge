@@ -54,6 +54,8 @@ export class Globe {
 
     this.tiles = new TileGlobe(this.scene, this.shared);
     this.tiles.wake = () => (this.dirty = true);
+    // The basemap's server cannot be reached: whoever listens may pick another.
+    this.tiles.onBaseFailed = () => this.onBasemapFailed?.(this.state.base);
     this.glow = atmosphere(this.scene);
     this.trackLines = new Lines(this.scene, this.shared, { width: 2 });
     this.linkLines = new Lines(this.scene, this.shared, { width: 1.8, dash: 14 });
