@@ -127,25 +127,14 @@ Flat lines matter too: where little changes, the calibrated values mostly stay w
 
 ## How it fits together
 
-```mermaid
-flowchart LR
-  subgraph live["Live, in the browser"]
-    feeds["USGS · NASA EONET · GDACS<br/>event feeds"] --> merge["Merge reports<br/>of one event"]
-    cmr["NASA CMR · ASF<br/>NISAR passes and previews"] --> pair["Same-track<br/>before / after pair"]
-    tle["Orbit elements<br/>(CelesTrak)"] --> sgp4["SGP4: NISAR's<br/>position now"]
-    gibs["NASA GIBS<br/>NISAR map layer"]
-    gbif["GBIF<br/>wildlife sightings"]
-  end
-  subgraph job["Twice a day, on GitHub Actions"]
-    gcov["NISAR GCOV HDF5<br/>calibrated backscatter"] --> measure["tools/measure.py<br/>dB series and change maps"]
-  end
-  merge --> globe(("3D globe"))
-  pair --> globe
-  sgp4 --> globe
-  gibs --> globe
-  gbif --> globe
-  measure --> data[("data/measured")] --> globe
-```
+<!-- A still picture of the diagram in docs/img/how-it-fits.mmd (Mermaid).
+     GitHub shows Mermaid in a viewer that pans and zooms as you scroll. -->
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/img/how-it-fits-dark.png">
+    <img src="docs/img/how-it-fits-light.png" alt="How it fits together: live in the browser, event feeds (USGS, NASA EONET, GDACS) are merged per event, NASA CMR and ASF give NISAR passes for a same-track before and after pair, orbit elements from CelesTrak give NISAR's position by SGP4, and NASA GIBS and GBIF add the NISAR map layer and wildlife sightings; twice a day on GitHub Actions, NISAR GCOV files are measured by tools/measure.py into data/measured. All of it feeds the 3D globe." width="760">
+  </picture>
+</p>
 
 **Previews find, measurements measure.** NASA's preview pictures are
 contrast-stretched one by one, so the app uses them to find *where* and
