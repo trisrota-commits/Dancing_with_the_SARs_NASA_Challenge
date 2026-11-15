@@ -35,7 +35,8 @@
 // - The frames are joined by the few lines of Python at the bottom
 //   (Pillow): 1100 px wide, 1.8 s a pass, 2.6 s on the first pass after
 //   the event and on the last frame, looping forever. The still (.jpg) is
-//   the first pass after the event, or the last pass where there is none.
+//   the first pass after the event, or the last pass where there is none,
+//   and the film starts on that pass and runs round from there.
 const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
@@ -206,7 +207,12 @@ for w, colours in ((width, 256), (width, 192), (960, 256), (960, 128)):
     # An octree palette: a median cut loses the orange and blue of the cells,
     # which cover little of the picture, and turns them grey.
     pal = [p.quantize(colors=colours, method=Image.FASTOCTREE) for p in pics]
-    pal[0].save(out + '.gif', save_all=True, append_images=pal[1:], duration=durations, loop=0, optimize=True, disposal=1)
+    # The film starts on the pass it is about and runs on round from there:
+    # where a GIF is shown without playing (a slide being edited, a
+    # thumbnail), its first frame is all there is to see.
+    turn = list(range(still, len(rows))) + list(range(still))
+    pal, timing = [pal[i] for i in turn], [durations[i] for i in turn]
+    pal[0].save(out + '.gif', save_all=True, append_images=pal[1:], duration=timing, loop=0, optimize=True, disposal=1)
     size = os.path.getsize(out + '.gif')
     if size < 4_000_000: break
 pics[still].save(out + '.jpg', quality=86, optimize=True)

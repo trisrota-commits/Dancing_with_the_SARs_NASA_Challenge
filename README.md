@@ -422,7 +422,8 @@ app in headless Chromium against the live services.
   recorded from the running app
 - `tools/forecast.py` – tests how well NISAR's next pass over a measured
   place can be predicted, against simple baselines
-- `tools/slides.js` – prints the seven demo slides (`demo/`) to PDF
+- `tools/slides.js`, `tools/slides_pptx.js` – the seven demo slides (`demo/`)
+  as a PDF, and as a PowerPoint file in which the animations play
 - `tools/change.py` – the planet-wide change picture: each pass against
   the same pass 48 days earlier, into `data/change/`
 - `docs/HANDOFF.md` – where the project stands and how to continue it

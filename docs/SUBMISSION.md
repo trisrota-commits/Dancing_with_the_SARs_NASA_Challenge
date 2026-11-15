@@ -39,10 +39,21 @@ repository: https://github.com/trisrota-commits/Dancing_with_the_SARs_NASA_Chall
 
 ## Link to the demo
 
-Seven slides, in the repository (public, no login):
-https://github.com/trisrota-commits/Dancing_with_the_SARs_NASA_Challenge/blob/main/demo/dancing-with-the-sars-slides.pdf
-[Team: check that this link opens in a private browser window. The same
-slides as a web page are at `demo/index.html` once hosting is on.]
+Seven slides, with three animations in them.
+
+[Team: the animations play in a slide show, not in a PDF. Do this once:
+upload `demo/dancing-with-the-sars-slides.pptx` to Google Drive, open it
+with Google Slides, press Share → "Anyone with the link" → Viewer, and
+paste that link here. Open it in a private browser window to check that
+it needs no login and that the pictures on slides 4, 5 and 6 move. Put
+your team's name and your names on slide 1 first; that line is ordinary
+text.]
+
+Fallbacks, both public with no login:
+- the same slides as a PDF (stills in place of the animations):
+  https://github.com/trisrota-commits/Dancing_with_the_SARs_NASA_Challenge/blob/main/demo/dancing-with-the-sars-slides.pdf
+- the same slides as a web page, animated, once the site is hosted:
+  `demo/index.html`.
 
 ## Project details
 
