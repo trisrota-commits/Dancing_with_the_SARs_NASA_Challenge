@@ -1,7 +1,7 @@
 // Picks the events worth measuring with calibrated NISAR data, by itself.
 //
-// It reads the same live feeds as the app, with the app's own code, takes
-// the strongest recent events, and keeps those NISAR has passed over on
+// It reads the same live feeds and archives as the app, with the app's own
+// code, takes the strongest recent events, and keeps those NISAR has passed over on
 // the same track both before and after. The result goes into
 // tools/measure_events.json, which tools/measure.py measures along with
 // the hand-picked places. Nobody has to name an event for a judge to find
@@ -14,17 +14,21 @@
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { FEEDS, CATEGORIES, NISAR_LOOKBACK_DAYS } from '../js/config.js';
-import { fetchFeed } from '../js/feeds.js';
+import { fetchFeed, fetchArchive } from '../js/feeds.js';
 import { buildIncidents } from '../js/incidents.js';
 import { scenesAt, bestPair } from '../js/nisar.js';
 
 const FILE = new URL('./measure_events.json', import.meta.url);
 const DAY = 86400_000;
-const LOOK_AT = 30; // strongest recent events to check against the archive
-const ADD_PER_RUN = 6; // new events taken on in one run
-const PER_KIND = 2; // of which at most this many of one kind
+const LOOK_AT = 90; // strongest recent events to check against the archive
+const ADD_PER_RUN = 24; // new events taken on in one run
+const PER_KIND = 8; // of which at most this many of one kind
 const KEEP = 40; // events kept in the list; the oldest fall out
 const MAX_AGE_DAYS = 45; // an event older than this is not "recent"
+// Kinds whose reported point lies on ground the radar can be read on. A
+// storm's point is the eye of its track and an iceberg's is at sea: open
+// water changes with the wind from pass to pass, which says nothing.
+const ON_LAND = new Set(['earthquake', 'volcano', 'landslide', 'wildfire', 'flood']);
 // A new pass can only arrive every 12 days, so an event is followed for a
 // while after it ends and then left as it is.
 const day = (ms) => new Date(ms).toISOString().slice(0, 10);
@@ -42,6 +46,17 @@ async function main() {
       console.log(`${FEEDS[name].label}: not reachable (${err.message})`);
     }
   }
+  // The live feeds hold the last days only, and NASA publishes a pass up
+  // to two weeks late: an event that new rarely has a pass after it yet.
+  // The agencies' archives (the app's "Since NISAR data began") hold the
+  // larger events of the weeks before, which do.
+  try {
+    const older = await fetchArchive();
+    events.push(...older);
+    console.log(`Archives: ${older.length} reports`);
+  } catch (err) {
+    console.log(`Archives: not reachable (${err.message})`);
+  }
   if (!events.length) {
     console.log('No feed answered; the list is left as it is.');
     return;
@@ -52,6 +67,7 @@ async function main() {
   const byKind = new Map();
   for (const inc of buildIncidents(events)) {
     if (now - inc.time > MAX_AGE_DAYS * DAY || now - inc.time < DAY) continue;
+    if (!ON_LAND.has(inc.category)) continue;
     if (!byKind.has(inc.category)) byKind.set(inc.category, []);
     byKind.get(inc.category).push(inc);
   }
@@ -68,6 +84,10 @@ async function main() {
   for (const inc of recent) {
     if (picked.length >= ADD_PER_RUN) break;
     if (known.has(inc.id)) continue;
+    // The same event can come from a feed and from an archive under two
+    // names: one already in the list within 30 km and three days is it.
+    const near = (s) => Math.abs(Date.parse(s.event) - inc.time) < 3 * DAY && Math.hypot(s.lat - inc.lat, (s.lon - inc.lon) * Math.cos((inc.lat * Math.PI) / 180)) * 111 < 30;
+    if (list.sites.some(near)) continue;
     if (picked.filter((p) => p.category === inc.category).length >= PER_KIND) continue;
     let found;
     try {
