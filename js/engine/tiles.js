@@ -346,6 +346,7 @@ export class TileGlobe {
     // Finished tiles kept for the visit: name → { blob }, oldest first.
     this.kept = new Map();
     this.keptBytes = 0;
+    this.keptLimit = KEPT_BYTES; // for whoever tells the reader about it
     // The bytes of a listed layer's tiles (the mosaic), by address: small
     // enough to hold for the whole planet (see `fill`).
     this.filled = new Map();
