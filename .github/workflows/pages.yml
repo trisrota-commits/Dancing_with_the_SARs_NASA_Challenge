@@ -1,0 +1,61 @@
+# Publishes the site: this repository as it stands, to GitHub Pages.
+#
+# One-time setup by a repository admin: Settings → Pages → Build and
+# deployment → Source: "GitHub Actions". Until then every run stops early
+# and says so; nothing fails.
+#
+# Why a job, and not "Deploy from a branch": the jobs that rebuild the
+# planet picture (mosaic.yml) and measure with NISAR (measure.yml) commit
+# their results to main, and GitHub does not publish a commit made by a job
+# to a site that is deployed from a branch. Those two jobs call this one
+# after they have committed something.
+
+name: Publish the site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Is the site switched on?
+        id: site
+        continue-on-error: true
+        uses: actions/configure-pages@v5
+
+      - name: Not yet
+        if: steps.site.outcome != 'success'
+        run: echo "::notice::GitHub Pages is not switched on for this repository (Settings → Pages → Source → GitHub Actions). Nothing was published. See the top of .github/workflows/pages.yml."
+
+      # main as it is now: a job that called this one has just pushed to it.
+      - uses: actions/checkout@v4
+        if: steps.site.outcome == 'success'
+        with:
+          ref: main
+
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.site.outcome == 'success'
+        with:
+          path: .
+
+      - name: Publish
+        id: deploy
+        if: steps.site.outcome == 'success'
+        uses: actions/deploy-pages@v4

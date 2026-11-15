@@ -67,11 +67,14 @@ repository: https://github.com/trisrota-commits/Dancing_with_the_SARs_NASA_Chall
   would miss.
 - **Two wavelengths side by side.** NISAR's L-band on the left of a
   divider, Sentinel-1's C-band on the right, for the same days.
-- **The whole planet as NISAR sees it.** NASA's daily NISAR map layer is
-  on from the start, stacked over the mission's 12-day repeat cycle, with
-  NASA's own colour description beside it. One switch stacks 24 days,
-  which covers every place NISAR images, land and ice, with the newest
-  pass on top.
+- **The whole planet as NISAR sees it.** The app opens on it: every place
+  NISAR images, land and ice, with the newest pass on top and NASA's own
+  colour description beside it. NASA publishes this layer one day at a
+  time and has no mosaic of it, so the app carries one it assembled from
+  48 days of the daily layer and loads NASA's own tiles close up and for
+  every day since. What a visitor has looked at stays sharp for the rest
+  of the visit. One switch shows a single 12-day cycle, 6, 3 or 1 day
+  instead.
 - **NISAR itself, live.** The satellite's real position, its orbit, the
   edges of its radar swath, and an estimate of its next pass over any
   event, labelled as computed.

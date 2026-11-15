@@ -1,0 +1,82 @@
+# The whole planet as NISAR sees it, rebuilt once a week.
+#
+# NASA publishes NISAR's map layer a day at a time. tools/mosaic.py stacks
+# the last 48 days into one ready-made picture of the planet in
+# data/mosaic/, which the app opens on. The picture does not have to be
+# new to be right: every day flown after it was made is drawn live on top
+# of it. But each such day costs the far and the continent view more
+# requests to NASA, and after 24 days the picture saves nothing any more.
+# A weekly rebuild keeps the opening view fast for a visitor who comes
+# weeks after the last person touched this repository.
+#
+# What a run does: about 27,000 small requests to NASA's public map
+# servers (no login), a quarter of an hour, and one commit of about 10 MB
+# to data/mosaic/. A build that comes out with far fewer tiles than the
+# picture in place (NASA's servers failing) is refused by the script, and
+# nothing is committed. To stop the rebuilds, disable this workflow in the
+# Actions tab or delete this file; the app goes on working with the
+# picture it has.
+#
+# The lead asked for this job on 15 November 2026.
+
+name: Rebuild the planet picture
+
+on:
+  schedule:
+    - cron: '41 4 * * 1' # Mondays, 04:41 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mosaic
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install
+        run: pip install --quiet pillow numpy
+
+      - name: Check the script's arithmetic
+        run: python tests/test_mosaic.py
+
+      - name: Build
+        run: python tools/mosaic.py
+
+      - name: Commit the picture
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A data/mosaic
+          if git diff --cached --quiet; then
+            echo "Nothing new."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            to=$(python -c "import json; a = json.load(open('data/mosaic/about.json')); print(a['from'], 'to', a['to'])")
+            git commit --quiet -m "The planet picture, rebuilt from NASA's daily NISAR layer ($to)"
+            git pull --rebase --quiet
+            git push
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  publish:
+    needs: build
+    if: needs.build.outputs.changed == 'true'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/pages.yml

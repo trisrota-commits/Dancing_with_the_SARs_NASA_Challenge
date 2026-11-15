@@ -3,7 +3,7 @@
 // Which version of the app this is. `tools/pack.sh` sets it; it shows at the
 // end of the credits line, so nobody has to wonder whether the browser is
 // still showing an older copy.
-const BUILD = '2026-11-15 07:26 UTC';
+const BUILD = '2026-11-15 10:35 UTC';
 
 import { CATEGORIES, FAMILIES, PALETTE, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START, RECENT_MS, OVERLAY_REACH_DAYS, NISAR_MOSAIC } from './config.js';
 import { fetchFeed, fetchArchive } from './feeds.js';
@@ -2180,6 +2180,10 @@ async function refreshMosaic() {
     .catch(() => null);
   if (!about?.built || about.built === state.mosaic?.built) return;
   state.mosaic = about;
+  // It arrived after the app had given up waiting for it (see `start`):
+  // the opening view goes back to the whole planet, unless the reader has
+  // chosen for themselves by now.
+  if (!state.stackChosen) $('stack').value = '24';
   globe.setMosaic(about);
   applyLayers();
 }
@@ -2317,7 +2321,7 @@ async function start() {
   globe.setBasemap('esri');
   renderStatus();
   // The ready-made whole-planet picture, if this copy of the app has one.
-  refreshMosaic();
+  const mosaicAsked = refreshMosaic();
   setInterval(() => !document.hidden && refreshMosaic(), 10 * 60_000);
 
   $('basemap').onchange = (e) => {
@@ -2375,6 +2379,7 @@ async function start() {
     draw();
   };
   ['nisar-tiles', 'stack', 'date', 'bands'].forEach((id) => ($(id).onchange = applyLayers));
+  $('stack').addEventListener('change', () => (state.stackChosen = true));
   $('overlays').onchange = (e) => {
     // A layer that covers the whole map hides whatever lies under it, so
     // switching one on switches the other ones of that sort off.
@@ -2690,10 +2695,18 @@ async function start() {
   });
 
   openLink();
-  // NISAR's map layer is on from the start, a full 12-day cycle ending on
-  // the newest day NASA has published. That day has to be asked for, so the
-  // layer starts on the likely one and moves if the answer differs: eleven
-  // of the twelve days are then already here.
+  // NISAR's map layer is on from the start, as the whole planet: every
+  // place NISAR images, the newest pass on top. That view opens from the
+  // ready-made mosaic (a third of a megabyte for the opening view), so the
+  // app waits a moment for the mosaic's list of tiles before it sets the
+  // layers; asking NASA for 24 daily layers first would be wasted. A copy
+  // of the app without the mosaic, or one that cannot reach it, opens on
+  // one 12-day cycle instead: 24 days stacked live take too long to be the
+  // first thing a visitor sees.
+  // The newest day NASA has published has to be asked for, so the layer
+  // starts on the likely one and moves if the answer differs.
+  await Promise.race([mosaicAsked, new Promise((done) => setTimeout(done, 2500))]);
+  if (!state.mosaic && !state.stackChosen) $('stack').value = '12';
   $('date').min = '2026-04-01';
   $('date').max = $('date').value = likelyTileDate();
   applyLayers();

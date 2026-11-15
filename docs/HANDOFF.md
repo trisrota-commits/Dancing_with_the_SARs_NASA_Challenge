@@ -857,6 +857,40 @@ everywhere, or whether the list of sound kinds needs extending.
   two pictures show in blocks of 4 x 4 pixels (`alike`): sound tiles
   score 0.69 to 1.0, damaged ones 0.11 or less.
 
+### The whole planet opens the app, and is rebuilt weekly (lead's decisions, 15 Nov, midday)
+
+- **Opening view.** "Days stacked" starts on "Whole planet" (it was "12
+  days"). The challenge asks to make NISAR accessible to a broad
+  audience and the judges test alone: a complete radar Earth reads at
+  once, where the strips of one cycle with gaps between them can look
+  broken. It opens from the mosaic, a third of a megabyte for the first
+  view. `start` in `js/main.js` waits up to 2.5 s for the mosaic's list
+  of tiles before it sets the layers (asking NASA for 24 daily layers
+  first would be wasted). A copy without the mosaic, or one that cannot
+  reach it, opens on 12 days; if the mosaic arrives late the view goes to
+  the whole planet, unless the reader has chosen for themselves
+  (`state.stackChosen`).
+- **Why a weekly rebuild after all.** The lead decided against a nightly
+  job in the morning, when the question was whether the mosaic must be
+  current to be right (it need not). The reason now is speed over the
+  weeks of judging: every day after the mosaic's last is drawn live on
+  top of it, and after 24 days the mosaic saves nothing: the continent
+  view is back to about 494 requests where it took 72.
+  `.github/workflows/mosaic.yml` runs `tools/mosaic.py` on Mondays at
+  04:41 UTC and on request (Actions → "Rebuild the planet picture" → Run
+  workflow), and commits `data/mosaic/`: a quarter of an hour, about
+  10 MB a run. A build with far fewer tiles than the one in place is
+  refused by the script. To stop it, disable the workflow or delete the
+  file.
+- **A commit made by a job is not published by "Deploy from a branch".**
+  GitHub's documentation says so in as many words. That would have kept
+  the weekly picture, and the measurements of `measure.yml`, off the
+  site. `.github/workflows/pages.yml` publishes the site itself: on every
+  push to `main`, and called by the two jobs after they commit. It needs
+  the Pages source set to "GitHub Actions"; until then it stops early
+  with a notice.
+- Not verified: the publishing job has not run with Pages switched on.
+
 ### Visual rules (lead, 14 Nov, night)
 
 The lead, after one screenshot confused them: no arbitrary colours; one
@@ -1179,11 +1213,14 @@ that appears on a place, or an event nearby, once results exist.
    anything further: stay in the current style, do not overdo it, and ask
    whether it serves "an easy to understand, easy to use visualization of
    data" for this challenge before building it.
-2. **Hosting.** The repo has `.nojekyll`, and every path is relative, so
-   GitHub Pages works with one setting by a repo admin: Settings → Pages →
-   Deploy from a branch → `main` / root. The address would be
+2. **Hosting.** Every path is relative, so GitHub Pages works with one
+   setting by a repo admin: Settings → Pages → Build and deployment →
+   Source: **GitHub Actions** (not "Deploy from a branch": see "The whole
+   planet opens the app, and is rebuilt weekly"). The job
+   `.github/workflows/pages.yml` then publishes `main` on every push. The
+   address would be
    `https://trisrota-commits.github.io/Dancing_with_the_SARs_NASA_Challenge/`.
-   Not yet switched on.
+   Not yet switched on; until it is, the job says so and does nothing.
 3. **Submission materials:** project description, a short demo video or
    slides, and the AI-use disclosure (this project was built largely with
    AI; Space Apps normally requires saying so). Check the submission form
