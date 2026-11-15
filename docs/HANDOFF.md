@@ -1583,7 +1583,11 @@ that appears on a place, or an event nearby, once results exist.
    that address and published again on every push to `main` (about half
    a minute). A domain of the team's own (cloudpiercer.space, at
    Cloudflare) was bought the same evening and pointed nowhere yet when
-   last checked. If it is to show this site through GitHub Pages: set
+   last checked. For hosting a second copy on Cloudflare under that
+   domain, `wrangler.jsonc` and `.assetsignore` in the repository's root
+   tell Cloudflare's Worker builds to serve the files as they are (the
+   application there must be named as in that file). If the domain is
+   instead to show this site through GitHub Pages: set
    the DNS records first, and only then enter the domain under Settings
    → Pages → Custom domain, because from that moment the github.io
    address redirects to the domain, working or not.
