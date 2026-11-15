@@ -152,8 +152,20 @@ function dedupe(scenes) {
   return [...best.values()].sort((a, b) => b.time - a.time);
 }
 
-export async function latestScenes(count = 200) {
-  return dedupe(await search(['NISAR_L2_GCOV_V1', 'NISAR_UR_L2'], 'GCOV', {}, count));
+// The newest passes, newest first.
+//
+// The catalogue's answer for these is 10 MB and is not compressed, so it
+// is fetched whole only once. After that, give back what an earlier call
+// returned (`held`) and when it was asked (`since`, in ms): then only what
+// the catalogue has added or changed since is fetched, and merged in. NASA
+// adds about 170 passes an hour, so that is one or two megabytes.
+export async function latestScenes(count = 200, held = null, since = null) {
+  const names = ['NISAR_L2_GCOV_V1', 'NISAR_UR_L2'];
+  if (held?.length && since) {
+    const added = await search(names, 'GCOV', { updated_since: new Date(since).toISOString().slice(0, 19) + 'Z' }, count);
+    return dedupe([...added, ...held]).slice(0, count);
+  }
+  return dedupe(await search(names, 'GCOV', {}, count));
 }
 
 // How far inside a frame outline a point lies, in kilometres (0 or less

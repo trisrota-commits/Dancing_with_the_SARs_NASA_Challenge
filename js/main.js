@@ -3,7 +3,7 @@
 // Which version of the app this is. `tools/pack.sh` sets it; it shows at the
 // end of the credits line, so nobody has to wonder whether the browser is
 // still showing an older copy.
-const BUILD = '2026-11-15 04:33 UTC';
+const BUILD = '2026-11-15 04:48 UTC';
 
 import { CATEGORIES, FAMILIES, PALETTE, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START, RECENT_MS, OVERLAY_REACH_DAYS, NISAR_MOSAIC } from './config.js';
 import { fetchFeed, fetchArchive } from './feeds.js';
@@ -149,7 +149,13 @@ async function refreshFeed(name) {
 
 async function refreshNisar() {
   try {
-    const scenes = await latestScenes();
+    // The whole list once (10 MB); after that only what the catalogue has
+    // added since the last look, with two minutes of overlap. After six
+    // hours without a look, the whole list again.
+    const asked = Date.now();
+    const recent = state.scenesAsked && asked - state.scenesAsked < 6 * 3600_000;
+    const scenes = await latestScenes(200, recent ? state.scenes : null, recent ? state.scenesAsked - 2 * 60_000 : null);
+    state.scenesAsked = asked;
     const known = new Set(state.scenes.map((s) => s.id));
     if (state.scenes.length) scenes.forEach((s) => !known.has(s.id) && markFresh(s.id));
     state.scenes = scenes;
@@ -2312,7 +2318,7 @@ async function start() {
   renderStatus();
   // The ready-made whole-planet picture, if this copy of the app has one.
   refreshMosaic();
-  setInterval(refreshMosaic, 10 * 60_000);
+  setInterval(() => !document.hidden && refreshMosaic(), 10 * 60_000);
 
   $('basemap').onchange = (e) => {
     $('basemap-note').hidden = true;
@@ -2662,12 +2668,26 @@ async function start() {
   setInterval(tickCountdowns, 1000);
   startTicker();
 
+  // Nothing is asked of anyone while the page sits in a tab nobody is
+  // looking at: every regular check waits until it is seen again, and
+  // then all of them run once (at most once a minute, however often the
+  // tab is flipped to).
+  const whileSeen = (check) => () => !document.hidden && check();
   for (const name of Object.keys(FEEDS)) {
     refreshFeed(name);
-    setInterval(() => refreshFeed(name), FEEDS[name].everyMs);
+    setInterval(whileSeen(() => refreshFeed(name)), FEEDS[name].everyMs);
   }
   refreshNisar();
-  setInterval(refreshNisar, NISAR_LATEST_EVERY_MS);
+  setInterval(whileSeen(refreshNisar), NISAR_LATEST_EVERY_MS);
+  let caughtUp = Date.now();
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden || Date.now() - caughtUp < 60_000) return;
+    caughtUp = Date.now();
+    for (const name of Object.keys(FEEDS)) refreshFeed(name);
+    refreshNisar();
+    refreshMosaic();
+    state.refreshDate?.();
+  });
 
   openLink();
   // NISAR's map layer is on from the start, a full 12-day cycle ending on
@@ -2689,8 +2709,9 @@ async function start() {
     }
   };
   refreshDate();
+  state.refreshDate = refreshDate;
   // NASA adds days and fills in recent ones; look again now and then.
-  setInterval(refreshDate, 10 * 60_000);
+  setInterval(() => !document.hidden && refreshDate(), 10 * 60_000);
 }
 
 // Handy in the browser console while developing.

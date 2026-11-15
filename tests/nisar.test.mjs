@@ -159,3 +159,25 @@ test('a scene across the date line is read whole, and a point on either side of 
   // Two polygons that are not a date-line cut: the first, as before.
   assert.equal(nisar.sceneOutline([['1 2 3 4 5 6 1 2'], ['7 8 9 10 11 12 7 8']]).length, 4);
 });
+
+test('after the first look, only what the catalogue has added since is asked for, and merged in', async () => {
+  const asked = [];
+  const entry = (minute, id) => ({ id, title: `NISAR_L2_PR_GCOV_010_0${10 + minute}_A_020_2005_DHDH_A_20261110T00${String(minute).padStart(2, '0')}00_20261110T00${String(minute).padStart(2, '0')}30_P05036_N_F_J_001`, polygons: [['1 1 1 2 2 2 2 1 1 1']], links: [] });
+  const real = globalThis.fetch;
+  globalThis.fetch = async (url) => {
+    asked.push(String(url));
+    const since = /updated_since/.test(url);
+    return { ok: true, json: async () => ({ feed: { entry: since ? [entry(30, 'new')] : [entry(20, 'b'), entry(10, 'a')] } }) };
+  };
+  try {
+    const first = await nisar.latestScenes(200);
+    assert.equal(first.length, 2);
+    assert.ok(!/updated_since/.test(asked[0]));
+    const next = await nisar.latestScenes(200, first, Date.UTC(2026, 10, 15, 4, 0, 0));
+    // Asked with the time of the last look, and the new pass leads the list.
+    assert.match(decodeURIComponent(asked[1]), /updated_since=2026-11-15T04:00:00Z/);
+    assert.deepEqual(next.map((s) => s.id), ['new', 'b', 'a']);
+  } finally {
+    globalThis.fetch = real;
+  }
+});
