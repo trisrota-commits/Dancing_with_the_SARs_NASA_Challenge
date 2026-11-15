@@ -90,6 +90,9 @@ def main() -> None:
     spoilt_hv[t:] -= 50
     after = forecast.predict(spoilt_hh, spoilt_hv, grid["times"], t)
     for key in before:
+        if key == "peers":  # by design it looks at the pass itself, and is marked as doing so
+            assert not np.allclose(before[key], after[key])
+            continue
         assert np.allclose(before[key], after[key]), key
 
     # Cells that only jitter: nothing beats "same as last time" by much, and the script says so.
@@ -98,9 +101,27 @@ def main() -> None:
     assert flat["learnt"]["skill"] < 0.6 and flat["line"]["skill"] < 0, flat
     print("still fields:", {k: (v["rmse"], v["skill"]) for k, v in flat.items()})
 
-    # Too few passes: no result, not a made-up one.
-    short = make_grid(passes=forecast.MIN_PASSES - 1)
-    assert forecast.forecast(short) is None
+    # Too few passes: no result, not a made-up one. With a few, only the
+    # ways that need no long history are tried.
+    assert forecast.forecast(make_grid(passes=forecast.MIN_SHORT - 1)) is None
+    few = forecast.forecast(make_grid(passes=6))
+    assert few["short"] and [w["key"] for w in few["ways"]] == ["last", "line", "peers"] and few["modelAgainstBestBaseline"] is None
+
+    # Against the neighbours: every cell drops by 2 dB on one pass (rain,
+    # a season), and one cell in ten drops by 6 more (a flood there). The
+    # common drop is no surprise; the cells that went their own way are,
+    # and the event's first pass after it is named.
+    quiet_grid = make_grid(momentum=0.0, noise=0.2, seed=3)
+    for c in range(400):
+        quiet_grid["hh"][9][c] -= 2.0 + (6.0 if c % 10 == 0 else 0.0)
+        for later in (10, 11):
+            quiet_grid["hh"][later][c] -= 2.0 + (6.0 if c % 10 == 0 else 0.0)
+    told = forecast.forecast(quiet_grid, event=quiet_grid["times"][9] - 5 * DAY)
+    at = next(r for r in told["byDate"] if r["time"] == quiet_grid["times"][9])
+    assert at["peers"]["rmse"] < at["last"]["rmse"] / 1.2, (at["peers"]["rmse"], at["last"]["rmse"])
+    assert 0.09 <= at["peers"]["outside"] <= 0.2 and at["last"]["outside"] > 0.9, (at["peers"]["outside"], at["last"]["outside"])
+    assert told["event"]["firstPassAfter"] == forecast.day(quiet_grid["times"][9]) and told["event"]["outside"] == at["peers"]["outside"]
+    assert told["best"] != "peers" and next(w for w in told["ways"] if w["key"] == "peers")["needsNewPass"]
 
     # A pass on which the fields do something new is a surprise: most cells
     # fall outside the range they had kept to; on the passes before, about

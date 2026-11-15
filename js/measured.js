@@ -115,7 +115,7 @@ const num = (v, digits = 2) => (v == null ? '–' : Number(v).toFixed(digits));
 // tools/forecast.py from the calibrated cells; nothing is written by hand.
 export function forecastHtml(f) {
   // A baseline is a simple rule the model has to beat; the model is set apart from them.
-  const name = (w) => `<th scope="row" title="${esc(w.how)}">${esc(w.name)}${w.baseline ? '' : ' <span class="tag">model</span>'}</th>`;
+  const name = (w) => `<th scope="row" title="${esc(w.how)}">${esc(w.name)}${w.needsNewPass ? ' <span class="tag">needs the new pass</span>' : w.baseline ? '' : ' <span class="tag">model</span>'}</th>`;
   const mark = (w) => (w.key === f.best ? ' class="best"' : '');
   const row = (w) => {
     const s = f.overall[w.key];
@@ -137,15 +137,16 @@ export function forecastHtml(f) {
   const dates = f.byDate
     .map((r) => {
       const b = r[f.best] || {};
-      const out = b.outside == null ? '–' : `${(b.outside * 100).toFixed(0)} %`;
-      return `<tr${f.surprise?.time === r.time ? ' class="best"' : ''}><td>${esc(r.date)}</td><td>${num(r.seenMean, 1)}</td><td>${num(b.predMean, 1)}</td><td>${num(b.rmse)}</td><td>${out}</td></tr>`;
+      const share = (v) => (v == null ? '–' : `${(v * 100).toFixed(0)} %`);
+      const marked = f.event ? f.event.firstPassAfter === r.date : f.peerSurprise?.time === r.time;
+      return `<tr${marked ? ' class="best"' : ''}><td>${esc(r.date)}${f.event?.firstPassAfter === r.date ? ' <span class="tag">after the event</span>' : ''}</td><td>${num(r.seenMean, 1)}</td><td>${num(b.predMean, 1)}</td><td>${share(b.outside)}</td><td>${share(r.peers?.outside)}</td></tr>`;
     })
     .join('');
   return `<div class="card measured forecast">
     <div class="src">Computed from the measurements · a test of predictability, not a forecast</div>
     <p>${esc(f.summary)}</p>
     <table class="forecast-table">
-      <caption>Predicting the next pass in ${f.cells.toLocaleString('en')} cells of ${f.cellM} m, in dB. The first four are baselines: simple rules a model has to beat</caption>
+      <caption>Predicting the next pass in ${f.cells.toLocaleString('en')} cells of ${f.cellM} m, in dB. ${f.short ? 'Too few passes here for more than the simplest ways' : 'The first four are baselines: simple rules a model has to beat'}</caption>
       <tr><th scope="col">Way of predicting</th><th scope="col" title="Mean absolute error">MAE</th><th scope="col" title="Root mean square error">RMSE</th><th scope="col" title="Nine cells in ten are within this">9 in 10</th><th scope="col" title="Share of the differences between cells that the prediction explains">R²</th><th scope="col" title="Rank agreement between prediction and measurement">Spearman</th></tr>
       ${f.ways.map(row).join('')}
     </table>
@@ -164,8 +165,8 @@ export function forecastHtml(f) {
       ${f.ways.map(strong).join('')}
     </table>
     <table class="forecast-table">
-      <caption>Pass by pass, with the best way: the mean over all cells, and how many cells fell outside the range nine in ten had kept to before (about 10 % is ordinary)</caption>
-      <tr><th scope="col">Pass</th><th scope="col">Measured</th><th scope="col">Predicted</th><th scope="col">RMSE</th><th scope="col">Outside</th></tr>
+      <caption>Pass by pass: the mean over all cells, measured and as the best forecast had it; how many cells fell outside the range nine in ten had kept to before (about 10 % is ordinary), against that forecast and against their neighbours</caption>
+      <tr><th scope="col">Pass</th><th scope="col">Measured</th><th scope="col">Forecast</th><th scope="col" title="Cells outside the expected range of the best forecast">Off forecast</th><th scope="col" title="Cells that did something other than their neighbours in the same pass">Off neighbours</th></tr>
       ${dates}
     </table>
     <p class="hint"><strong>Method.</strong> ${esc(f.method)}</p>
