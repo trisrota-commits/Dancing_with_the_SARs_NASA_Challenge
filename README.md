@@ -115,9 +115,9 @@ Links and folded sections stand in for the clicks. For the real, free-to-explore
 For 26 places and reported events the app has NISAR's calibrated
 backscatter, cut into cells of 500 m. A detector (`tools/detect.py`) says
 for every pass which cells stood out. What moved the whole area alike
-(rain, a season) is taken away, and then two keys must both turn: the cell
-has left what the place read on its two latest passes, and it has left its
-own usual reading over the longer history, in HH and HV together. At a
+(rain, a season) is taken away, and then two checks must agree: the cell
+differs from the two passes just before, and it differs from its own
+longer history, in HH and HV together. At a
 flood reported in Tuscany on 7 October 2026 **nothing** stood out on the
 pass before it and **3.5 %** of the cells three days after it; 2.8 % a pass
 later and nothing after that. In the app, "Show where it stood out" draws
@@ -468,7 +468,7 @@ app in headless Chromium against the live services.
 - `tools/film.js` – films the app frame by frame (the 30-second demo); its
   header says how, and what was learnt making it
 - `tools/detect.py` – the change detector: for every measured place, which
-  cells of each pass stood out (two keys: the two latest passes, and the
+  cells of each pass stood out (two checks: the two latest passes, and the
   cell's own history); `--sensitivity` measures its recall and precision
   with changes put in
 - `tools/explain_gif.py`, `tools/demo_gifs.js` – the animations of the demo:

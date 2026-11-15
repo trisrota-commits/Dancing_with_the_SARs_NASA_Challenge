@@ -113,9 +113,9 @@ Fallbacks, both public with no login:
   tool from the full data files, in cells of 500 m. A detector
   (`tools/detect.py`) says for every pass which cells stood out. What
   moved the whole area alike (rain, a season) is taken away first. Then
-  two keys must both turn: the cell has left what the place read on its
-  two latest passes, and it has left its own usual reading over the
-  longer history, in HH and HV together. Each threshold lets 1 cell in
+  two checks must agree: the cell differs from the two passes just
+  before, and it differs from its own longer history, in HH and HV
+  together. Each threshold lets 1 cell in
   100 through on the passes before, only clusters count, and open water
   is left out. At a flood in Italy nothing stood out on the pass before
   it, 3.5 % of the cells three days after it, 2.8 % a pass later and
@@ -134,7 +134,7 @@ Fallbacks, both public with no login:
   places, 88 passes, 12 patches a pass). Where the ground is otherwise
   quiet, a drop of 6 dB over 2.5 km is found 98 times in 100 and 96 in
   100 flagged cells are right; for 3 dB it is 79 and 96. With nothing
-  put in, 0.06 % of the cells are flagged. Each key alone is right less
+  put in, 0.06 % of the cells are flagged. Each check alone is right less
   often (81 and 73 in 100 at 3 dB), and the rule we used first 16 in
   100. These are test results with changes we put in, kept apart from
   the measurements (`data/detection/`).

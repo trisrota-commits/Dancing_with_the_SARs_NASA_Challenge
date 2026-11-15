@@ -290,8 +290,8 @@ def main() -> None:
 
     # 5 and 6. The two keys.
     for step_no, key, compared, caption, against in (
-        (5, key1, recent_base, "Key 1: has the cell left what the place read on its two latest passes?", "set against the two passes before it"),
-        (6, key2, base, "Key 2: has it left its own usual reading over the longer history?", f"set against all {len(base)} passes before it"),
+        (5, key1, recent_base, "Check 1: does the cell differ from the two passes just before?", "set against the two passes before it"),
+        (6, key2, base, "Check 2: does it differ from its own longer history?", f"set against all {len(base)} passes before it"),
     ):
         alone = key["over"] & ~key["kept"]
         im, draw, y = scene(caption, step_no, steps, n, times, event, t, compared, against, [ACCENT if k else None for k in key["kept"]], [ACCENT if a else None for a in alone])
@@ -306,11 +306,11 @@ def main() -> None:
     one_only = (final["recent"] | final["long"]) & ~kept
     rose, fell = int((kept & (final["lead"] > 0)).sum()), int((kept & (final["lead"] < 0)).sum())
     assert rose + fell == int(kept.sum())
-    im, draw, y = scene("Only cells that both keys flag count. Each key asks for flagged neighbours", 7, steps, n, times, event, t, base, after, sign(final), [LINE if o else None for o in one_only])
+    im, draw, y = scene("Only cells where both checks agree count. Each asks for flagged neighbours", 7, steps, n, times, event, t, base, after, sign(final), [LINE if o else None for o in one_only])
     y = stat(draw, y + 4, D.pct(published["event"]["stood"]), "of the ground stood out", f"{int(kept.sum())} of {cells} cells")
     y = swatch(draw, PX, y, f"echo rose ({rose} cells)", fill=STRONGER)
     y = swatch(draw, PX, y, f"echo fell ({fell} cells)", fill=WEAKER)
-    y = swatch(draw, PX, y, f"one key only: not counted ({int(one_only.sum())})", outline=LINE)
+    y = swatch(draw, PX, y, f"one check only: not counted ({int(one_only.sum())})", outline=LINE)
     frames.append((im, 3400))
 
     # 8. The passes after: three small grids.

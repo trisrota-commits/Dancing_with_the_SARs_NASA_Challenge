@@ -534,11 +534,11 @@
       <section class="slide" aria-label="Slide 6 of 7">
         <div>
           <p class="kicker">Validity · how the detector works, measured</p>
-          <h2>Two keys must both turn before a cell counts, and we measured how often that is right</h2>
+          <h2>Two checks must agree before a cell counts, and we measured how often that is right</h2>
         </div>
         <div class="cols" style="grid-template-columns: minmax(0, 1.22fr) minmax(0, 1fr); gap: 48px">
           <figure>
-            <img src="img/how-it-works.gif" data-still="img/how-it-works.png" alt="Animated explanation from the real flood data: the radar echo in cells of 500 m, pass after pass; what moved the whole area is taken away; key one compares with the two latest passes, key two with the cell's own history; only cells both keys flag count" />
+            <img src="img/how-it-works.gif" data-still="img/how-it-works.png" alt="Animated explanation from the real flood data: the radar echo in cells of 500 m, pass after pass; what moved the whole area is taken away; check one compares with the two passes just before, check two with the cell's own history; only cells where both agree count" />
           </figure>
           <div class="tight" style="display: grid; gap: 18px">
             <p><b>The test:</b> changes of known size put into real passes. “Right”: the share of flagged cells that lay in the change.</p>
@@ -570,7 +570,7 @@
             <tr><th>Open data and tools we start from</th><th>What we added</th></tr>
             <tr><td><b>NISAR's daily map layer</b> (NASA GIBS), one day at a time; NASA Worldview stacks 12 days on a flat map</td><td>The whole planet from 48 days on a 3D globe: 2.4 times the land 12 days cover. 43 % of the tiles in our worldwide sample arrive damaged; our engine detects and replaces each one</td></tr>
             <tr><td><b>NISAR L2 GCOV</b> (NASA and ISRO, via the Alaska Satellite Facility): calibrated backscatter in large files behind a login</td><td>A public job reads them twice a day for places and reported events; the values, in decibels, are in the repository for anyone to check</td></tr>
-            <tr><td><b>NASA's OPERA DIST-ALERT</b> finds disturbed ground with Sentinel-1 (ESA) and years of history</td><td>The same idea for NISAR with a few months of history: two keys, both channels, open water left out, and its recall and precision measured</td></tr>
+            <tr><td><b>NASA's OPERA DIST-ALERT</b> finds disturbed ground with Sentinel-1 (ESA) and years of history</td><td>The same idea for NISAR with a few months of history: two checks, both channels, open water left out, and its recall and precision measured</td></tr>
             <tr><td><b>USGS, NASA EONET, GDACS</b> report events; <b>Sentinel-1</b> via OPERA shows C-band and surface water</td><td>One globe where a report, the radar picture before and after it, and the measurement meet</td></tr>
           </table>
           <p class="note"><b>Next:</b> a year of NISAR, so the baseline knows the seasons and a crop no longer looks like a change · every reported event measured and checked against what was mapped on the ground · NISAR's soil moisture and ground movement beside backscatter.</p>
