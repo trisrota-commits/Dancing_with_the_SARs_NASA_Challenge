@@ -209,8 +209,11 @@ from a web server.
 ### Hosting
 
 The site is static with relative paths, so GitHub Pages can serve it as is:
-Settings → Pages → Deploy from a branch → `main` / root. `.nojekyll` is
-already in place.
+Settings → Pages → Build and deployment → Source: **GitHub Actions**. The
+job `.github/workflows/pages.yml` then publishes `main` on every push.
+(Not "Deploy from a branch": GitHub does not publish commits made by a job
+that way, and two jobs here commit data: the weekly planet picture and
+the NISAR measurements.)
 
 ### Tests
 
