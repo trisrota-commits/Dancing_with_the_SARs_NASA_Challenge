@@ -2,9 +2,10 @@
 """Assembles the whole planet as NISAR sees it, once, ahead of time.
 
 NASA publishes NISAR's map layer one day at a time: each day holds the
-strips flown that day. Stacked over 24 days they cover every place NISAR
-images. The app can do that stacking live, but it then asks NASA for up to
-24 pictures per map tile. This script does it once: it takes each day's
+strips flown that day. Stacked over 24 days (two rounds of its orbit) they
+cover every place NISAR images, bar thin slivers between passes; over 48
+days most of those close too. The app can do that stacking live, but it
+then asks NASA for up to 24 pictures per map tile. This script does it once: it takes each day's
 tiles, lays them on top of each other with the newest pass on top, and
 writes one ready-made set of tiles into data/mosaic/. The app shows that
 set from far away and at continent distance; close in, NASA's own tiles
@@ -16,11 +17,11 @@ stored as WebP at reduced file size, and the coarser levels are made by
 averaging four tiles into one.
 
     pip install pillow numpy
-    python tools/mosaic.py                  # 24 days up to NASA's newest day
-    python tools/mosaic.py --end 2026-11-12 --days 24 --level 5
+    python tools/mosaic.py                  # 48 days up to NASA's newest day
+    python tools/mosaic.py --end 2026-11-12 --days 48 --level 5
 
-No login is needed. It makes about 10,000 small requests and takes five to
-ten minutes. It always builds the whole mosaic afresh from NASA's own
+No login is needed. It makes about 27,000 small requests and takes about a
+quarter of an hour. It always builds the whole mosaic afresh from NASA's own
 pictures and never patches the one already there: that keeps the newest
 pass on top without any bookkeeping, and the stored tiles are compressed
 once, not again and again. A tile that has not changed comes out byte for
@@ -220,7 +221,7 @@ def newest_day():
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     ap.add_argument('--end', help='newest day in the mosaic, YYYY-MM-DD (default: the newest day NASA has)')
-    ap.add_argument('--days', type=int, default=24, help='how many days are stacked (default 24: every place NISAR images)')
+    ap.add_argument('--days', type=int, default=48, help='how many days are stacked (default 48: four rounds of the orbit, which closes most slivers between passes)')
     ap.add_argument('--level', type=int, default=5, help='finest level written (default 5: continent detail, about 780 tiles)')
     ap.add_argument('--out', default=os.path.join(os.path.dirname(__file__), '..', 'data', 'mosaic'))
     ap.add_argument('--quality', type=int, default=84, help='WebP quality (default 84)')
