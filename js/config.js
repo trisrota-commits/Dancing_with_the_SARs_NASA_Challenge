@@ -110,7 +110,9 @@ const since = new Date(NISAR_START).toISOString().slice(0, 10);
 // Larger events only, to keep five months of history readable on the globe.
 export const ARCHIVE = {
   usgs: [`https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=${since}&minmagnitude=6&orderby=time`],
-  eonet: [`https://eonet.gsfc.nasa.gov/api/v3/events?start=${since}&status=all&category=floods,severeStorms,volcanoes,seaLakeIce,drought,landslides`],
+  // With `start` alone EONET returns its whole archive (23 MB, back to
+  // 2011); it needs an `end` as well to keep to the window.
+  eonet: [`https://eonet.gsfc.nasa.gov/api/v3/events?start=${since}&end=${new Date().toISOString().slice(0, 10)}&status=all&category=floods,severeStorms,volcanoes,seaLakeIce,drought,landslides`],
   gdacs: [`https://www.gdacs.org/gdacsapi/api/events/geteventlist/SEARCH?eventlist=EQ,TC,FL,VO,WF,DR&fromDate=${since}&alertlevel=Orange;Red`],
 };
 

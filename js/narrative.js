@@ -73,13 +73,20 @@ export function channelReading(before, after, pol) {
   return `<span class="badge computed">Hypothesis</span> ${moved}. ${reading} This is a rule of thumb applied to two preview values, not a finding.`;
 }
 
+// An event with a start and a later end (a flood, a fire), as against one
+// moment (an earthquake). "After" such an event is not the same as after
+// its start, and the text must not mix them up.
+const isLasting = (inc) => inc.endTime - inc.time > 6 * 3600_000;
+
 // One line for the popup.
 export function nisarLine(inc, found) {
   if (!found) return 'Checking what NISAR has seen here…';
   if (found.failed) return 'The NISAR archive could not be searched just now.';
   const { all, before, after } = passesAround(inc, found);
   if (!all.length) return 'NISAR has not imaged this spot around the event.';
-  if (before.length && after.length) return `NISAR imaged this place ${span(inc.time - before[0].time)} before and ${span(after[0].time - inc.time)} after.`;
+  // An event that lasts has a start and an end; these times are from its start.
+  const began = isLasting(inc) ? ' it began' : '';
+  if (before.length && after.length) return `NISAR imaged this place ${span(inc.time - before[0].time)} before${began} and ${span(after[0].time - inc.time)} after${began}.`;
   const est = nextPass(found.newest?.length ? found.newest : all);
   const next = est ? ` Next pass expected around ${shortDate(est.time)}.` : '';
   if (before.length) return `NISAR last imaged this place ${span(inc.time - before[0].time)} before the event.${next}`;
@@ -93,7 +100,7 @@ export function narrate(inc, { found, history, measured, sizeText }) {
 
   // What happened, when, and who says so.
   const feeds = [...new Set(inc.reports.map((r) => r.source))];
-  const lasting = inc.endTime - inc.time > 6 * 3600_000;
+  const lasting = isLasting(inc);
   const fresh = Date.now() - inc.endTime < 2 * DAY;
   let p = `<b>${esc(inc.title)}.</b> `;
   p += lasting
@@ -115,13 +122,17 @@ export function narrate(inc, { found, history, measured, sizeText }) {
     if (!all.length && !found.interferograms.length) {
       n = `${nisar}, the radar satellite this app is built around, has not imaged this spot in the weeks around the event. It comes round every ${REPEAT_DAYS} days, and open ocean is mostly not imaged.`;
     } else {
-      n = `${nisar}, the radar satellite this app is built around, imaged this place ${many(all.length, 'time')} around the event: ${before.length} before and ${after.length} after.`;
-      if (before.length) n += ` The last pass before it was on ${date(before[0].time)}, ${span(inc.time - before[0].time)} earlier`;
-      if (before.length) n += after.length ? `, and the first after it on ${date(after[0].time)}, ${span(after[0].time - inc.time)} later.` : '; there has been no pass since.';
+      const it = lasting ? 'it began' : 'it';
+      n = `${nisar}, the radar satellite this app is built around, imaged this place ${many(all.length, 'time')} around the event: ${before.length} before ${it} and ${after.length} ${lasting ? 'since' : 'after'}.`;
+      if (before.length) n += ` The last pass before ${it} was on ${date(before[0].time)}, ${span(inc.time - before[0].time)} earlier`;
+      if (before.length) n += after.length ? `, and the first after ${it} on ${date(after[0].time)}, ${span(after[0].time - inc.time)} later.` : '; there has been no pass since.';
       else if (after.length) n += ` The first pass was on ${date(after[0].time)}, ${span(after[0].time - inc.time)} after the event began.`;
       const pair = bestPair(all, inc.time, true, inc);
       if (pair) n += ` Two passes on the same track, ${shortDate(pair.before.time)} and ${shortDate(pair.after.time)}, let the app show ${link('nisar', 'what changed between them', 'sec-nisar')}.`;
-      if (found.interferograms.some((g) => g.refTime < inc.time && g.secTime > inc.time)) n += ` An ${link('nisar', 'interferogram', 'sec-nisar')} spans the event and shows how the ground moved.`;
+      // Across the whole event, or only across its start.
+      const across = found.interferograms.filter((g) => g.refTime < inc.time && g.secTime > inc.time);
+      if (across.some((g) => g.secTime > inc.endTime)) n += ` An ${link('nisar', 'interferogram', 'sec-nisar')} spans the event and shows how the ground moved.`;
+      else if (across.length) n += ` An ${link('nisar', 'interferogram', 'sec-nisar')} spans the start of the event and shows how the ground moved in its first days.`;
     }
     const est = nextPass(found.newest?.length ? found.newest : all);
     if (est) n += ` The next overpass is expected around ${date(est.time)}; that is an estimate from the ${REPEAT_DAYS}-day repeat cycle, not a schedule.`;
@@ -150,7 +161,7 @@ export function narrate(inc, { found, history, measured, sizeText }) {
     const read = (q) => `${Math.round(q.co)} on ${shortDate(q.time)}`;
     let h = `At this exact spot the radar echo (${esc(history.pol)}) `;
     h += before && after
-      ? `read ${read(before)}, the last pass on this track before the event, and ${read(after)}, the first one after it. Over ${pts.length} passes it ranged from ${read(low)} to ${read(high)}.`
+      ? `read ${read(before)}, the last pass on this track before the event${isLasting(inc) ? ' began' : ''}, and ${read(after)}, the first one after ${isLasting(inc) ? 'it began' : 'it'}. Over ${pts.length} passes it ranged from ${read(low)} to ${read(high)}.`
       : `ranged from ${read(low)} to ${read(high)} over ${pts.length} passes.`;
     h += ` ${link('nisar', 'See every pass in the chart', 'sec-nisar')}. These are values from NASA's preview pictures, on a scale of 0 to 255, not calibrated measurements${step ? '; the measured values above are' : ''}.`;
     out.push(h);

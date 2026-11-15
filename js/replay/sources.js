@@ -52,7 +52,10 @@ export async function gdacsShapes(incident) {
     if (!g) continue;
     const outer = g.type === 'Polygon' ? [g.coordinates[0]] : g.type === 'MultiPolygon' ? g.coordinates.map((poly) => poly[0]) : [];
     for (const ring of outer) {
-      if (ring.length >= 3) polygons.push({ kind: p.Class || '', label: p.polygonlabel || '', intensity: parseFloat(p.intensity) || null, ring: toRing(ring) });
+      // The shaking level is in `intensity`, or only in the label
+      // ("Intensity 4.5") for some events.
+      const level = parseFloat(p.intensity) || parseFloat(String(p.polygonlabel || '').match(/\d+(\.\d+)?/)?.[0]) || null;
+      if (ring.length >= 3) polygons.push({ kind: p.Class || '', label: p.polygonlabel || '', intensity: level, ring: toRing(ring) });
     }
     const paths = g.type === 'LineString' ? [g.coordinates] : g.type === 'MultiLineString' ? g.coordinates : [];
     for (const path of paths) if (path.length >= 2) lines.push({ kind: p.Class || '', points: toRing(path) });
@@ -105,7 +108,9 @@ const FIRE_SPAN = 288 / 2 ** 5;
 
 async function fireTile(date, row, col) {
   const res = await fetch(FIRE_URL.replace('{date}', date).replace('{row}', row).replace('{col}', col), { signal: patient(current) });
-  if (!res.ok) return [];
+  // A tile with no fires in it still answers 200, so anything else is a
+  // failure, and is counted as one: "no fires" must not be said for it.
+  if (!res.ok) throw new Error(`fire tile answered ${res.status}`);
   return tilePoints(await res.arrayBuffer()).map((p) => ({ lat: 90 - (row + p.y) * FIRE_SPAN, lon: -180 + (col + p.x) * FIRE_SPAN }));
 }
 
@@ -127,7 +132,16 @@ export async function fireDetections(lat, lon, radiusKm, dates) {
     if (signal?.aborted) throw new DOMException('The event was closed', 'AbortError');
     const batch = await Promise.all(
       dates.slice(i, i + 4).map(async (date) => {
-        const parts = await Promise.all([...tiles].map((t) => fireTile(date, ...t.split('/').map(Number)).catch(() => [])));
+        let failed = 0;
+        const parts = await Promise.all(
+          [...tiles].map((t) =>
+            fireTile(date, ...t.split('/').map(Number)).catch((err) => {
+              if (err?.name === 'AbortError') throw err;
+              failed++;
+              return [];
+            }),
+          ),
+        );
         const seen = new Set();
         const points = [];
         for (const p of parts.flat()) {
@@ -136,7 +150,7 @@ export async function fireDetections(lat, lon, radiusKm, dates) {
           seen.add(key);
           points.push(p);
         }
-        return { date, points };
+        return { date, points, failed };
       }),
     );
     days.push(...batch);

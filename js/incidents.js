@@ -31,9 +31,19 @@ export function buildIncidents(events) {
   // Union-find over events that describe the same thing in different feeds.
   const parent = events.map((_, i) => i);
   const find = (i) => (parent[i] === i ? i : (parent[i] = find(parent[i])));
+  // The feeds each group holds. A feed lists one event once, so two groups
+  // that both hold a report from the same feed are two events: a mainshock
+  // and its aftershock minutes apart must not become one because a second
+  // feed reports them both.
+  const feeds = events.map((ev) => new Set([ev.source]));
   for (let i = 0; i < events.length; i++) {
     for (let j = i + 1; j < events.length; j++) {
-      if (sameIncident(events[i], events[j])) parent[find(j)] = find(i);
+      if (!sameIncident(events[i], events[j])) continue;
+      const a = find(i);
+      const b = find(j);
+      if (a === b || [...feeds[b]].some((f) => feeds[a].has(f))) continue;
+      parent[b] = a;
+      for (const f of feeds[b]) feeds[a].add(f);
     }
   }
 
@@ -46,7 +56,10 @@ export function buildIncidents(events) {
 
   const incidents = [...groups.values()].map((reports) => {
     reports.sort((a, b) => b.severity - a.severity);
-    const lead = reports[0];
+    // An earthquake's place, time and magnitude are the USGS's when it has
+    // reported it: the other feeds relay or estimate them, and their
+    // "severity" is an alert level, not a magnitude.
+    const lead = (reports[0].category === 'earthquake' && reports.find((r) => r.source === 'usgs')) || reports[0];
     return {
       id: reports.map((r) => r.id).sort()[0],
       category: lead.category,
@@ -55,7 +68,7 @@ export function buildIncidents(events) {
       lon: lead.lon,
       time: Math.min(...reports.map((r) => r.time)),
       endTime: Math.max(...reports.map((r) => r.endTime)),
-      severity: lead.severity,
+      severity: reports[0].severity,
       magnitude: lead.magnitude,
       track: reports.find((r) => r.track)?.track || null,
       reports,

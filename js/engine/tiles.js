@@ -30,7 +30,7 @@ const AHEAD_DOWNLOADS = 8; // of which at most this many for pictures fetched ah
 //   for.
 // - A tile the server answers with its tiny see-through picture is empty
 //   (known by the size of the answer, never decoded).
-const EMPTY_BYTES = 300;
+const EMPTY_BYTES = 340;
 const SHEET_PX = 1024; // the world picture: the level-2 tiles in one piece
 const SHEET_LEVEL = 2;
 const SHEET_CELLS = 128; // its cells: one for each tile of level 7
@@ -172,7 +172,9 @@ const FRAGMENT = /* glsl */ `
         float size = exp2(floor(level));
         float wave = mix(ripples(km / size), ripples(km / (size * 2.0)), fract(level));
         float cover = mask.r;
-        float arrive = smoothstep(-0.15, 0.85, uWater.x - mask.g * uWater.y);
+        // The water of one map arrives over the first half of its step:
+        // from the start of its own day, and all there a day later.
+        float arrive = smoothstep(0.0, 0.5, uWater.x - mask.g * uWater.y);
         float wet = smoothstep(0.1, 0.5, cover) * arrive;
         vec3 water = mix(vec3(0.24, 0.6, 0.84), vec3(0.05, 0.27, 0.5), smoothstep(0.35, 0.95, cover)) * (0.8 + 0.4 * wave);
         color = mix(color, water, wet * 0.8);
@@ -975,8 +977,14 @@ export class TileGlobe {
   heights(z, x, y, tile) {
     const key = `${z}/${x}/${y}`;
     let entry = this.elevation.get(key);
+    // Heights that failed to load are asked for again after a while, at
+    // most three times; until then the coarser level stands in.
+    if (entry?.state === 'missing' && entry.fails < 3 && performance.now() - entry.failedAt > RETRY_MS * entry.fails) {
+      entry.state = 'queued';
+      this.elevationQueue.push(entry);
+    }
     if (!entry) {
-      entry = { key, z, x, y, state: 'queued', h: null, waiting: new Set(), lastUsed: this.frame };
+      entry = { key, z, x, y, state: 'queued', h: null, waiting: new Set(), lastUsed: this.frame, fails: 0 };
       this.elevation.set(key, entry);
       this.elevationQueue.push(entry);
     }
@@ -989,6 +997,9 @@ export class TileGlobe {
     while (this.elevationLoading < 6 && this.elevationQueue.length) {
       const entry = this.elevationQueue.pop();
       if (![...entry.waiting].some((t) => !t.dead && t.mesh.visible)) {
+        // Nobody on screen needs it now. The tiles that asked are marked,
+        // so they shape themselves and ask again when they come back.
+        for (const t of entry.waiting) if (!t.dead) t.shapeDirty = true;
         this.elevation.delete(entry.key);
         continue;
       }
@@ -999,6 +1010,10 @@ export class TileGlobe {
       const done = (ok) => {
         this.elevationLoading--;
         entry.state = ok ? 'ready' : 'missing';
+        if (!ok) {
+          entry.fails++;
+          entry.failedAt = performance.now();
+        }
         if (ok) {
           this.readerCtx.drawImage(img, 0, 0, SIZE, SIZE);
           const px = this.readerCtx.getImageData(0, 0, SIZE, SIZE).data;
@@ -1018,7 +1033,9 @@ export class TileGlobe {
       img.src = ELEVATION_URL.replace('{z}', entry.z).replace('{x}', entry.x).replace('{y}', entry.y);
     }
     if (this.elevation.size > ELEVATION_CACHE) {
-      const old = [...this.elevation.values()].filter((e) => e.state === 'ready').sort((a, b) => a.lastUsed - b.lastUsed);
+      // Failed ones go first: they hold nothing.
+      const rank = (e) => (e.state === 'missing' ? 0 : 1);
+      const old = [...this.elevation.values()].filter((e) => e.state === 'ready' || e.state === 'missing').sort((a, b) => rank(a) - rank(b) || a.lastUsed - b.lastUsed);
       for (const entry of old.slice(0, this.elevation.size - ELEVATION_CACHE * 0.8)) this.elevation.delete(entry.key);
     }
   }
@@ -1275,6 +1292,8 @@ export class TileGlobe {
         entry.fails = (entry.fails || 0) + 1;
       } else entry.fails = 0;
       entry.img = state === 'ready' ? (entry.keep ? this.filtered(picture, entry.keep, entry.tint) : picture) : null;
+      // The copy is what is kept; the picture it was made from is let go.
+      if (state === 'ready' && entry.keep) picture.close?.();
       for (const t of entry.waiting) if (!t.dead) t.dirty = true;
       entry.waiting.clear();
       if (entry.pinned) for (const t of this.tiles.values()) t.dirty = true;
@@ -1431,7 +1450,8 @@ export class TileGlobe {
         const bitmap = await createImageBitmap(blob).catch(() => null);
         // The map service's picture is not held to the colour rule: where a
         // real picture is grey (ice, bare ground), it is the one that says so.
-        seen = bitmap ? this.inspect(bitmap, source !== 'map' && !!entry.layer?.colour) : { faulty: 'it is not a picture' };
+        const fromMap = source === 'map' || (source === 'kept' && kept.headers.get('x-from') === 'map');
+        seen = bitmap ? this.inspect(bitmap, !fromMap && !!entry.layer?.colour, !!entry.layer?.colour) : { faulty: 'it is not a picture' };
         if (seen.faulty) bitmap?.close?.();
       }
       // Nothing here. The map service is believed; the tile service only
@@ -1439,14 +1459,17 @@ export class TileGlobe {
       if (!seen || seen.blank) {
         // (A single byte in the store is this engine's own note that the
         // map service said so on an earlier visit.)
-        const believed = source === 'map' || (source === 'kept' && blob.size === 1) || (!seen && !this.shownAbove(entry));
+        // (A blank picture counts like the tiny empty tile: Sentinel-1's
+        // empty tiles vary in size and are not always under the limit.)
+        const believed = source === 'map' || (source === 'kept' && blob.size === 1) || !this.shownAbove(entry);
         if (believed) {
           if (store && source !== 'kept') store.put(entry.url, new Response(source === 'map' ? new Blob([new Uint8Array(1)]) : blob)).catch(() => {});
           return null;
         }
         why = seen ? seen.faulty : 'it is empty where the level above has a picture';
       } else if (!seen.faulty) {
-        if (store && source !== 'kept') store.put(entry.url, new Response(blob)).catch(() => {});
+        // Kept with a note of which service it came from (see above).
+        if (store && source !== 'kept') store.put(entry.url, new Response(blob, source === 'map' ? { headers: { 'x-from': 'map' } } : undefined)).catch(() => {});
         if (source === 'map') this.mended++;
         entry.cells = seen.cells;
         return seen.picture;
@@ -1652,6 +1675,8 @@ export class TileGlobe {
           const x = (((cx + dx) % n) + n) % n;
           for (const layer of this.layers) {
             if (layer.mask != null || layer.keep) continue;
+            // From this far the world picture is the layer: no tile is drawn.
+            if (layer.sparse && layer.sheet && level <= SHEET_LEVEL + 1) continue;
             const top = Math.min(layer.sparse && level > 2 && level < COARSER_BELOW ? level - 1 : level, layer.maxLevel);
             const entry = this.image(layer, top, x >> (level - top), y >> (level - top), null);
             if (entry.state === 'queued' || entry.state === 'idle') {
@@ -1685,7 +1710,7 @@ export class TileGlobe {
   // Returns { cells, picture } with the 8 × 8 cells that hold anything, or
   // { faulty: why } (with `blank` when it holds nothing). Half see-through
   // pixels in a sound tile (a soft edge) are made fully see-through.
-  inspect(bitmap, colour = false) {
+  inspect(bitmap, colour = false, crisp = true) {
     const ctx = this.readerCtx;
     ctx.clearRect(0, 0, SIZE, SIZE);
     ctx.drawImage(bitmap, 0, 0, SIZE, SIZE);
@@ -1713,7 +1738,9 @@ export class TileGlobe {
         }
       }
     }
-    if (half > 0.2 * (half + solid)) return { faulty: 'its transparency is noise' };
+    // NISAR's tiles have no soft edges at all (`crisp`); Sentinel-1's do,
+    // up to a fifth of a tile, so they are given more room.
+    if (half > (crisp ? 0.2 : 0.35) * (half + solid)) return { faulty: 'its transparency is noise' };
     if (solid > 600 && black > 0.9 * solid) return { faulty: 'it is solid black' };
     if (colour && solid > 600 && grey > 0.6 * solid) return { faulty: 'it is grey, and this layer is in colour' };
     if (!solid) return { faulty: 'it holds nothing, yet is not the empty tile', blank: true };

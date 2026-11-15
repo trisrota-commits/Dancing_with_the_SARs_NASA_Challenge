@@ -435,6 +435,91 @@ with glitches". Three separate causes, each fixed where it arose:
   10.6 s (was 31.5 s), failed requests 11 (was 157), no tile left
   standing in (was all 29).
 
+### Bug hunt: three reviews and four stress tests (15 Nov, night)
+
+No features: the lead asked for a night of finding and fixing. Three
+independent code reviews (map engine, app state, data and timelines) and
+hands-on tests: each outside service cut off in turn, laptop-size
+windows, a long session, share links opened cold.
+
+**Accuracy (the project's first rule)**
+- A merged earthquake showed GDACS's magnitude under the label USGS,
+  because the lead report was picked by "severity", which is an alert
+  level for one feed and a magnitude for the other. Indonesia read 7.7;
+  USGS says 7.8. Now the USGS report leads an earthquake when there is
+  one (`js/incidents.js`), and the line names the feed it really is from.
+- Two earthquakes minutes apart could merge into one once a second feed
+  reported both. A group now never holds two reports from one feed.
+- A fire or flood longer than the days of satellite data shown (15 and
+  22) read "Before the event" for its first weeks. Plans carry `began`,
+  and the bar says "Under way · the satellite data shown here starts on …".
+- Flood water appeared a day before its map's date. It now starts on its
+  own day and is all there a day later (the `+ 0.5` in the flood clock is
+  gone; the shader's fade is `smoothstep(0.0, 0.5, …)`).
+- A failed request read as "none": "0 later quakes", "No shaking map has
+  been published", "No satellite fire detections". Failures are now told
+  apart and worded as "could not be loaded".
+- "3 days after" was said of a pass on day 3 of a 59-day flood. For an
+  event that lasts the text says "after it began", and an interferogram
+  "spans the start of the event" unless it reaches past its end.
+- GDACS shaking zones whose level is only in their label were dropped.
+
+**Things that broke or got stuck**
+- Inside an event, opening the place's passes and then anything that
+  takes the globe left the event with no timeline. `take()` now brings it
+  back where the camera is (`Replay.start(…, { still: true })`), and
+  `startLapse` takes the globe only once it has passes to show.
+- The opening card stayed on screen after a click on a dot, a report or
+  a share link. `openPanel` closes it; Escape closes it first.
+- Pass marks were missing when the same event was opened twice.
+- With "Compare with Sentinel-1" on, NISAR's strips showed on Sentinel-1's
+  side; the divider jumped back to the middle on every date step.
+- A place did not drop the answers still on their way for the event open
+  before it.
+- An emptied date field threw on every step.
+
+**Reliability**
+- If the Esri basemap cannot be reached the globe was black. The engine
+  reports it (`onBaseFailed`), NASA's Blue Marble takes over and the menu
+  says so.
+- With no feed reachable the reports bar said "Loading the feeds…" for ever.
+- Height tiles: a request dropped while its tile was off screen was never
+  asked for again, and a failed one was final. Both are retried now.
+- Sentinel-1: its empty tiles vary in size and its tiles have soft edges,
+  so the soundness check cost extra requests and could reject sound
+  tiles. A blank answer counts like the empty tile; the transparency rule
+  is 20 % for NISAR and 35 % for other layers.
+- The picture memory cache miscounted pictures evicted while loading.
+
+**Speed**
+- The search made when an event is pointed at never matched the one made
+  on the click, because the end time was the current millisecond. Both
+  now end on the hour (`searchUntil`), so the click finds the answer.
+- The archive window downloaded all of EONET since 2011 (23 MB); with an
+  end date it is 10 MB.
+- Nothing is fetched ahead of need for levels the world picture covers.
+
+**Layout**
+- On a wide screen the opening card stands at the left, beside the globe,
+  instead of on top of it; on a short screen it no longer covers the
+  reports bar.
+- With menu and details both open the timeline bar sits between them.
+
+**Found and left**
+- A NISAR scene that crosses the date line (Fiji, Chukotka, the Ross Sea)
+  is half-read: CMR gives two outlines and only the first is used, so a
+  point in the other half gets no brightness sample. No story or place
+  sits there.
+- 244 of 280 archive floods from EONET carry an outline and no point, and
+  are skipped (`js/feeds.js`).
+- A share link to an event that no longer exists opens nothing and says
+  nothing.
+- A world picture that fails to load is only asked for again when
+  something repaints.
+
+Tests: 29 unit tests (4 new, `tests/events.test.mjs`), smoke test, and
+the zoom-and-drag over Colorado (111 damaged tiles, 111 replaced).
+
 ### Visual rules (lead, 14 Nov, night)
 
 The lead, after one screenshot confused them: no arbitrary colours; one

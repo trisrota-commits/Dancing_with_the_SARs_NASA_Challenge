@@ -237,7 +237,20 @@ function focusLayout(on) {
 
 // Fills the details panel. An event opens quietly: the panel is filled but
 // stays shut, and the small card shows until "Show details" is pressed.
+// The opening card is done once the visitor has opened anything, by its own
+// buttons or by a dot, a report, a search hit or a link.
+function closeWelcome() {
+  if ($('welcome').hidden) return;
+  $('welcome').hidden = true;
+  try {
+    localStorage.setItem('sars-welcome', '1');
+  } catch {
+    /* nothing to remember it with */
+  }
+}
+
 function openPanel(html, quiet = false, fold = true) {
+  closeWelcome();
   $('detail').innerHTML = html;
   $('right').hidden = quiet;
   $('card').hidden = !quiet;
@@ -382,6 +395,7 @@ function renderReplay(u) {
     $('replay-knob').style.left = '100%';
     $('replay-span').style.width = '0';
     $('replay-marks').textContent = '';
+    delete $('replay-marks').dataset.at;
     if (list) list.innerHTML = '<p class="spinner">Loading the event history…</p>';
     return;
   }
@@ -485,12 +499,18 @@ function syncNisar(ms) {
   return null;
 }
 
+// Until when an event's passes are searched: 75 days after it ended, or
+// now. "Now" is the end of the current hour, so that the search made when
+// an event is pointed at and the one made when it is opened are the same
+// question and the second finds the first one's answer.
+const searchUntil = (inc) => Math.min(Math.ceil(Date.now() / 3600_000) * 3600_000, inc.endTime + 75 * DAY);
+
 // Gets an event ready before it is opened: the search for its passes, and
 // the small picture of the pass that would show. Called for the event the
 // pointer rests on and for the one the opening card offers, so that a click
 // finds the answers already here. `fully` also fetches the large picture.
 function warmIncident(inc, fully = false) {
-  passesAt(inc.lat, inc.lon, inc.time - NISAR_LOOKBACK_DAYS * DAY, Math.min(Date.now(), inc.endTime + 75 * DAY))
+  passesAt(inc.lat, inc.lon, inc.time - NISAR_LOOKBACK_DAYS * DAY, searchUntil(inc))
     .then((backscatter) => {
       const pass = timelinePasses(inc, { backscatter }).pop();
       if (!pass) return;
@@ -540,7 +560,8 @@ function incidentHtml(inc, radar) {
     ['When', inc.endTime - inc.time > 3600_000 ? `${utc(inc.time)} → ${utc(inc.endTime)}` : `${utc(inc.time)} (${ago(inc.time)})`],
     ['Where', where(inc.lat, inc.lon)],
     ['Size', size(inc.magnitude)],
-    ['Reported by', `${inc.reports.length} ${inc.reports.length > 1 ? 'feeds, merged into one event' : 'feed'}`],
+    // Feeds, not reports: one feed can list an event twice.
+    ['Reported by', new Set(inc.reports.map((r) => r.source)).size > 1 ? `${new Set(inc.reports.map((r) => r.source)).size} feeds, merged into one event` : `1 feed${inc.reports.length > 1 ? `, in ${inc.reports.length} reports` : ''}`],
   ].filter(([, v]) => v);
 
   const reports = inc.reports
@@ -698,7 +719,7 @@ async function selectIncident(inc, fly, intro = '') {
   // The passes come first and alone: they are all the radar picture and the
   // timeline need, so those appear without waiting for the rest.
   const from = inc.time - NISAR_LOOKBACK_DAYS * DAY;
-  const to = Math.min(Date.now(), inc.endTime + 75 * DAY);
+  const to = searchUntil(inc);
   const rest = Promise.all([scenesAt(inc.lat, inc.lon, from, to), newestAt(inc.lat, inc.lon).catch(() => [])]);
   rest.catch(() => {});
   passesAt(inc.lat, inc.lon, from, to)
@@ -742,7 +763,8 @@ function placePasses(inc, sel) {
   sel.passes = timelinePasses(inc, sel.found);
   const earlier = sel.passes.filter((x) => x.time < inc.time);
   sel.reach = earlier.length ? earlier[Math.max(0, earlier.length - 2)].time - DAY : null;
-  replay.extend(sel.reach, sel.passes.map((x) => x.time));
+  // (Not while the bar shows the passes of a place opened inside the event.)
+  if (!replay.plan?.lapse) replay.extend(sel.reach, sel.passes.map((x) => x.time));
   // The newest pass goes up now, without waiting for the event's own history
   // (fire detections, water maps) to arrive: the timeline will find it
   // already there. An earthquake opens on its wave and on the pass before
@@ -964,7 +986,8 @@ function take(owner) {
     // Inside an event that leaves the bar empty: the event's own timeline
     // comes back, where the camera is. ("Back to the event" starts it itself.)
     const sel = state.selected;
-    if (sel?.kind === 'incident' && owner !== 'timeline') {
+    // (Not for 'none': that is the selection itself being left.)
+    if (sel?.kind === 'incident' && owner !== 'timeline' && owner !== 'none') {
       replay.start(sel.incident, { still: true });
       if (sel.passes) replay.extend(sel.reach, sel.passes.map((x) => x.time));
     }
@@ -975,8 +998,9 @@ function take(owner) {
   if (replay.timeline) replay.report();
   setLegend(null);
   globe.clearScenes();
-  // The divider stays up while the two radar wavelengths are being compared.
-  if (state.bands) showBandSplit();
+  // The divider stays up, where it is, while the two radar wavelengths
+  // are being compared.
+  if (state.bands) showBandSplit(false);
   else $('split').hidden = true;
   state.change = null;
   const out = $('change-out');
@@ -1084,7 +1108,9 @@ async function openLink() {
   }
   if (key !== 'event') return;
   const find = () => state.incidents.find((i) => i.reports.some((r) => r.id === value));
-  for (let tries = 0; tries < 20 && !find(); tries++) await new Promise((r) => setTimeout(r, 700));
+  // Until the feeds have all answered (or failed), at most 14 seconds.
+  const answered = () => Object.keys(FEEDS).every((k) => state.feedStatus[k]);
+  for (let tries = 0; tries < 20 && !find() && !answered(); tries++) await new Promise((r) => setTimeout(r, 700));
   if (!find() && !state.archive) {
     $('window').value = 'nisar';
     await $('window').onchange({ target: $('window') });
@@ -1423,8 +1449,6 @@ async function startLapse(stackIndex = 0, all = false) {
   const run = (state.lapseRun = (state.lapseRun || 0) + 1);
   const look = state.lookup;
   const stale = () => run !== state.lapseRun || look !== state.lookup || !$('lapse');
-  take('lapse');
-  replay.stop();
   box.innerHTML = "<p class=\"spinner\">Looking up NISAR's passes over this spot…</p>";
   let stacks;
   try {
@@ -1438,6 +1462,10 @@ async function startLapse(stackIndex = 0, all = false) {
     box.innerHTML = '<p class="note">NISAR has not imaged this spot at least twice on the same track yet. Open ocean is mostly not imaged.</p>';
     return;
   }
+  // Only now is the globe taken: had the search found nothing, an event's
+  // own timeline would have been closed for no reason.
+  take('lapse');
+  replay.stop();
   const stack = stacks[stackIndex];
   const passes = stack.scenes; // every placeable pass of the track, oldest first
   const pol = stack.pol?.co ? stack.pol : { co: 'Radar', cross: null };
@@ -1524,6 +1552,7 @@ function showLapsePass(lapse, ms) {
   if (i < 0) {
     lapse.sharp = -1;
     globe.clearScenes();
+    setLegend(null);
     return;
   }
   if (moved && lapse.sound && replay.playing) playPass(lapse.series[i]);
@@ -1964,6 +1993,7 @@ function drawPlaces() {
 async function selectPlace(place, fly) {
   endCompare();
   replay.stop();
+  state.lookup++;
   const kind = PLACE_KINDS[place.kind];
   state.selected = { kind: 'site', place, incident: { lat: place.lat, lon: place.lon, related: [] } };
   setLink(`place=${place.id}`);
@@ -2143,6 +2173,8 @@ function overlayDay(key, date) {
 }
 
 function applyLayers() {
+  // A date field that was emptied goes back to the newest day.
+  if (!$('date').value) $('date').value = $('date').max;
   const date = $('date').value;
   globe.setNisarTiles($('nisar-tiles').checked, date, +$('stack').value);
   for (const key of Object.keys(OVERLAYS)) {
@@ -2167,17 +2199,20 @@ function applyLayers() {
   }
   $('nisar-tiles-key').hidden = !$('nisar-tiles').checked;
   // Two wavelengths side by side, for the same days.
+  const compared = state.bands;
   state.bands = $('bands').checked;
   globe.setBandCompare(state.bands, date, Math.min(3, +$('stack').value));
-  if (state.bands) showBandSplit();
+  // Switched on: the divider appears in the middle. A new date or another
+  // layer leaves it where the reader put it.
+  if (state.bands) showBandSplit(!compared);
   else if (!globe.pictures.some((p) => p.side)) $('split').hidden = true;
 }
 
-function showBandSplit() {
+function showBandSplit(centre = true) {
   $('split-before').textContent = 'NISAR · L-band, 24 cm';
   $('split-after').textContent = 'Sentinel-1 · C-band, 5.6 cm';
   $('split').hidden = false;
-  setSplit(0.5);
+  if (centre) setSplit(0.5);
 }
 
 function shiftDate(days) {
@@ -2335,6 +2370,8 @@ async function start() {
   $('close').onclick = stepBack;
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') hideHere();
+    // Escape closes the opening card first, then steps back from a selection.
+    if (e.key === 'Escape' && !$('welcome').hidden) return $('welcome-close').click();
     if (e.key === 'Escape' && state.selected && !e.target.closest('#search')) stepBack();
     // Rows that act as buttons answer to the keyboard too.
     if ((e.key === 'Enter' || e.key === ' ') && e.target.matches?.('li[role="button"]')) {
@@ -2457,14 +2494,6 @@ async function start() {
     $('menu').setAttribute('aria-expanded', 'false');
     menu.folded = true;
   }
-  const closeWelcome = () => {
-    $('welcome').hidden = true;
-    try {
-      localStorage.setItem('sars-welcome', '1');
-    } catch {
-      /* nothing to remember it with */
-    }
-  };
   $('welcome-story').onclick = () => {
     closeWelcome();
     openStory(STORIES[0].id);
