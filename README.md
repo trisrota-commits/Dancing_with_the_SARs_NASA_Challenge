@@ -288,6 +288,8 @@ Three people built this during the NASA Space Apps Challenge 2026, on 14
 and 15 November. What each brought in is taken from the repository's pull
 requests and issues.
 
+- `docs/PAST_WINNERS.md` – all Global Winners from 2022 to 2025 by award,
+  with links, and what they suggest for this project
 - **[LucidPaths](https://github.com/LucidPaths)**, project lead. Set the
   direction and the rules the app follows, decided what was built and what
   was cut, and tested every version by hand. Brought in the globe engine,
