@@ -1,0 +1,76 @@
+{
+ "id": "event-usgs-us6000u2mq",
+ "name": "M 6.9 - 72 km NE of Ozernovskiy, Russia",
+ "lat": 52.0153,
+ "lon": 157.133,
+ "radiusKm": 25,
+ "track": "161-D-062-DHDH",
+ "setup": {
+  "lat": 52.0153,
+  "lon": 157.133,
+  "seriesRadiusM": 500,
+  "mapRadiusM": 6000,
+  "mapPol": "co"
+ },
+ "event": 1792108800000.0,
+ "pols": [
+  "HH",
+  "HV"
+ ],
+ "series": [
+  {
+   "time": 1788598700000,
+   "hh": -8.02,
+   "hv": -13.8,
+   "pixels": 1962,
+   "file": "NISAR_L2_PR_GCOV_029_161_D_062_2005_DHDH_A_20260905T085820_20260905T085856_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1789635500000,
+   "hh": -7.81,
+   "hv": -13.86,
+   "pixels": 1962,
+   "file": "NISAR_L2_PR_GCOV_030_161_D_062_2005_DHDH_A_20260917T085820_20260917T085856_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1790672300000,
+   "hh": -7.62,
+   "hv": -13.5,
+   "pixels": 1962,
+   "file": "NISAR_L2_PR_GCOV_031_161_D_062_2005_DHDH_A_20260929T085820_20260929T085856_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1792745900000,
+   "hh": -9.1,
+   "hv": -15.79,
+   "pixels": 1962,
+   "file": "NISAR_L2_PR_GCOV_033_161_D_062_2005_DHDH_A_20261023T085820_20261023T085856_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1793782701000,
+   "hh": -10.14,
+   "hv": -15.87,
+   "pixels": 1962,
+   "file": "NISAR_L2_PR_GCOV_034_161_D_062_2005_DHDH_A_20261104T085821_20261104T085856_P05036_N_F_J_001.h5"
+  }
+ ],
+ "change": {
+  "before": 1790672300000,
+  "after": 1792745900000,
+  "pol": "HH",
+  "image": "event-usgs-us6000u2mq_change.png",
+  "bounds": {
+   "west": 157.04542411147708,
+   "east": 157.22057588852294,
+   "south": 51.96140132950054,
+   "north": 52.06919867049947
+  },
+  "weakerPct": 2.5,
+  "strongerPct": 1.1,
+  "spansEvent": true
+ },
+ "firstDrop": null,
+ "summary": "Across the event of 2026-10-16: between 2026-09-29 and 2026-10-23, HH backscatter here changed by -1.5 dB and HV by -2.3 dB (mean within 500 m). Across the mapped area, 2% got at least 3 dB weaker and 1% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 5 passes on track 161-D-062-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-10-16, and 'before' the last pass before it.",
+ "generated": "2026-11-15T17:08:27Z"
+}

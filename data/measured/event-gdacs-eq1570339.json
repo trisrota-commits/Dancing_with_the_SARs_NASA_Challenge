@@ -1,0 +1,83 @@
+{
+ "id": "event-gdacs-eq1570339",
+ "name": "M 7.7 - 10 km WSW of Pitaloza Arriba, Panama",
+ "lat": 7.6069,
+ "lon": -80.7566,
+ "radiusKm": 25,
+ "track": "040-D-085-DHDH",
+ "setup": {
+  "lat": 7.6069,
+  "lon": -80.7566,
+  "seriesRadiusM": 500,
+  "mapRadiusM": 6000,
+  "mapPol": "co"
+ },
+ "event": 1791504000000.0,
+ "pols": [
+  "HH",
+  "HV"
+ ],
+ "series": [
+  {
+   "time": 1787874316000,
+   "hh": -4.61,
+   "hv": -9.92,
+   "pixels": 7857,
+   "file": "NISAR_L2_PR_GCOV_029_040_D_085_4005_DHDH_A_20260827T234516_20260827T234532_P05023_N_P_J_001.h5"
+  },
+  {
+   "time": 1788911116000,
+   "hh": -4.58,
+   "hv": -10.0,
+   "pixels": 7857,
+   "file": "NISAR_L2_PR_GCOV_030_040_D_085_4005_DHDH_A_20260908T234516_20260908T234532_P05023_N_P_J_001.h5"
+  },
+  {
+   "time": 1789947916000,
+   "hh": -4.22,
+   "hv": -9.42,
+   "pixels": 7857,
+   "file": "NISAR_L2_PR_GCOV_031_040_D_085_4005_DHDH_A_20260920T234516_20260920T234532_P05023_N_P_J_001.h5"
+  },
+  {
+   "time": 1792021516000,
+   "hh": -4.15,
+   "hv": -9.62,
+   "pixels": 7857,
+   "file": "NISAR_L2_PR_GCOV_033_040_D_085_4005_DHDH_A_20261014T234516_20261014T234533_P05023_N_P_J_001.h5"
+  },
+  {
+   "time": 1793058316000,
+   "hh": -4.55,
+   "hv": -9.8,
+   "pixels": 7857,
+   "file": "NISAR_L2_PR_GCOV_034_040_D_085_4005_DHDH_A_20261026T234516_20261026T234533_P05036_N_P_J_001.h5"
+  },
+  {
+   "time": 1794095117000,
+   "hh": -4.57,
+   "hv": -9.67,
+   "pixels": 7857,
+   "file": "NISAR_L2_PR_GCOV_035_040_D_085_4005_DHDH_A_20261107T234517_20261107T234534_P05036_N_P_J_001.h5"
+  }
+ ],
+ "change": {
+  "before": 1789947916000,
+  "after": 1792021516000,
+  "pol": "HH",
+  "image": "event-gdacs-eq1570339_change.png",
+  "bounds": {
+   "west": -80.81097721139916,
+   "east": -80.70222278860085,
+   "south": 7.55300132950054,
+   "north": 7.660798670499461
+  },
+  "weakerPct": 1.1,
+  "strongerPct": 1.9,
+  "spansEvent": true
+ },
+ "firstDrop": null,
+ "summary": "Across the event of 2026-10-09: between 2026-09-20 and 2026-10-14, HH backscatter here changed by +0.1 dB and HV by -0.2 dB (mean within 500 m). Across the mapped area, 1% got at least 3 dB weaker and 2% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 6 passes on track 040-D-085-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-10-09, and 'before' the last pass before it.",
+ "generated": "2026-11-15T17:14:29Z"
+}

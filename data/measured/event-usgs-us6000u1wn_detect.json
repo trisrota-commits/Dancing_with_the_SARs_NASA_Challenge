@@ -1,0 +1,95 @@
+{
+ "id": "event-usgs-us6000u1wn",
+ "name": "M 6.1 - 15 km W of R\u00edo Grande, Panama",
+ "track": "141-D-085-DHDH",
+ "cellM": 500.0,
+ "cells": 576,
+ "passes": 6,
+ "from": "2026-09-03",
+ "to": "2026-11-02",
+ "falseAlarm": 0.01,
+ "event": {
+  "time": 1791763200000.0,
+  "date": "2026-10-12",
+  "firstPassAfter": "2026-10-21",
+  "stood": 0.0,
+  "quiet": 0.0048,
+  "stillNext": null,
+  "newVersion": {
+   "from": "P05023",
+   "to": "P05036"
+  },
+  "baseline": 4
+ },
+ "most": {
+  "date": "2026-10-09",
+  "time": 1791590015000,
+  "stood": 0.0,
+  "quiet": 0.0046
+ },
+ "picture": {
+  "date": "2026-10-21",
+  "time": 1792626815000,
+  "baselineFrom": "2026-09-03",
+  "baselineTo": "2026-10-09",
+  "stood": 0.0,
+  "quiet": 0.0048,
+  "n": 24,
+  "image": "event-usgs-us6000u1wn_stood.png",
+  "bounds": {
+   "west": -81.52589034464287,
+   "east": -81.41710965535714,
+   "south": 7.65590132950054,
+   "north": 7.763698670499461
+  }
+ },
+ "byDate": [
+  {
+   "time": 1791590015000,
+   "date": "2026-10-09",
+   "baseline": 3,
+   "channels": 2,
+   "threshold": 14.88,
+   "over": 0.0,
+   "stood": 0.0,
+   "quiet": 0.0046,
+   "rose": 0.0,
+   "fell": 0.0,
+   "afterEvent": false
+  },
+  {
+   "time": 1792626815000,
+   "date": "2026-10-21",
+   "baseline": 4,
+   "channels": 2,
+   "threshold": 8.73,
+   "over": 0.0052,
+   "stood": 0.0,
+   "quiet": 0.0048,
+   "rose": 0.0,
+   "fell": 0.0,
+   "afterEvent": true,
+   "newVersion": {
+    "from": "P05023",
+    "to": "P05036"
+   }
+  },
+  {
+   "time": 1793663616000,
+   "date": "2026-11-02",
+   "baseline": 4,
+   "channels": 2,
+   "threshold": 8.73,
+   "over": 0.0052,
+   "stood": 0.0,
+   "quiet": 0.0048,
+   "rose": 0.0,
+   "fell": 0.0,
+   "afterEvent": true
+  }
+ ],
+ "summary": "On NISAR's first pass after the event of 2026-10-12 (2026-10-21), 0.0 % of the cells stood out from what they had read on the 4 passes before it. On those passes themselves the same rules flag 0.5 %.",
+ "method": "NISAR L2 GCOV backscatter in cells of 500 m. From each pass the middle of all cells is taken away, so that what moved the whole area alike drops out. Each cell is then set against its own usual value and spread over the passes before (at an event: before the event; at least 3, at most 10), in HH and, where recorded, HV. The threshold is the score that 1% of the cells exceeded when each baseline pass was judged against the others. A cell counts only if at least 2 of its eight neighbours are over the threshold too.",
+ "limits": "It says that the ground changed and where, not why. A baseline of a few passes knows nothing of the season: a crop growing or ground freezing stands out as well. Cells next to each other share speckle and weather, so a cluster is weaker evidence than its size suggests.",
+ "generated": "2026-11-15T17:16:48Z"
+}

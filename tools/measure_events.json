@@ -50,6 +50,30 @@
       "picked": "2026-11-15"
     },
     {
+      "id": "event-usgs-us7000tu4f",
+      "event_id": "usgs:us7000tu4f",
+      "name": "M 6.2 - 43 km ESE of Port-Olry, Vanuatu",
+      "category": "earthquake",
+      "kind": "Earthquake",
+      "lat": -15.1891,
+      "lon": 167.4523,
+      "event": "2026-10-29",
+      "start": "2026-09-14",
+      "picked": "2026-11-15"
+    },
+    {
+      "id": "event-usgs-us6000u4rf",
+      "event_id": "usgs:us6000u4rf",
+      "name": "M 6.1 - 22 km ENE of Port-Olry, Vanuatu",
+      "category": "earthquake",
+      "kind": "Earthquake",
+      "lat": -14.9726,
+      "lon": 167.2727,
+      "event": "2026-10-25",
+      "start": "2026-09-10",
+      "picked": "2026-11-15"
+    },
+    {
       "id": "event-gdacs-fl1104253",
       "event_id": "gdacs:FL1104253",
       "name": "Flood in Indonesia",
@@ -95,6 +119,102 @@
       "lon": 66.1855,
       "event": "2026-10-17",
       "start": "2026-09-02",
+      "picked": "2026-11-15"
+    },
+    {
+      "id": "event-usgs-us6000u2mq",
+      "event_id": "usgs:us6000u2mq",
+      "name": "M 6.9 - 72 km NE of Ozernovskiy, Russia",
+      "category": "earthquake",
+      "kind": "Earthquake",
+      "lat": 52.0153,
+      "lon": 157.133,
+      "event": "2026-10-16",
+      "start": "2026-09-01",
+      "picked": "2026-11-15"
+    },
+    {
+      "id": "event-usgs-us6000u1wn",
+      "event_id": "usgs:us6000u1wn",
+      "name": "M 6.1 - 15 km W of Río Grande, Panama",
+      "category": "earthquake",
+      "kind": "Earthquake",
+      "lat": 7.7098,
+      "lon": -81.4715,
+      "event": "2026-10-12",
+      "start": "2026-08-28",
+      "picked": "2026-11-15"
+    },
+    {
+      "id": "event-usgs-us6000u1kv",
+      "event_id": "usgs:us6000u1kv",
+      "name": "M 6.2 - 86 km SSE of Panguna, Papua New Guinea",
+      "category": "earthquake",
+      "kind": "Earthquake",
+      "lat": -7.0483,
+      "lon": 155.7498,
+      "event": "2026-10-11",
+      "start": "2026-08-27",
+      "picked": "2026-11-15"
+    },
+    {
+      "id": "event-gdacs-vo1000152",
+      "event_id": "gdacs:VO1000152",
+      "name": "Eruption  Kanlaon",
+      "category": "volcano",
+      "kind": "Volcano",
+      "lat": 10.412,
+      "lon": 123.132,
+      "event": "2026-10-10",
+      "start": "2026-08-26",
+      "picked": "2026-11-15"
+    },
+    {
+      "id": "event-usgs-us6000u19w",
+      "event_id": "usgs:us6000u19w",
+      "name": "M 6.6 - 13 km WSW of Río Grande, Panama",
+      "category": "earthquake",
+      "kind": "Earthquake",
+      "lat": 7.676,
+      "lon": -81.4515,
+      "event": "2026-10-09",
+      "start": "2026-08-25",
+      "picked": "2026-11-15"
+    },
+    {
+      "id": "event-gdacs-eq1570339",
+      "event_id": "gdacs:EQ1570339",
+      "name": "M 7.7 - 10 km WSW of Pitaloza Arriba, Panama",
+      "category": "earthquake",
+      "kind": "Earthquake",
+      "lat": 7.6069,
+      "lon": -80.7566,
+      "event": "2026-10-09",
+      "start": "2026-08-25",
+      "picked": "2026-11-15"
+    },
+    {
+      "id": "event-gdacs-eq1570077",
+      "event_id": "gdacs:EQ1570077",
+      "name": "M 6.3 - 117 km NE of Norsup, Vanuatu",
+      "category": "earthquake",
+      "kind": "Earthquake",
+      "lat": -15.4332,
+      "lon": 168.2783,
+      "event": "2026-10-08",
+      "start": "2026-08-24",
+      "picked": "2026-11-15"
+    },
+    {
+      "id": "event-gdacs-vo1000151",
+      "event_id": "gdacs:VO1000151",
+      "name": "Eruption  Taal",
+      "category": "volcano",
+      "kind": "Volcano",
+      "lat": 14.0106,
+      "lon": 120.9975,
+      "event": "2026-10-08",
+      "start": "2026-08-24",
       "picked": "2026-11-15"
     },
     {
