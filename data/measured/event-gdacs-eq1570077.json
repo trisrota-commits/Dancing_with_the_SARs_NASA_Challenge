@@ -1,0 +1,90 @@
+{
+ "id": "event-gdacs-eq1570077",
+ "name": "M 6.3 - 117 km NE of Norsup, Vanuatu",
+ "lat": -15.4332,
+ "lon": 168.2783,
+ "radiusKm": 25,
+ "track": "022-A-170-DHDH",
+ "setup": {
+  "lat": -15.4332,
+  "lon": 168.2783,
+  "seriesRadiusM": 500,
+  "mapRadiusM": 6000,
+  "mapPol": "co"
+ },
+ "event": 1791417600000.0,
+ "pols": [
+  "HH",
+  "HV"
+ ],
+ "series": [
+  {
+   "time": 1787769341000,
+   "hh": -18.7,
+   "hv": -25.94,
+   "pixels": 1959,
+   "file": "NISAR_L2_PR_GCOV_029_022_A_170_2005_DHDH_A_20260826T183541_20260826T183616_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1788806141000,
+   "hh": -18.42,
+   "hv": -25.94,
+   "pixels": 1959,
+   "file": "NISAR_L2_PR_GCOV_030_022_A_170_2005_DHDH_A_20260907T183541_20260907T183616_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1789842941000,
+   "hh": -17.76,
+   "hv": -25.47,
+   "pixels": 1959,
+   "file": "NISAR_L2_PR_GCOV_031_022_A_170_2005_DHDH_A_20260919T183541_20260919T183616_P05023_F_F_J_001.h5"
+  },
+  {
+   "time": 1790879741000,
+   "hh": -19.09,
+   "hv": -25.88,
+   "pixels": 1959,
+   "file": "NISAR_L2_PR_GCOV_032_022_A_170_2005_DHDH_A_20261001T183541_20261001T183616_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1791916541000,
+   "hh": -17.93,
+   "hv": -25.42,
+   "pixels": 1959,
+   "file": "NISAR_L2_PR_GCOV_033_022_A_170_2005_DHDH_A_20261013T183541_20261013T183616_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1792953342000,
+   "hh": -18.95,
+   "hv": -25.51,
+   "pixels": 1959,
+   "file": "NISAR_L2_PR_GCOV_034_022_A_170_2005_DHDH_A_20261025T183542_20261025T183616_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1793990142000,
+   "hh": -19.29,
+   "hv": -25.45,
+   "pixels": 1959,
+   "file": "NISAR_L2_PR_GCOV_035_022_A_170_2005_DHDH_A_20261106T183542_20261106T183617_P05036_N_F_J_001.h5"
+  }
+ ],
+ "change": {
+  "before": 1790879741000,
+  "after": 1791916541000,
+  "pol": "HH",
+  "image": "event-gdacs-eq1570077_change.png",
+  "bounds": {
+   "west": 168.22238511513657,
+   "east": 168.33421488486343,
+   "south": -15.48709867049946,
+   "north": -15.379301329500539
+  },
+  "weakerPct": 0.0,
+  "strongerPct": 0.7,
+  "spansEvent": true
+ },
+ "firstDrop": null,
+ "summary": "Across the event of 2026-10-08: between 2026-10-01 and 2026-10-13, HH backscatter here changed by +1.2 dB and HV by +0.5 dB (mean within 500 m). Across the mapped area, 0% got at least 3 dB weaker and 1% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 7 passes on track 022-A-170-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-10-08, and 'before' the last pass before it.",
+ "generated": "2026-11-15T17:15:45Z"
+}

@@ -1,0 +1,92 @@
+{
+ "id": "event-gdacs-vo1000151",
+ "name": "Eruption  Taal",
+ "track": "140-A-009-DHDH",
+ "cellM": 500.0,
+ "cells": 576,
+ "passes": 6,
+ "from": "2026-09-03",
+ "to": "2026-11-02",
+ "falseAlarm": 0.01,
+ "event": {
+  "time": 1791417600000.0,
+  "date": "2026-10-08",
+  "firstPassAfter": "2026-10-09",
+  "stood": 0.0,
+  "quiet": 0.0029,
+  "stillNext": null,
+  "newVersion": null,
+  "baseline": 3
+ },
+ "most": {
+  "date": "2026-11-02",
+  "time": 1793655032000,
+  "stood": 0.0191,
+  "quiet": 0.0029
+ },
+ "picture": {
+  "date": "2026-10-09",
+  "time": 1791581431000,
+  "baselineFrom": "2026-09-03",
+  "baselineTo": "2026-09-27",
+  "stood": 0.0,
+  "quiet": 0.0029,
+  "n": 24,
+  "image": "event-gdacs-vo1000151_stood.png",
+  "bounds": {
+   "west": 120.94194873222085,
+   "east": 121.05305126777915,
+   "south": 13.95670132950054,
+   "north": 14.06449867049946
+  }
+ },
+ "byDate": [
+  {
+   "time": 1791581431000,
+   "date": "2026-10-09",
+   "baseline": 3,
+   "channels": 2,
+   "threshold": 13.39,
+   "over": 0.0035,
+   "stood": 0.0,
+   "quiet": 0.0029,
+   "rose": 0.0,
+   "fell": 0.0,
+   "afterEvent": true
+  },
+  {
+   "time": 1792618232000,
+   "date": "2026-10-21",
+   "baseline": 3,
+   "channels": 2,
+   "threshold": 13.39,
+   "over": 0.0035,
+   "stood": 0.0,
+   "quiet": 0.0029,
+   "rose": 0.0,
+   "fell": 0.0,
+   "afterEvent": true,
+   "newVersion": {
+    "from": "P05023",
+    "to": "P05036"
+   }
+  },
+  {
+   "time": 1793655032000,
+   "date": "2026-11-02",
+   "baseline": 3,
+   "channels": 2,
+   "threshold": 13.39,
+   "over": 0.0208,
+   "stood": 0.0191,
+   "quiet": 0.0029,
+   "rose": 0.0,
+   "fell": 0.0191,
+   "afterEvent": true
+  }
+ ],
+ "summary": "On NISAR's first pass after the event of 2026-10-08 (2026-10-09), 0.0 % of the cells stood out from what they had read on the 3 passes before it. On those passes themselves the same rules flag 0.3 %.",
+ "method": "NISAR L2 GCOV backscatter in cells of 500 m. From each pass the middle of all cells is taken away, so that what moved the whole area alike drops out. Each cell is then set against its own usual value and spread over the passes before (at an event: before the event; at least 3, at most 10), in HH and, where recorded, HV. The threshold is the score that 1% of the cells exceeded when each baseline pass was judged against the others. A cell counts only if at least 2 of its eight neighbours are over the threshold too.",
+ "limits": "It says that the ground changed and where, not why. A baseline of a few passes knows nothing of the season: a crop growing or ground freezing stands out as well. Cells next to each other share speckle and weather, so a cluster is weaker evidence than its size suggests.",
+ "generated": "2026-11-15T17:16:48Z"
+}

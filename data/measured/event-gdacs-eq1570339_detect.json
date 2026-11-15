@@ -1,0 +1,92 @@
+{
+ "id": "event-gdacs-eq1570339",
+ "name": "M 7.7 - 10 km WSW of Pitaloza Arriba, Panama",
+ "track": "040-D-085-DHDH",
+ "cellM": 500.0,
+ "cells": 576,
+ "passes": 6,
+ "from": "2026-08-27",
+ "to": "2026-11-07",
+ "falseAlarm": 0.01,
+ "event": {
+  "time": 1791504000000.0,
+  "date": "2026-10-09",
+  "firstPassAfter": "2026-10-14",
+  "stood": 0.0,
+  "quiet": 0.0046,
+  "stillNext": null,
+  "newVersion": null,
+  "baseline": 3
+ },
+ "most": {
+  "date": "2026-10-14",
+  "time": 1792021516000,
+  "stood": 0.0,
+  "quiet": 0.0046
+ },
+ "picture": {
+  "date": "2026-10-14",
+  "time": 1792021516000,
+  "baselineFrom": "2026-08-27",
+  "baselineTo": "2026-09-20",
+  "stood": 0.0,
+  "quiet": 0.0046,
+  "n": 24,
+  "image": "event-gdacs-eq1570339_stood.png",
+  "bounds": {
+   "west": -80.81097721139916,
+   "east": -80.70222278860085,
+   "south": 7.55300132950054,
+   "north": 7.660798670499461
+  }
+ },
+ "byDate": [
+  {
+   "time": 1792021516000,
+   "date": "2026-10-14",
+   "baseline": 3,
+   "channels": 2,
+   "threshold": 12.33,
+   "over": 0.0,
+   "stood": 0.0,
+   "quiet": 0.0046,
+   "rose": 0.0,
+   "fell": 0.0,
+   "afterEvent": true
+  },
+  {
+   "time": 1793058316000,
+   "date": "2026-10-26",
+   "baseline": 3,
+   "channels": 2,
+   "threshold": 12.33,
+   "over": 0.0,
+   "stood": 0.0,
+   "quiet": 0.0046,
+   "rose": 0.0,
+   "fell": 0.0,
+   "afterEvent": true,
+   "newVersion": {
+    "from": "P05023",
+    "to": "P05036"
+   }
+  },
+  {
+   "time": 1794095117000,
+   "date": "2026-11-07",
+   "baseline": 3,
+   "channels": 2,
+   "threshold": 12.33,
+   "over": 0.0017,
+   "stood": 0.0,
+   "quiet": 0.0046,
+   "rose": 0.0,
+   "fell": 0.0,
+   "afterEvent": true
+  }
+ ],
+ "summary": "On NISAR's first pass after the event of 2026-10-09 (2026-10-14), 0.0 % of the cells stood out from what they had read on the 3 passes before it. On those passes themselves the same rules flag 0.5 %.",
+ "method": "NISAR L2 GCOV backscatter in cells of 500 m. From each pass the middle of all cells is taken away, so that what moved the whole area alike drops out. Each cell is then set against its own usual value and spread over the passes before (at an event: before the event; at least 3, at most 10), in HH and, where recorded, HV. The threshold is the score that 1% of the cells exceeded when each baseline pass was judged against the others. A cell counts only if at least 2 of its eight neighbours are over the threshold too.",
+ "limits": "It says that the ground changed and where, not why. A baseline of a few passes knows nothing of the season: a crop growing or ground freezing stands out as well. Cells next to each other share speckle and weather, so a cluster is weaker evidence than its size suggests.",
+ "generated": "2026-11-15T17:16:48Z"
+}

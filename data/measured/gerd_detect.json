@@ -195,14 +195,8 @@
    }
   }
  ],
- "summary": "The pass that stood out most was that of 2026-10-09: 0.9 % of the cells stood out: they had left both what the place read on its two latest passes and their own usual reading over 8 passes.",
- "method": "NISAR L2 GCOV backscatter in cells of 500 m. From each pass the middle of all cells is taken away, so that what moved the whole area alike drops out. A cell stands out if two keys both turn. Recent: its step from the mean of the 2 latest passes before (at an event: before the event) is beyond the spread such steps had over the area. Long: it lies beyond its own usual value and spread over the whole baseline (at most 10 passes). Both in HH and, where recorded, HV. Each threshold is the score that 1% of the cells exceeded when the baseline passes were judged against each other, and a cell counts only if at least 2 of its eight neighbours are over it too.",
- "limits": "It says that the ground changed and where, not why. A baseline of a few passes knows nothing of the season: a crop growing or ground freezing stands out as well. Over open water the echo follows the wind from pass to pass. Cells next to each other share speckle and weather, so a cluster is weaker evidence than its size suggests.",
- "generated": "2026-11-15T17:20:19Z",
- "bounds": {
-  "west": 35.06990244548194,
-  "east": 35.344497554518064,
-  "south": 10.927053323751347,
-  "north": 11.196546676248653
- }
+ "summary": "The pass that stood out most was that of 2026-09-03: 62 % of the cells differed from what they had read on the 5 passes before it. On those passes themselves the same rules flag 0.7 %.",
+ "method": "NISAR L2 GCOV backscatter in cells of 500 m. From each pass the middle of all cells is taken away, so that what moved the whole area alike drops out. Each cell is then set against its own usual value and spread over the passes before (at an event: before the event; at least 3, at most 10), in HH and, where recorded, HV. The threshold is the score that 1% of the cells exceeded when each baseline pass was judged against the others. A cell counts only if at least 2 of its eight neighbours are over the threshold too.",
+ "limits": "It says that the ground changed and where, not why. A baseline of a few passes knows nothing of the season: a crop growing or ground freezing stands out as well. Cells next to each other share speckle and weather, so a cluster is weaker evidence than its size suggests.",
+ "generated": "2026-11-15T17:16:49Z"
 }

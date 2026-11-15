@@ -1,0 +1,106 @@
+{
+ "id": "event-gdacs-eq1570077",
+ "name": "M 6.3 - 117 km NE of Norsup, Vanuatu",
+ "track": "022-A-170-DHDH",
+ "cellM": 500.0,
+ "cells": 576,
+ "passes": 7,
+ "from": "2026-08-26",
+ "to": "2026-11-06",
+ "falseAlarm": 0.01,
+ "event": {
+  "time": 1791417600000.0,
+  "date": "2026-10-08",
+  "firstPassAfter": "2026-10-13",
+  "stood": 0.0,
+  "quiet": 0.0056,
+  "stillNext": null,
+  "newVersion": null,
+  "baseline": 4
+ },
+ "most": {
+  "date": "2026-10-25",
+  "time": 1792953342000,
+  "stood": 0.0104,
+  "quiet": 0.0056
+ },
+ "picture": {
+  "date": "2026-10-13",
+  "time": 1791916541000,
+  "baselineFrom": "2026-08-26",
+  "baselineTo": "2026-10-01",
+  "stood": 0.0,
+  "quiet": 0.0056,
+  "n": 24,
+  "image": "event-gdacs-eq1570077_stood.png",
+  "bounds": {
+   "west": 168.22238511513657,
+   "east": 168.33421488486343,
+   "south": -15.48709867049946,
+   "north": -15.379301329500539
+  }
+ },
+ "byDate": [
+  {
+   "time": 1790879741000,
+   "date": "2026-10-01",
+   "baseline": 3,
+   "channels": 2,
+   "threshold": 7.29,
+   "over": 0.0,
+   "stood": 0.0,
+   "quiet": 0.0058,
+   "rose": 0.0,
+   "fell": 0.0,
+   "afterEvent": false
+  },
+  {
+   "time": 1791916541000,
+   "date": "2026-10-13",
+   "baseline": 4,
+   "channels": 2,
+   "threshold": 5.2,
+   "over": 0.0,
+   "stood": 0.0,
+   "quiet": 0.0056,
+   "rose": 0.0,
+   "fell": 0.0,
+   "afterEvent": true
+  },
+  {
+   "time": 1792953342000,
+   "date": "2026-10-25",
+   "baseline": 4,
+   "channels": 2,
+   "threshold": 5.2,
+   "over": 0.0226,
+   "stood": 0.0104,
+   "quiet": 0.0056,
+   "rose": 0.0052,
+   "fell": 0.0052,
+   "afterEvent": true,
+   "newVersion": {
+    "from": "P05023",
+    "to": "P05036"
+   },
+   "stillNext": 0.0
+  },
+  {
+   "time": 1793990142000,
+   "date": "2026-11-06",
+   "baseline": 4,
+   "channels": 2,
+   "threshold": 5.2,
+   "over": 0.0017,
+   "stood": 0.0,
+   "quiet": 0.0056,
+   "rose": 0.0,
+   "fell": 0.0,
+   "afterEvent": true
+  }
+ ],
+ "summary": "On NISAR's first pass after the event of 2026-10-08 (2026-10-13), 0.0 % of the cells stood out from what they had read on the 4 passes before it. On those passes themselves the same rules flag 0.6 %.",
+ "method": "NISAR L2 GCOV backscatter in cells of 500 m. From each pass the middle of all cells is taken away, so that what moved the whole area alike drops out. Each cell is then set against its own usual value and spread over the passes before (at an event: before the event; at least 3, at most 10), in HH and, where recorded, HV. The threshold is the score that 1% of the cells exceeded when each baseline pass was judged against the others. A cell counts only if at least 2 of its eight neighbours are over the threshold too.",
+ "limits": "It says that the ground changed and where, not why. A baseline of a few passes knows nothing of the season: a crop growing or ground freezing stands out as well. Cells next to each other share speckle and weather, so a cluster is weaker evidence than its size suggests.",
+ "generated": "2026-11-15T17:16:48Z"
+}
