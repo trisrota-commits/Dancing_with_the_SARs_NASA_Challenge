@@ -66,6 +66,7 @@ data/measured/forecast.json with one line per site.
 from __future__ import annotations
 
 import json
+import re
 import sys
 import warnings
 from datetime import datetime, timezone
@@ -245,8 +246,24 @@ def day(ms: int) -> str:
     return datetime.fromtimestamp(ms / 1000, timezone.utc).strftime("%Y-%m-%d")
 
 
+def versions(files: list[str] | None, n: int) -> list[str | None]:
+    """The version of NASA's processing each pass was made with, from the
+    file name (the part like P05036). When it changes, the values can
+    shift by themselves: at the change from P05023 to P05036 (passes from
+    about 21 October 2026) the mean over the window fell at 12 of the 15
+    places measured, by 0.4 dB in the middle (found 15 November 2026). A
+    pass that is the first of a new version is marked, so that such a
+    shift is not read as the ground's."""
+    out = []
+    for i in range(n):
+        m = re.search(r"_(P\d{5})_", files[i]) if files and i < len(files) and files[i] else None
+        out.append(m.group(1) if m else None)
+    return out
+
+
 def forecast(grid: dict, event: int | None = None) -> dict | None:
     times = grid["times"]
+    made = versions(grid.get("files"), len(times))
     hh = np.array(grid["hh"], dtype=float)
     hv = np.array(grid["hv"], dtype=float) if grid.get("hv") else None
     # A cell that ever read a value no radar could measure is left out
@@ -269,6 +286,8 @@ def forecast(grid: dict, event: int | None = None) -> dict | None:
             pooled.setdefault(key, {"pred": [], "seen": [], "last": []})
             earlier.setdefault(key, [])
         row = {"time": times[t], "date": day(times[t]), "seenMean": round(float(np.nanmean(hh[t])), 2), "lastMean": round(float(np.nanmean(hh[t - 1])), 2)}
+        if made[t] and made[t - 1] and made[t] != made[t - 1]:
+            row["newVersion"] = {"from": made[t - 1], "to": made[t]}
         for key, p in preds.items():
             s = scores(p, hh[t], hh[t - 1])
             row[key] = s and {**s, "predMean": round(float(np.nanmean(p)), 2)}
@@ -319,7 +338,7 @@ def forecast(grid: dict, event: int | None = None) -> dict | None:
         "ways": ways,
         "short": short,
         "peerSurprise": odd and {"date": odd["date"], "time": odd["time"], "outside": odd["peers"]["outside"], "expected": odd["peers"]["expected"]},
-        "event": None if not event else {"time": event, "date": day(event), "firstPassAfter": after and after["date"], "outside": hit if hit is not None else None},
+        "event": None if not event else {"time": event, "date": day(event), "firstPassAfter": after and after["date"], "outside": hit if hit is not None else None, "newVersion": (after or {}).get("newVersion")},
         "overall": overall,
         "best": best,
         "bestBaseline": bar,
@@ -360,7 +379,7 @@ def forecast(grid: dict, event: int | None = None) -> dict | None:
             f"The yes/no question is whether a cell changes by {STRONG_DB:g} dB or more by the next pass. "
             "'Outside the expected range' is the share of cells whose miss was larger than nine in ten misses on the passes predicted before; about 10 % is ordinary."
         ),
-        "limits": "One season of data: no way of predicting has seen a harvest, a flood or a thaw here before it happened. Neighbouring cells change together, so they are fewer independent samples than their number.",
+        "limits": "One season of data: no way of predicting has seen a harvest, a flood or a thaw here before it happened. Neighbouring cells change together, so they are fewer independent samples than their number. A pass made with a new version of NASA's processing can shift by itself; such passes are marked.",
         "generated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     }
 
@@ -392,7 +411,7 @@ def main() -> None:
                 c, d = s["strong"], s["direction"]
                 print(f"  {w['name']:34s} RMSE {s['rmse']:5.2f} MAE {s['mae']:5.2f} within90 {s['within90']:5.2f} R2 {s['r2']} Spearman {s['spearman']} | up/down/stay: accuracy {d['accuracy']} (commonest {d['commonest']}), precision {d['precision']}, recall {d['recall']}, F1 {d['f1']} | strong change: accuracy {c['accuracy']}, precision {c['precision']}, recall {c['recall']}, F1 {c['f1']} ({c['happened']:.1%})")
         print(f"  → {result['summary']}")
-        lines.append({"id": result["id"], "name": result["name"], "cells": result["cells"], "passes": result["passes"], "best": result["best"], **{k: o[k] and {m: o[k][m] for m in ("rmse", "mae", "within90", "r2", "spearman", "skill")} for k in o}})
+        lines.append({"id": result["id"], "name": result["name"], "cells": result["cells"], "passes": result["passes"], "best": result["best"], "event": result["event"], "peerSurprise": result["peerSurprise"], **{k: o[k] and {m: o[k][m] for m in ("rmse", "mae", "within90", "r2", "spearman", "skill")} for k in o}})
     if not wanted:
         (OUT_DIR / "forecast.json").write_text(json.dumps(lines, indent=1) + "\n")
     print(f"\n{len(lines)} site(s) tested")

@@ -5,6 +5,13 @@
   "cells": 1020,
   "passes": 11,
   "best": "last",
+  "event": null,
+  "peerSurprise": {
+   "date": "2026-10-22",
+   "time": 1792642740000,
+   "outside": 0.102,
+   "expected": 1.2
+  },
   "last": {
    "rmse": 0.88,
    "mae": 0.58,
@@ -60,6 +67,19 @@
   "cells": 576,
   "passes": 5,
   "best": "last",
+  "event": {
+   "time": 1793664000000.0,
+   "date": "2026-11-03",
+   "firstPassAfter": "2026-11-08",
+   "outside": 0.038,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-08",
+   "time": 1794140908000,
+   "outside": 0.038,
+   "expected": 1.28
+  },
   "last": {
    "rmse": 1.15,
    "mae": 0.93,
@@ -91,6 +111,19 @@
   "cells": 576,
   "passes": 7,
   "best": "last",
+  "event": {
+   "time": 1791331200000.0,
+   "date": "2026-10-07",
+   "firstPassAfter": "2026-10-10",
+   "outside": 0.307,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-10-10",
+   "time": 1791605875000,
+   "outside": 0.307,
+   "expected": 0.47
+  },
   "last": {
    "rmse": 0.88,
    "mae": 0.69,
@@ -122,6 +155,22 @@
   "cells": 576,
   "passes": 5,
   "best": "last",
+  "event": {
+   "time": 1792800000000.0,
+   "date": "2026-10-24",
+   "firstPassAfter": "2026-10-31",
+   "outside": 0.078,
+   "newVersion": {
+    "from": "P05023",
+    "to": "P05036"
+   }
+  },
+  "peerSurprise": {
+   "date": "2026-10-31",
+   "time": 1793447900000,
+   "outside": 0.078,
+   "expected": 0.31
+  },
   "last": {
    "rmse": 0.52,
    "mae": 0.42,
@@ -153,6 +202,22 @@
   "cells": 576,
   "passes": 5,
   "best": "last",
+  "event": {
+   "time": 1792195200000.0,
+   "date": "2026-10-17",
+   "firstPassAfter": "2026-10-22",
+   "outside": 0.25,
+   "newVersion": {
+    "from": "P05023",
+    "to": "P05036"
+   }
+  },
+  "peerSurprise": {
+   "date": "2026-10-22",
+   "time": 1792630453000,
+   "outside": 0.25,
+   "expected": 0.22
+  },
   "last": {
    "rmse": 0.48,
    "mae": 0.32,
@@ -184,6 +249,22 @@
   "cells": 576,
   "passes": 6,
   "best": "last",
+  "event": {
+   "time": 1792627200000.0,
+   "date": "2026-10-22",
+   "firstPassAfter": "2026-10-30",
+   "outside": 0.043,
+   "newVersion": {
+    "from": "P05023",
+    "to": "P05036"
+   }
+  },
+  "peerSurprise": {
+   "date": "2026-11-11",
+   "time": 1794400327000,
+   "outside": 0.073,
+   "expected": 1.51
+  },
   "last": {
    "rmse": 1.33,
    "mae": 1.06,
@@ -215,6 +296,13 @@
   "cells": 3600,
   "passes": 11,
   "best": "last",
+  "event": null,
+  "peerSurprise": {
+   "date": "2026-11-02",
+   "time": 1793589041000,
+   "outside": 0.1,
+   "expected": 1.25
+  },
   "last": {
    "rmse": 0.8,
    "mae": 0.57,
@@ -270,6 +358,13 @@
   "cells": 2304,
   "passes": 11,
   "best": "last",
+  "event": null,
+  "peerSurprise": {
+   "date": "2026-09-29",
+   "time": 1790725921000,
+   "outside": 0.416,
+   "expected": 1.2
+  },
   "last": {
    "rmse": 0.87,
    "mae": 0.64,
@@ -325,6 +420,13 @@
   "cells": 1024,
   "passes": 11,
   "best": "learnt",
+  "event": null,
+  "peerSurprise": {
+   "date": "2026-10-03",
+   "time": 1791026600000,
+   "outside": 0.139,
+   "expected": 0.62
+  },
   "last": {
    "rmse": 0.73,
    "mae": 0.47,
@@ -380,6 +482,13 @@
   "cells": 3600,
   "passes": 11,
   "best": "last",
+  "event": null,
+  "peerSurprise": {
+   "date": "2026-10-12",
+   "time": 1791778634000,
+   "outside": 0.267,
+   "expected": 0.66
+  },
   "last": {
    "rmse": 0.57,
    "mae": 0.41,
@@ -435,6 +544,13 @@
   "cells": 1361,
   "passes": 9,
   "best": "mean",
+  "event": null,
+  "peerSurprise": {
+   "date": "2026-09-29",
+   "time": 1790676077000,
+   "outside": 0.085,
+   "expected": 1.54
+  },
   "last": {
    "rmse": 1.19,
    "mae": 0.82,
@@ -490,6 +606,13 @@
   "cells": 1024,
   "passes": 28,
   "best": "last",
+  "event": null,
+  "peerSurprise": {
+   "date": "2026-05-23",
+   "time": 1779541775000,
+   "outside": 0.217,
+   "expected": 1.93
+  },
   "last": {
    "rmse": 1.38,
    "mae": 0.87,
@@ -545,6 +668,13 @@
   "cells": 1024,
   "passes": 12,
   "best": "learnt",
+  "event": null,
+  "peerSurprise": {
+   "date": "2026-10-06",
+   "time": 1791329857000,
+   "outside": 0.146,
+   "expected": 2.07
+  },
   "last": {
    "rmse": 1.95,
    "mae": 1.54,
