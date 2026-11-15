@@ -19,8 +19,14 @@ averaging four tiles into one.
     python tools/mosaic.py                  # 24 days up to NASA's newest day
     python tools/mosaic.py --end 2026-11-12 --days 24 --level 5
 
-No login is needed. It makes about 8,000 small requests and takes ten to
-twenty minutes.
+No login is needed. It makes about 10,000 small requests and takes five to
+ten minutes. It always builds the whole mosaic afresh from NASA's own
+pictures and never patches the one already there: that keeps the newest
+pass on top without any bookkeeping, and the stored tiles are compressed
+once, not again and again. A tile that has not changed comes out byte for
+byte the same, so only changed tiles add to the repository.
+
+It is meant to be run every night, so that the app has little to add live.
 """
 
 import argparse
@@ -218,6 +224,7 @@ def main():
     ap.add_argument('--out', default=os.path.join(os.path.dirname(__file__), '..', 'data', 'mosaic'))
     ap.add_argument('--quality', type=int, default=84, help='WebP quality (default 84)')
     ap.add_argument('--workers', type=int, default=12)
+    ap.add_argument('--force', action='store_true', help='write the result even if it holds far fewer tiles than the mosaic already there')
     args = ap.parse_args()
 
     end = datetime.date.fromisoformat(args.end or newest_day())
@@ -299,6 +306,18 @@ def main():
         'mended': counts['mended'],
         'tiles': index,
     }
+    # A build that comes out much smaller than the one before it is not
+    # NASA losing a third of the planet overnight: its services were
+    # failing. The old mosaic then stays, and the job says so.
+    try:
+        with open(os.path.join(args.out, 'about.json')) as f:
+            before = len(json.load(f)['tiles'].get(str(level), []))
+    except Exception:
+        before = 0
+    if not args.force and len(finest) < 0.8 * before:
+        shutil.rmtree(tmp, ignore_errors=True)
+        raise SystemExit(f'only {len(finest)} tiles at level {level}, where the mosaic in place has {before}: kept the old one (use --force to write this one anyway)')
+
     with open(os.path.join(tmp, 'about.json'), 'w') as f:
         json.dump(about, f, separators=(',', ':'))
         f.write('\n')

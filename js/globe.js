@@ -372,7 +372,9 @@ export class Globe {
       // was made from only come in close up, where they are sharper.
       // Days after the mosaic's last are drawn at every distance, on top.
       const mosaic = this.mosaicFor(s.nisar);
-      if (mosaic) layers.push({ url: NISAR_MOSAIC.url, maxLevel: mosaic.levels, has: mosaic.has });
+      // (The build's time is part of the address: after a rebuild the
+      // browser must not go on showing tiles it kept from the one before.)
+      if (mosaic) layers.push({ url: `${NISAR_MOSAIC.url}?v=${encodeURIComponent(mosaic.built || '')}`, maxLevel: mosaic.levels, has: mosaic.has });
       for (let i = s.nisar.days - 1; i >= 0; i--) {
         const date = iso(end - i * DAY);
         const under = mosaic && date <= mosaic.settled ? { minLevel: mosaic.levels + 2, backed: true } : null;
@@ -410,7 +412,7 @@ export class Globe {
     this.mosaic = null;
     if (about?.tiles && about.to && Number.isInteger(about.levels)) {
       const held = Object.fromEntries(Object.entries(about.tiles).map(([z, list]) => [z, new Set(list)]));
-      this.mosaic = { from: about.from, to: about.to, settled, levels: about.levels, has: (z, x, y) => !!held[z]?.has(`${x}/${y}`) };
+      this.mosaic = { from: about.from, to: about.to, built: about.built, settled, levels: about.levels, has: (z, x, y) => !!held[z]?.has(`${x}/${y}`) };
     }
     this.applyLayers();
   }

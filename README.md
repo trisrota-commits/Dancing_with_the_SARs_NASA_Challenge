@@ -161,7 +161,8 @@ this app's workload:
   top, into `data/mosaic/`; the app shows that from far away and at
   continent distance, and NASA's own tiles close up. It compares each
   day's fingerprint with NASA's, so passes NASA adds later are drawn live
-  on top and the mosaic never hides newer data.
+  on top and the mosaic never hides newer data. Rebuilt every night it
+  keeps that live part small.
 - Tiles are painted and fetched from the middle of the view outwards,
   ahead of a flying camera and ahead of a turning globe.
 - Event effects live in shaders: the earthquake front is drawn and lifted
