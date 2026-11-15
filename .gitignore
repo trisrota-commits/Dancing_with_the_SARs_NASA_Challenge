@@ -2,3 +2,6 @@ __pycache__/
 
 # Working folders of AI helper sessions
 .claude/
+
+# Frames recorded for the README tour (tools/tour)
+.tour/
