@@ -51,19 +51,10 @@
     {
       "id": "gerd",
       "name": "Grand Ethiopian Renaissance Dam reservoir",
-      "lat": 11.1,
-      "lon": 35.15,
+      "lat": 11.0618,
+      "lon": 35.2072,
       "seriesRadiusM": 1000,
       "mapRadiusM": 15000
-    },
-    {
-      "id": "punjab",
-      "name": "Punjab plains",
-      "lat": 30.9,
-      "lon": 75.85,
-      "seriesRadiusM": 1000,
-      "mapRadiusM": 8000,
-      "start": "2025-10-29"
     },
     {
       "id": "sacramento",

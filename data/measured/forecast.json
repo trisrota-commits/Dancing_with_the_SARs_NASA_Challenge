@@ -235,53 +235,6 @@
   }
  },
  {
-  "id": "punjab",
-  "name": "Punjab plains",
-  "cells": 1024,
-  "passes": 26,
-  "best": "last",
-  "last": {
-   "rmse": 1.08,
-   "mae": 0.73,
-   "within90": 1.64,
-   "r2": 0.894,
-   "spearman": 0.949,
-   "skill": 0.0
-  },
-  "mean": {
-   "rmse": 1.12,
-   "mae": 0.72,
-   "within90": 1.54,
-   "r2": 0.886,
-   "spearman": 0.956,
-   "skill": -0.073
-  },
-  "line": {
-   "rmse": 1.71,
-   "mae": 1.18,
-   "within90": 2.61,
-   "r2": 0.733,
-   "spearman": 0.884,
-   "skill": -1.518
-  },
-  "trend": {
-   "rmse": 1.28,
-   "mae": 0.9,
-   "within90": 2.03,
-   "r2": 0.851,
-   "spearman": 0.93,
-   "skill": -0.405
-  },
-  "learnt": {
-   "rmse": 1.19,
-   "mae": 0.85,
-   "within90": 1.8,
-   "r2": 0.872,
-   "spearman": 0.937,
-   "skill": -0.213
-  }
- },
- {
   "id": "rondonia",
   "name": "Rond\u00f4nia",
   "cells": 1361,

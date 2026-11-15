@@ -126,15 +126,6 @@
   "file": "okavango.json"
  },
  {
-  "id": "punjab",
-  "name": "Punjab plains",
-  "lat": 30.9,
-  "lon": 75.85,
-  "radiusKm": 25,
-  "event": null,
-  "file": "punjab.json"
- },
- {
   "id": "rondonia",
   "name": "Rond\u00f4nia",
   "lat": -9.9,
