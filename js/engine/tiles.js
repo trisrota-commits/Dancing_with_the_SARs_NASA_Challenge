@@ -259,6 +259,18 @@ function sample(h, px, py) {
   return top * (1 - fy) + bottom * fy;
 }
 
+// Where a picture's bounds fall on a tile: as given, and one turn of the
+// globe to the west or east. A picture across the date line has longitudes
+// that run past 180° (178° to 181°), while tiles count from -180° to 180°,
+// so its eastern part lies on the tiles at -180° to -179°.
+function placements(b, tile) {
+  const out = [];
+  for (const turn of [0, -360, 360]) {
+    if (b.east + turn > tile.west && b.west + turn < tile.east && b.north > tile.south && b.south < tile.north) out.push(turn ? { ...b, west: b.west + turn, east: b.east + turn } : b);
+  }
+  return out;
+}
+
 export class TileGlobe {
   constructor(scene, shared) {
     this.group = new THREE.Group();
@@ -384,7 +396,7 @@ export class TileGlobe {
     const touched = [...this.pictures, ...pictures].map((p) => p.bounds);
     this.pictures = pictures;
     for (const tile of this.tiles.values()) {
-      if (touched.some((b) => b.east > tile.west && b.west < tile.east && b.north > tile.south && b.south < tile.north)) tile.dirty = true;
+      if (touched.some((b) => placements(b, tile).length)) tile.dirty = true;
     }
     this.changed = true;
   }
@@ -749,7 +761,10 @@ export class TileGlobe {
     this.paintMask(tile, maskLayers);
     ctx.globalAlpha = 1;
 
-    const here = this.pictures.filter((p) => p.bounds.east > tile.west && p.bounds.west < tile.east && p.bounds.north > tile.south && p.bounds.south < tile.north);
+    // Each picture where it falls on this tile; one across the date line
+    // falls on tiles of both sides, and twice on a tile that spans the world.
+    const here = [];
+    for (const p of this.pictures) for (const b of placements(p.bounds, tile)) here.push(b === p.bounds ? p : Object.assign(Object.create(p), { bounds: b }));
     const sided = sidedLayers.length > 0 || here.some((p) => p.side);
     if (sided) {
       if (!tile.canvasB) {

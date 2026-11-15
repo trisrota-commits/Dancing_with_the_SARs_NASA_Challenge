@@ -3,7 +3,7 @@
 // Which version of the app this is. `tools/pack.sh` sets it; it shows at the
 // end of the credits line, so nobody has to wonder whether the browser is
 // still showing an older copy.
-const BUILD = '2026-11-15 00:52 UTC';
+const BUILD = '2026-11-15 01:38 UTC';
 
 import { CATEGORIES, FAMILIES, PALETTE, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START, RECENT_MS, OVERLAY_REACH_DAYS } from './config.js';
 import { fetchFeed, fetchArchive } from './feeds.js';
@@ -1120,7 +1120,21 @@ async function openLink() {
     state.hidden.delete(incident.category);
     draw();
     selectIncident(incident, true);
+  } else if (!incident && look === state.lookup && !state.selected) {
+    // A link must not fail without a word.
+    notice('The event this link points to is no longer in the feeds, so it cannot be opened. Recent events stay for a week; after that only the larger ones are kept.');
   }
+}
+
+// A short message at the top of the globe that goes away by itself.
+let noticeTimer = 0;
+function notice(text) {
+  const box = $('notice');
+  box.textContent = text;
+  box.hidden = false;
+  clearTimeout(noticeTimer);
+  noticeTimer = setTimeout(() => (box.hidden = true), 12_000);
+  box.onclick = () => (box.hidden = true);
 }
 
 // ---------- stories ----------

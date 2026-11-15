@@ -10,6 +10,11 @@
 // brightness of the preview, not calibrated radar units.
 
 import { imageBounds } from './nisar.js';
+import { lonNear } from './incidents.js';
+
+// A point's longitude as the picture counts it: a picture across the date
+// line has bounds that run past 180°.
+const lonIn = (b, lon) => lonNear(lon, (b.west + b.east) / 2);
 
 const MAX_SIDE = 900;
 
@@ -93,7 +98,7 @@ export function history(frames, lat, lon) {
   return frames.map((frame) => {
     const b = frame.bounds;
     const { width, height, data } = frame.pixels;
-    const cx = Math.round(((lon - b.west) / (b.east - b.west)) * width);
+    const cx = Math.round(((lonIn(b, lon) - b.west) / (b.east - b.west)) * width);
     const cy = Math.round(((b.north - lat) / (b.north - b.south)) * height);
     let co = 0;
     let cross = 0;
@@ -116,7 +121,7 @@ export function history(frames, lat, lon) {
 // cross-polarised brightness in the 5 × 5 pixels around the point, or
 // nulls where the pass did not cover it. Only those 25 pixels are read.
 export function sampleAt(picture, bounds, lat, lon, hasCross, time) {
-  const cx = Math.round(((lon - bounds.west) / (bounds.east - bounds.west)) * picture.width);
+  const cx = Math.round(((lonIn(bounds, lon) - bounds.west) / (bounds.east - bounds.west)) * picture.width);
   const cy = Math.round(((bounds.north - lat) / (bounds.north - bounds.south)) * picture.height);
   const x0 = Math.max(0, cx - 2);
   const y0 = Math.max(0, cy - 2);
@@ -193,7 +198,7 @@ async function covers(scene, lat, lon) {
   canvas.height = img.height;
   const ctx = canvas.getContext('2d', { willReadFrequently: true });
   ctx.drawImage(img, 0, 0);
-  const x = Math.round(((lon - b.west) / (b.east - b.west)) * img.width);
+  const x = Math.round(((lonIn(b, lon) - b.west) / (b.east - b.west)) * img.width);
   const y = Math.round(((b.north - lat) / (b.north - b.south)) * img.height);
   if (x < 1 || y < 1 || x >= img.width - 1 || y >= img.height - 1) return false;
   const px = ctx.getImageData(x - 1, y - 1, 3, 3).data;

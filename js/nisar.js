@@ -2,6 +2,7 @@
 // search, footprints or the preview images; only full HDF5 downloads need one.
 
 import { CMR, NISAR_GCOV, NISAR_GUNW, NISAR_TILES } from './config.js';
+import { lonNear } from './incidents.js';
 
 const BROWSE_REL = 'http://esipfed.org/ns/fedsearch/1.1/browse#';
 const DATA_REL = 'http://esipfed.org/ns/fedsearch/1.1/data#';
@@ -31,13 +32,39 @@ export function polMode(field) {
   return POL_MODES[band] || { code: band || '??', co: null, cross: null };
 }
 
+// A scene's outline from the catalogue's polygons ("lat lon lat lon …").
+//
+// A scene that crosses the date line comes as two polygons, cut along
+// 180°, one on each side. Read alone, the first is half the scene. They
+// are joined here into one outline whose longitudes run on past 180°
+// (178° to 181°, say): the corners of both, without the points on the
+// cut, in order around their middle. The preview's corner file uses the
+// same convention.
+export function sceneOutline(polygons) {
+  const rings = (polygons || [])
+    .map((p) => {
+      const flat = String(p?.[0] || '').split(' ').map(Number);
+      const ring = [];
+      for (let i = 0; i + 1 < flat.length; i += 2) ring.push({ lat: flat[i], lon: flat[i + 1] });
+      return ring;
+    })
+    .filter((ring) => ring.length >= 3);
+  const onCut = (p) => Math.abs(Math.abs(p.lon) - 180) < 1e-6;
+  if (rings.length < 2 || !rings.every((ring) => ring.some(onCut))) return rings[0] || [];
+  const corners = rings.flat().filter((p) => !onCut(p)).map((p) => ({ lat: p.lat, lon: p.lon < 0 ? p.lon + 360 : p.lon }));
+  if (corners.length < 3) return rings[0];
+  // A scene is a four-cornered strip: its corners in order of their
+  // direction from the middle make its outline.
+  const mid = { lat: corners.reduce((n, p) => n + p.lat, 0) / corners.length, lon: corners.reduce((n, p) => n + p.lon, 0) / corners.length };
+  corners.sort((a, b) => Math.atan2(a.lat - mid.lat, a.lon - mid.lon) - Math.atan2(b.lat - mid.lat, b.lon - mid.lon));
+  return [...corners, corners[0]];
+}
+
 function parseEntry(entry) {
   const name = entry.title;
   const parts = name.split('_');
   const product = parts[3];
-  const ring = [];
-  const flat = (entry.polygons?.[0]?.[0] || '').split(' ').map(Number);
-  for (let i = 0; i + 1 < flat.length; i += 2) ring.push({ lat: flat[i], lon: flat[i + 1] });
+  const ring = sceneOutline(entry.polygons);
   if (ring.length < 3) return null;
 
   const hrefs = [...new Set((entry.links || []).filter((l) => l.rel === BROWSE_REL && l.href.startsWith('https')).map((l) => l.href))];
@@ -133,6 +160,7 @@ export async function latestScenes(count = 200) {
 // means outside). The picture does not reach the outline: a strip along
 // the edges is empty, so a point close to the edge is often not imaged.
 export function edgeMarginKm(ring, lat, lon) {
+  if (ring.length) lon = lonNear(lon, ring[0].lon);
   const kx = 111.32 * Math.cos((lat * Math.PI) / 180);
   const ky = 110.57;
   let nearest = Infinity;
