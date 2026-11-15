@@ -15,9 +15,9 @@
     <link rel="preconnect" href="https://earthquake.usgs.gov" crossorigin />
     <link rel="preconnect" href="https://eonet.gsfc.nasa.gov" crossorigin />
     <link rel="preconnect" href="https://www.gdacs.org" crossorigin />
-    <link rel="modulepreload" href="js/main.js?v=202611152030" />
+    <link rel="modulepreload" href="js/main.js?v=202611152105" />
     <link rel="modulepreload" href="vendor/three.module.min.js" />
-    <link rel="stylesheet" href="css/style.css?v=202611152030" />
+    <link rel="stylesheet" href="css/style.css?v=202611152105" />
   </head>
   <body>
     <div id="globe"></div>
@@ -74,6 +74,7 @@
         <label class="check"><input type="checkbox" id="footprints" checked /> Where NISAR looked recently <span id="scene-count" class="count"></span></label>
         <p class="hint">Teal frames: the newest are bold, and they fade over four days.</p>
         <label class="check"><input type="checkbox" id="nisar-tiles" checked /> NISAR radar picture on the globe</label>
+        <p class="hint">Right-click any place on land (on a touch screen: tap it) for NISAR's passes over it.</p>
         <label class="check"><input type="checkbox" id="bands" /> Compare with Sentinel-1: L-band left, C-band right</label>
         <label class="check" id="change-row" hidden><input type="checkbox" id="change48" /> What changed in 48 days, whole planet</label>
         <div class="layer-key" id="change-key" hidden>
@@ -253,6 +254,6 @@
     <input type="hidden" id="stretch" value="4" /><b id="stretch-value" hidden></b>
     <!-- The address carries the version (tools/pack.sh writes it), so a
          new page never runs an older script from the browser's cache. -->
-    <script type="module" src="js/main.js?v=202611152030"></script>
+    <script type="module" src="js/main.js?v=202611152105"></script>
   </body>
 </html>

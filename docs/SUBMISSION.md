@@ -83,7 +83,7 @@ https://trisrota-commits.github.io/Dancing_with_the_SARs_NASA_Challenge/demo/dan
 - **Ground movement.** An earthquake with a pair of passes either side of
   it gets NISAR's interferogram, with a key that says what one colour
   cycle means.
-- **A time-lapse for any place on Earth.** Click the ground or search a
+- **A time-lapse for any place on Earth.** Right-click the ground or search a
   place: the newest NISAR pass is on the globe at once, and every pass of
   that repeat track is a mark on the same timeline an event has. Drag it
   back or play it once, in the colour composite or in one channel, with a

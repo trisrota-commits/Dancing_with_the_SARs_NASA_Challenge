@@ -210,7 +210,7 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
 - Features **interferograms**: any earthquake with a pair of passes either
   side of it gets a "Show ground movement" card.
 - Shows **NISAR's passes over any spot on Earth** on the same timeline as
-  an event: click the ground (or search a place) and the newest pass is on
+  an event: right-click the ground (or search a place) and the newest pass is on
   the globe at once, every pass of the repeat track is a mark on the line,
   dragging goes back and play runs through them once. Switch between the
   colour composite, HH only and HV only, and read a chart of both channels
