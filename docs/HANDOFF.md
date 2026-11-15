@@ -1168,53 +1168,74 @@ a disaster or aid organisation; the rice fields of Bardhaman are the
 proof that the method reads real ground.
 
 **The detector (later the same evening) replaces the neighbour rule
-below as the app's answer.** `tools/detect.py`, on the practice of
-NASA's OPERA DIST-ALERT-S1: the middle of all cells is taken away from
-each pass; each cell is set against its own usual value and spread over
-the passes before (at an event: before the event; 3 to 10 passes; the
-spread pulled towards the window's usual one); HH and HV make one
-score; the threshold is the score 1 cell in 100 exceeded when each
-baseline pass was judged against the others; a cell counts only with
-two flagged neighbours; the same rules on the baseline passes give the
-place's quiet level; and where a later pass exists, the share of
-flagged cells still over the threshold. It writes `<site>_detect.json`,
-`<site>_stood.png` and `detect.json`, runs in the measuring job, and
-has 11 tests (`tests/test_detect.py`).
+below as the app's answer.** `tools/detect.py`; its docstring is the
+full account. In short:
 
-| Event (first pass after) | Stood out | Quiet level | Note |
+- From each pass the middle of all cells is taken away (rain, a season,
+  a step in calibration drop out). Open water is left out: cells whose
+  HV is usually under -24 dB, the threshold ASF uses to colour water. A
+  window that is nearly all water (an epicentre at sea) is not judged.
+- **Two keys, and a cell stands out only if both turn.** Recent: its
+  step from the mean of the two latest passes before (before the event,
+  at an event), against the spread such steps had over the window. Long:
+  the cell against its own usual value and spread over up to ten passes.
+  HH and HV make one score; each threshold is the score 1 cell in 100
+  exceeded when the baseline passes were judged against each other; a
+  cell counts only with two flagged neighbours.
+- An event with two passes before it gets the recent key alone (grade
+  `two`), with one pass the two-date test (grade `pair`); both say so.
+- Where both channels exist the flagged cells are sorted by how HH and
+  HV moved (`KINDS`), each with the cause it is typical of, shown as a
+  hypothesis.
+- A picture per pass (`<site>_stood_<date>.png`); the app shows any pass
+  and plays them through. 18 tests (`tests/test_detect.py`).
+
+How this design was reached, because each step was measured and two
+attractive ones were wrong:
+
+1. The long key alone flagged 12 % at the flood in Italy and tested well
+   on quiet ground, but where a place is changing by itself one flagged
+   cell in eight was right.
+2. A recent key that took its spread from the pass judged looked far
+   better in the test with small patches, and hid the flood in Italy
+   (0.2 %): a change over much of the window widened its own yardstick.
+   The spread now comes from the passes before; a test guards it.
+3. Both keys together are right more often than either (table below).
+   Not kept: recent keys of three to six passes, and switching between
+   keys by a test of whether the place is drifting.
+
+| 5 × 5 cells (2.5 km) | Quiet: found / right | Changing: found / right | All: F1, both keys / long key / first rule |
 |---|---|---|---|
-| Flood in Italy, 7 Oct | 12 % (then 8.2 %, 0.0 %) | 0.2 % | 0.0 % on the pass before |
-| M 5.7 Khuzdar, 17 Oct | 6.4 % | 0.1 % | first pass of a new processing version |
-| Floods in Indonesia and France, fires in Utah and New Hampshire, M 7.0 Nagqu | 0.0 % | 0.1 to 0.7 % | nothing, or the point is off the affected ground |
+| −6 dB | 98 % / 96 % | 80 % / 47 % | 0.70 / 0.41 / 0.23 |
+| −3 dB | 79 % / 96 % | 33 % / 27 % | 0.47 / 0.31 / 0.22 |
+| −2 dB | 46 % / 93 % | 15 % / 15 % | 0.28 / 0.23 / 0.18 |
 
-Elsewhere, the pass that stood out most: GERD 3 Sep 62 % (the reservoir
-filling), Sacramento rice 2 Oct 39 %, Jakobshavn 29 Sep 13 %, Okavango
-12 Oct 10 %, Bardhaman 11 Nov 8.7 % (harvest), Rondônia 3.2 %, Mekong
-2.5 %, Aletsch 1.2 %.
+With nothing put in: 0.06 % of cells flagged at quiet places, 1.29 % at
+changing ones, 0.87 % over all (long key alone 2.58 %, first rule
+11.2 %). 16 places, 88 passes before any event, 12 patches a pass
+(`tools/detect.py --sensitivity`, about ten minutes, writes
+`data/detection/sensitivity.json`). Quiet (11): Aletsch, Mekong,
+Rondônia and eight events before they happened. Changing (5): GERD,
+Jakobshavn, Okavango, Sacramento, Bardhaman. The grouping uses the long
+key's own behaviour on the same passes, after the fact. The price of two
+keys: small changes (1 to 2 dB) are found less often than by the long
+key alone.
 
-**How good it is was measured** (`tools/detect.py --sensitivity`, about
-two and a half minutes, writes `data/detection/sensitivity.json`): a
-square patch of a real pass before any event is raised or lowered in
-both channels, 12 times a pass. The places fall into two groups by one
-rule: "quiet" where the detector flags no more than 1 % with nothing put
-in, "changing" where it flags more.
+Events (18 measured; the job now also reads the agencies' archives, see
+`tools/pick_events.mjs`): four epicentres in open water are not judged;
+the flood in Italy 3.5 % (0.0 % before, 2.8 % a pass later, 0.0 % after);
+M 6.9 near Ozernovskiy, Kamchatka, 16 % on 23 October, back to 5.6 % of
+those cells a pass later, cause unknown (first pass of the new
+processing version; snow is likely there then); Khuzdar 0.9 %; the
+other eleven 0.0 %. Places, the pass that stood out most:
+Sacramento rice 2 October 32 % (a pass whose HV dips by 5 dB: check it
+before reading anything into it), Okavango 7.3 %, Bardhaman 7.3 %,
+Jakobshavn 2.9 %.
 
-| 5 × 5 cells (2.5 km) | Quiet: recall / precision / F1 | Changing | Rule used before, quiet F1 |
-|---|---|---|---|
-| −6 dB | 0.98 / 0.82 / 0.89 | 0.78 / 0.19 / 0.31 | 0.27 |
-| −3 dB | 0.86 / 0.80 / 0.83 | 0.44 / 0.12 / 0.19 | 0.27 |
-| −2 dB | 0.69 / 0.77 / 0.73 | 0.25 / 0.07 / 0.11 | 0.25 |
-| −1 dB | 0.34 / 0.64 / 0.45 | 0.10 / 0.03 / 0.04 | 0.17 |
-
-With nothing put in: 0.4 % of cells flagged at quiet places (the rule
-used before: 11.6 %), 3.4 % at changing ones. Quiet: Aletsch, Mekong,
-Rondônia and five events before they happened (8 places, 27 passes).
-Changing: GERD, Jakobshavn, Okavango, Sacramento, Bardhaman (58 passes).
-The grouping uses the detector's own behaviour on the same passes,
-after the fact; the limits say so. Variants tried and not kept, because
-they changed little: a baseline of 4 or 6 passes, a stronger pull
-towards the pooled spread, one or three neighbours, a 2 % false-alarm
-rate. What would help is a year of data (a baseline by season).
+The slides: `demo/index.html` (animated), `tools/slides.js` makes the
+PDF from pictures of the slides, because Chromium embeds the Inter font
+as Type 3 glyphs that several PDF readers space badly (letters ran into
+each other).
 
 The prediction check (`tools/forecast.py`) stays, one fold below in the
 panel; its `peers` way is the neighbour rule described next, and it no

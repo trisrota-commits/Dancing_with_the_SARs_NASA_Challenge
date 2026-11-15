@@ -22,9 +22,9 @@ earthquake or a failed harvest the question is a simple one: where did
 the ground change? Our app opens on the whole planet as NASA's NISAR
 radar sees it and follows the radar echo of a place through time: what
 it normally reads, and where it did something else. At a flood in Italy
-in October 2026, NISAR's calibrated data show 12 % of the ground
-reading differently from its own past on the first pass afterwards,
-where the same rules flag 0.2 % on the passes before. Over the rice fields of Bardhaman in West
+in October 2026, NISAR's calibrated data show nothing standing out on
+the pass before it and 3.5 % of the ground three days after it, where
+our test finds 0.06 % flagged when nothing has happened. Over the rice fields of Bardhaman in West
 Bengal the same measurements follow one crop from flooded paddies in
 July to standing rice in October and the harvest in November. The globe
 carries the earthquakes, fires, floods and storms the world's agencies
@@ -97,31 +97,36 @@ slides as a web page are at `demo/index.html` once hosting is on.]
   brightness of NASA's picture, not a calibrated measurement, and the
   app says so; checked against our calibrated measurements at six
   places, the direction agrees at five.
-- **What stood out, measured.** For 16 places and events the app has
-  NISAR's calibrated backscatter in decibels, read by our own tool from
-  the full data files, in cells of 500 m. A detector (`tools/detect.py`)
-  says for every pass which cells stood out from what is ordinary at
-  that place. It follows the practice of operational radar change
-  detection: what moved the whole area alike (rain, a season) is taken
-  away; each cell is set against its own baseline of earlier passes, in
-  HH and HV together; the threshold is fixed so that 1 cell in 100
-  passes it on a quiet pass; and a cell counts only with flagged
-  neighbours. Next to every result stands the place's own quiet level:
-  what the same rules flag on the passes before. At a flood in Italy
-  12 % of the cells stood out on the first pass after the flood was
-  reported, against 0.2 % before; 8.2 % a pass later, and 0.0 % the
-  pass after that. The app draws those cells on the globe and lists
-  every measured place by this share.
+- **What stood out, measured.** For 26 places and reported events the
+  app has NISAR's calibrated backscatter in decibels, read by our own
+  tool from the full data files, in cells of 500 m. A detector
+  (`tools/detect.py`) says for every pass which cells stood out. What
+  moved the whole area alike (rain, a season) is taken away first. Then
+  two keys must both turn: the cell has left what the place read on its
+  two latest passes, and it has left its own usual reading over the
+  longer history, in HH and HV together. Each threshold lets 1 cell in
+  100 through on the passes before, only clusters count, and open water
+  is left out. At a flood in Italy nothing stood out on the pass before
+  it, 3.5 % of the cells three days after it, 2.8 % a pass later and
+  nothing after that.
+- **An interactive change-detection map and a time series.** "Show where
+  it stood out" draws those cells on the satellite map; any pass can be
+  clicked, and "Play the passes" runs the detection through time.
+- **Which polarisation, and why.** Where both channels were recorded the
+  app sorts the cells that stood out by how HH and HV moved and names
+  the cause each pattern is typical of (both fell: open water; both
+  rose: wetter or rougher ground; HV fell alone: lost leaves and
+  branches), marked as a hypothesis. At the flood in Italy 70 % of the
+  cells show both channels risen and 25 % both fallen.
 - **The detector is measured, not asserted.** We put a change of a known
-  size into real, quiet passes and ran the detector on it (12 patches a
-  pass, seven sizes of change). Where the ground is otherwise quiet (8
-  places, 27 passes), a drop of 3 dB over 2.5 km is found with recall
-  0.86 at precision 0.80 (F1 0.83), a drop of 2 dB with recall 0.69 at
-  precision 0.77; with nothing put in, 0.4 % of the cells are flagged.
-  The simpler rule we used first (a cell's step against its
-  neighbours') flags 11.6 % with nothing put in and reaches F1 0.27.
-  These are test results with changes we put in, kept apart from the
-  measurements (`data/detection/`).
+  size into real passes before any event and ran the detector on it (16
+  places, 88 passes, 12 patches a pass). Where the ground is otherwise
+  quiet, a drop of 6 dB over 2.5 km is found 98 times in 100 and 96 in
+  100 flagged cells are right; for 3 dB it is 79 and 96. With nothing
+  put in, 0.06 % of the cells are flagged. Each key alone is right less
+  often (81 and 73 in 100 at 3 dB), and the rule we used first 16 in
+  100. These are test results with changes we put in, kept apart from
+  the measurements (`data/detection/`).
 - **Can the next pass be predicted?** Also scored, against four
   baselines (the same as last time, the mean so far, a line through the
   last two passes, a least-squares trend) with RMSE, MAE, an error
@@ -134,15 +139,19 @@ slides as a web page are at `demo/index.html` once hosting is on.]
 - **What it cannot claim.** NISAR's data began in mid-2026: no place has
   been seen through the same season twice. Where a place is itself
   changing from pass to pass (rice growing, a reservoir filling, a
-  glacier moving), the same test gives recall 0.44 at precision 0.12:
-  with one season of data the detector cannot tell a crop from a
-  change. Of the seven reported events it could judge, the flood in
-  Italy stood out; an earthquake in Pakistan shows 6.4 % on a pass that
-  is also the first made with a new version of NASA's processing, so we
-  do not put it down to the quake; five show nothing, and we cannot say
-  whether nothing changed there or the reported point lies off the
-  affected ground. It says that something changed and where, not what
-  caused it.
+  glacier moving), the same test finds a drop of 3 dB only 33 times in
+  100, and 27 in 100 flagged cells are right: with one season of data
+  the detector cannot tell a crop from a change. Of the 18 reported
+  events measured, four have their reported point in open water and are
+  not judged; the flood in Italy stood out; around one earthquake in
+  Kamchatka 16 % of the cells stood out for one pass, which we cannot
+  put down to the quake (it is also the first pass of a new version of
+  NASA's processing, and late October there brings snow); the other
+  twelve show under 1 %, and we cannot say whether nothing changed
+  there or the reported point lies off the affected ground. An event
+  with fewer than three passes before it is judged more roughly, and
+  the app says how roughly. It says that something changed and where,
+  not what caused it.
 - **Not for the whole planet, and we checked.** The measurement needs
   NISAR's full data for every place. We built its rough counterpart from
   NASA's planet picture and tested it against 573 reported events: it
@@ -186,9 +195,9 @@ journalist can open it alone and understand it.
 
 ### What benefits it has, and what we hope to achieve
 
-- **A statement instead of a picture.** "12 % of this ground changed,
-  here, and 0.2 % is ordinary" is something a decision-maker can act
-  on without knowing radar.
+- **A statement instead of a picture.** "3.5 % of this ground changed,
+  here; before the flood it was none" is something a decision-maker
+  can act on without knowing radar.
 - **No barrier.** It runs in a browser, with no login, key or
   installation, on NASA's open data. The measurements are made by a
   public job and kept in the repository, so anyone can check them.
@@ -243,8 +252,9 @@ journalist can open it alone and understand it.
   backscatter in dB over time and between two passes. A scheduled job on
   GitHub runs it twice a day for the strongest recent events and a list
   of places. Its first run on real NISAR products, on 15 November 2026,
-  measured its first places and events; 16 are in the app now, from 2 to
-  28 passes each. The clearest
+  measured its first places and events; 26 are in the app now, from 2 to
+  28 passes each. The job picks the events itself, from the same feeds
+  and archives the app shows. The clearest
   result is the rice fields of Bardhaman in West Bengal: over one crop
   season the HH echo fell to -10.9 dB when the paddies were flooded in
   July, rose to -3.7 dB by mid-October as the rice stood tall, and fell
@@ -259,7 +269,7 @@ journalist can open it alone and understand it.
 - The detector and the prediction check (`tools/detect.py`,
   `tools/forecast.py`) run in the same job after every measurement, on
   the cells just written, in a few seconds.
-- 38 unit tests for the app, 11 for the detector, further checks for
+- 38 unit tests for the app, 18 for the detector, further checks for
   the other tools, and a browser test against the live services guard
   the rules above.
 
@@ -331,8 +341,11 @@ We used AI to build this project and we say so plainly.
 - **No AI in the running app.** The app does not call any AI model.
   Its sentences are fixed templates filled from data, and its hypotheses
   come from fixed, written rules.
-- **The demo slides** were laid out by the same assistant and say so on
-  every slide. Their pictures are screenshots of the running app.
+- **The demo slides and their animations** were assembled by the same
+  assistant and say so on every slide and in every animation. Their
+  pictures are screenshots of the running app; the animations are
+  recorded from it or drawn from its measured data by a script in the
+  repository.
 - **No AI-generated images, video or sound.** Every picture on the globe
   comes from the data sources listed below. The event animations are
   drawn by our own code from that data, and the app labels what is

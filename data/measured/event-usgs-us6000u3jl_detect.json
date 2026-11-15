@@ -1,0 +1,31 @@
+{
+ "id": "event-usgs-us6000u3jl",
+ "name": "M 6.3 - 202 km NW of Port-Olry, Vanuatu",
+ "track": "123-A-171-DHDH",
+ "cellM": 500.0,
+ "cells": 0,
+ "passes": 2,
+ "from": "2026-09-14",
+ "to": "2026-10-20",
+ "water": 1.0,
+ "event": {
+  "time": 1792454400000.0,
+  "date": "2026-10-20",
+  "firstPassAfter": null,
+  "stood": null,
+  "openWater": true
+ },
+ "most": null,
+ "picture": null,
+ "byDate": [],
+ "summary": "Nearly all of the window around this point reads as open water (the cross-polarised echo is under -24 dB there). On water the echo follows the wind from pass to pass, so nothing can be said about change here.",
+ "method": "",
+ "limits": "",
+ "generated": "2026-11-15T17:25:44Z",
+ "bounds": {
+  "west": 165.5190670397071,
+  "east": 165.6301329602929,
+  "south": -13.98859867049946,
+  "north": -13.880801329500539
+ }
+}
