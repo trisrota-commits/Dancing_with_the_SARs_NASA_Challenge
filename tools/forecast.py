@@ -14,9 +14,14 @@ cell around a site, for every pass on one track.
 What it does, for every pass from the fifth on ("rolling origin": only
 passes before the one predicted are ever used):
 
-  1. Three ways of predicting each cell's co-polarised backscatter:
-       last    the same as last time (the bar every other way must beat)
-       line    the last value plus the last step (a straight line on)
+  1. Five ways of predicting each cell's co-polarised backscatter. Four
+     are baselines, simple rules a model has to beat:
+       last    the same as last time (persistence, the naive forecast)
+       mean    the mean of every earlier pass of the cell
+       line    the last value plus the last step
+       trend   a least-squares line (linear regression) through the
+               cell's last four passes, read off at the date predicted
+     and one is the model:
        learnt  a ridge regression on the last three passes of both
                channels and the days since the last pass, fitted on every
                cell's history before the pass predicted (a small
@@ -34,7 +39,11 @@ passes before the one predicted are ever used):
      means the ground did something the passes before gave no sign of.
      This is the use a prediction has here: not to foretell, but to tell
      a change from the ordinary.
-  4. A yes/no question, for the measures used with rare events: "will
+  4. A three-way question scored flat out: "will the echo go down,
+     stay, or go up by the next pass?" (1 dB or more counts as a move):
+     accuracy, and precision, recall and F1 averaged over the three
+     answers, next to the accuracy of always naming the commonest answer.
+  5. A yes/no question, for the measures used with rare events: "will
      this cell change by 3 dB or more (half or double the echo's power)
      by the next pass?" Answered by each way's own prediction and scored
      with accuracy, precision, recall and F1, next to how often it
@@ -58,6 +67,7 @@ from __future__ import annotations
 
 import json
 import sys
+import warnings
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -72,10 +82,16 @@ STRONG_DB = 3.0  # "a strong change": half or double the echo's power
 RIDGE = 1.0
 DAY = 86_400_000
 
+DIRECTION_DB = 1.0  # "up" or "down": a change of this much or more (a quarter more or less power)
+
+# The ways of predicting. The first four are baselines: simple rules any
+# model has to beat before it is worth anything. The fifth is the model.
 WAYS = [
-    {"key": "last", "name": "Same as last time", "how": "The next pass is predicted to read what the last one read."},
-    {"key": "line", "name": "Straight line on", "how": "The last value plus the last step."},
-    {"key": "learnt", "name": "Learnt from the cells' past", "how": f"A ridge regression on the last {LAGS} passes of both channels and the days since the last pass, fitted on every cell's history before the pass predicted."},
+    {"key": "last", "name": "Same as last time", "baseline": True, "how": "Persistence, the naive forecast: the next pass is predicted to read what the last one read."},
+    {"key": "mean", "name": "Mean of the earlier passes", "baseline": True, "how": "The cell's average over every pass before the one predicted."},
+    {"key": "line", "name": "Line through the last two", "baseline": True, "how": "The last value plus the last step."},
+    {"key": "trend", "name": "Trend of the last four", "baseline": True, "how": "A straight line fitted by least squares (linear regression) through the cell's last four passes against their dates, read off at the date predicted."},
+    {"key": "learnt", "name": "Model learnt from the cells' past", "baseline": False, "how": f"A ridge regression on the last {LAGS} passes of both channels and the days since the last pass, fitted on every cell's history before the pass predicted."},
 ]
 
 
@@ -132,7 +148,37 @@ def scores(pred: np.ndarray, seen: np.ndarray, last: np.ndarray) -> dict | None:
         "fn": fn,
         "tn": tn,
     }
+    out["direction"] = direction(p - l, y - l)
     return out
+
+
+def direction(said: np.ndarray, was: np.ndarray) -> dict:
+    """The three-way question "will the echo go down, stay, or go up by the
+    next pass?" (a step of DIRECTION_DB or more counts as a move), scored
+    flat out: accuracy, and precision, recall and F1 averaged over the
+    classes that occurred. `commonest` is the accuracy of always naming
+    the class that occurred most: the number an accuracy has to beat."""
+    kind = lambda d: np.where(d <= -DIRECTION_DB, 0, np.where(d >= DIRECTION_DB, 2, 1))  # noqa: E731
+    p, y = kind(said), kind(was)
+    precisions, recalls, f1s, shares = [], [], [], {}
+    for k, name in enumerate(("down", "stay", "up")):
+        shares[name] = round(float((y == k).mean()), 3)
+        if not (y == k).any():
+            continue
+        tp = int(((p == k) & (y == k)).sum())
+        precision = tp / int((p == k).sum()) if (p == k).any() else 0.0
+        recall = tp / int((y == k).sum())
+        precisions.append(precision)
+        recalls.append(recall)
+        f1s.append(2 * precision * recall / (precision + recall) if precision + recall else 0.0)
+    return {
+        "accuracy": round(float((p == y).mean()), 3),
+        "precision": round(float(np.mean(precisions)), 3),
+        "recall": round(float(np.mean(recalls)), 3),
+        "f1": round(float(np.mean(f1s)), 3),
+        "commonest": max(shares.values()),
+        "shares": shares,
+    }
 
 
 def features(hh: np.ndarray, hv: np.ndarray | None, times: list[int], t: int) -> np.ndarray:
@@ -167,6 +213,15 @@ def learn(hh: np.ndarray, hv: np.ndarray | None, times: list[int], before: int) 
 def predict(hh: np.ndarray, hv: np.ndarray | None, times: list[int], t: int) -> dict:
     """Each way's prediction of pass t for every cell, from passes before t only."""
     out = {"last": hh[t - 1], "line": 2 * hh[t - 1] - hh[t - 2]}
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)  # a cell with no value at all stays NaN
+        out["mean"] = np.nanmean(hh[:t], axis=0)
+    # Least squares through the last four passes, against their dates.
+    days = np.array(times[t - 4 : t + 1], dtype=float) / DAY
+    x = days[:4] - days[:4].mean()
+    y = hh[t - 4 : t]
+    slope = (x[:, None] * (y - y.mean(axis=0))).sum(axis=0) / (x**2).sum()
+    out["trend"] = y.mean(axis=0) + slope * (days[4] - days[:4].mean())
     weights = learn(hh, hv, times, t)
     out["learnt"] = features(hh, hv, times, t) @ weights if weights is not None else np.full(hh.shape[1], np.nan)
     return out
@@ -207,6 +262,10 @@ def forecast(grid: dict) -> dict | None:
     if not overall["last"]:
         return None
     best = min((k for k in overall if overall[k]), key=lambda k: overall[k]["rmse"])
+    # The baseline to beat, and by how much the model does or does not.
+    bar = min((w["key"] for w in WAYS if w["baseline"] and overall[w["key"]]), key=lambda k: overall[k]["rmse"])
+    model = overall.get("learnt")
+    gain = None if not model else round(1 - (model["rmse"] / overall[bar]["rmse"]) ** 2, 3)
     margin = overall[best]["within90"]
     worst = max(by_date, key=lambda r: (r[best] or {}).get("rmse", 0))
     judged = [r for r in by_date if r[best] and "outside" in r[best]]
@@ -225,11 +284,19 @@ def forecast(grid: dict) -> dict | None:
         "ways": WAYS,
         "overall": overall,
         "best": best,
+        "bestBaseline": bar,
+        "modelAgainstBestBaseline": gain,
+        "directionDb": DIRECTION_DB,
         "byDate": by_date,
         "summary": (
             f"Predicting the next pass one step ahead, {len(by_date)} times over {overall[best]['n']:,} cell readings: "
             f"the best way here is \"{next(w['name'] for w in WAYS if w['key'] == best).lower()}\", off by {overall[best]['mae']} dB on average, "
             f"and within {margin} dB for nine cells in ten. It was furthest off for the pass of {worst['date']} ({worst[best]['rmse']} dB)."
+            + (
+                f" The model {'beats' if gain > 0 else 'does not beat'} the best simple rule (\"{next(w['name'] for w in WAYS if w['key'] == bar).lower()}\", RMSE {overall[bar]['rmse']} dB) with RMSE {model['rmse']} dB."
+                if model and gain is not None
+                else ""
+            )
             + (
                 f" The most surprising pass was that of {surprise['date']}: {surprise[best]['outside']:.0%} of the cells fell outside the range nine in ten had kept to before (±{surprise[best]['expected']} dB)."
                 if surprise
@@ -241,6 +308,7 @@ def forecast(grid: dict) -> dict | None:
             f"Calibrated NISAR backscatter (GCOV, gamma-naught) in cells of {grid['cellM']:g} m on track {grid['track']}. "
             f"Each pass from the {FIRST + 1}th on is predicted from the passes before it only, and compared with what was measured. "
             "RMSE and MAE in dB; '9 in 10' is the error nine cells in ten stay under. "
+            f"'Up or down' asks whether a cell's echo goes down or up by {DIRECTION_DB:g} dB or more by the next pass, or stays; precision, recall and F1 are averaged over the three answers. "
             f"The yes/no question is whether a cell changes by {STRONG_DB:g} dB or more by the next pass. "
             "'Outside the expected range' is the share of cells whose miss was larger than nine in ten misses on the passes predicted before; about 10 % is ordinary."
         ),
@@ -269,8 +337,8 @@ def main() -> None:
         for w in WAYS:
             s = o[w["key"]]
             if s:
-                c = s["strong"]
-                print(f"  {w['name']:28s} RMSE {s['rmse']:5.2f}  MAE {s['mae']:5.2f}  within90 {s['within90']:5.2f}  R2 {s['r2']}  Spearman {s['spearman']}  skill {s['skill']}  | strong change: accuracy {c['accuracy']}, precision {c['precision']}, recall {c['recall']}, F1 {c['f1']} (happened in {c['happened']:.1%})")
+                c, d = s["strong"], s["direction"]
+                print(f"  {w['name']:34s} RMSE {s['rmse']:5.2f} MAE {s['mae']:5.2f} within90 {s['within90']:5.2f} R2 {s['r2']} Spearman {s['spearman']} | up/down/stay: accuracy {d['accuracy']} (commonest {d['commonest']}), precision {d['precision']}, recall {d['recall']}, F1 {d['f1']} | strong change: accuracy {c['accuracy']}, precision {c['precision']}, recall {c['recall']}, F1 {c['f1']} ({c['happened']:.1%})")
         print(f"  → {result['summary']}")
         lines.append({"id": result["id"], "name": result["name"], "cells": result["cells"], "passes": result["passes"], "best": result["best"], **{k: o[k] and {m: o[k][m] for m in ("rmse", "mae", "within90", "r2", "spearman", "skill")} for k in o}})
     if not wanted:

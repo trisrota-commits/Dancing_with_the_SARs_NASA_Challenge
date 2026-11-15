@@ -2259,3 +2259,16 @@ button:focus-visible,
   color: #fff;
   font-weight: 600;
 }
+
+.forecast-table .tag {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--dim);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0 4px;
+  margin-left: 4px;
+  white-space: nowrap;
+}

@@ -13,6 +13,14 @@
    "spearman": 0.967,
    "skill": 0.0
   },
+  "mean": {
+   "rmse": 1.0,
+   "mae": 0.74,
+   "within90": 1.61,
+   "r2": 0.92,
+   "spearman": 0.955,
+   "skill": -0.291
+  },
   "line": {
    "rmse": 1.52,
    "mae": 0.96,
@@ -20,6 +28,14 @@
    "r2": 0.816,
    "spearman": 0.912,
    "skill": -1.983
+  },
+  "trend": {
+   "rmse": 1.0,
+   "mae": 0.67,
+   "within90": 1.43,
+   "r2": 0.921,
+   "spearman": 0.96,
+   "skill": -0.288
   },
   "learnt": {
    "rmse": 0.89,
@@ -44,6 +60,14 @@
    "spearman": 0.952,
    "skill": 0.0
   },
+  "mean": {
+   "rmse": 1.06,
+   "mae": 0.76,
+   "within90": 1.55,
+   "r2": 0.969,
+   "spearman": 0.935,
+   "skill": -0.774
+  },
   "line": {
    "rmse": 1.25,
    "mae": 0.88,
@@ -51,6 +75,14 @@
    "r2": 0.957,
    "spearman": 0.927,
    "skill": -1.472
+  },
+  "trend": {
+   "rmse": 0.9,
+   "mae": 0.67,
+   "within90": 1.42,
+   "r2": 0.978,
+   "spearman": 0.937,
+   "skill": -0.26
   },
   "learnt": {
    "rmse": 0.94,
@@ -75,6 +107,14 @@
    "spearman": 0.958,
    "skill": 0.0
   },
+  "mean": {
+   "rmse": 1.47,
+   "mae": 1.11,
+   "within90": 2.48,
+   "r2": 0.788,
+   "spearman": 0.921,
+   "skill": -1.889
+  },
   "line": {
    "rmse": 1.23,
    "mae": 0.89,
@@ -82,6 +122,14 @@
    "r2": 0.853,
    "spearman": 0.93,
    "skill": -1.0
+  },
+  "trend": {
+   "rmse": 1.07,
+   "mae": 0.82,
+   "within90": 1.75,
+   "r2": 0.887,
+   "spearman": 0.945,
+   "skill": -0.538
   },
   "learnt": {
    "rmse": 0.93,
@@ -106,6 +154,14 @@
    "spearman": 0.966,
    "skill": 0.0
   },
+  "mean": {
+   "rmse": 0.77,
+   "mae": 0.53,
+   "within90": 1.13,
+   "r2": 0.941,
+   "spearman": 0.978,
+   "skill": -0.12
+  },
   "line": {
    "rmse": 1.14,
    "mae": 0.75,
@@ -113,6 +169,14 @@
    "r2": 0.87,
    "spearman": 0.918,
    "skill": -1.466
+  },
+  "trend": {
+   "rmse": 0.87,
+   "mae": 0.56,
+   "within90": 1.16,
+   "r2": 0.925,
+   "spearman": 0.953,
+   "skill": -0.428
   },
   "learnt": {
    "rmse": 0.7,
@@ -137,6 +201,14 @@
    "spearman": 0.967,
    "skill": 0.0
   },
+  "mean": {
+   "rmse": 1.49,
+   "mae": 1.1,
+   "within90": 2.55,
+   "r2": 0.449,
+   "spearman": 0.884,
+   "skill": -5.935
+  },
   "line": {
    "rmse": 0.64,
    "mae": 0.47,
@@ -144,6 +216,14 @@
    "r2": 0.899,
    "spearman": 0.952,
    "skill": -0.269
+  },
+  "trend": {
+   "rmse": 0.57,
+   "mae": 0.41,
+   "within90": 0.93,
+   "r2": 0.92,
+   "spearman": 0.967,
+   "skill": -0.005
   },
   "learnt": {
    "rmse": 0.61,
@@ -168,6 +248,14 @@
    "spearman": 0.949,
    "skill": 0.0
   },
+  "mean": {
+   "rmse": 1.12,
+   "mae": 0.72,
+   "within90": 1.54,
+   "r2": 0.886,
+   "spearman": 0.956,
+   "skill": -0.073
+  },
   "line": {
    "rmse": 1.71,
    "mae": 1.18,
@@ -175,6 +263,14 @@
    "r2": 0.733,
    "spearman": 0.884,
    "skill": -1.518
+  },
+  "trend": {
+   "rmse": 1.28,
+   "mae": 0.9,
+   "within90": 2.03,
+   "r2": 0.851,
+   "spearman": 0.93,
+   "skill": -0.405
   },
   "learnt": {
    "rmse": 1.19,
@@ -190,7 +286,7 @@
   "name": "Rond\u00f4nia",
   "cells": 1361,
   "passes": 9,
-  "best": "last",
+  "best": "mean",
   "last": {
    "rmse": 1.19,
    "mae": 0.82,
@@ -199,6 +295,14 @@
    "spearman": 0.896,
    "skill": 0.0
   },
+  "mean": {
+   "rmse": 0.84,
+   "mae": 0.57,
+   "within90": 1.38,
+   "r2": 0.887,
+   "spearman": 0.948,
+   "skill": 0.5
+  },
   "line": {
    "rmse": 2.22,
    "mae": 1.54,
@@ -206,6 +310,14 @@
    "r2": 0.231,
    "spearman": 0.696,
    "skill": -2.61
+  },
+  "trend": {
+   "rmse": 1.17,
+   "mae": 0.78,
+   "within90": 1.8,
+   "r2": 0.794,
+   "spearman": 0.911,
+   "skill": -0.025
   },
   "learnt": {
    "rmse": 1.27,
@@ -230,6 +342,14 @@
    "spearman": 0.925,
    "skill": 0.0
   },
+  "mean": {
+   "rmse": 2.0,
+   "mae": 1.39,
+   "within90": 3.33,
+   "r2": 0.663,
+   "spearman": 0.824,
+   "skill": -1.086
+  },
   "line": {
    "rmse": 1.95,
    "mae": 1.25,
@@ -237,6 +357,14 @@
    "r2": 0.681,
    "spearman": 0.884,
    "skill": -0.974
+  },
+  "trend": {
+   "rmse": 1.73,
+   "mae": 1.15,
+   "within90": 2.74,
+   "r2": 0.747,
+   "spearman": 0.903,
+   "skill": -0.568
   },
   "learnt": {
    "rmse": 1.39,
@@ -261,6 +389,14 @@
    "spearman": 0.879,
    "skill": 0.0
   },
+  "mean": {
+   "rmse": 4.5,
+   "mae": 3.64,
+   "within90": 7.54,
+   "r2": -0.485,
+   "spearman": 0.495,
+   "skill": -4.342
+  },
   "line": {
    "rmse": 1.79,
    "mae": 1.32,
@@ -268,6 +404,14 @@
    "r2": 0.764,
    "spearman": 0.924,
    "skill": 0.151
+  },
+  "trend": {
+   "rmse": 2.7,
+   "mae": 2.13,
+   "within90": 4.25,
+   "r2": 0.465,
+   "spearman": 0.905,
+   "skill": -0.924
   },
   "learnt": {
    "rmse": 1.62,

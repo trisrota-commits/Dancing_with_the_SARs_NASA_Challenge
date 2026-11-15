@@ -83,6 +83,15 @@ repository: https://github.com/trisrota-commits/Dancing_with_the_SARs_NASA_Chall
   since. What a visitor has looked at stays sharp for the rest
   of the visit. One switch shows a single 12-day cycle, 6, 3 or 1 day
   instead.
+- **What changed on the whole planet in 48 days.** One switch shows
+  where NASA's NISAR picture got darker or brighter between each pass
+  and the same pass 48 days earlier (NISAR flies the same tracks every
+  12 days, so like is compared with like; pairs recorded in different
+  radar modes are left out). The ground freezing across Siberia and
+  Canada and the Sahel drying after the rains stand out. It is the
+  brightness of NASA's picture, not a calibrated measurement, and the
+  app says so; checked against our calibrated measurements at six
+  places, the direction agrees at five.
 - **A prediction, with its error.** For every place measured through
   eight passes or more, the app tests how well the next pass could have
   been predicted from the passes before it, in cells of 500 m, and shows
@@ -91,7 +100,12 @@ repository: https://github.com/trisrota-commits/Dancing_with_the_SARs_NASA_Chall
   the rice fields of Bardhaman a small model that has learnt how the
   fields moved beats "the same as last time" (RMSE 1.62 against 1.95 dB)
   and follows the growing crop to within 0.3 dB on the area's average.
-  It misses the harvest by 1.7 dB: it had never seen one. Where little
+  It misses the harvest by 1.7 dB: it had never seen one. It is set
+  against four baselines (the same as last time, the mean so far, a line
+  through the last two passes, a least-squares trend) and beats the best
+  of them here; asked whether a field's echo will go down, stay or go
+  up, it is right 57 % of the time, against 44 % for always naming the
+  commonest answer. Where little
   changes (a delta, a reservoir, glaciers, forest) nothing beats "the
   same as last time", which is off by about half a decibel. So the app
   does not claim to foretell. It uses the prediction to tell a change

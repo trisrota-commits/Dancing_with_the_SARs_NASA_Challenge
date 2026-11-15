@@ -13,16 +13,31 @@
   {
    "key": "last",
    "name": "Same as last time",
-   "how": "The next pass is predicted to read what the last one read."
+   "baseline": true,
+   "how": "Persistence, the naive forecast: the next pass is predicted to read what the last one read."
+  },
+  {
+   "key": "mean",
+   "name": "Mean of the earlier passes",
+   "baseline": true,
+   "how": "The cell's average over every pass before the one predicted."
   },
   {
    "key": "line",
-   "name": "Straight line on",
+   "name": "Line through the last two",
+   "baseline": true,
    "how": "The last value plus the last step."
   },
   {
+   "key": "trend",
+   "name": "Trend of the last four",
+   "baseline": true,
+   "how": "A straight line fitted by least squares (linear regression) through the cell's last four passes against their dates, read off at the date predicted."
+  },
+  {
    "key": "learnt",
-   "name": "Learnt from the cells' past",
+   "name": "Model learnt from the cells' past",
+   "baseline": false,
    "how": "A ridge regression on the last 3 passes of both channels and the days since the last pass, fitted on every cell's history before the pass predicted."
   }
  ],
@@ -45,6 +60,50 @@
     "fp": 0,
     "fn": 52,
     "tn": 7116
+   },
+   "direction": {
+    "accuracy": 0.904,
+    "precision": 0.301,
+    "recall": 0.333,
+    "f1": 0.317,
+    "commonest": 0.904,
+    "shares": {
+     "down": 0.037,
+     "stay": 0.904,
+     "up": 0.059
+    }
+   }
+  },
+  "mean": {
+   "n": 7168,
+   "rmse": 0.77,
+   "mae": 0.53,
+   "within90": 1.13,
+   "r2": 0.941,
+   "spearman": 0.978,
+   "skill": -0.12,
+   "strong": {
+    "happened": 0.007,
+    "accuracy": 0.993,
+    "precision": 0.5,
+    "recall": 0.154,
+    "f1": 0.235,
+    "tp": 8,
+    "fp": 8,
+    "fn": 44,
+    "tn": 7108
+   },
+   "direction": {
+    "accuracy": 0.866,
+    "precision": 0.468,
+    "recall": 0.474,
+    "f1": 0.462,
+    "commonest": 0.904,
+    "shares": {
+     "down": 0.037,
+     "stay": 0.904,
+     "up": 0.059
+    }
    }
   },
   "line": {
@@ -65,6 +124,50 @@
     "fp": 38,
     "fn": 41,
     "tn": 7078
+   },
+   "direction": {
+    "accuracy": 0.838,
+    "precision": 0.351,
+    "recall": 0.35,
+    "f1": 0.351,
+    "commonest": 0.904,
+    "shares": {
+     "down": 0.037,
+     "stay": 0.904,
+     "up": 0.059
+    }
+   }
+  },
+  "trend": {
+   "n": 7168,
+   "rmse": 0.87,
+   "mae": 0.56,
+   "within90": 1.16,
+   "r2": 0.925,
+   "spearman": 0.953,
+   "skill": -0.428,
+   "strong": {
+    "happened": 0.007,
+    "accuracy": 0.992,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": null,
+    "tp": 0,
+    "fp": 8,
+    "fn": 52,
+    "tn": 7108
+   },
+   "direction": {
+    "accuracy": 0.887,
+    "precision": 0.374,
+    "recall": 0.349,
+    "f1": 0.349,
+    "commonest": 0.904,
+    "shares": {
+     "down": 0.037,
+     "stay": 0.904,
+     "up": 0.059
+    }
    }
   },
   "learnt": {
@@ -85,10 +188,25 @@
     "fp": 0,
     "fn": 52,
     "tn": 7116
+   },
+   "direction": {
+    "accuracy": 0.9,
+    "precision": 0.569,
+    "recall": 0.341,
+    "f1": 0.333,
+    "commonest": 0.904,
+    "shares": {
+     "down": 0.037,
+     "stay": 0.904,
+     "up": 0.059
+    }
    }
   }
  },
  "best": "learnt",
+ "bestBaseline": "last",
+ "modelAgainstBestBaseline": 0.081,
+ "directionDb": 1.0,
  "byDate": [
   {
    "time": 1786879401000,
@@ -114,6 +232,18 @@
      "fn": 13,
      "tn": 1011
     },
+    "direction": {
+     "accuracy": 0.692,
+     "precision": 0.231,
+     "recall": 0.333,
+     "f1": 0.273,
+     "commonest": 0.692,
+     "shares": {
+      "down": 0.013,
+      "stay": 0.692,
+      "up": 0.295
+     }
+    },
     "predMean": -6.73
    },
    "line": {
@@ -135,7 +265,85 @@
      "fn": 13,
      "tn": 1009
     },
+    "direction": {
+     "accuracy": 0.701,
+     "precision": 0.451,
+     "recall": 0.35,
+     "f1": 0.315,
+     "commonest": 0.692,
+     "shares": {
+      "down": 0.013,
+      "stay": 0.692,
+      "up": 0.295
+     }
+    },
     "predMean": -6.6
+   },
+   "mean": {
+    "n": 1024,
+    "rmse": 1.12,
+    "mae": 0.95,
+    "within90": 1.57,
+    "r2": 0.847,
+    "spearman": 0.987,
+    "skill": -0.05,
+    "strong": {
+     "happened": 0.013,
+     "accuracy": 0.987,
+     "precision": null,
+     "recall": 0.0,
+     "f1": null,
+     "tp": 0,
+     "fp": 0,
+     "fn": 13,
+     "tn": 1011
+    },
+    "direction": {
+     "accuracy": 0.694,
+     "precision": 0.528,
+     "recall": 0.414,
+     "f1": 0.375,
+     "commonest": 0.692,
+     "shares": {
+      "down": 0.013,
+      "stay": 0.692,
+      "up": 0.295
+     }
+    },
+    "predMean": -6.74
+   },
+   "trend": {
+    "n": 1024,
+    "rmse": 1.42,
+    "mae": 1.11,
+    "within90": 1.88,
+    "r2": 0.754,
+    "spearman": 0.966,
+    "skill": -0.689,
+    "strong": {
+     "happened": 0.013,
+     "accuracy": 0.981,
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": null,
+     "tp": 0,
+     "fp": 6,
+     "fn": 13,
+     "tn": 1005
+    },
+    "direction": {
+     "accuracy": 0.686,
+     "precision": 0.375,
+     "recall": 0.384,
+     "f1": 0.312,
+     "commonest": 0.692,
+     "shares": {
+      "down": 0.013,
+      "stay": 0.692,
+      "up": 0.295
+     }
+    },
+    "predMean": -6.88
    },
    "learnt": {
     "n": 1024,
@@ -155,6 +363,18 @@
      "fp": 0,
      "fn": 13,
      "tn": 1011
+    },
+    "direction": {
+     "accuracy": 0.693,
+     "precision": 0.453,
+     "recall": 0.335,
+     "f1": 0.277,
+     "commonest": 0.692,
+     "shares": {
+      "down": 0.013,
+      "stay": 0.692,
+      "up": 0.295
+     }
     },
     "predMean": -6.67
    }
@@ -183,6 +403,18 @@
      "fn": 4,
      "tn": 1020
     },
+    "direction": {
+     "accuracy": 0.94,
+     "precision": 0.313,
+     "recall": 0.333,
+     "f1": 0.323,
+     "commonest": 0.94,
+     "shares": {
+      "down": 0.058,
+      "stay": 0.94,
+      "up": 0.002
+     }
+    },
     "predMean": -5.86
    },
    "line": {
@@ -204,7 +436,85 @@
      "fn": 0,
      "tn": 1011
     },
+    "direction": {
+     "accuracy": 0.678,
+     "precision": 0.402,
+     "recall": 0.256,
+     "f1": 0.303,
+     "commonest": 0.94,
+     "shares": {
+      "down": 0.058,
+      "stay": 0.94,
+      "up": 0.002
+     }
+    },
     "predMean": -4.99
+   },
+   "mean": {
+    "n": 1024,
+    "rmse": 0.73,
+    "mae": 0.54,
+    "within90": 1.08,
+    "r2": 0.944,
+    "spearman": 0.989,
+    "skill": -0.577,
+    "strong": {
+     "happened": 0.004,
+     "accuracy": 0.995,
+     "precision": 0.4,
+     "recall": 0.5,
+     "f1": 0.444,
+     "tp": 2,
+     "fp": 3,
+     "fn": 2,
+     "tn": 1017
+    },
+    "direction": {
+     "accuracy": 0.811,
+     "precision": 0.375,
+     "recall": 0.441,
+     "f1": 0.378,
+     "commonest": 0.94,
+     "shares": {
+      "down": 0.058,
+      "stay": 0.94,
+      "up": 0.002
+     }
+    },
+    "predMean": -6.56
+   },
+   "trend": {
+    "n": 1024,
+    "rmse": 0.67,
+    "mae": 0.5,
+    "within90": 0.93,
+    "r2": 0.953,
+    "spearman": 0.988,
+    "skill": -0.32,
+    "strong": {
+     "happened": 0.004,
+     "accuracy": 0.996,
+     "precision": null,
+     "recall": 0.0,
+     "f1": null,
+     "tp": 0,
+     "fp": 0,
+     "fn": 4,
+     "tn": 1020
+    },
+    "direction": {
+     "accuracy": 0.932,
+     "precision": 0.48,
+     "recall": 0.336,
+     "f1": 0.332,
+     "commonest": 0.94,
+     "shares": {
+      "down": 0.058,
+      "stay": 0.94,
+      "up": 0.002
+     }
+    },
+    "predMean": -5.77
    },
    "learnt": {
     "n": 1024,
@@ -224,6 +534,18 @@
      "fp": 0,
      "fn": 4,
      "tn": 1020
+    },
+    "direction": {
+     "accuracy": 0.938,
+     "precision": 0.48,
+     "recall": 0.338,
+     "f1": 0.334,
+     "commonest": 0.94,
+     "shares": {
+      "down": 0.058,
+      "stay": 0.94,
+      "up": 0.002
+     }
     },
     "predMean": -5.99
    }
@@ -252,6 +574,18 @@
      "fn": 4,
      "tn": 1020
     },
+    "direction": {
+     "accuracy": 0.966,
+     "precision": 0.322,
+     "recall": 0.333,
+     "f1": 0.328,
+     "commonest": 0.966,
+     "shares": {
+      "down": 0.03,
+      "stay": 0.966,
+      "up": 0.004
+     }
+    },
     "predMean": -6.21,
     "expected": 1.28,
     "outside": 0.02
@@ -275,9 +609,91 @@
      "fn": 4,
      "tn": 1016
     },
+    "direction": {
+     "accuracy": 0.915,
+     "precision": 0.34,
+     "recall": 0.347,
+     "f1": 0.341,
+     "commonest": 0.966,
+     "shares": {
+      "down": 0.03,
+      "stay": 0.966,
+      "up": 0.004
+     }
+    },
     "predMean": -6.56,
     "expected": 1.83,
     "outside": 0.025
+   },
+   "mean": {
+    "n": 1024,
+    "rmse": 0.63,
+    "mae": 0.35,
+    "within90": 0.89,
+    "r2": 0.96,
+    "spearman": 0.99,
+    "skill": -0.458,
+    "strong": {
+     "happened": 0.004,
+     "accuracy": 0.996,
+     "precision": null,
+     "recall": 0.0,
+     "f1": null,
+     "tp": 0,
+     "fp": 0,
+     "fn": 4,
+     "tn": 1020
+    },
+    "direction": {
+     "accuracy": 0.906,
+     "precision": 0.398,
+     "recall": 0.562,
+     "f1": 0.423,
+     "commonest": 0.966,
+     "shares": {
+      "down": 0.03,
+      "stay": 0.966,
+      "up": 0.004
+     }
+    },
+    "predMean": -6.5,
+    "expected": 1.38,
+    "outside": 0.035
+   },
+   "trend": {
+    "n": 1024,
+    "rmse": 0.88,
+    "mae": 0.73,
+    "within90": 1.2,
+    "r2": 0.92,
+    "spearman": 0.988,
+    "skill": -1.906,
+    "strong": {
+     "happened": 0.004,
+     "accuracy": 0.996,
+     "precision": null,
+     "recall": 0.0,
+     "f1": null,
+     "tp": 0,
+     "fp": 0,
+     "fn": 4,
+     "tn": 1020
+    },
+    "direction": {
+     "accuracy": 0.931,
+     "precision": 0.506,
+     "recall": 0.508,
+     "f1": 0.387,
+     "commonest": 0.966,
+     "shares": {
+      "down": 0.03,
+      "stay": 0.966,
+      "up": 0.004
+     }
+    },
+    "predMean": -5.77,
+    "expected": 1.52,
+    "outside": 0.053
    },
    "learnt": {
     "n": 1024,
@@ -297,6 +713,18 @@
      "fp": 0,
      "fn": 4,
      "tn": 1020
+    },
+    "direction": {
+     "accuracy": 0.957,
+     "precision": 0.322,
+     "recall": 0.33,
+     "f1": 0.326,
+     "commonest": 0.966,
+     "shares": {
+      "down": 0.03,
+      "stay": 0.966,
+      "up": 0.004
+     }
     },
     "predMean": -6.2,
     "expected": 1.26,
@@ -327,6 +755,18 @@
      "fn": 3,
      "tn": 1021
     },
+    "direction": {
+     "accuracy": 0.928,
+     "precision": 0.309,
+     "recall": 0.333,
+     "f1": 0.321,
+     "commonest": 0.928,
+     "shares": {
+      "down": 0.007,
+      "stay": 0.928,
+      "up": 0.065
+     }
+    },
     "predMean": -6.46,
     "expected": 1.12,
     "outside": 0.046
@@ -350,9 +790,91 @@
      "fn": 1,
      "tn": 1019
     },
+    "direction": {
+     "accuracy": 0.91,
+     "precision": 0.408,
+     "recall": 0.379,
+     "f1": 0.347,
+     "commonest": 0.928,
+     "shares": {
+      "down": 0.007,
+      "stay": 0.928,
+      "up": 0.065
+     }
+    },
     "predMean": -6.71,
     "expected": 1.66,
     "outside": 0.059
+   },
+   "mean": {
+    "n": 1024,
+    "rmse": 0.71,
+    "mae": 0.6,
+    "within90": 1.05,
+    "r2": 0.948,
+    "spearman": 0.988,
+    "skill": -0.191,
+    "strong": {
+     "happened": 0.003,
+     "accuracy": 0.998,
+     "precision": 0.667,
+     "recall": 0.667,
+     "f1": 0.667,
+     "tp": 2,
+     "fp": 1,
+     "fn": 1,
+     "tn": 1020
+    },
+    "direction": {
+     "accuracy": 0.92,
+     "precision": 0.546,
+     "recall": 0.56,
+     "f1": 0.525,
+     "commonest": 0.928,
+     "shares": {
+      "down": 0.007,
+      "stay": 0.928,
+      "up": 0.065
+     }
+    },
+    "predMean": -6.5,
+    "expected": 1.25,
+    "outside": 0.052
+   },
+   "trend": {
+    "n": 1024,
+    "rmse": 0.58,
+    "mae": 0.34,
+    "within90": 0.73,
+    "r2": 0.965,
+    "spearman": 0.987,
+    "skill": 0.213,
+    "strong": {
+     "happened": 0.003,
+     "accuracy": 0.997,
+     "precision": null,
+     "recall": 0.0,
+     "f1": null,
+     "tp": 0,
+     "fp": 0,
+     "fn": 3,
+     "tn": 1021
+    },
+    "direction": {
+     "accuracy": 0.907,
+     "precision": 0.412,
+     "recall": 0.392,
+     "f1": 0.397,
+     "commonest": 0.928,
+     "shares": {
+      "down": 0.007,
+      "stay": 0.928,
+      "up": 0.065
+     }
+    },
+    "predMean": -6.11,
+    "expected": 1.41,
+    "outside": 0.03
    },
    "learnt": {
     "n": 1024,
@@ -372,6 +894,18 @@
      "fp": 0,
      "fn": 3,
      "tn": 1021
+    },
+    "direction": {
+     "accuracy": 0.928,
+     "precision": 0.643,
+     "recall": 0.381,
+     "f1": 0.404,
+     "commonest": 0.928,
+     "shares": {
+      "down": 0.007,
+      "stay": 0.928,
+      "up": 0.065
+     }
     },
     "predMean": -6.33,
     "expected": 1.1,
@@ -402,6 +936,18 @@
      "fn": 17,
      "tn": 1007
     },
+    "direction": {
+     "accuracy": 0.901,
+     "precision": 0.3,
+     "recall": 0.333,
+     "f1": 0.316,
+     "commonest": 0.901,
+     "shares": {
+      "down": 0.091,
+      "stay": 0.901,
+      "up": 0.008
+     }
+    },
     "predMean": -6.01,
     "expected": 1.07,
     "outside": 0.09
@@ -425,9 +971,91 @@
      "fn": 17,
      "tn": 1004
     },
+    "direction": {
+     "accuracy": 0.86,
+     "precision": 0.408,
+     "recall": 0.366,
+     "f1": 0.335,
+     "commonest": 0.901,
+     "shares": {
+      "down": 0.091,
+      "stay": 0.901,
+      "up": 0.008
+     }
+    },
     "predMean": -5.56,
     "expected": 1.58,
     "outside": 0.114
+   },
+   "mean": {
+    "n": 1024,
+    "rmse": 0.71,
+    "mae": 0.47,
+    "within90": 0.94,
+    "r2": 0.956,
+    "spearman": 0.992,
+    "skill": 0.167,
+    "strong": {
+     "happened": 0.017,
+     "accuracy": 0.982,
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": null,
+     "tp": 0,
+     "fp": 1,
+     "fn": 17,
+     "tn": 1006
+    },
+    "direction": {
+     "accuracy": 0.901,
+     "precision": 0.52,
+     "recall": 0.487,
+     "f1": 0.499,
+     "commonest": 0.901,
+     "shares": {
+      "down": 0.091,
+      "stay": 0.901,
+      "up": 0.008
+     }
+    },
+    "predMean": -6.44,
+    "expected": 1.19,
+    "outside": 0.077
+   },
+   "trend": {
+    "n": 1024,
+    "rmse": 0.74,
+    "mae": 0.37,
+    "within90": 0.77,
+    "r2": 0.952,
+    "spearman": 0.988,
+    "skill": 0.092,
+    "strong": {
+     "happened": 0.017,
+     "accuracy": 0.982,
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": null,
+     "tp": 0,
+     "fp": 1,
+     "fn": 17,
+     "tn": 1006
+    },
+    "direction": {
+     "accuracy": 0.89,
+     "precision": 0.363,
+     "recall": 0.342,
+     "f1": 0.338,
+     "commonest": 0.901,
+     "shares": {
+      "down": 0.091,
+      "stay": 0.901,
+      "up": 0.008
+     }
+    },
+    "predMean": -6.31,
+    "expected": 1.29,
+    "outside": 0.052
    },
    "learnt": {
     "n": 1024,
@@ -447,6 +1075,18 @@
      "fp": 0,
      "fn": 17,
      "tn": 1007
+    },
+    "direction": {
+     "accuracy": 0.899,
+     "precision": 0.301,
+     "recall": 0.333,
+     "f1": 0.316,
+     "commonest": 0.901,
+     "shares": {
+      "down": 0.091,
+      "stay": 0.901,
+      "up": 0.008
+     }
     },
     "predMean": -6.06,
     "expected": 1.02,
@@ -477,6 +1117,18 @@
      "fn": 6,
      "tn": 1018
     },
+    "direction": {
+     "accuracy": 0.941,
+     "precision": 0.314,
+     "recall": 0.333,
+     "f1": 0.323,
+     "commonest": 0.941,
+     "shares": {
+      "down": 0.032,
+      "stay": 0.941,
+      "up": 0.026
+     }
+    },
     "predMean": -6.35,
     "expected": 1.06,
     "outside": 0.056
@@ -500,9 +1152,91 @@
      "fn": 4,
      "tn": 1003
     },
+    "direction": {
+     "accuracy": 0.876,
+     "precision": 0.391,
+     "recall": 0.4,
+     "f1": 0.375,
+     "commonest": 0.941,
+     "shares": {
+      "down": 0.032,
+      "stay": 0.941,
+      "up": 0.026
+     }
+    },
     "predMean": -6.69,
     "expected": 1.6,
     "outside": 0.076
+   },
+   "mean": {
+    "n": 1024,
+    "rmse": 0.72,
+    "mae": 0.4,
+    "within90": 0.83,
+    "r2": 0.952,
+    "spearman": 0.988,
+    "skill": -0.104,
+    "strong": {
+     "happened": 0.006,
+     "accuracy": 0.993,
+     "precision": 0.333,
+     "recall": 0.167,
+     "f1": 0.222,
+     "tp": 1,
+     "fp": 2,
+     "fn": 5,
+     "tn": 1016
+    },
+    "direction": {
+     "accuracy": 0.911,
+     "precision": 0.592,
+     "recall": 0.61,
+     "f1": 0.568,
+     "commonest": 0.941,
+     "shares": {
+      "down": 0.032,
+      "stay": 0.941,
+      "up": 0.026
+     }
+    },
+    "predMean": -6.43,
+    "expected": 1.17,
+    "outside": 0.062
+   },
+   "trend": {
+    "n": 1024,
+    "rmse": 0.76,
+    "mae": 0.39,
+    "within90": 0.86,
+    "r2": 0.947,
+    "spearman": 0.981,
+    "skill": -0.228,
+    "strong": {
+     "happened": 0.006,
+     "accuracy": 0.994,
+     "precision": null,
+     "recall": 0.0,
+     "f1": null,
+     "tp": 0,
+     "fp": 0,
+     "fn": 6,
+     "tn": 1018
+    },
+    "direction": {
+     "accuracy": 0.935,
+     "precision": 0.314,
+     "recall": 0.331,
+     "f1": 0.322,
+     "commonest": 0.941,
+     "shares": {
+      "down": 0.032,
+      "stay": 0.941,
+      "up": 0.026
+     }
+    },
+    "predMean": -6.25,
+    "expected": 1.23,
+    "outside": 0.051
    },
    "learnt": {
     "n": 1024,
@@ -522,6 +1256,18 @@
      "fp": 0,
      "fn": 6,
      "tn": 1018
+    },
+    "direction": {
+     "accuracy": 0.935,
+     "precision": 0.647,
+     "recall": 0.341,
+     "f1": 0.342,
+     "commonest": 0.941,
+     "shares": {
+      "down": 0.032,
+      "stay": 0.941,
+      "up": 0.026
+     }
     },
     "predMean": -6.43,
     "expected": 1.01,
@@ -552,6 +1298,18 @@
      "fn": 5,
      "tn": 1019
     },
+    "direction": {
+     "accuracy": 0.96,
+     "precision": 0.32,
+     "recall": 0.333,
+     "f1": 0.327,
+     "commonest": 0.96,
+     "shares": {
+      "down": 0.028,
+      "stay": 0.96,
+      "up": 0.012
+     }
+    },
     "predMean": -6.38,
     "expected": 1.02,
     "outside": 0.037
@@ -575,9 +1333,91 @@
      "fn": 2,
      "tn": 1016
     },
+    "direction": {
+     "accuracy": 0.923,
+     "precision": 0.37,
+     "recall": 0.398,
+     "f1": 0.378,
+     "commonest": 0.96,
+     "shares": {
+      "down": 0.028,
+      "stay": 0.96,
+      "up": 0.012
+     }
+    },
     "predMean": -6.42,
     "expected": 1.57,
     "outside": 0.043
+   },
+   "mean": {
+    "n": 1024,
+    "rmse": 0.67,
+    "mae": 0.42,
+    "within90": 1.1,
+    "r2": 0.959,
+    "spearman": 0.987,
+    "skill": -0.086,
+    "strong": {
+     "happened": 0.005,
+     "accuracy": 0.997,
+     "precision": 0.75,
+     "recall": 0.6,
+     "f1": 0.667,
+     "tp": 3,
+     "fp": 1,
+     "fn": 2,
+     "tn": 1018
+    },
+    "direction": {
+     "accuracy": 0.917,
+     "precision": 0.566,
+     "recall": 0.48,
+     "f1": 0.503,
+     "commonest": 0.96,
+     "shares": {
+      "down": 0.028,
+      "stay": 0.96,
+      "up": 0.012
+     }
+    },
+    "predMean": -6.42,
+    "expected": 1.14,
+    "outside": 0.095
+   },
+   "trend": {
+    "n": 1024,
+    "rmse": 0.77,
+    "mae": 0.5,
+    "within90": 0.87,
+    "r2": 0.945,
+    "spearman": 0.98,
+    "skill": -0.44,
+    "strong": {
+     "happened": 0.005,
+     "accuracy": 0.994,
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": null,
+     "tp": 0,
+     "fp": 1,
+     "fn": 5,
+     "tn": 1018
+    },
+    "direction": {
+     "accuracy": 0.933,
+     "precision": 0.382,
+     "recall": 0.379,
+     "f1": 0.38,
+     "commonest": 0.96,
+     "shares": {
+      "down": 0.028,
+      "stay": 0.96,
+      "up": 0.012
+     }
+    },
+    "predMean": -6.33,
+    "expected": 1.19,
+    "outside": 0.055
    },
    "learnt": {
     "n": 1024,
@@ -598,20 +1438,32 @@
      "fn": 5,
      "tn": 1019
     },
+    "direction": {
+     "accuracy": 0.951,
+     "precision": 0.654,
+     "recall": 0.364,
+     "f1": 0.388,
+     "commonest": 0.96,
+     "shares": {
+      "down": 0.028,
+      "stay": 0.96,
+      "up": 0.012
+     }
+    },
     "predMean": -6.27,
     "expected": 0.98,
     "outside": 0.07
    }
   }
  ],
- "summary": "Predicting the next pass one step ahead, 7 times over 7,168 cell readings: the best way here is \"learnt from the cells' past\", off by 0.44 dB on average, and within 0.96 dB for nine cells in ten. It was furthest off for the pass of 2026-08-16 (1.05 dB). The most surprising pass was that of 2026-10-03: 9% of the cells fell outside the range nine in ten had kept to before (\u00b11.02 dB).",
+ "summary": "Predicting the next pass one step ahead, 7 times over 7,168 cell readings: the best way here is \"model learnt from the cells' past\", off by 0.44 dB on average, and within 0.96 dB for nine cells in ten. It was furthest off for the pass of 2026-08-16 (1.05 dB). The model beats the best simple rule (\"same as last time\", RMSE 0.73 dB) with RMSE 0.7 dB. The most surprising pass was that of 2026-10-03: 9% of the cells fell outside the range nine in ten had kept to before (\u00b11.02 dB).",
  "surprise": {
   "date": "2026-10-03",
   "time": 1791026600000,
   "outside": 0.09,
   "expected": 1.02
  },
- "method": "Calibrated NISAR backscatter (GCOV, gamma-naught) in cells of 500 m on track 047-D-083-DHDH. Each pass from the 5th on is predicted from the passes before it only, and compared with what was measured. RMSE and MAE in dB; '9 in 10' is the error nine cells in ten stay under. The yes/no question is whether a cell changes by 3 dB or more by the next pass. 'Outside the expected range' is the share of cells whose miss was larger than nine in ten misses on the passes predicted before; about 10 % is ordinary.",
+ "method": "Calibrated NISAR backscatter (GCOV, gamma-naught) in cells of 500 m on track 047-D-083-DHDH. Each pass from the 5th on is predicted from the passes before it only, and compared with what was measured. RMSE and MAE in dB; '9 in 10' is the error nine cells in ten stay under. 'Up or down' asks whether a cell's echo goes down or up by 1 dB or more by the next pass, or stays; precision, recall and F1 are averaged over the three answers. The yes/no question is whether a cell changes by 3 dB or more by the next pass. 'Outside the expected range' is the share of cells whose miss was larger than nine in ten misses on the passes predicted before; about 10 % is ordinary.",
  "limits": "One season of data: no way of predicting has seen a harvest, a flood or a thaw here before it happened. Neighbouring cells change together, so they are fewer independent samples than their number.",
- "generated": "2026-11-15T14:49:53Z"
+ "generated": "2026-11-15T14:59:29Z"
 }

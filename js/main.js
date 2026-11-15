@@ -3,9 +3,9 @@
 // Which version of the app this is. `tools/pack.sh` sets it; it shows at the
 // end of the credits line, so nobody has to wonder whether the browser is
 // still showing an older copy.
-const BUILD = '2026-11-15 14:20 UTC';
+const BUILD = '2026-11-15 15:00 UTC';
 
-import { CATEGORIES, FAMILIES, PALETTE, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START, RECENT_MS, OVERLAY_REACH_DAYS, NISAR_MOSAIC } from './config.js';
+import { CATEGORIES, FAMILIES, PALETTE, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START, RECENT_MS, OVERLAY_REACH_DAYS, NISAR_MOSAIC, NISAR_CHANGE } from './config.js';
 import { fetchFeed, fetchArchive } from './feeds.js';
 import { buildIncidents, tagNisarCoverage, pointInPolygon, distanceKm } from './incidents.js';
 import { edgeMarginKm, latestScenes, scenesAt, passesAt, bestPair, comparisonStatus, imageBounds, latestTileDate, likelyTileDate, historyAt, newestAt, nextPass, interferogramsAt, REPEAT_DAYS } from './nisar.js';
@@ -2189,6 +2189,24 @@ async function refreshMosaic() {
   applyLayers();
 }
 
+// The planet-wide change picture, if this copy of the app has one: its
+// switch appears in the menu, with what was compared and how.
+async function loadChange() {
+  const about = await fetch(NISAR_CHANGE.about, { cache: 'no-store' })
+    .then((res) => (res.ok ? res.json() : null))
+    .catch(() => null);
+  if (!about?.tiles) return;
+  state.change = about;
+  globe.setChange(about);
+  $('change-row').hidden = false;
+  const pct = (v) => `${Math.round(v * 100)} %`;
+  $('change-note').textContent =
+    `Each pass from ${about.after.from} to ${about.after.to} against the same pass ${about.gapDays} days earlier (${about.before.from} to ${about.before.to}); NISAR flies the same tracks every 12 days. ` +
+    `${about.notCalibrated} Changes under ${about.deadBand} are not drawn; full colour is ${about.full} or more. ` +
+    `A pair of passes is only used where it compares like with like: ${pct(about.numbers.accepted)} of the overlap was, and ${pct(about.numbers.covered)} of the map is covered. ` +
+    `${about.limits} ${about.checked || ''} While this is on, the radar picture itself is hidden. Built ${about.built} by tools/change.py.`;
+}
+
 // The day a context layer is shown for: the chosen day, or the newest day
 // before it that NASA has published. Several layers run days behind, and
 // asking for a day they do not have returns an error for every tile. One
@@ -2242,8 +2260,11 @@ function applyLayers() {
         : `NASA has published nothing for this layer in the ${OVERLAY_REACH_DAYS} days before ${date}.`;
     });
   }
-  $('nisar-tiles-key').hidden = !$('nisar-tiles').checked;
-  const planet = $('nisar-tiles').checked && +$('stack').value > 12;
+  const changing = $('change48').checked && !$('bands').checked;
+  globe.showChange(changing);
+  $('change-key').hidden = !changing;
+  $('nisar-tiles-key').hidden = !$('nisar-tiles').checked || changing;
+  const planet = $('nisar-tiles').checked && +$('stack').value > 12 && !changing;
   $('stack-note').hidden = !planet;
   if (planet) {
     // Says which of the two ways the whole planet is being shown.
@@ -2323,6 +2344,7 @@ async function start() {
   renderStatus();
   // The ready-made whole-planet picture, if this copy of the app has one.
   const mosaicAsked = refreshMosaic();
+  loadChange();
   setInterval(() => !document.hidden && refreshMosaic(), 10 * 60_000);
 
   $('basemap').onchange = (e) => {
@@ -2379,7 +2401,7 @@ async function start() {
     state.hidden.has(cat) ? state.hidden.delete(cat) : state.hidden.add(cat);
     draw();
   };
-  ['nisar-tiles', 'stack', 'date', 'bands'].forEach((id) => ($(id).onchange = applyLayers));
+  ['nisar-tiles', 'stack', 'date', 'bands', 'change48'].forEach((id) => ($(id).onchange = applyLayers));
   $('stack').addEventListener('change', () => (state.stackChosen = true));
   $('overlays').onchange = (e) => {
     // A layer that covers the whole map hides whatever lies under it, so

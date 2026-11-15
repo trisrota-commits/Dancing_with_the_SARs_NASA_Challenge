@@ -46,6 +46,26 @@ def main() -> None:
     never = forecast.scores(last, seen, last)["strong"]
     assert never["recall"] == 0.0 and never["precision"] is None and never["f1"] is None and never["accuracy"] == 0.75, never
 
+    # Up, down or stay (1 dB or more is a move), on four cells worked out by hand:
+    # said up, stay, down, stay; it was up, stay, down, down.
+    d = forecast.direction(np.array([2.0, 0.0, -3.0, 0.5]), np.array([1.5, 0.2, -2.0, -1.2]))
+    assert d["accuracy"] == 0.75 and d["precision"] == 0.833 and d["recall"] == 0.833 and d["f1"] == 0.778, d
+    assert d["commonest"] == 0.5 and d["shares"] == {"down": 0.5, "stay": 0.25, "up": 0.25}, d
+    # "Same as last time" always says stay: its accuracy is the share of cells that stayed.
+    still = forecast.direction(np.zeros(4), np.array([1.5, 0.2, -2.0, -1.2]))
+    assert still["accuracy"] == 0.25 and still["recall"] == 0.333, still
+
+    # The baselines on cells that rise by exactly 0.5 dB a pass: the trend
+    # line and the line through the last two are exact, the mean lags.
+    steps = np.arange(8, dtype=float)[:, None] * 0.5 + np.array([[-12.0, -8.0, -5.0]])
+    times = [1_780_000_000_000 + t * 12 * DAY for t in range(8)]
+    said = forecast.predict(steps, None, times, 6)
+    assert np.allclose(said["trend"], steps[6]) and np.allclose(said["line"], steps[6])
+    assert np.allclose(said["last"], steps[5]) and np.allclose(said["mean"], steps[:6].mean(axis=0))
+    # A pass that comes late (24 days, not 12): the trend line reads further along, the two-point line does not know.
+    late = times[:6] + [times[5] + 24 * DAY]
+    assert np.allclose(forecast.predict(steps, None, late + [late[-1] + 12 * DAY], 6)["trend"], steps[5] + 1.0)
+
     grid = make_grid()
     result = forecast.forecast(grid)
     o = result["overall"]
@@ -54,6 +74,8 @@ def main() -> None:
     assert o["learnt"]["rmse"] < o["line"]["rmse"], (o["learnt"]["rmse"], o["line"]["rmse"])
     assert o["learnt"]["rmse"] < 0.3 and o["learnt"]["skill"] > 0.6, o["learnt"]
     assert o["last"]["skill"] == 0.0 and result["best"] == "learnt"
+    assert result["bestBaseline"] in ("line", "trend") and result["modelAgainstBestBaseline"] > 0, (result["bestBaseline"], result["modelAgainstBestBaseline"])
+    assert [w["key"] for w in result["ways"] if w["baseline"]] == ["last", "mean", "line", "trend"]
     assert len(result["byDate"]) == 12 - forecast.FIRST and result["cells"] == 400
     print("made-up fields:", {k: (v["rmse"], v["skill"]) for k, v in o.items()})
 

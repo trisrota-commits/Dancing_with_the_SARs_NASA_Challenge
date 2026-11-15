@@ -114,16 +114,25 @@ const num = (v, digits = 2) => (v == null ? '–' : Number(v).toFixed(digits));
 // was, and the yes/no question. Every number is computed by
 // tools/forecast.py from the calibrated cells; nothing is written by hand.
 export function forecastHtml(f) {
+  // A baseline is a simple rule the model has to beat; the model is set apart from them.
+  const name = (w) => `<th scope="row" title="${esc(w.how)}">${esc(w.name)}${w.baseline ? '' : ' <span class="tag">model</span>'}</th>`;
+  const mark = (w) => (w.key === f.best ? ' class="best"' : '');
   const row = (w) => {
     const s = f.overall[w.key];
     if (!s) return '';
-    return `<tr${w.key === f.best ? ' class="best"' : ''}><th scope="row" title="${esc(w.how)}">${esc(w.name)}</th><td>${num(s.mae)}</td><td>${num(s.rmse)}</td><td>±${num(s.within90)}</td><td>${num(s.r2)}</td><td>${num(s.spearman)}</td></tr>`;
+    return `<tr${mark(w)}>${name(w)}<td>${num(s.mae)}</td><td>${num(s.rmse)}</td><td>±${num(s.within90)}</td><td>${num(s.r2)}</td><td>${num(s.spearman)}</td></tr>`;
+  };
+  const way = (w) => {
+    const d = f.overall[w.key]?.direction;
+    if (!d) return '';
+    return `<tr${mark(w)}>${name(w)}<td>${num(d.accuracy)}</td><td>${num(d.precision)}</td><td>${num(d.recall)}</td><td>${num(d.f1)}</td></tr>`;
   };
   const strong = (w) => {
     const c = f.overall[w.key]?.strong;
     if (!c) return '';
-    return `<tr${w.key === f.best ? ' class="best"' : ''}><th scope="row">${esc(w.name)}</th><td>${num(c.accuracy)}</td><td>${num(c.precision)}</td><td>${num(c.recall)}</td><td>${num(c.f1)}</td></tr>`;
+    return `<tr${mark(w)}>${name(w)}<td>${num(c.accuracy)}</td><td>${num(c.precision)}</td><td>${num(c.recall)}</td><td>${num(c.f1)}</td></tr>`;
   };
+  const shares = f.overall.last?.direction;
   const happened = f.overall.last?.strong?.happened;
   const dates = f.byDate
     .map((r) => {
@@ -136,10 +145,19 @@ export function forecastHtml(f) {
     <div class="src">Computed from the measurements · a test of predictability, not a forecast</div>
     <p>${esc(f.summary)}</p>
     <table class="forecast-table">
-      <caption>Predicting the next pass in ${f.cells.toLocaleString('en')} cells of ${f.cellM} m, in dB</caption>
+      <caption>Predicting the next pass in ${f.cells.toLocaleString('en')} cells of ${f.cellM} m, in dB. The first four are baselines: simple rules a model has to beat</caption>
       <tr><th scope="col">Way of predicting</th><th scope="col" title="Mean absolute error">MAE</th><th scope="col" title="Root mean square error">RMSE</th><th scope="col" title="Nine cells in ten are within this">9 in 10</th><th scope="col" title="Share of the differences between cells that the prediction explains">R²</th><th scope="col" title="Rank agreement between prediction and measurement">Spearman</th></tr>
       ${f.ways.map(row).join('')}
     </table>
+    ${
+      shares
+        ? `<table class="forecast-table">
+      <caption>“Will the echo go down, stay or go up by the next pass?” (${f.directionDb} dB or more is a move.) Always naming the commonest answer would be right ${(shares.commonest * 100).toFixed(0)} % of the time</caption>
+      <tr><th scope="col">Way of predicting</th><th scope="col">Accuracy</th><th scope="col" title="Averaged over the three answers">Precision</th><th scope="col" title="Averaged over the three answers">Recall</th><th scope="col" title="Averaged over the three answers">F1</th></tr>
+      ${f.ways.map(way).join('')}
+    </table>`
+        : ''
+    }
     <table class="forecast-table">
       <caption>“Will this cell change by ${f.strongDb} dB or more by the next pass?” It did in ${happened == null ? '–' : (happened * 100).toFixed(1)} % of readings</caption>
       <tr><th scope="col">Way of predicting</th><th scope="col">Accuracy</th><th scope="col">Precision</th><th scope="col">Recall</th><th scope="col">F1</th></tr>

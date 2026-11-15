@@ -49,6 +49,15 @@
         <p class="hint">Teal frames: the newest are bold, and they fade over four days.</p>
         <label class="check"><input type="checkbox" id="nisar-tiles" checked /> NISAR radar picture on the globe</label>
         <label class="check"><input type="checkbox" id="bands" /> Compare with Sentinel-1: L-band left, C-band right</label>
+        <label class="check" id="change-row" hidden><input type="checkbox" id="change48" /> What changed in 48 days, whole planet</label>
+        <div class="layer-key" id="change-key" hidden>
+          <ul class="legend">
+            <li><i style="--c: #40aaff"></i>Blue: the radar picture got darker (the echo weaker)</li>
+            <li><i style="--c: #ffaa3c"></i>Orange: it got brighter (the echo stronger)</li>
+            <li><i style="--c: #232c3a"></i>Dimmed map: hardly any change, or no pair of passes to compare</li>
+          </ul>
+          <small id="change-note"></small>
+        </div>
         <div class="row date">
           <button id="date-prev" aria-label="Previous day">◀</button>
           <input type="date" id="date" aria-label="Imagery date" />
