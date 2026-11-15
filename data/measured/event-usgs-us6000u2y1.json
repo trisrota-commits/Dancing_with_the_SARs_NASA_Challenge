@@ -1,0 +1,76 @@
+{
+ "id": "event-usgs-us6000u2y1",
+ "name": "M 5.7 - 47 km WNW of Khuzdar, Pakistan",
+ "lat": 28.0196,
+ "lon": 66.1855,
+ "radiusKm": 25,
+ "track": "142-A-016-DHDH",
+ "setup": {
+  "lat": 28.0196,
+  "lon": 66.1855,
+  "seriesRadiusM": 500,
+  "mapRadiusM": 6000,
+  "mapPol": "co"
+ },
+ "event": 1792195200000.0,
+ "pols": [
+  "HH",
+  "HV"
+ ],
+ "series": [
+  {
+   "time": 1788483253000,
+   "hh": -7.09,
+   "hv": -14.4,
+   "pixels": 7853,
+   "file": "NISAR_L2_PR_GCOV_029_142_A_016_4005_DHDH_A_20260904T005413_20260904T005447_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1789520052000,
+   "hh": -6.95,
+   "hv": -14.4,
+   "pixels": 7854,
+   "file": "NISAR_L2_PR_GCOV_030_142_A_016_4005_DHDH_A_20260916T005412_20260916T005447_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1790556852000,
+   "hh": -6.76,
+   "hv": -14.14,
+   "pixels": 7853,
+   "file": "NISAR_L2_PR_GCOV_031_142_A_016_4005_DHDH_A_20260928T005412_20260928T005447_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1791593652000,
+   "hh": -6.84,
+   "hv": -14.14,
+   "pixels": 7852,
+   "file": "NISAR_L2_PR_GCOV_032_142_A_016_4005_DHDH_A_20261010T005412_20261010T005447_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1792630453000,
+   "hh": -7.92,
+   "hv": -14.98,
+   "pixels": 7853,
+   "file": "NISAR_L2_PR_GCOV_033_142_A_016_4005_DHDH_A_20261022T005413_20261022T005447_P05036_N_F_J_001.h5"
+  }
+ ],
+ "change": {
+  "before": 1791593652000,
+  "after": 1792630453000,
+  "pol": "HH",
+  "image": "event-usgs-us6000u2y1_change.png",
+  "bounds": {
+   "west": 66.12444487115688,
+   "east": 66.24655512884313,
+   "south": 27.96570132950054,
+   "north": 28.07349867049946
+  },
+  "weakerPct": 0.7,
+  "strongerPct": 0.1,
+  "spansEvent": true
+ },
+ "firstDrop": null,
+ "summary": "Across the event of 2026-10-17: between 2026-10-10 and 2026-10-22, HH backscatter here changed by -1.1 dB and HV by -0.8 dB (mean within 500 m). Across the mapped area, 1% got at least 3 dB weaker and 0% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 5 passes on track 142-A-016-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-10-17, and 'before' the last pass before it.",
+ "generated": "2026-11-15T14:15:08Z"
+}

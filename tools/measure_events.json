@@ -2,6 +2,18 @@
   "about": "Written by tools/pick_events.mjs, not by hand: the strongest recent events that NISAR has passed over on one track both before and after. tools/measure.py measures them across the event date. Edit tools/measure_sites.json for places chosen by people.",
   "sites": [
     {
+      "id": "event-eonet-eonet-26258",
+      "event_id": "eonet:EONET_26258",
+      "name": "Wildfire FOOT CREEK, Johnson, Wyoming",
+      "category": "wildfire",
+      "kind": "Wildfire",
+      "lat": 44.3187,
+      "lon": -106.9326,
+      "event": "2026-11-05",
+      "start": "2026-09-21",
+      "picked": "2026-11-15"
+    },
+    {
       "id": "event-gdacs-fl1104270",
       "event_id": "gdacs:FL1104270",
       "name": "Flood in France",
@@ -71,6 +83,30 @@
       "lon": 165.5746,
       "event": "2026-10-20",
       "start": "2026-09-05",
+      "picked": "2026-11-15"
+    },
+    {
+      "id": "event-usgs-us6000u2y1",
+      "event_id": "usgs:us6000u2y1",
+      "name": "M 5.7 - 47 km WNW of Khuzdar, Pakistan",
+      "category": "earthquake",
+      "kind": "Earthquake",
+      "lat": 28.0196,
+      "lon": 66.1855,
+      "event": "2026-10-17",
+      "start": "2026-09-02",
+      "picked": "2026-11-15"
+    },
+    {
+      "id": "event-gdacs-fl1104220",
+      "event_id": "gdacs:FL1104220",
+      "name": "Flood in Italy",
+      "category": "flood",
+      "kind": "Flood",
+      "lat": 43.4587,
+      "lon": 11.1389,
+      "event": "2026-10-07",
+      "start": "2026-08-23",
       "picked": "2026-11-15"
     }
   ]
