@@ -13,6 +13,12 @@
 <h1 align="center">Dancing with the SARs</h1>
 
 <p align="center">
+  <b><a href="https://trisrota-commits.github.io/Dancing_with_the_SARs_NASA_Challenge/">Open the live app</a></b>
+  ·
+  <a href="https://trisrota-commits.github.io/Dancing_with_the_SARs_NASA_Challenge/demo/">the project in seven slides</a>
+</p>
+
+<p align="center">
   <b>Earth's surface never holds still.</b><br>
   A live 3D globe that follows the planet's changing surface through the eyes of
   the NASA-ISRO <b>NISAR</b> radar satellite: floods, earthquakes, fires, glaciers
