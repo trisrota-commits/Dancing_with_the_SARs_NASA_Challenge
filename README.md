@@ -10,7 +10,7 @@
   <a href="LICENSE"><img alt="MIT licence" src="https://img.shields.io/badge/licence-MIT-blue?style=flat-square"></a>
 </p>
 
-<h1 align="center">Dancing with the SARs</h1>
+<h1 align="center">Cloud Piercer</h1>
 
 <p align="center">
   <b><a href="https://cloudpiercer.space/">Open the live app</a></b>
