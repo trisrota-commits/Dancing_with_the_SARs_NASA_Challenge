@@ -1,0 +1,144 @@
+{
+ "id": "jakobshavn",
+ "name": "Sermeq Kujalleq (Jakobshavn)",
+ "track": "170-D-053-SHNA",
+ "cellM": 500.0,
+ "cells": 2304,
+ "passes": 11,
+ "from": "2026-06-25",
+ "to": "2026-11-04",
+ "falseAlarm": 0.01,
+ "event": null,
+ "most": {
+  "date": "2026-09-29",
+  "time": 1790725921000,
+  "stood": 0.1259,
+  "quiet": 0.0064
+ },
+ "picture": {
+  "date": "2026-09-29",
+  "time": 1790725921000,
+  "baselineFrom": "2026-06-25",
+  "baselineTo": "2026-09-17",
+  "stood": 0.1259,
+  "quiet": 0.0064,
+  "n": 48,
+  "image": "jakobshavn_stood.png",
+  "bounds": {
+   "west": -50.2031452085918,
+   "east": -49.5968547914082,
+   "south": 69.06220265900107,
+   "north": 69.27779734099893
+  }
+ },
+ "byDate": [
+  {
+   "time": 1786578721000,
+   "date": "2026-08-12",
+   "baseline": 3,
+   "channels": 1,
+   "threshold": 5.57,
+   "over": 0.0009,
+   "stood": 0.0,
+   "quiet": 0.0067,
+   "rose": 0.0,
+   "fell": 0.0
+  },
+  {
+   "time": 1787615521000,
+   "date": "2026-08-24",
+   "baseline": 4,
+   "channels": 1,
+   "threshold": 4.24,
+   "over": 0.0087,
+   "stood": 0.0004,
+   "quiet": 0.0046,
+   "rose": 0.0004,
+   "fell": 0.0,
+   "stillNext": 1.0
+  },
+  {
+   "time": 1788652321000,
+   "date": "2026-09-05",
+   "baseline": 5,
+   "channels": 1,
+   "threshold": 4.25,
+   "over": 0.003,
+   "stood": 0.0,
+   "quiet": 0.0031,
+   "rose": 0.0,
+   "fell": 0.0
+  },
+  {
+   "time": 1789689121000,
+   "date": "2026-09-17",
+   "baseline": 6,
+   "channels": 1,
+   "threshold": 3.92,
+   "over": 0.0634,
+   "stood": 0.049,
+   "quiet": 0.0038,
+   "rose": 0.0295,
+   "fell": 0.0195,
+   "stillNext": 0.92
+  },
+  {
+   "time": 1790725921000,
+   "date": "2026-09-29",
+   "baseline": 7,
+   "channels": 1,
+   "threshold": 4.07,
+   "over": 0.1372,
+   "stood": 0.1259,
+   "quiet": 0.0064,
+   "rose": 0.1259,
+   "fell": 0.0,
+   "stillNext": 0.979
+  },
+  {
+   "time": 1791762721000,
+   "date": "2026-10-11",
+   "baseline": 8,
+   "channels": 1,
+   "threshold": 4.78,
+   "over": 0.0013,
+   "stood": 0.0,
+   "quiet": 0.0082,
+   "rose": 0.0,
+   "fell": 0.0
+  },
+  {
+   "time": 1792799521000,
+   "date": "2026-10-23",
+   "baseline": 9,
+   "channels": 1,
+   "threshold": 3.4,
+   "over": 0.0226,
+   "stood": 0.0109,
+   "quiet": 0.0064,
+   "rose": 0.0109,
+   "fell": 0.0,
+   "newVersion": {
+    "from": "P05023",
+    "to": "P05036"
+   },
+   "stillNext": 0.88
+  },
+  {
+   "time": 1793836321000,
+   "date": "2026-11-04",
+   "baseline": 10,
+   "channels": 1,
+   "threshold": 2.96,
+   "over": 0.0091,
+   "stood": 0.003,
+   "quiet": 0.0046,
+   "rose": 0.003,
+   "fell": 0.0
+  }
+ ],
+ "summary": "The pass that stood out most was that of 2026-09-29: 13 % of the cells differed from what they had read on the 7 passes before it. On those passes themselves the same rules flag 0.6 %.",
+ "method": "NISAR L2 GCOV backscatter in cells of 500 m. From each pass the middle of all cells is taken away, so that what moved the whole area alike drops out. Each cell is then set against its own usual value and spread over the passes before (at an event: before the event; at least 3, at most 10), in HH and, where recorded, HV. The threshold is the score that 1% of the cells exceeded when each baseline pass was judged against the others. A cell counts only if at least 2 of its eight neighbours are over the threshold too.",
+ "limits": "It says that the ground changed and where, not why. A baseline of a few passes knows nothing of the season: a crop growing or ground freezing stands out as well. Cells next to each other share speckle and weather, so a cluster is weaker evidence than its size suggests.",
+ "generated": "2026-11-15T16:30:07Z"
+}

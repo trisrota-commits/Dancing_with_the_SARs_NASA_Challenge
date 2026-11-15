@@ -453,14 +453,9 @@ def main() -> None:
         except (OSError, ValueError):
             event = None
         result = forecast(grid, event)
-        stood_file = OUT_DIR / f"{grid['id']}_stood.png"
+        # (The picture of the cells that stood out is made by tools/detect.py.)
         if result and result["stood"]:
-            # The picture of the cells that stood out, and where it lies.
-            site = json.loads((OUT_DIR / f"{grid['id']}.json").read_text())
-            stood_file.write_bytes(png(result["stood"].pop("_rgba")))
-            result["stood"]["bounds"] = window_bounds(site["lat"], site["lon"], grid["radiusM"])
-        elif stood_file.exists():
-            stood_file.unlink()
+            result["stood"] = None
         if not result:
             print(f"{grid['id']}: too few passes to test anything ({len(grid['times'])}; {MIN_SHORT} are needed)")
             stale = OUT_DIR / f"{grid['id']}_forecast.json"

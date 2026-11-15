@@ -1,19 +1,5 @@
 {
- "stood": {
-  "date": "2026-10-22",
-  "time": 1792630453000,
-  "before": "2026-10-10",
-  "expected": 0.22,
-  "outside": 0.25,
-  "n": 24,
-  "image": "event-usgs-us6000u2y1_stood.png",
-  "bounds": {
-   "west": 66.12444487115688,
-   "east": 66.24655512884313,
-   "south": 27.96570132950054,
-   "north": 28.07349867049946
-  }
- },
+ "stood": null,
  "id": "event-usgs-us6000u2y1",
  "name": "M 5.7 - 47 km WNW of Khuzdar, Pakistan",
  "track": "142-A-016-DHDH",
@@ -500,5 +486,5 @@
  },
  "method": "Calibrated NISAR backscatter (GCOV, gamma-naught) in cells of 500 m on track 142-A-016-DHDH. Each pass from the 5th on is predicted from the passes before it only, and compared with what was measured. RMSE and MAE in dB; '9 in 10' is the error nine cells in ten stay under. 'Up or down' asks whether a cell's echo goes down or up by 1 dB or more by the next pass, or stays; precision, recall and F1 are averaged over the three answers. The yes/no question is whether a cell changes by 3 dB or more by the next pass. 'Outside the expected range' is the share of cells whose miss was larger than nine in ten misses on the passes predicted before; about 10 % is ordinary.",
  "limits": "One season of data: no way of predicting has seen a harvest, a flood or a thaw here before it happened. Neighbouring cells change together, so they are fewer independent samples than their number. A pass made with a new version of NASA's processing can shift by itself; such passes are marked.",
- "generated": "2026-11-15T16:02:02Z"
+ "generated": "2026-11-15T16:30:06Z"
 }

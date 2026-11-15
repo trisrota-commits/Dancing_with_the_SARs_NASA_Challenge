@@ -1,0 +1,143 @@
+{
+ "id": "aletsch",
+ "name": "Aletsch Glacier (Konkordiaplatz)",
+ "track": "144-A-025-DHDH",
+ "cellM": 500.0,
+ "cells": 1020,
+ "passes": 11,
+ "from": "2026-06-24",
+ "to": "2026-11-03",
+ "falseAlarm": 0.01,
+ "event": null,
+ "most": {
+  "date": "2026-10-22",
+  "time": 1792642740000,
+  "stood": 0.0118,
+  "quiet": 0.0022
+ },
+ "picture": {
+  "date": "2026-10-22",
+  "time": 1792642740000,
+  "baselineFrom": "2026-06-24",
+  "baselineTo": "2026-10-10",
+  "stood": 0.0118,
+  "quiet": 0.0022,
+  "n": 32,
+  "image": "aletsch_stood.png",
+  "bounds": {
+   "west": 7.925599017516731,
+   "east": 8.134400982483267,
+   "south": 46.42813510600072,
+   "north": 46.57186489399928
+  }
+ },
+ "byDate": [
+  {
+   "time": 1786421944000,
+   "date": "2026-08-11",
+   "baseline": 3,
+   "channels": 2,
+   "threshold": 9.01,
+   "over": 0.001,
+   "stood": 0.0,
+   "quiet": 0.0003,
+   "rose": 0.0,
+   "fell": 0.0
+  },
+  {
+   "time": 1787458740000,
+   "date": "2026-08-23",
+   "baseline": 4,
+   "channels": 2,
+   "threshold": 6.06,
+   "over": 0.0206,
+   "stood": 0.0088,
+   "quiet": 0.0,
+   "rose": 0.0,
+   "fell": 0.0088,
+   "stillNext": 0.0
+  },
+  {
+   "time": 1788495543000,
+   "date": "2026-09-04",
+   "baseline": 5,
+   "channels": 2,
+   "threshold": 5.76,
+   "over": 0.0029,
+   "stood": 0.0,
+   "quiet": 0.0024,
+   "rose": 0.0,
+   "fell": 0.0
+  },
+  {
+   "time": 1789532343000,
+   "date": "2026-09-16",
+   "baseline": 6,
+   "channels": 2,
+   "threshold": 5.47,
+   "over": 0.002,
+   "stood": 0.0,
+   "quiet": 0.0023,
+   "rose": 0.0,
+   "fell": 0.0
+  },
+  {
+   "time": 1790569140000,
+   "date": "2026-09-28",
+   "baseline": 7,
+   "channels": 2,
+   "threshold": 5.44,
+   "over": 0.0137,
+   "stood": 0.001,
+   "quiet": 0.0028,
+   "rose": 0.001,
+   "fell": 0.0,
+   "stillNext": 1.0
+  },
+  {
+   "time": 1791605940000,
+   "date": "2026-10-10",
+   "baseline": 8,
+   "channels": 2,
+   "threshold": 5.17,
+   "over": 0.0127,
+   "stood": 0.0,
+   "quiet": 0.0025,
+   "rose": 0.0,
+   "fell": 0.0
+  },
+  {
+   "time": 1792642740000,
+   "date": "2026-10-22",
+   "baseline": 9,
+   "channels": 2,
+   "threshold": 4.85,
+   "over": 0.0353,
+   "stood": 0.0118,
+   "quiet": 0.0022,
+   "rose": 0.0108,
+   "fell": 0.001,
+   "newVersion": {
+    "from": "P05023",
+    "to": "P05036"
+   },
+   "stillNext": 1.0
+  },
+  {
+   "time": 1793679541000,
+   "date": "2026-11-03",
+   "baseline": 10,
+   "channels": 2,
+   "threshold": 4.72,
+   "over": 0.0216,
+   "stood": 0.0088,
+   "quiet": 0.0024,
+   "rose": 0.0,
+   "fell": 0.0088
+  }
+ ],
+ "summary": "The pass that stood out most was that of 2026-10-22: 1.2 % of the cells differed from what they had read on the 9 passes before it. On those passes themselves the same rules flag 0.2 %.",
+ "method": "NISAR L2 GCOV backscatter in cells of 500 m. From each pass the middle of all cells is taken away, so that what moved the whole area alike drops out. Each cell is then set against its own usual value and spread over the passes before (at an event: before the event; at least 3, at most 10), in HH and, where recorded, HV. The threshold is the score that 1% of the cells exceeded when each baseline pass was judged against the others. A cell counts only if at least 2 of its eight neighbours are over the threshold too.",
+ "limits": "It says that the ground changed and where, not why. A baseline of a few passes knows nothing of the season: a crop growing or ground freezing stands out as well. Cells next to each other share speckle and weather, so a cluster is weaker evidence than its size suggests.",
+ "generated": "2026-11-15T16:30:07Z"
+}

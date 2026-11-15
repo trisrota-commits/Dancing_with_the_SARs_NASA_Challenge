@@ -1,0 +1,82 @@
+{
+ "id": "event-usgs-us6000u2y1",
+ "name": "M 5.7 - 47 km WNW of Khuzdar, Pakistan",
+ "track": "142-A-016-DHDH",
+ "cellM": 500.0,
+ "cells": 576,
+ "passes": 5,
+ "from": "2026-09-04",
+ "to": "2026-10-22",
+ "falseAlarm": 0.01,
+ "event": {
+  "time": 1792195200000.0,
+  "date": "2026-10-17",
+  "firstPassAfter": "2026-10-22",
+  "stood": 0.0642,
+  "quiet": 0.0013,
+  "stillNext": null,
+  "newVersion": {
+   "from": "P05023",
+   "to": "P05036"
+  },
+  "baseline": 4
+ },
+ "most": {
+  "date": "2026-10-22",
+  "time": 1792630453000,
+  "stood": 0.0642,
+  "quiet": 0.0013
+ },
+ "picture": {
+  "date": "2026-10-22",
+  "time": 1792630453000,
+  "baselineFrom": "2026-09-04",
+  "baselineTo": "2026-10-10",
+  "stood": 0.0642,
+  "quiet": 0.0013,
+  "n": 24,
+  "image": "event-usgs-us6000u2y1_stood.png",
+  "bounds": {
+   "west": 66.12444487115688,
+   "east": 66.24655512884313,
+   "south": 27.96570132950054,
+   "north": 28.07349867049946
+  }
+ },
+ "byDate": [
+  {
+   "time": 1791593652000,
+   "date": "2026-10-10",
+   "baseline": 3,
+   "channels": 2,
+   "threshold": 11.55,
+   "over": 0.0017,
+   "stood": 0.0,
+   "quiet": 0.0017,
+   "rose": 0.0,
+   "fell": 0.0,
+   "afterEvent": false
+  },
+  {
+   "time": 1792630453000,
+   "date": "2026-10-22",
+   "baseline": 4,
+   "channels": 2,
+   "threshold": 4.7,
+   "over": 0.1024,
+   "stood": 0.0642,
+   "quiet": 0.0013,
+   "rose": 0.0139,
+   "fell": 0.0503,
+   "afterEvent": true,
+   "newVersion": {
+    "from": "P05023",
+    "to": "P05036"
+   }
+  }
+ ],
+ "summary": "On NISAR's first pass after the event of 2026-10-17 (2026-10-22), 6.4 % of the cells stood out from what they had read on the 4 passes before it. On those passes themselves the same rules flag 0.1 %.",
+ "method": "NISAR L2 GCOV backscatter in cells of 500 m. From each pass the middle of all cells is taken away, so that what moved the whole area alike drops out. Each cell is then set against its own usual value and spread over the passes before (at an event: before the event; at least 3, at most 10), in HH and, where recorded, HV. The threshold is the score that 1% of the cells exceeded when each baseline pass was judged against the others. A cell counts only if at least 2 of its eight neighbours are over the threshold too.",
+ "limits": "It says that the ground changed and where, not why. A baseline of a few passes knows nothing of the season: a crop growing or ground freezing stands out as well. Cells next to each other share speckle and weather, so a cluster is weaker evidence than its size suggests.",
+ "generated": "2026-11-15T16:30:07Z"
+}

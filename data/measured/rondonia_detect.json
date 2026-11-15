@@ -1,0 +1,119 @@
+{
+ "id": "rondonia",
+ "name": "Rond\u00f4nia",
+ "track": "161-A-173-DHDH",
+ "cellM": 500.0,
+ "cells": 1361,
+ "passes": 9,
+ "from": "2026-06-25",
+ "to": "2026-10-23",
+ "falseAlarm": 0.01,
+ "event": null,
+ "most": {
+  "date": "2026-09-05",
+  "time": 1788602477000,
+  "stood": 0.0325,
+  "quiet": 0.0055
+ },
+ "picture": {
+  "date": "2026-09-05",
+  "time": 1788602477000,
+  "baselineFrom": "2026-06-25",
+  "baselineTo": "2026-08-24",
+  "stood": 0.0325,
+  "quiet": 0.0055,
+  "n": 40,
+  "image": "rondonia_stood.png",
+  "bounds": {
+   "west": -63.09118898290177,
+   "east": -62.90881101709823,
+   "south": -9.989831117499103,
+   "north": -9.810168882500898
+  }
+ },
+ "byDate": [
+  {
+   "time": 1787565678000,
+   "date": "2026-08-24",
+   "baseline": 3,
+   "channels": 2,
+   "threshold": 10.14,
+   "over": 0.0107,
+   "stood": 0.0025,
+   "quiet": 0.0035,
+   "rose": 0.0,
+   "fell": 0.0025,
+   "stillNext": 0.5
+  },
+  {
+   "time": 1788602477000,
+   "date": "2026-09-05",
+   "baseline": 4,
+   "channels": 2,
+   "threshold": 7.57,
+   "over": 0.0531,
+   "stood": 0.0325,
+   "quiet": 0.0055,
+   "rose": 0.0325,
+   "fell": 0.0,
+   "stillNext": 0.038
+  },
+  {
+   "time": 1789639277000,
+   "date": "2026-09-17",
+   "baseline": 5,
+   "channels": 2,
+   "threshold": 7.83,
+   "over": 0.0013,
+   "stood": 0.0,
+   "quiet": 0.0055,
+   "rose": 0.0,
+   "fell": 0.0
+  },
+  {
+   "time": 1790676077000,
+   "date": "2026-09-29",
+   "baseline": 6,
+   "channels": 2,
+   "threshold": 6.73,
+   "over": 0.0019,
+   "stood": 0.0019,
+   "quiet": 0.0065,
+   "rose": 0.0019,
+   "fell": 0.0,
+   "stillNext": 0.0
+  },
+  {
+   "time": 1791712877000,
+   "date": "2026-10-11",
+   "baseline": 7,
+   "channels": 2,
+   "threshold": 4.87,
+   "over": 0.0,
+   "stood": 0.0,
+   "quiet": 0.0053,
+   "rose": 0.0,
+   "fell": 0.0
+  },
+  {
+   "time": 1792749677000,
+   "date": "2026-10-23",
+   "baseline": 8,
+   "channels": 2,
+   "threshold": 4.83,
+   "over": 0.0081,
+   "stood": 0.0031,
+   "quiet": 0.0063,
+   "rose": 0.0031,
+   "fell": 0.0,
+   "newVersion": {
+    "from": "P05023",
+    "to": "P05036"
+   }
+  }
+ ],
+ "summary": "The pass that stood out most was that of 2026-09-05: 3.2 % of the cells differed from what they had read on the 4 passes before it. On those passes themselves the same rules flag 0.5 %.",
+ "method": "NISAR L2 GCOV backscatter in cells of 500 m. From each pass the middle of all cells is taken away, so that what moved the whole area alike drops out. Each cell is then set against its own usual value and spread over the passes before (at an event: before the event; at least 3, at most 10), in HH and, where recorded, HV. The threshold is the score that 1% of the cells exceeded when each baseline pass was judged against the others. A cell counts only if at least 2 of its eight neighbours are over the threshold too.",
+ "limits": "It says that the ground changed and where, not why. A baseline of a few passes knows nothing of the season: a crop growing or ground freezing stands out as well. Cells next to each other share speckle and weather, so a cluster is weaker evidence than its size suggests.",
+ "generated": "2026-11-15T16:30:08Z"
+}

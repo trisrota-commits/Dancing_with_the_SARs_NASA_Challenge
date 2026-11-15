@@ -12,7 +12,7 @@ import { edgeMarginKm, latestScenes, scenesAt, passesAt, bestPair, comparisonSta
 import { STORIES } from './stories.js';
 import { PLACES, PLACE_KINDS, otherHemisphere } from './places.js';
 import { loadFrames, spread, view, history, describeSeries, rankByCoverage, sampleAt, channelView } from './timelapse.js';
-import { measuredIndex, measuredSummary, measuredById, measuredNear, measuredHtml, measuredChart, measuredLine, changeImageUrl, forecastFor, forecastHtml, stoodImageUrl, stoodLine } from './measured.js';
+import { measuredIndex, measuredSummary, measuredById, measuredNear, measuredHtml, measuredChart, measuredLine, changeImageUrl, forecastFor, forecastHtml, detectFor, detectHtml, sensitivity, stoodImageUrl, stoodLine, share, stoodOut } from './measured.js';
 import { fetchElements, positionAt, groundTrack, swathEdges, elementsEpoch } from './orbit.js';
 import { SPECIES, MONTHS, POIS, loadSightings } from './wildlife.js';
 import { historyChart } from './chart.js';
@@ -932,11 +932,11 @@ function setLegend(kind, info = {}) {
       <ul>${row('linear-gradient(90deg,#f33,#ff3,#3f3,#3ff,#33f,#f3f)', 'One run through the colours: about 12 cm')}</ul>
       <small>Tight bands around one place are ground movement. Broad bands are mostly the atmosphere. Speckle means the passes did not match, as over water.</small>`;
   } else if (kind === 'stood') {
-    const st = info.f.stood;
-    html = `<b>What stood out · ${esc(st.before)} to ${esc(st.date)}</b>
-      <p>Cells of ${info.f.cellM} m whose radar echo changed differently from the ground around them between two NISAR passes, from NISAR's calibrated data.</p>
-      <ul>${row(PALETTE.stronger, 'Orange: the echo rose more than around it') + row(PALETTE.weaker, 'Blue: it fell more than around it')}</ul>
-      <small>A cell is coloured where it differs from the middle of all cells by more than ${st.expected} dB, the range nine cells in ten kept to on the passes before; full colour at twice that. ${Math.round(st.outside * 100)} % of the cells are coloured; about 10 % is ordinary. It shows where something changed, not what caused it. Placed to within about half a cell.</small>`;
+    const st = info.f.picture;
+    html = `<b>What stood out · ${esc(st.date)}</b>
+      <p>Cells of ${info.f.cellM} m that read differently on this NISAR pass from their own past, from NISAR's calibrated data.</p>
+      <ul>${row(PALETTE.stronger, "Orange: the echo rose against the cell's own past") + row(PALETTE.weaker, 'Blue: it fell')}</ul>
+      <small>The past is the passes from ${esc(st.baselineFrom)} to ${esc(st.baselineTo)}. What moved the whole area alike (rain, a season) is taken away first. ${share(st.stood)} of the cells are coloured; on those earlier passes the same rules flag ${share(st.quiet)}. A cell counts only with flagged neighbours. It shows where something changed, not what caused it. Placed to within about half a cell.</small>`;
   } else if (kind === 'measured') {
     const c = info.d.change;
     html = `<b>Measured change · ${day(c.before)} to ${day(c.after)}</b>
@@ -1276,16 +1276,17 @@ function renderSpotlight() {
 
 // The two lead cases on the opening card. Both are measured sites; the
 // sentence is put together from their files (tools/measure.py and
-// tools/forecast.py), so it says nothing the data does not.
+// tools/detect.py), so it says nothing the data does not.
 const PROOF = { flood: 'event-gdacs-fl1104220', floodReport: 'gdacs:FL1104220', crop: 'west-bengal' };
 
 async function renderProof() {
   const [flood, crop] = await Promise.all([measuredById(PROOF.flood), measuredById(PROOF.crop)]);
-  const check = flood ? await forecastFor(flood) : null;
+  const check = flood ? await detectFor(flood) : null;
   const parts = [];
-  const share = check?.event?.outside;
-  if (share != null) {
-    parts.push(`At a flood in Italy, ${Math.round(share * 100)} % of the ground did something other than the ground around it on NISAR's first pass afterwards (${check.event.firstPassAfter}); about 10 % is ordinary.`);
+  const e = check?.event;
+  const found = e && stoodOut(e.stood, e.quiet) ? e.stood : null;
+  if (found != null) {
+    parts.push(`At a flood in Italy, ${share(e.stood)} of the ground read differently from its own past on NISAR's first pass afterwards (${e.firstPassAfter}); on the passes before, the same rules flag ${share(e.quiet)}.`);
   }
   if (crop?.series?.length > 2 && placeById(PROOF.crop)) {
     const hh = crop.series.filter((p) => p.hh != null);
@@ -1293,9 +1294,9 @@ async function renderProof() {
     const high = hh.reduce((a, b) => (b.hh > a.hh ? b : a));
     parts.push(`Over the rice fields of Bardhaman the echo ran from ${low.hh.toFixed(1)} dB (${day(low.time)}) to ${high.hh.toFixed(1)} dB (${day(high.time)}) through one crop, over ${hh.length} passes.`);
   }
-  $('proof-flood').hidden = share == null;
-  $('proof-crop').hidden = parts.length === (share == null ? 0 : 1);
-  $('proof-crop').classList.toggle('primary', share == null);
+  $('proof-flood').hidden = found == null;
+  $('proof-crop').hidden = parts.length === (found == null ? 0 : 1);
+  $('proof-crop').classList.toggle('primary', found == null);
   $('proof-text').textContent = parts.join(' ');
   $('proof').hidden = !parts.length;
   // Without the measured cases the story is the way in.
@@ -1304,7 +1305,7 @@ async function renderProof() {
 
 // The measured places and events, as a list in the menu: the ones where
 // most of the ground stood out come first. Every figure is from
-// tools/forecast.py; a place it could not test is listed without one.
+// tools/detect.py; a place it could not judge is listed without one.
 async function renderMeasuredList() {
   const [index, checks] = await Promise.all([measuredIndex(), measuredSummary()]);
   const byId = new Map(checks.map((c) => [c.id, c]));
@@ -1312,19 +1313,17 @@ async function renderMeasuredList() {
     .filter((e) => e.event != null || placeById(e.id))
     .map((e) => {
       const c = byId.get(e.id);
-      const share = e.event != null ? c?.event?.outside : c?.peerSurprise?.outside;
-      return { e, share: share ?? null, when: e.event != null ? c?.event?.firstPassAfter : c?.peerSurprise?.date };
+      const at = e.event != null ? c?.event : c?.most;
+      return { e, stood: at?.stood ?? null, quiet: at?.quiet ?? null, when: e.event != null ? c?.event?.firstPassAfter : c?.most?.date };
     })
-    .sort((a, b) => (b.share ?? -1) - (a.share ?? -1));
+    .sort((a, b) => (b.stood ?? -1) - (a.stood ?? -1));
   if (!rows.length) return;
   state.measuredList = rows;
   $('measured-list').innerHTML = rows
-    .map(({ e, share, when }, i) => {
-      // A figure from the first pass of a new processing version is not the ground's alone.
-      const doubtful = e.event != null && byId.get(e.id)?.event?.newVersion;
-      const label = share == null ? 'measured' : `${Math.round(share * 100)} % stood out${doubtful ? '*' : ''}`;
-      const title = share == null ? 'Too few passes yet to say what is ordinary here' : `${e.event != null ? 'First pass after the event' : 'The pass that stood out most'}: ${when}${doubtful ? ". * NASA's processing changed with this pass, which alone can shift the values" : ''}`;
-      return `<li tabindex="0" role="button" data-n="${i}" class="${share != null && share >= 0.2 && !doubtful ? 'out' : ''}" title="${esc(title)}"><span>${esc(e.name)}</span><span class="km">${label}</span></li>`;
+    .map(({ e, stood, quiet, when }, i) => {
+      const label = stood == null ? 'measured' : `${share(stood)} stood out`;
+      const title = stood == null ? 'Too few passes yet for a baseline' : `${e.event != null ? 'First pass after the event' : 'The pass that stood out most'}: ${when}. On the passes before, the same rules flag ${share(quiet)}`;
+      return `<li tabindex="0" role="button" data-n="${i}" class="${stoodOut(stood, quiet) ? 'out' : ''}" title="${esc(title)}"><span>${esc(e.name)}</span><span class="km">${label}</span></li>`;
     })
     .join('');
   $('measured-count').textContent = rows.length;
@@ -2038,16 +2037,21 @@ async function showMeasured(stillHere, pending, findCompare) {
   const compare = findCompare ? await findCompare() : null;
   if (!stillHere() || !$('measured-slot')) return;
   state.selected.measured = d;
-  // What stood out comes first (filled in below), then the series it rests on.
-  $('measured-slot').innerHTML = `<div id="forecast-slot"></div><h4>Measured with NISAR</h4>${measuredHtml(d, compare)}
+  // What stood out comes first (filled in below), then the series it rests
+  // on, then how well the next pass could have been predicted.
+  $('measured-slot').innerHTML = `<div id="detect-slot"></div><h4>Measured with NISAR</h4>${measuredHtml(d, compare)}<div id="forecast-slot"></div>
     <p class="note">These are calibrated values from the full NISAR data, comparable between dates. Any preview charts below are relative: each preview is contrast-stretched on its own, so use them for <em>where</em> and <em>when</em>, and these dB values for <em>how much</em>.</p>`;
   measuredChart($('measured-chart'), d, compare);
-  // How well the next pass could have been predicted here, if that was tested.
-  forecastFor(d).then((f) => {
-    if (!f || !stillHere() || state.selected?.measured !== d || !$('forecast-slot')) return;
-    state.selected.check = f;
+  const here = () => stillHere() && state.selected?.measured === d;
+  Promise.all([detectFor(d), sensitivity()]).then(([found, sens]) => {
+    if (!found || !here() || !$('detect-slot')) return;
+    state.selected.check = found;
     if (state.selected.kind === 'incident') renderCard();
-    $('forecast-slot').innerHTML = `<h4>What stood out here?</h4>${forecastHtml(f)}`;
+    $('detect-slot').innerHTML = `<h4>What stood out here?</h4>${detectHtml(found, sens)}`;
+  });
+  forecastFor(d).then((f) => {
+    if (!f || !here() || !$('forecast-slot')) return;
+    $('forecast-slot').innerHTML = `<details class="fold"><summary>Can the next pass be predicted? Baselines and error measures</summary>${forecastHtml(f)}</details>`;
   });
   // An event's card and text lead with the calibrated value once it is here.
   renderCard();
@@ -2074,14 +2078,14 @@ async function showMeasuredMap(button) {
 // The cells that did something other than their neighbours, on the globe.
 async function showStoodMap(button) {
   const f = state.selected?.check;
-  if (!f?.stood) return;
+  if (!f?.picture) return;
   const token = take('measured');
   button.textContent = 'Loading…';
   try {
     const picture = await loadPicture(stoodImageUrl(f));
     if (token !== stage.token) return;
-    globe.addPicture(picture, f.stood.bounds, undefined, 0.9);
-    globe.flyToBounds(f.stood.bounds);
+    globe.addPicture(picture, f.picture.bounds, undefined, 0.9);
+    globe.flyToBounds(f.picture.bounds);
     setLegend('stood', { f });
     button.textContent = 'Shown on the globe';
   } catch {

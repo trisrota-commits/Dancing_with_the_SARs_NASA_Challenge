@@ -1,0 +1,145 @@
+{
+ "id": "okavango",
+ "name": "Okavango Delta",
+ "track": "172-A-168-DHDH",
+ "cellM": 500.0,
+ "cells": 3600,
+ "passes": 11,
+ "from": "2026-06-26",
+ "to": "2026-11-05",
+ "falseAlarm": 0.01,
+ "event": null,
+ "most": {
+  "date": "2026-10-12",
+  "time": 1791778634000,
+  "stood": 0.0981,
+  "quiet": 0.0058
+ },
+ "picture": {
+  "date": "2026-10-12",
+  "time": 1791778634000,
+  "baselineFrom": "2026-06-26",
+  "baselineTo": "2026-09-30",
+  "stood": 0.0981,
+  "quiet": 0.0058,
+  "n": 60,
+  "image": "okavango_stood.png",
+  "bounds": {
+   "west": 22.75722977284287,
+   "east": 23.042770227157128,
+   "south": -19.434746676248654,
+   "north": -19.165253323751347
+  }
+ },
+ "byDate": [
+  {
+   "time": 1786594634000,
+   "date": "2026-08-13",
+   "baseline": 3,
+   "channels": 2,
+   "threshold": 15.16,
+   "over": 0.0008,
+   "stood": 0.0,
+   "quiet": 0.0074,
+   "rose": 0.0,
+   "fell": 0.0
+  },
+  {
+   "time": 1787631434000,
+   "date": "2026-08-25",
+   "baseline": 4,
+   "channels": 2,
+   "threshold": 7.97,
+   "over": 0.0006,
+   "stood": 0.0,
+   "quiet": 0.0051,
+   "rose": 0.0,
+   "fell": 0.0
+  },
+  {
+   "time": 1788668234000,
+   "date": "2026-09-06",
+   "baseline": 5,
+   "channels": 2,
+   "threshold": 4.93,
+   "over": 0.0486,
+   "stood": 0.0325,
+   "quiet": 0.0066,
+   "rose": 0.0325,
+   "fell": 0.0,
+   "stillNext": 0.991
+  },
+  {
+   "time": 1789705034000,
+   "date": "2026-09-18",
+   "baseline": 6,
+   "channels": 2,
+   "threshold": 4.73,
+   "over": 0.0506,
+   "stood": 0.0361,
+   "quiet": 0.0068,
+   "rose": 0.0361,
+   "fell": 0.0,
+   "stillNext": 0.938
+  },
+  {
+   "time": 1790741834000,
+   "date": "2026-09-30",
+   "baseline": 7,
+   "channels": 2,
+   "threshold": 4.45,
+   "over": 0.0119,
+   "stood": 0.0047,
+   "quiet": 0.007,
+   "rose": 0.0047,
+   "fell": 0.0,
+   "stillNext": 0.882
+  },
+  {
+   "time": 1791778634000,
+   "date": "2026-10-12",
+   "baseline": 8,
+   "channels": 2,
+   "threshold": 3.78,
+   "over": 0.1481,
+   "stood": 0.0981,
+   "quiet": 0.0058,
+   "rose": 0.0775,
+   "fell": 0.0206,
+   "stillNext": 0.912
+  },
+  {
+   "time": 1792815434000,
+   "date": "2026-10-24",
+   "baseline": 9,
+   "channels": 2,
+   "threshold": 4.22,
+   "over": 0.0975,
+   "stood": 0.0603,
+   "quiet": 0.0052,
+   "rose": 0.0317,
+   "fell": 0.0286,
+   "newVersion": {
+    "from": "P05023",
+    "to": "P05036"
+   },
+   "stillNext": 0.935
+  },
+  {
+   "time": 1793852234000,
+   "date": "2026-11-05",
+   "baseline": 10,
+   "channels": 2,
+   "threshold": 4.27,
+   "over": 0.0606,
+   "stood": 0.035,
+   "quiet": 0.006,
+   "rose": 0.0192,
+   "fell": 0.0158
+  }
+ ],
+ "summary": "The pass that stood out most was that of 2026-10-12: 10 % of the cells differed from what they had read on the 8 passes before it. On those passes themselves the same rules flag 0.6 %.",
+ "method": "NISAR L2 GCOV backscatter in cells of 500 m. From each pass the middle of all cells is taken away, so that what moved the whole area alike drops out. Each cell is then set against its own usual value and spread over the passes before (at an event: before the event; at least 3, at most 10), in HH and, where recorded, HV. The threshold is the score that 1% of the cells exceeded when each baseline pass was judged against the others. A cell counts only if at least 2 of its eight neighbours are over the threshold too.",
+ "limits": "It says that the ground changed and where, not why. A baseline of a few passes knows nothing of the season: a crop growing or ground freezing stands out as well. Cells next to each other share speckle and weather, so a cluster is weaker evidence than its size suggests.",
+ "generated": "2026-11-15T16:30:08Z"
+}
