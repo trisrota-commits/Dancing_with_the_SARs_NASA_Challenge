@@ -236,6 +236,20 @@ def read_window(f, lat: float, lon: float, radius_m: float) -> dict | None:
     return {"epsg": epsg, "x": xs[x0:x1], "y": ys[y0:y1], "cx": cx, "cy": cy, "labels": labels, **bands}
 
 
+# Backscatter that can be a measurement at all, in dB. NISAR's own noise
+# lies near -25 dB and the brightest city blocks stay under +10 dB, so a
+# mean outside these generous bounds is not a reading of the ground. The
+# first run on real files (15 November 2026) gave -135 dB for every pass
+# over Perito Moreno, with a believable difference between the channels:
+# the values in those files are scaled differently, for a reason not yet
+# found. Such a pass is left out and said so; it is never written.
+PLAUSIBLE_DB = (-50.0, 20.0)
+
+
+def plausible(db) -> bool:
+    return db is not None and PLAUSIBLE_DB[0] <= db <= PLAUSIBLE_DB[1]
+
+
 def to_db(linear):
     with np.errstate(divide="ignore", invalid="ignore"):
         return 10 * np.log10(linear)
@@ -346,7 +360,7 @@ def measure(site: dict, passes: list[dict], previous: dict | None = None) -> dic
     # An earlier result counts only if it was made the same way on the same track.
     if previous and (previous.get("setup") != setup_of(site) or previous.get("track") != stack[0]["stack"]):
         previous = None
-    known = {s["file"]: s for s in previous["series"]} if previous else {}
+    known = {s["file"]: s for s in previous["series"] if plausible(s.get("hh"))} if previous else {}
     by_time = {int(p["time"].timestamp() * 1000): p for p in stack}
 
     def read(p: dict) -> dict | None:
@@ -375,6 +389,11 @@ def measure(site: dict, passes: list[dict], previous: dict | None = None) -> dic
         if hh is None:
             print(f"    {p['time']:%Y-%m-%d}: too little valid data at the site")
             continue
+        if not plausible(hh):
+            print(f"    {p['time']:%Y-%m-%d}: {hh:.1f} dB is not a possible backscatter; this pass is left out")
+            continue
+        if not plausible(hv):
+            hv = None
         series.append({"time": when, "hh": round(hh, 2), "hv": None if hv is None else round(hv, 2), "pixels": n, "file": p["name"]})
         windows[when] = win
         co_l, cross_l = win["labels"]["co"], win["labels"].get("cross", "-")

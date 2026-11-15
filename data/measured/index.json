@@ -90,15 +90,6 @@
   "file": "okavango.json"
  },
  {
-  "id": "perito-moreno",
-  "name": "Perito Moreno Glacier",
-  "lat": -50.5,
-  "lon": -73.15,
-  "radiusKm": 25,
-  "event": null,
-  "file": "perito-moreno.json"
- },
- {
   "id": "rondonia",
   "name": "Rond\u00f4nia",
   "lat": -9.9,

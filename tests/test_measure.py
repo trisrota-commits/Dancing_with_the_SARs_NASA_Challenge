@@ -103,6 +103,18 @@ def main() -> None:
         early = measure.measure({**site, "id": "early", "event": "2026-12-01"}, measure.local_passes(tmp))
         assert early and not early["change"]["spansEvent"] and "does not have a pass on both sides" in early["method"]
 
+        # A pass whose values cannot be backscatter (as seen over Perito
+        # Moreno on the first real run: -135 dB) is left out, not written;
+        # and such a value in an earlier result is not carried on.
+        make_file(tmp, "20260901T053000", -135.0)
+        guarded = measure.measure(site, measure.local_passes(tmp))
+        assert guarded and all(-50 <= s["hh"] <= 20 for s in guarded["series"]), guarded["series"]
+        assert not any("20260901" in s["file"] for s in guarded["series"]), guarded["series"]
+        tainted = {**guarded, "series": guarded["series"] + [{"time": 1, "hh": -135.0, "hv": -144.0, "pixels": 9, "file": "x.h5"}]}
+        carried = measure.measure(site, measure.local_passes(tmp), tainted)
+        assert all(-50 <= s["hh"] <= 20 for s in carried["series"]), carried["series"]
+        assert measure.plausible(-25.0) and not measure.plausible(-135.38) and not measure.plausible(None)
+
         measure.write_index()
         index = json.loads((measure.OUT_DIR / "index.json").read_text())
         assert index == [], index  # nothing was written to disk as a site file here
