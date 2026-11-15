@@ -253,6 +253,8 @@ app in headless Chromium against the live services.
   links, the one-line NISAR summary and the event timeline
 - `js/sound.js` – plays a time-lapse as notes
 - `tools/mosaic.py` – assembles the whole-planet mosaic in `data/mosaic/`
+- `tools/census.py` – checks on a sample of the whole planet which of
+  NASA's NISAR tiles are sound (run by hand; half an hour)
 - `tools/smoke.js` – browser smoke test against the live services
 - `docs/HANDOFF.md` – where the project stands and how to continue it
 - `docs/SUBMISSION.md` – the text for the challenge's project page: summary,

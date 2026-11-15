@@ -1942,6 +1942,18 @@ export class TileGlobe {
             seen = { faulty: `it is the wrong kind of picture (PNG colour type ${kind}, not 2)` };
           }
         }
+        // And it must hold what the day's picture of the world shows at
+        // its place. While NASA adds a pass to a day, the tile service
+        // hands out tiles from before for some minutes: the right kind
+        // of file with most of the pass missing (see `expectedCover`).
+        if (!fromMap && !seen.faulty && entry.layer?.sheet) {
+          const due = expectedCover(this.images.get(entry.layer.sheet)?.share, entry.z, entry.x, entry.y);
+          if (due > 0.15 && seen.cover < due * 0.5) {
+            seen.picture?.close?.();
+            this.thin = (this.thin || 0) + 1; // counted, for whoever looks into it
+            seen = { faulty: `it holds less than the day's picture of the world shows here (${Math.round(seen.cover * 100)} % of the tile, not ${Math.round(due * 100)} %)` };
+          }
+        }
         if (seen.faulty) bitmap?.close?.();
       }
       // Nothing here. The map service is believed; the tile service only
@@ -2020,6 +2032,9 @@ export class TileGlobe {
     // pass to this day, the cells whose mark differs are where (`refresh`).
     const marks = new Uint32Array(SHEET_CELLS * SHEET_CELLS);
     entry.marks = null;
+    // How many of a cell's pixels are solid: what a tile of this day
+    // should hold there at the least (see `expectedCover`).
+    const share = new Uint8Array(SHEET_CELLS * SHEET_CELLS);
     const span = SHEET_PX / SHEET_CELLS;
     let any = false;
     for (let y = 0; y < SHEET_PX; y++) {
@@ -2029,6 +2044,7 @@ export class TileGlobe {
         if (px[at] === 255) {
           const cell = row + Math.floor(x / span);
           seen[cell] = 1;
+          share[cell]++;
           marks[cell] = (Math.imul(marks[cell], 31) + ((px[at - 3] << 16) | (px[at - 2] << 8) | px[at - 1]) + 1) >>> 0;
           any = true;
         } else if (px[at]) {
@@ -2055,6 +2071,7 @@ export class TileGlobe {
     entry.seen = seen;
     entry.grid = grid;
     entry.marks = marks;
+    entry.share = share;
     if (!soft) return bitmap;
     const canvas = document.createElement('canvas');
     canvas.width = canvas.height = SHEET_PX;
@@ -2263,13 +2280,13 @@ export class TileGlobe {
     // scattering of single holes in nearly every tile (measured: two
     // thirds of tiles inside a pass are 99.5 to 99.99 % solid), so a tile
     // counts as full from 99.5 %.
-    if (!half) return { cells, picture: bitmap, full: solid >= FULL_SHARE * SIZE * SIZE };
+    if (!half) return { cells, picture: bitmap, full: solid >= FULL_SHARE * SIZE * SIZE, cover: solid / (SIZE * SIZE) };
     // Cleaned: the tile is kept as its own small canvas.
     const canvas = document.createElement('canvas');
     canvas.width = canvas.height = SIZE;
     canvas.getContext('2d').putImageData(data, 0, 0);
     bitmap.close?.();
-    return { cells, picture: canvas };
+    return { cells, picture: canvas, cover: solid / (SIZE * SIZE) };
   }
 
   // A copy of the image with only the pixels `keep` accepts.
@@ -2345,12 +2362,50 @@ export class TileGlobe {
 // 15 Nov over north-east China, level 9, 26 days: 388 of 563 tiles were
 // kind 2 and all sound; the other 175 were kinds 0, 3, 4 and 6 and all
 // damaged. Judging pixels caught 174 of them and showed one, a dark grey
-// square; the kind catches all 175. (Sentinel-1's sound tiles are kind 6,
-// so this rule is for layers marked `colour` only.)
+// square; the kind catches all 175. A census of the whole planet the same
+// day (`tools/census.py`: 10,421 tiles, levels 7 to 13, each compared
+// with the map service) found the same: all 4,447 tiles of another kind
+// damaged, none sound. So kind 2 is the only sound kind. (Sentinel-1's
+// sound tiles are kind 6, so this rule is for layers marked `colour` only.)
 export function pngKind(bytes) {
   const png = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
   if (bytes.length < 26 || png.some((b, i) => bytes[i] !== b)) return -1;
   return bytes[25];
+}
+
+// How much of a tile a day should fill at the least, going by that day's
+// picture of the whole world (`share`: for each of its 128 × 128 cells, a
+// tile of level 7 each, how many of its 64 pixels are solid). Null where
+// that cannot be said.
+//
+// The picture of the world comes from NASA's map service, which draws
+// from the data as it stands. The tile service keeps tiles it has made,
+// and for some minutes after NASA adds a pass to a day it still hands out
+// the tile from before. Seen on 15 Nov while NASA was adding to 1
+// November: three level-7 tiles of the right kind held 1 %, 5 % and 24 %
+// where the map service showed 100 %, 100 % and 29 %; twenty minutes later
+// the same tiles were complete.
+//
+// Down to level 7 the cells under the tile are averaged. Further in, a
+// tile is a small part of one cell, and only one thing can be said: where
+// that cell and all around it are solid throughout, so is the tile.
+export function expectedCover(share, z, x, y) {
+  if (!share || z == null) return null;
+  const n = SHEET_CELLS;
+  if (z <= SHEET_REACH) {
+    const side = n >> z;
+    let sum = 0;
+    for (let j = y * side; j < (y + 1) * side; j++) for (let i = x * side; i < (x + 1) * side; i++) sum += share[j * n + i];
+    return sum / (side * side * 64);
+  }
+  const cx = x >> (z - SHEET_REACH);
+  const cy = y >> (z - SHEET_REACH);
+  for (let dj = -1; dj <= 1; dj++) {
+    const j = cy + dj;
+    if (j < 0 || j >= n) return null;
+    for (let di = -1; di <= 1; di++) if (share[j * n + ((cx + di + n) % n)] !== 64) return null;
+  }
+  return 1;
 }
 
 // A short fingerprint of some bytes (FNV-1a), to tell whether a picture
