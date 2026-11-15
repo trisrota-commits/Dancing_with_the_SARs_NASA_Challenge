@@ -13,7 +13,7 @@ import { STORIES } from './stories.js';
 import { PLACES, PLACE_KINDS, otherHemisphere } from './places.js';
 import { loadFrames, spread, view, history, describeSeries, rankByCoverage, sampleAt, channelView } from './timelapse.js';
 import { playPass } from './sound.js';
-import { measuredById, measuredNear, measuredHtml, measuredChart, measuredLine, changeImageUrl } from './measured.js';
+import { measuredById, measuredNear, measuredHtml, measuredChart, measuredLine, changeImageUrl, forecastFor, forecastHtml } from './measured.js';
 import { fetchElements, positionAt, groundTrack, swathEdges, elementsEpoch } from './orbit.js';
 import { SPECIES, MONTHS, POIS, loadSightings } from './wildlife.js';
 import { historyChart } from './chart.js';
@@ -1959,8 +1959,12 @@ async function showMeasured(stillHere, pending, findCompare) {
   const compare = findCompare ? await findCompare() : null;
   if (!stillHere() || !$('measured-slot')) return;
   state.selected.measured = d;
-  $('measured-slot').innerHTML = `<h4>Measured with NISAR</h4>${measuredHtml(d, compare)}`;
+  $('measured-slot').innerHTML = `<h4>Measured with NISAR</h4>${measuredHtml(d, compare)}<div id="forecast-slot"></div>`;
   measuredChart($('measured-chart'), d, compare);
+  // How well the next pass could have been predicted here, if that was tested.
+  forecastFor(d).then((f) => {
+    if (f && stillHere() && state.selected?.measured === d && $('forecast-slot')) $('forecast-slot').innerHTML = `<h4>Can the next pass be predicted?</h4>${forecastHtml(f)}`;
+  });
   // An event's card and text lead with the calibrated value once it is here.
   renderCard();
   renderNarrative();

@@ -2222,3 +2222,40 @@ button:focus-visible,
     display: none;
   }
 }
+
+/* The prediction check: small tables of computed numbers. */
+.forecast-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0 4px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.forecast-table caption {
+  text-align: left;
+  color: var(--dim);
+  font-size: 11.5px;
+  padding-bottom: 4px;
+}
+.forecast-table th,
+.forecast-table td {
+  padding: 3px 6px 3px 0;
+  text-align: right;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+.forecast-table th[scope='row'],
+.forecast-table th:first-child {
+  text-align: left;
+  font-weight: 500;
+  white-space: normal;
+}
+.forecast-table th[scope='col'] {
+  color: var(--dim);
+  font-weight: 500;
+}
+.forecast-table tr.best th,
+.forecast-table tr.best td {
+  color: #fff;
+  font-weight: 600;
+}
