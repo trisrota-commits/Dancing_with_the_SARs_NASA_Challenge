@@ -319,10 +319,23 @@
         color: #fff;
       }
       .title .who {
-        font-size: 28px;
+        font-size: 24px;
         color: var(--dim);
-        max-width: 900px;
-        line-height: 1.5;
+        max-width: 1000px;
+        line-height: 1.45;
+      }
+      .title .who p {
+        margin: 0 0 10px;
+      }
+      .title .who ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        gap: 6px;
+      }
+      .title .who b {
+        color: #fff;
       }
       a {
         color: var(--accent);
@@ -387,10 +400,17 @@
         <div>
           <p class="kicker">NASA Space Apps Challenge 2026 · Challenge: Dancing with the SARs</p>
         </div>
-        <div style="align-self: center; display: grid; gap: 30px">
-          <h1>Dancing<br />with the SARs</h1>
+        <div style="align-self: center; display: grid; gap: 22px">
+          <h1>Cloud<br />Piercer</h1>
           <p class="lead">A live globe that shows what a place normally reads on NISAR's radar, and where the ground did something else.</p>
-          <p class="who"><b>Team:</b> <span id="team-name">Dancing with the SARs</span><br /><b>Members:</b> <span id="team-members">LucidPaths · trisrota-commits · MadhuraSaha02</span></p>
+          <div class="who">
+            <p class="team"><b>Team:</b> <span id="team-name">We came, We saw, We scattered</span></p>
+            <ul id="team-members">
+              <li><b>Lucas Cicek</b>: Full-stack AI Engineer</li>
+              <li><b>Trisrota Bose</b>: Computer Science Masters student</li>
+              <li><b>Madhura Saha</b>: Earth Observation Masters student</li>
+            </ul>
+          </div>
         </div>
         <div class="foot">
           <span>Open source · runs in a browser · no login, no key, nothing to install</span>
@@ -408,18 +428,18 @@
         <div class="cols wide-left" style="align-items: start">
           <table class="asks small">
             <tr><th>The challenge asks for</th><th>In our app</th></tr>
-            <tr><td>An interactive application on NISAR data</td><td>A 3D globe of NISAR's radar in the browser, with the events the world's agencies report</td></tr>
-            <tr><td>“Interactive change-detection maps”</td><td>The 500 m cells that stood out, on the map, for any pass of a measured place</td></tr>
-            <tr><td>“Time-series animations”</td><td>Play the passes of a detection; a time-lapse of every pass for any spot on land</td></tr>
-            <tr><td>“Which polarizations highlight these changes?” “Hypothesize the physical drivers”</td><td>HH and HV side by side; each change sorted by how the two moved, with the cause it is typical of, marked as a hypothesis</td></tr>
-            <tr><td>“Different frequencies”, “ancillary datasets”</td><td>NISAR's L-band beside Sentinel-1's C-band; 15 context layers (water, fire, soil moisture, population)</td></tr>
-            <tr><td>“Actionable insights” for decision-makers and the public</td><td>One sentence: this much of the ground changed, here, and this is what is ordinary</td></tr>
+            <tr><td>An interactive NISAR app</td><td>A 3D globe of NISAR's radar, with live events</td></tr>
+            <tr><td>“Change-detection maps”</td><td>The 500 m cells that stood out, on the map</td></tr>
+            <tr><td>“Time-series animations”</td><td>Every pass of a place, played in order</td></tr>
+            <tr><td>“Which polarizations?” “Physical drivers?”</td><td>HH and HV side by side; a likely cause, marked as a hypothesis</td></tr>
+            <tr><td>“Other frequencies”, “ancillary data”</td><td>Sentinel-1's C-band beside L-band; 15 context layers</td></tr>
+            <tr><td>“Actionable insights”</td><td>How much ground changed, where, against what is normal</td></tr>
           </table>
           <div style="display: grid; gap: 22px">
             <figure>
-              <img src="img/welcome.jpg" alt="The app's opening view: the whole planet as NISAR's radar sees it, with a card that offers the measured cases, a live event and the stories" />
+              <img style="height: 500px; width: auto; max-width: 100%" src="img/planet-spin.gif" data-still="img/planet-spin.png" alt="The app's globe turning, covered in NISAR's radar picture of the whole planet" />
             </figure>
-            <p class="note"><b>For whom:</b> disaster and aid organisations first, who must decide after a flood or an earthquake where to send people; farm advisers and food-security planners; teachers and the public.</p>
+            <p class="note"><b>For whom:</b> disaster and aid teams deciding where to send help; farm advisers; teachers and the public.</p>
           </div>
         </div>
         <div class="foot">
@@ -437,13 +457,13 @@
         </div>
         <div class="cols wide-right">
           <ul class="steps tight">
-            <li><b>Open the globe.</b> Live earthquakes, floods, fires and storms (USGS, NASA EONET, GDACS) on NISAR's radar picture of the whole planet.</li>
-            <li><b>Pick an event or a place.</b> A timeline puts NISAR's passes before and after it on the ground. Any other spot on land gives a time-lapse of every pass there.</li>
-            <li><b>Read what stood out.</b> Where we have measured: the share of the ground that changed, a map of where, what kind of change, and the series in decibels behind it.</li>
+            <li><b>Open the globe.</b> Live earthquakes, floods, fires and storms on NISAR's picture of the planet.</li>
+            <li><b>Pick an event.</b> NISAR's passes before and after it, on a timeline.</li>
+            <li><b>Read what stood out.</b> How much ground changed, where, and what kind of change.</li>
           </ul>
           <figure>
-            <img src="img/menu.jpg" alt="The app: the globe with live event markers, and the menu listing the places and events measured from NISAR's calibrated data, sorted by how much of the ground stood out" />
-            <figcaption>26 places and events measured so far, by a public job that reads NISAR's data twice a day</figcaption>
+            <img style="width: 100%" src="img/globe-quake.gif" data-still="img/globe-quake.png" alt="Recorded from the app: the globe turns, stops over Pakistan and dives into the M 5.7 earthquake of 17 October 2026, whose two seismic wave fronts spread out" />
+            <figcaption>From the app: an M 5.7 earthquake in Pakistan. The wave fronts are illustrated, not measured.</figcaption>
           </figure>
         </div>
         <div class="foot">
@@ -568,12 +588,16 @@
         <div style="display: grid; gap: 22px; align-content: start">
           <table class="asks">
             <tr><th>Open data and tools we start from</th><th>What we added</th></tr>
-            <tr><td><b>NISAR's daily map layer</b> (NASA GIBS), one day at a time; NASA Worldview stacks 12 days on a flat map</td><td>The whole planet from 48 days on a 3D globe: 2.4 times the land 12 days cover. 43 % of the tiles in our worldwide sample arrive damaged; our engine detects and replaces each one</td></tr>
-            <tr><td><b>NISAR L2 GCOV</b> (NASA and ISRO, via the Alaska Satellite Facility): calibrated backscatter in large files behind a login</td><td>A public job reads them twice a day for places and reported events; the values, in decibels, are in the repository for anyone to check</td></tr>
-            <tr><td><b>NASA's OPERA DIST-ALERT</b> finds disturbed ground with Sentinel-1 (ESA) and years of history</td><td>The same idea for NISAR with a few months of history: two checks, both channels, open water left out, and its recall and precision measured</td></tr>
-            <tr><td><b>USGS, NASA EONET, GDACS</b> report events; <b>Sentinel-1</b> via OPERA shows C-band and surface water</td><td>One globe where a report, the radar picture before and after it, and the measurement meet</td></tr>
+            <tr><td><b>NISAR's map layer</b> (NASA GIBS), one day at a time</td><td>The whole planet from 48 days on a 3D globe; damaged tiles found and replaced</td></tr>
+            <tr><td><b>NISAR L2 GCOV</b>: calibrated data in large files behind a login</td><td>A public job measures them twice a day; every value is in the repository</td></tr>
+            <tr><td><b>NASA OPERA DIST-ALERT</b>: disturbed ground from Sentinel-1</td><td>The same idea for NISAR, with its accuracy measured</td></tr>
+            <tr><td><b>USGS, NASA EONET, GDACS</b>: event reports</td><td>One globe where a report, the radar and the measurement meet</td></tr>
           </table>
-          <p class="note"><b>Next:</b> a year of NISAR, so the baseline knows the seasons and a crop no longer looks like a change · every reported event measured and checked against what was mapped on the ground · NISAR's soil moisture and ground movement beside backscatter.</p>
+          <p class="note"><b>Next:</b> a full year of NISAR, so seasons are known · every reported event measured · soil moisture and ground movement.</p>
+          <figure>
+            <img style="max-height: 340px" src="img/world-nisar.jpg" alt="The whole planet as NISAR's radar sees it, assembled from 48 days of passes" />
+            <figcaption>The whole planet from 48 days of NISAR passes, in our app</figcaption>
+          </figure>
         </div>
         <div class="foot">
           <span>Code, data and this deck: <a href="https://github.com/trisrota-commits/Dancing_with_the_SARs_NASA_Challenge">github.com/trisrota-commits/Dancing_with_the_SARs_NASA_Challenge</a> · Built 14–15 November 2026 with an AI coding assistant; no AI runs in the app.</span>

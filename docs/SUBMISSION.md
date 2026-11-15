@@ -48,7 +48,7 @@ the submission guide warns of exactly that.]
 
 ## Link to the demo
 
-Seven slides, with three animations in them. Live, public, no login,
+Seven slides, with five animations in them. Live, public, no login,
 the animations playing (arrow keys or the two buttons at the bottom
 right move between slides):
 https://trisrota-commits.github.io/Dancing_with_the_SARs_NASA_Challenge/demo/
@@ -56,9 +56,10 @@ https://trisrota-commits.github.io/Dancing_with_the_SARs_NASA_Challenge/demo/
 [Team: if you would rather give a Google Slides link: upload
 `demo/dancing-with-the-sars-slides.pptx` to Google Drive, open it with
 Google Slides, press Share → "Anyone with the link" → Viewer. Put your
-team's name and your names on slide 1 first; that line is ordinary text.
+Slide 1 already names the team and its three members; those lines are
+ordinary text, so they can be changed there.
 Whichever link you give, open it in a private browser window to check
-that it needs no login and that the pictures on slides 4, 5 and 6 move.]
+that it needs no login and that the pictures on slides 2 to 6 move.]
 
 The same slides as a PDF, with stills in place of the animations:
 https://trisrota-commits.github.io/Dancing_with_the_SARs_NASA_Challenge/demo/dancing-with-the-sars-slides.pdf
