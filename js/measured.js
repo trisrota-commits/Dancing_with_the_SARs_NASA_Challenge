@@ -60,6 +60,17 @@ export async function measuredIndex() {
   return index;
 }
 
+// One line per tested site from tools/forecast.py: what stood out, and when.
+let summary = null;
+export function measuredSummary() {
+  if (!summary) {
+    summary = fetch(`${DIR}forecast.json`, { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : []))
+      .catch(() => []);
+  }
+  return summary;
+}
+
 export async function measuredById(id) {
   const entry = (await measuredIndex()).find((e) => e.id === id);
   return entry ? load(entry) : null;
@@ -115,7 +126,7 @@ const num = (v, digits = 2) => (v == null ? '–' : Number(v).toFixed(digits));
 // tools/forecast.py from the calibrated cells; nothing is written by hand.
 export function forecastHtml(f) {
   // A baseline is a simple rule the model has to beat; the model is set apart from them.
-  const name = (w) => `<th scope="row" title="${esc(w.how)}">${esc(w.name)}${w.baseline ? '' : ' <span class="tag">model</span>'}</th>`;
+  const name = (w) => `<th scope="row" title="${esc(w.how)}">${esc(w.name)}${w.needsNewPass ? ' <span class="tag">needs the new pass</span>' : w.baseline ? '' : ' <span class="tag">model</span>'}</th>`;
   const mark = (w) => (w.key === f.best ? ' class="best"' : '');
   const row = (w) => {
     const s = f.overall[w.key];
@@ -137,15 +148,37 @@ export function forecastHtml(f) {
   const dates = f.byDate
     .map((r) => {
       const b = r[f.best] || {};
-      const out = b.outside == null ? '–' : `${(b.outside * 100).toFixed(0)} %`;
-      return `<tr${f.surprise?.time === r.time ? ' class="best"' : ''}><td>${esc(r.date)}</td><td>${num(r.seenMean, 1)}</td><td>${num(b.predMean, 1)}</td><td>${num(b.rmse)}</td><td>${out}</td></tr>`;
+      const share = (v) => (v == null ? '–' : `${(v * 100).toFixed(0)} %`);
+      const marked = f.event ? f.event.firstPassAfter === r.date : f.peerSurprise?.time === r.time;
+      return `<tr${marked ? ' class="best"' : ''}><td>${esc(r.date)}${f.event?.firstPassAfter === r.date ? ' <span class="tag">after the event</span>' : ''}${r.newVersion ? ` <span class="tag" title="NASA's processing changed from ${esc(r.newVersion.from)} to ${esc(r.newVersion.to)} with this pass; that alone can shift the values">new processing</span>` : ''}</td><td>${num(r.seenMean, 1)}</td><td>${num(b.predMean, 1)}</td><td>${share(b.outside)}</td><td>${share(r.peers?.outside)}</td></tr>`;
     })
     .join('');
+  // What the card is for: telling a change from the ordinary. The sentence
+  // is put together from the numbers; "about 10 %" is the method's own
+  // yardstick (the range nine cells in ten kept to before).
+  const pct = (v) => `${(v * 100).toFixed(0)} %`;
+  const after = f.event && f.byDate.find((r) => r.date === f.event.firstPassAfter);
+  // A place's own usual range needs a longer history than a short series has.
+  const own = f.short ? null : after?.[f.best]?.outside;
+  const changed = after?.newVersion ? ` This pass is also the first made with a newer version of NASA's processing (${esc(after.newVersion.to)} after ${esc(after.newVersion.from)}), which by itself shifts the values: the figure cannot be put down to the event.` : '';
+  const stood = after
+    ? `On NISAR's first pass after the event of ${esc(f.event.date)} (${esc(after.date)})${after.peers?.outside != null ? `, ${pct(after.peers.outside)} of the cells did something other than their neighbours` : ''}${own != null ? `${after.peers?.outside != null ? ', and' : ','} ${pct(own)} fell outside their own usual range` : ''}. About 10 % is ordinary.${changed}`
+    : f.peerSurprise
+      ? `Set against their neighbours, the pass that stood out most was that of ${esc(f.peerSurprise.date)}: ${pct(f.peerSurprise.outside)} of the cells did something of their own. About 10 % is ordinary.`
+      : '';
   return `<div class="card measured forecast">
-    <div class="src">Computed from the measurements · a test of predictability, not a forecast</div>
+    <div class="src">Computed from the measurements · detecting change, not forecasting it</div>
+    ${stood ? `<p><strong>${stood}</strong></p>` : ''}
+    <p class="hint">Each cell of ${f.cellM} m is compared with what was expected of it: from its own earlier passes, and from what the cells around it did in the same pass. Rain or a season moves every cell alike and drops out of the second comparison; what is left is ground that went its own way. It says that something changed and where, not what caused it.</p>
+    <table class="forecast-table">
+      <caption>Pass by pass: the mean over all cells, measured and as expected from the earlier passes; how many cells fell outside the range nine in ten had kept to before (about 10 % is ordinary), against their own past and against their neighbours</caption>
+      <tr><th scope="col">Pass</th><th scope="col">Measured</th><th scope="col">Expected</th><th scope="col" title="Cells outside the range expected from their own earlier passes">Off own past</th><th scope="col" title="Cells that did something other than their neighbours in the same pass">Off neighbours</th></tr>
+      ${dates}
+    </table>
+    <details class="fold inner"><summary>How good is the expectation? Baselines and error measures</summary>
     <p>${esc(f.summary)}</p>
     <table class="forecast-table">
-      <caption>Predicting the next pass in ${f.cells.toLocaleString('en')} cells of ${f.cellM} m, in dB. The first four are baselines: simple rules a model has to beat</caption>
+      <caption>Predicting the next pass in ${f.cells.toLocaleString('en')} cells of ${f.cellM} m, in dB. ${f.short ? 'Too few passes here for more than the simplest ways' : 'The first four are baselines: simple rules a model has to beat'}</caption>
       <tr><th scope="col">Way of predicting</th><th scope="col" title="Mean absolute error">MAE</th><th scope="col" title="Root mean square error">RMSE</th><th scope="col" title="Nine cells in ten are within this">9 in 10</th><th scope="col" title="Share of the differences between cells that the prediction explains">R²</th><th scope="col" title="Rank agreement between prediction and measurement">Spearman</th></tr>
       ${f.ways.map(row).join('')}
     </table>
@@ -163,13 +196,9 @@ export function forecastHtml(f) {
       <tr><th scope="col">Way of predicting</th><th scope="col">Accuracy</th><th scope="col">Precision</th><th scope="col">Recall</th><th scope="col">F1</th></tr>
       ${f.ways.map(strong).join('')}
     </table>
-    <table class="forecast-table">
-      <caption>Pass by pass, with the best way: the mean over all cells, and how many cells fell outside the range nine in ten had kept to before (about 10 % is ordinary)</caption>
-      <tr><th scope="col">Pass</th><th scope="col">Measured</th><th scope="col">Predicted</th><th scope="col">RMSE</th><th scope="col">Outside</th></tr>
-      ${dates}
-    </table>
     <p class="hint"><strong>Method.</strong> ${esc(f.method)}</p>
-    <p class="hint"><strong>Limits.</strong> ${esc(f.limits)} Made ${esc(f.generated.slice(0, 10))}.</p>
+    </details>
+    <p class="hint"><strong>Limits.</strong> ${esc(f.limits)} With few passes the usual range is rough. Made ${esc(f.generated.slice(0, 10))}.</p>
   </div>`;
 }
 

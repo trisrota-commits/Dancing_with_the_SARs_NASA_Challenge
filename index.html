@@ -37,6 +37,12 @@
     </header>
 
     <aside id="left">
+      <details open id="measured-menu" hidden>
+        <summary>Measured by NISAR <span id="measured-count" class="count"></span></summary>
+        <ul id="measured-list" class="links"></ul>
+        <p class="hint">Places and events read from NISAR's calibrated data, in decibels. The share is how much of the ground did something other than the ground around it: at an event on the first pass after it; elsewhere on the pass that stood out most, which is the largest of several and so naturally higher. About 10 % is ordinary for a single pass. * NASA's processing changed with that pass, which alone can shift the values.</p>
+      </details>
+
       <details open>
         <summary>Stories: start here</summary>
         <div id="stories"></div>
@@ -214,17 +220,28 @@
 
     <div id="welcome" role="dialog" aria-labelledby="welcome-title" hidden>
       <h2 id="welcome-title">Earth's surface never holds still.</h2>
-      <p>Every 12 days the NISAR radar satellite images the planet's land and ice again, through cloud and at night. This globe shows what it sees change, next to the events being reported on the ground right now. The coloured strips on the globe are its radar passes of the last 12 days.</p>
+      <p>Every 12 days the NISAR radar satellite images the planet's land and ice again, through cloud and at night. This globe follows the radar echo of a place through time: what it normally reads, and where it did something else, at a flood, an earthquake or a harvest.</p>
+      <!-- The lead cases, measured from NISAR's calibrated data. The
+           sentence is filled in from the measured files; without them the
+           box stays hidden. -->
+      <div id="proof" hidden>
+        <small>Measured from NISAR's calibrated data</small>
+        <span id="proof-text"></span>
+        <div class="actions">
+          <button class="primary" id="proof-flood">The flood in Italy</button>
+          <button id="proof-crop">The rice season in Bardhaman</button>
+        </div>
+      </div>
       <!-- Filled in from the live feeds: the strongest recent event that
            NISAR has flown over since it began. -->
       <div id="spotlight" hidden>
         <small>Reported, and since seen by NISAR</small>
         <b id="spotlight-title"></b>
         <span id="spotlight-text"></span>
-        <button class="primary" id="spotlight-go">Take me there</button>
+        <button id="spotlight-go">Take me there</button>
       </div>
       <div class="actions">
-        <button class="primary" id="welcome-story">Start with a story</button>
+        <button id="welcome-story">Start with a story</button>
         <button id="welcome-close">Explore the globe</button>
       </div>
       <ol>

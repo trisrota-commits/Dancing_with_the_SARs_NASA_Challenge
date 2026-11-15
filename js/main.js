@@ -5,14 +5,14 @@
 // still showing an older copy.
 const BUILD = '2026-11-15 15:00 UTC';
 
-import { CATEGORIES, FAMILIES, PALETTE, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START, RECENT_MS, OVERLAY_REACH_DAYS, NISAR_MOSAIC, NISAR_CHANGE } from './config.js';
+import { CATEGORIES, FAMILIES, PALETTE, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START, RECENT_MS, OVERLAY_REACH_DAYS, NISAR_MOSAIC, NISAR_CHANGE, PREVIEW_STRETCH } from './config.js';
 import { fetchFeed, fetchArchive } from './feeds.js';
 import { buildIncidents, tagNisarCoverage, pointInPolygon, distanceKm } from './incidents.js';
 import { edgeMarginKm, latestScenes, scenesAt, passesAt, bestPair, comparisonStatus, imageBounds, latestTileDate, likelyTileDate, historyAt, newestAt, nextPass, interferogramsAt, REPEAT_DAYS } from './nisar.js';
 import { STORIES } from './stories.js';
 import { PLACES, PLACE_KINDS, otherHemisphere } from './places.js';
 import { loadFrames, spread, view, history, describeSeries, rankByCoverage, sampleAt, channelView } from './timelapse.js';
-import { measuredById, measuredNear, measuredHtml, measuredChart, measuredLine, changeImageUrl, forecastFor, forecastHtml } from './measured.js';
+import { measuredIndex, measuredSummary, measuredById, measuredNear, measuredHtml, measuredChart, measuredLine, changeImageUrl, forecastFor, forecastHtml } from './measured.js';
 import { fetchElements, positionAt, groundTrack, swathEdges, elementsEpoch } from './orbit.js';
 import { SPECIES, MONTHS, POIS, loadSightings } from './wildlife.js';
 import { historyChart } from './chart.js';
@@ -596,7 +596,7 @@ function incidentHtml(inc, radar) {
     <details class="fold" id="sec-nisar" open>
       <summary>NISAR radar at this place</summary>
       <div id="measured-slot"></div>
-      <h4>Radar brightness here, pass by pass</h4>
+      <h4>Preview brightness here, pass by pass (relative)</h4>
       <div id="incident-history" aria-live="polite"><p class="spinner">Searching NISAR repeat passes…</p></div>
       <h4>Passes, changes and ground movement</h4>
       <div id="radar">${radar}</div>
@@ -667,7 +667,7 @@ function radarHtml(inc, found) {
       <p>Two passes on the same track and frame: ${day(pair.before.time)} and ${day(pair.after.time)}, ${Math.round(pair.span / DAY)} days apart.</p>
       <details><summary>Why might this have changed?</summary>
         <p>${esc(explanation)}</p>
-        <p class="hint">Possible explanations, not a diagnosis. These comparisons use preview brightness, not calibrated radar measurements. Image scaling and alignment can also affect the apparent change. The event category selects this guidance; it is not a classification of the images or proof that the event caused a change.</p>
+        <p class="hint">Possible explanations, not a diagnosis. These comparisons use preview brightness, not calibrated radar measurements. ${esc(PREVIEW_STRETCH)} A change across the whole scene can vanish, and slight misalignment can add false change. The event category selects this guidance; it is not a classification of the images or proof that the event caused a change.</p>
       </details>
       <div class="actions">
         <button class="primary" id="changes">Show what changed</button>
@@ -942,7 +942,7 @@ function setLegend(kind, info = {}) {
     html = `<b>What changed · ${day(info.from)} to ${day(info.to)}</b>
       <p>Where the radar echo differs between two NISAR passes.</p>
       <ul>${row(PALETTE.weaker, `Blue: the echo got weaker, ${km(info.result.weakerKm2)} km²`) + row(PALETTE.stronger, `Orange: the echo got stronger, ${km(info.result.strongerKm2)} km²`)}</ul>
-      <small>Worked out from preview pictures: a guide to where to look, not a measurement, and not a statement of cause.</small>`;
+      <small>Worked out from preview pictures, each contrast-stretched on its own: a guide to where to look, not a measurement, and not a statement of cause.</small>`;
   }
   legend.picture = html;
   drawLegend();
@@ -1067,7 +1067,7 @@ async function showChanges(button) {
       </ul>
       <label class="check"><input type="checkbox" id="under" checked /> Show the radar image underneath</label>
       <details class="fold inner"><summary>How this is worked out</summary>
-      <p class="hint">Computed in your browser from NASA's preview images of both passes over ${km(result.comparedKm2)} km². A pixel is coloured where the ${esc(channels)} brightness moved by more than ${Math.round((CHANGE_THRESHOLD / 255) * 100)}% of full scale. Differences that a shift of up to two pixels between the images would explain are ignored. Previews are 8-bit and reduced in resolution, so treat this as where to look, not a measurement. Open sea changes with the wind between passes. The causes listed are the usual ones, not a diagnosis.</p></details>`;
+      <p class="hint">Computed in your browser from NASA's preview images of both passes over ${km(result.comparedKm2)} km². A pixel is coloured where the ${esc(channels)} brightness moved by more than ${Math.round((CHANGE_THRESHOLD / 255) * 100)}% of each preview's own scale. ${esc(PREVIEW_STRETCH)} So the colours show where change stands out within the scene, not how much the radar echo changed, and a change across the whole scene may not show at all. Differences that a shift of up to two pixels between the images would explain are ignored. Previews are 8-bit and reduced in resolution, so treat this as where to look, not a measurement. Open sea changes with the wind between passes. The causes listed are the usual ones, not a diagnosis.</p></details>`;
     }
     if ($('changes')) $('changes').textContent = 'Back to the radar picture';
     renderCard();
@@ -1095,7 +1095,7 @@ function setLink(hash) {
 
 // Opens whatever a shared link points at. Events may need a moment, or the
 // archive, before they are loaded.
-async function openLink() {
+async function openLink(detailed = false) {
   // Whatever the reader picks while this is still looking wins.
   const look = state.lookup;
   const [key, raw] = location.hash.slice(1).split('=');
@@ -1124,7 +1124,9 @@ async function openLink() {
   if (incident && look === state.lookup) {
     state.hidden.delete(incident.category);
     draw();
-    selectIncident(incident, true);
+    await selectIncident(incident, true);
+    // The lead case is about the measurement: open on it, not on the small card.
+    if (detailed && state.selected?.incident === incident) $('card-details')?.click();
   } else if (!incident && look === state.lookup && !state.selected) {
     // A link must not fail without a word.
     notice('The event this link points to is no longer in the feeds, so it cannot be opened. Recent events stay for a week; after that only the larger ones are kept.');
@@ -1252,8 +1254,6 @@ function renderSpotlight() {
   const pick = spotlight();
   state.spotlight = pick;
   box.hidden = !pick;
-  // With something live to show, that is the way in; the story comes second.
-  $('welcome-story').classList.toggle('primary', !pick);
   if (!pick) return;
   const { incident } = pick;
   // Most first visits start here: have it ready before the button is pressed.
@@ -1265,6 +1265,81 @@ function renderSpotlight() {
   // No day count here: this only knows NISAR's newest passes, and the
   // event's own card searches the whole archive and may find an earlier one.
   $('spotlight-text').textContent = `It began ${ago(incident.time)}. NISAR has flown over it since, so there is a radar picture from after it.`;
+}
+
+// The two lead cases on the opening card. Both are measured sites; the
+// sentence is put together from their files (tools/measure.py and
+// tools/forecast.py), so it says nothing the data does not.
+const PROOF = { flood: 'event-gdacs-fl1104220', floodReport: 'gdacs:FL1104220', crop: 'west-bengal' };
+
+async function renderProof() {
+  const [flood, crop] = await Promise.all([measuredById(PROOF.flood), measuredById(PROOF.crop)]);
+  const check = flood ? await forecastFor(flood) : null;
+  const parts = [];
+  const share = check?.event?.outside;
+  if (share != null) {
+    parts.push(`At a flood in Italy, ${Math.round(share * 100)} % of the ground did something other than the ground around it on NISAR's first pass afterwards (${check.event.firstPassAfter}); about 10 % is ordinary.`);
+  }
+  if (crop?.series?.length > 2 && placeById(PROOF.crop)) {
+    const hh = crop.series.filter((p) => p.hh != null);
+    const low = hh.reduce((a, b) => (b.hh < a.hh ? b : a));
+    const high = hh.reduce((a, b) => (b.hh > a.hh ? b : a));
+    parts.push(`Over the rice fields of Bardhaman the echo ran from ${low.hh.toFixed(1)} dB (${day(low.time)}) to ${high.hh.toFixed(1)} dB (${day(high.time)}) through one crop, over ${hh.length} passes.`);
+  }
+  $('proof-flood').hidden = share == null;
+  $('proof-crop').hidden = parts.length === (share == null ? 0 : 1);
+  $('proof-crop').classList.toggle('primary', share == null);
+  $('proof-text').textContent = parts.join(' ');
+  $('proof').hidden = !parts.length;
+  // Without the measured cases the story is the way in.
+  $('welcome-story').classList.toggle('primary', !parts.length);
+}
+
+// The measured places and events, as a list in the menu: the ones where
+// most of the ground stood out come first. Every figure is from
+// tools/forecast.py; a place it could not test is listed without one.
+async function renderMeasuredList() {
+  const [index, checks] = await Promise.all([measuredIndex(), measuredSummary()]);
+  const byId = new Map(checks.map((c) => [c.id, c]));
+  const rows = index
+    .filter((e) => e.event != null || placeById(e.id))
+    .map((e) => {
+      const c = byId.get(e.id);
+      const share = e.event != null ? c?.event?.outside : c?.peerSurprise?.outside;
+      return { e, share: share ?? null, when: e.event != null ? c?.event?.firstPassAfter : c?.peerSurprise?.date };
+    })
+    .sort((a, b) => (b.share ?? -1) - (a.share ?? -1));
+  if (!rows.length) return;
+  state.measuredList = rows;
+  $('measured-list').innerHTML = rows
+    .map(({ e, share, when }, i) => {
+      // A figure from the first pass of a new processing version is not the ground's alone.
+      const doubtful = e.event != null && byId.get(e.id)?.event?.newVersion;
+      const label = share == null ? 'measured' : `${Math.round(share * 100)} % stood out${doubtful ? '*' : ''}`;
+      const title = share == null ? 'Too few passes yet to say what is ordinary here' : `${e.event != null ? 'First pass after the event' : 'The pass that stood out most'}: ${when}${doubtful ? ". * NASA's processing changed with this pass, which alone can shift the values" : ''}`;
+      return `<li tabindex="0" role="button" data-n="${i}" class="${share != null && share >= 0.2 && !doubtful ? 'out' : ''}" title="${esc(title)}"><span>${esc(e.name)}</span><span class="km">${label}</span></li>`;
+    })
+    .join('');
+  $('measured-count').textContent = rows.length;
+  $('measured-menu').hidden = false;
+}
+
+// Opens a measured place, or the reported event a measurement was made for.
+async function openMeasured(entry) {
+  if (entry.event == null) return selectPlace(placeById(entry.id), true);
+  const look = ++state.lookup;
+  const find = () => state.incidents.find((i) => Math.abs(i.time - entry.event) < 3 * DAY && distanceKm(i, entry) < 30);
+  if (!find() && !state.archive) {
+    $('window').value = 'nisar';
+    await $('window').onchange({ target: $('window') });
+  }
+  const incident = find();
+  if (look !== state.lookup) return;
+  if (!incident) return notice('This event is no longer in the feeds, so its card cannot be opened. Its measurement stays in data/measured/.');
+  state.hidden.delete(incident.category);
+  draw();
+  await selectIncident(incident, true);
+  if (state.selected?.incident === incident) $('card-details')?.click();
 }
 
 function tickerItems() {
@@ -1401,7 +1476,7 @@ async function startIncidentHistory(inc, selection) {
       <p class="note">${usable} usable samples from ${wanted.length} requested previews of ${stack.scenes.length} available passes. Same ${esc(stack.direction)} track ${esc(stack.track)}, frame ${esc(stack.frame)}; ${day(wanted[0].time)} to ${day(wanted[wanted.length - 1].time)}.${stack.unplaced ? ` ${stack.unplaced} other passes lack placeable previews and are omitted.` : ''}</p>
       <div id="incident-history-chart"></div>
       <p id="incident-history-status" class="note" role="status">${usable < 2 ? 'Insufficient data for a trend: fewer than two previews have samples at this pin. ' : ''}${wanted.length - usable} requested passes have no sample (failed image or no coverage); these are gaps, not zero brightness.</p>
-      <p class="hint">${esc(channels)} ${pol.cross ? 'are' : 'is'} NASA preview brightness (0–255), not calibrated backscatter or a measurement of forest loss, area lost or ice melt. Samples average up to 5×5 preview pixels; the ground footprint varies with image resolution and coverage, not a fixed area. Click a chart date to show that pass on the globe.</p>`;
+      <p class="hint">${esc(channels)} ${pol.cross ? 'are' : 'is'} NASA preview brightness (0–255), not calibrated backscatter or a measurement of forest loss, area lost or ice melt. ${esc(PREVIEW_STRETCH)} Rises and falls in this line can come from the stretch rather than the ground; where a “Measured with NISAR” card appears above, use its dB values for amounts. Samples average up to 5×5 preview pixels; the ground footprint varies with image resolution and coverage, not a fixed area. Click a chart date to show that pass on the globe.</p>`;
     if (!usable) {
       $('incident-history-chart').innerHTML = '<p class="note">No brightness history could be sampled from these previews.</p>';
       return;
@@ -1545,7 +1620,7 @@ async function startLapse(stackIndex = 0, all = false) {
     ${passes.length > wanted || all ? `<label class="check"><input type="checkbox" id="lapse-all" ${all ? 'checked' : ''} /> Read all ${passes.length} passes for the chart (a few megabytes each)</label>` : ''}
     <p class="note">${passes.length} passes on ${esc(stack.direction.toLowerCase())} track ${esc(stack.track)}, frame ${esc(stack.frame)}, ${day(first)} to ${day(passes[passes.length - 1].time)}.${stack.unplaced ? ` ${stack.unplaced} earlier passes are left out: their previews were published without public corner coordinates, so they cannot be placed on the map accurately.` : ''}${stack.otherModes ? ` ${stack.otherModes} passes recorded in a different polarisation mode are left out too, because their previews are not comparable with these.` : ''}</p>
     ${state.selected?.kind === 'incident' ? '' : nextPassHtml(stacks.flatMap((st) => st.scenes))}
-    <p class="hint">Each pass is NASA's preview of a NISAR backscatter scene, recorded here in ${pol.cross ? `dual polarisation. ${esc(pol.co)} is the echo that comes back in the polarisation that was sent; ${esc(pol.cross)} is the part that came back twisted, which mostly happens inside vegetation` : `single polarisation (${esc(pol.co)}), so there is no cross-polarised channel`}. Values are the 0–255 preview brightness averaged over 5×5 pixels, not calibrated radar units.</p>`;
+    <p class="hint">Each pass is NASA's preview of a NISAR backscatter scene, recorded here in ${pol.cross ? `dual polarisation. ${esc(pol.co)} is the echo that comes back in the polarisation that was sent; ${esc(pol.cross)} is the part that came back twisted, which mostly happens inside vegetation` : `single polarisation (${esc(pol.co)}), so there is no cross-polarised channel`}. Values are the 0–255 preview brightness averaged over 5×5 pixels, not calibrated radar units. ${esc(PREVIEW_STRETCH)} Use this to see when something changed, not by how much; where a “Measured with NISAR” card appears, its dB values are the measurement.</p>`;
   drawLapseChart(lapse);
   setLegend('radar', { pol });
   const newest = passes[passes.length - 1];
@@ -1956,11 +2031,12 @@ async function showMeasured(stillHere, pending, findCompare) {
   const compare = findCompare ? await findCompare() : null;
   if (!stillHere() || !$('measured-slot')) return;
   state.selected.measured = d;
-  $('measured-slot').innerHTML = `<h4>Measured with NISAR</h4>${measuredHtml(d, compare)}<div id="forecast-slot"></div>`;
+  $('measured-slot').innerHTML = `<h4>Measured with NISAR</h4>${measuredHtml(d, compare)}<div id="forecast-slot"></div>
+    <p class="note">These are calibrated values from the full NISAR data, comparable between dates. Any preview charts below are relative: each preview is contrast-stretched on its own, so use them for <em>where</em> and <em>when</em>, and these dB values for <em>how much</em>.</p>`;
   measuredChart($('measured-chart'), d, compare);
   // How well the next pass could have been predicted here, if that was tested.
   forecastFor(d).then((f) => {
-    if (f && stillHere() && state.selected?.measured === d && $('forecast-slot')) $('forecast-slot').innerHTML = `<h4>Can the next pass be predicted?</h4>${forecastHtml(f)}`;
+    if (f && stillHere() && state.selected?.measured === d && $('forecast-slot')) $('forecast-slot').innerHTML = `<h4>What stood out here?</h4>${forecastHtml(f)}`;
   });
   // An event's card and text lead with the calibrated value once it is here.
   renderCard();
@@ -2577,6 +2653,21 @@ async function start() {
   $('welcome-story').onclick = () => {
     closeWelcome();
     openStory(STORIES[0].id);
+  };
+  renderProof();
+  renderMeasuredList();
+  $('measured-list').onclick = (e) => {
+    const li = e.target.closest('li');
+    if (li) openMeasured(state.measuredList[+li.dataset.n].e);
+  };
+  $('proof-flood').onclick = () => {
+    closeWelcome();
+    setLink(`event=${encodeURIComponent(PROOF.floodReport)}`);
+    openLink(true);
+  };
+  $('proof-crop').onclick = () => {
+    closeWelcome();
+    selectPlace(placeById(PROOF.crop), true);
   };
   $('spotlight-go').onclick = () => {
     const pick = state.spotlight;

@@ -458,6 +458,23 @@ h2 {
   height: 8px;
 }
 
+#measured-list {
+  margin-top: 4px;
+  max-height: 230px;
+  overflow-y: auto;
+  font-size: 13px;
+}
+
+#measured-list .km {
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+
+#measured-list li.out .km {
+  color: var(--accent);
+  font-weight: 600;
+}
+
 #place-list {
   margin-top: 8px;
   max-height: 180px;
@@ -2025,10 +2042,28 @@ body:has(#replay:not([hidden])) #nav {
   line-height: 1.4;
 }
 
-#spotlight[hidden] {
+#spotlight[hidden],
+#proof[hidden] {
   display: none;
 }
 
+/* The lead cases: measured, so they come before the live way in. */
+#proof {
+  display: grid;
+  gap: 4px;
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  line-height: 1.4;
+}
+
+#proof .actions {
+  margin: 6px 0 0;
+}
+
+#proof small,
 #spotlight small {
   color: var(--accent);
   text-transform: uppercase;

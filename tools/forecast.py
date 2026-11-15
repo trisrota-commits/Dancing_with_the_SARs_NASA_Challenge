@@ -66,6 +66,7 @@ data/measured/forecast.json with one line per site.
 from __future__ import annotations
 
 import json
+import re
 import sys
 import warnings
 from datetime import datetime, timezone
@@ -77,7 +78,9 @@ OUT_DIR = Path(__file__).resolve().parent.parent / "data" / "measured"
 LAGS = 3  # passes of history a prediction looks at
 FIRST = LAGS + 1  # the first pass predicted: there must be history to learn from as well
 MIN_PASSES = 8  # fewer passes than this are too little history to test a prediction on
+MIN_SHORT = 5  # with this many, the comparison with the neighbours can still be made
 QUIET = 0.9  # "the expected range": what this share of cells stayed within on the passes before
+PLAUSIBLE_DB = (-40.0, 20.0)  # as in tools/measure.py: outside this, no reading of the ground
 STRONG_DB = 3.0  # "a strong change": half or double the echo's power
 RIDGE = 1.0
 DAY = 86_400_000
@@ -91,6 +94,13 @@ WAYS = [
     {"key": "mean", "name": "Mean of the earlier passes", "baseline": True, "how": "The cell's average over every pass before the one predicted."},
     {"key": "line", "name": "Line through the last two", "baseline": True, "how": "The last value plus the last step."},
     {"key": "trend", "name": "Trend of the last four", "baseline": True, "how": "A straight line fitted by least squares (linear regression) through the cell's last four passes against their dates, read off at the date predicted."},
+    {
+        "key": "peers",
+        "name": "Last pass plus what the neighbours did",
+        "baseline": False,
+        "needsNewPass": True,
+        "how": "The last value plus the median step of all the place's cells in the same pass. It uses the new pass itself, so it is no forecast: it removes what rain, season or the whole scene did to every cell alike, and shows which cells did something else.",
+    },
     {"key": "learnt", "name": "Model learnt from the cells' past", "baseline": False, "how": f"A ridge regression on the last {LAGS} passes of both channels and the days since the last pass, fitted on every cell's history before the pass predicted."},
 ]
 
@@ -210,11 +220,16 @@ def learn(hh: np.ndarray, hv: np.ndarray | None, times: list[int], before: int) 
     return np.linalg.solve(x.T @ x + penalty, x.T @ y)
 
 
-def predict(hh: np.ndarray, hv: np.ndarray | None, times: list[int], t: int) -> dict:
-    """Each way's prediction of pass t for every cell, from passes before t only."""
+def predict(hh: np.ndarray, hv: np.ndarray | None, times: list[int], t: int, short: bool = False) -> dict:
+    """Each way's prediction of pass t for every cell, from passes before t
+    only; except "peers", which also takes the median step of pass t itself.
+    `short`: only the ways that need no long history."""
     out = {"last": hh[t - 1], "line": 2 * hh[t - 1] - hh[t - 2]}
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", RuntimeWarning)  # a cell with no value at all stays NaN
+        out["peers"] = hh[t - 1] + np.nanmedian(hh[t] - hh[t - 1])
+        if short:
+            return out
         out["mean"] = np.nanmean(hh[:t], axis=0)
     # Least squares through the last four passes, against their dates.
     days = np.array(times[t - 4 : t + 1], dtype=float) / DAY
@@ -231,17 +246,48 @@ def day(ms: int) -> str:
     return datetime.fromtimestamp(ms / 1000, timezone.utc).strftime("%Y-%m-%d")
 
 
-def forecast(grid: dict) -> dict | None:
+def versions(files: list[str] | None, n: int) -> list[str | None]:
+    """The version of NASA's processing each pass was made with, from the
+    file name (the part like P05036). When it changes, the values can
+    shift by themselves: at the change from P05023 to P05036 (passes from
+    about 21 October 2026) the mean over the window fell at 12 of the 15
+    places measured, by 0.4 dB in the middle (found 15 November 2026). A
+    pass that is the first of a new version is marked, so that such a
+    shift is not read as the ground's."""
+    out = []
+    for i in range(n):
+        m = re.search(r"_(P\d{5})_", files[i]) if files and i < len(files) and files[i] else None
+        out.append(m.group(1) if m else None)
+    return out
+
+
+def forecast(grid: dict, event: int | None = None) -> dict | None:
     times = grid["times"]
+    made = versions(grid.get("files"), len(times))
     hh = np.array(grid["hh"], dtype=float)
     hv = np.array(grid["hv"], dtype=float) if grid.get("hv") else None
-    if len(times) < MIN_PASSES:
+    # A cell that ever read a value no radar could measure is left out
+    # whole: its other passes come from the same faulty strip of the file.
+    with np.errstate(invalid="ignore"):
+        faulty = ((hh < PLAUSIBLE_DB[0]) | (hh > PLAUSIBLE_DB[1])).any(axis=0)
+        if hv is not None:
+            faulty |= ((hv < PLAUSIBLE_DB[0]) | (hv > PLAUSIBLE_DB[1])).any(axis=0)
+    hh[:, faulty] = np.nan
+    if hv is not None:
+        hv[:, faulty] = np.nan
+    if len(times) < MIN_SHORT:
         return None
-    by_date, pooled = [], {w["key"]: {"pred": [], "seen": [], "last": []} for w in WAYS}
-    earlier = {w["key"]: [] for w in WAYS}  # each way's misses on the passes predicted so far
-    for t in range(FIRST, len(times)):
-        preds = predict(hh, hv, times, t)
+    short = len(times) < MIN_PASSES
+    by_date, pooled = [], {}
+    earlier = {}  # each way's misses on the passes predicted so far
+    for t in range(2 if short else FIRST, len(times)):
+        preds = predict(hh, hv, times, t, short)
+        for key in preds:
+            pooled.setdefault(key, {"pred": [], "seen": [], "last": []})
+            earlier.setdefault(key, [])
         row = {"time": times[t], "date": day(times[t]), "seenMean": round(float(np.nanmean(hh[t])), 2), "lastMean": round(float(np.nanmean(hh[t - 1])), 2)}
+        if made[t] and made[t - 1] and made[t] != made[t - 1]:
+            row["newVersion"] = {"from": made[t - 1], "to": made[t]}
         for key, p in preds.items():
             s = scores(p, hh[t], hh[t - 1])
             row[key] = s and {**s, "predMean": round(float(np.nanmean(p)), 2)}
@@ -261,15 +307,23 @@ def forecast(grid: dict) -> dict | None:
     overall = {key: scores(np.concatenate(v["pred"]), np.concatenate(v["seen"]), np.concatenate(v["last"])) for key, v in pooled.items()}
     if not overall["last"]:
         return None
-    best = min((k for k in overall if overall[k]), key=lambda k: overall[k]["rmse"])
+    ways = [w for w in WAYS if overall.get(w["key"])]
+    # (The best way of predicting: "peers" is left out, it needs the pass it predicts.)
+    best = min((w["key"] for w in ways if not w.get("needsNewPass")), key=lambda k: overall[k]["rmse"])
     # The baseline to beat, and by how much the model does or does not.
-    bar = min((w["key"] for w in WAYS if w["baseline"] and overall[w["key"]]), key=lambda k: overall[k]["rmse"])
+    bar = min((w["key"] for w in ways if w["baseline"]), key=lambda k: overall[k]["rmse"])
     model = overall.get("learnt")
     gain = None if not model else round(1 - (model["rmse"] / overall[bar]["rmse"]) ** 2, 3)
     margin = overall[best]["within90"]
     worst = max(by_date, key=lambda r: (r[best] or {}).get("rmse", 0))
     judged = [r for r in by_date if r[best] and "outside" in r[best]]
     surprise = max(judged, key=lambda r: r[best]["outside"]) if judged else None
+    # Against the neighbours: the pass on which most cells did something of their own.
+    stood = [r for r in by_date if r.get("peers") and "outside" in r["peers"]]
+    odd = max(stood, key=lambda r: r["peers"]["outside"]) if stood else None
+    # An event: the first pass after it.
+    after = next((r for r in by_date if event and r["time"] >= event), None)
+    hit = after and after.get("peers") and after["peers"].get("outside")
     return {
         "id": grid["id"],
         "name": grid["name"],
@@ -281,7 +335,10 @@ def forecast(grid: dict) -> dict | None:
         "to": day(times[-1]),
         "channel": "co-polarised backscatter, dB",
         "strongDb": STRONG_DB,
-        "ways": WAYS,
+        "ways": ways,
+        "short": short,
+        "peerSurprise": odd and {"date": odd["date"], "time": odd["time"], "outside": odd["peers"]["outside"], "expected": odd["peers"]["expected"]},
+        "event": None if not event else {"time": event, "date": day(event), "firstPassAfter": after and after["date"], "outside": hit if hit is not None else None, "newVersion": (after or {}).get("newVersion")},
         "overall": overall,
         "best": best,
         "bestBaseline": bar,
@@ -295,6 +352,16 @@ def forecast(grid: dict) -> dict | None:
             + (
                 f" The model {'beats' if gain > 0 else 'does not beat'} the best simple rule (\"{next(w['name'] for w in WAYS if w['key'] == bar).lower()}\", RMSE {overall[bar]['rmse']} dB) with RMSE {model['rmse']} dB."
                 if model and gain is not None
+                else ""
+            )
+            + (
+                f" Set against their neighbours, most cells stood out at the pass of {odd['date']}: {odd['peers']['outside']:.0%} did something of their own (about 10 % is ordinary)."
+                if odd
+                else ""
+            )
+            + (
+                f" At the first pass after the event of {day(event)} ({after['date']}), {hit:.0%} of the cells did something other than their neighbours."
+                if hit is not None
                 else ""
             )
             + (
@@ -312,7 +379,7 @@ def forecast(grid: dict) -> dict | None:
             f"The yes/no question is whether a cell changes by {STRONG_DB:g} dB or more by the next pass. "
             "'Outside the expected range' is the share of cells whose miss was larger than nine in ten misses on the passes predicted before; about 10 % is ordinary."
         ),
-        "limits": "One season of data: no way of predicting has seen a harvest, a flood or a thaw here before it happened. Neighbouring cells change together, so they are fewer independent samples than their number.",
+        "limits": "One season of data: no way of predicting has seen a harvest, a flood or a thaw here before it happened. Neighbouring cells change together, so they are fewer independent samples than their number. A pass made with a new version of NASA's processing can shift by itself; such passes are marked.",
         "generated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     }
 
@@ -324,9 +391,13 @@ def main() -> None:
         grid = json.loads(path.read_text())
         if wanted and grid["id"] not in wanted:
             continue
-        result = forecast(grid)
+        try:
+            event = json.loads((OUT_DIR / f"{grid['id']}.json").read_text()).get("event")
+        except (OSError, ValueError):
+            event = None
+        result = forecast(grid, event)
         if not result:
-            print(f"{grid['id']}: too few passes to test a prediction ({len(grid['times'])}; {MIN_PASSES} are needed)")
+            print(f"{grid['id']}: too few passes to test anything ({len(grid['times'])}; {MIN_SHORT} are needed)")
             stale = OUT_DIR / f"{grid['id']}_forecast.json"
             if stale.exists():
                 stale.unlink()
@@ -335,12 +406,12 @@ def main() -> None:
         o = result["overall"]
         print(f"\n{result['name']}: {result['cells']} cells, {result['passes']} passes, {result['from']} to {result['to']}")
         for w in WAYS:
-            s = o[w["key"]]
+            s = o.get(w["key"])
             if s:
                 c, d = s["strong"], s["direction"]
                 print(f"  {w['name']:34s} RMSE {s['rmse']:5.2f} MAE {s['mae']:5.2f} within90 {s['within90']:5.2f} R2 {s['r2']} Spearman {s['spearman']} | up/down/stay: accuracy {d['accuracy']} (commonest {d['commonest']}), precision {d['precision']}, recall {d['recall']}, F1 {d['f1']} | strong change: accuracy {c['accuracy']}, precision {c['precision']}, recall {c['recall']}, F1 {c['f1']} ({c['happened']:.1%})")
         print(f"  → {result['summary']}")
-        lines.append({"id": result["id"], "name": result["name"], "cells": result["cells"], "passes": result["passes"], "best": result["best"], **{k: o[k] and {m: o[k][m] for m in ("rmse", "mae", "within90", "r2", "spearman", "skill")} for k in o}})
+        lines.append({"id": result["id"], "name": result["name"], "cells": result["cells"], "passes": result["passes"], "best": result["best"], "event": result["event"], "peerSurprise": result["peerSurprise"], **{k: o[k] and {m: o[k][m] for m in ("rmse", "mae", "within90", "r2", "spearman", "skill")} for k in o}})
     if not wanted:
         (OUT_DIR / "forecast.json").write_text(json.dumps(lines, indent=1) + "\n")
     print(f"\n{len(lines)} site(s) tested")

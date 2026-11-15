@@ -335,7 +335,7 @@ def main() -> None:
             "sd": round(float(finite.std()), 2),
             "beyond25": round(float((np.abs(finite) > 25).mean()), 4),
         },
-        "limits": "The 'after' day differs by up to 24 days from place to place, so neighbouring passes can show different amounts of change with a straight edge between them. The picture mixes both radar channels: where they move in opposite directions (as over rice at harvest, where HH falls and HV rises) it can read brighter while the HH echo got weaker. Rainforest reads 5 to 7 units darker for a reason not established. Holes: no pair of passes that compares like with like.",
+        "limits": "The 'after' day differs by up to 24 days from place to place, so neighbouring passes can show different amounts of change with a straight edge between them. The picture mixes both radar channels: where they move in opposite directions (as over rice at harvest, where HH falls and HV rises) it can read brighter while the HH echo got weaker. Rainforest reads 5 to 7 units darker for a reason not established. NASA's picture is on one fixed scale for every date (checked against calibrated values at two places over 20 passes), but it is not a decibel scale: brightness goes with the square root of the echo power, red is capped for strong echoes, and its colour rule switches where HV falls below -24 dB. Holes: no pair of passes that compares like with like.",
         "tiles": tiles,
     }
     with open(os.path.join(tmp, "about.json"), "w") as f:

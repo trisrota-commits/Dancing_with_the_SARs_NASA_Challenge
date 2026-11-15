@@ -1048,6 +1048,21 @@ the paddy's November value?
   What would help is a second year at the same place. Not built in.
   (The point measured for "Punjab plains" lies in a town: its HH is near
   0 dB all year. It should be moved onto fields.)
+- **Does such a model exist already?** (the lead's question.) Yes, for
+  another satellite: NASA/JPL's OPERA DIST-ALERT-S1 (Sentinel-1) "uses
+  the per-pixel temporal change in radar backscatter to infer surface
+  disturbance events" (NASA's Earthdata catalogue, read here). A helper's
+  search adds: released 27 October 2026; a baseline of ten passes from
+  the three years before; a transformer estimates what the new pass
+  should read and a pass 2.5 deviations off is flagged; no NISAR version
+  is on OPERA's public product list. (Those details were not opened
+  here.) NISAR's own disturbance, cropland and inundation methods are
+  science-team algorithms, not next-pass predictors. So: say "the same
+  logic as OPERA DIST-S1, applied to NISAR as a prototype"; do not say
+  "the first model that predicts NISAR". One year is too little for a
+  seasonal model; the helper suggests a peer baseline (the last pass
+  plus the median step of similar cells in the same pass), which tells
+  a field that departs from its neighbours. Not built.
 - **`tools/film.js`** films the app frame by frame with a stepped clock;
   its header holds what was learnt. The 30-second demo of the Bardhaman
   case is made with it.

@@ -2,48 +2,292 @@
  {
   "id": "aletsch",
   "name": "Aletsch Glacier (Konkordiaplatz)",
-  "cells": 1021,
+  "cells": 1020,
   "passes": 11,
   "best": "last",
+  "event": null,
+  "peerSurprise": {
+   "date": "2026-10-22",
+   "time": 1792642740000,
+   "outside": 0.102,
+   "expected": 1.2
+  },
   "last": {
    "rmse": 0.88,
    "mae": 0.58,
    "within90": 1.24,
-   "r2": 0.938,
+   "r2": 0.934,
    "spearman": 0.967,
    "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.52,
+   "mae": 0.96,
+   "within90": 2.05,
+   "r2": 0.804,
+   "spearman": 0.912,
+   "skill": -1.983
+  },
+  "peers": {
+   "rmse": 0.84,
+   "mae": 0.55,
+   "within90": 1.17,
+   "r2": 0.941,
+   "spearman": 0.97,
+   "skill": 0.095
   },
   "mean": {
    "rmse": 1.0,
    "mae": 0.74,
    "within90": 1.61,
-   "r2": 0.92,
+   "r2": 0.915,
    "spearman": 0.955,
    "skill": -0.291
-  },
-  "line": {
-   "rmse": 1.52,
-   "mae": 0.96,
-   "within90": 2.06,
-   "r2": 0.816,
-   "spearman": 0.912,
-   "skill": -1.983
   },
   "trend": {
    "rmse": 1.0,
    "mae": 0.67,
    "within90": 1.43,
-   "r2": 0.921,
-   "spearman": 0.96,
+   "r2": 0.915,
+   "spearman": 0.959,
    "skill": -0.288
   },
   "learnt": {
    "rmse": 0.89,
    "mae": 0.65,
    "within90": 1.38,
-   "r2": 0.937,
+   "r2": 0.933,
    "spearman": 0.964,
-   "skill": -0.024
+   "skill": -0.022
+  }
+ },
+ {
+  "id": "event-eonet-eonet-26260",
+  "name": "Prescribed Fire Cold Springs RX, Wasatch, Utah",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1793664000000.0,
+   "date": "2026-11-03",
+   "firstPassAfter": "2026-11-08",
+   "outside": 0.038,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-08",
+   "time": 1794140908000,
+   "outside": 0.038,
+   "expected": 1.28
+  },
+  "last": {
+   "rmse": 1.15,
+   "mae": 0.93,
+   "within90": 1.89,
+   "r2": 0.574,
+   "spearman": 0.746,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.93,
+   "mae": 1.49,
+   "within90": 3.34,
+   "r2": -0.212,
+   "spearman": 0.511,
+   "skill": -1.846
+  },
+  "peers": {
+   "rmse": 0.73,
+   "mae": 0.55,
+   "within90": 1.2,
+   "r2": 0.828,
+   "spearman": 0.886,
+   "skill": 0.595
+  }
+ },
+ {
+  "id": "event-gdacs-fl1104220",
+  "name": "Flood in Italy",
+  "cells": 576,
+  "passes": 7,
+  "best": "last",
+  "event": {
+   "time": 1791331200000.0,
+   "date": "2026-10-07",
+   "firstPassAfter": "2026-10-10",
+   "outside": 0.307,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-10-10",
+   "time": 1791605875000,
+   "outside": 0.307,
+   "expected": 0.47
+  },
+  "last": {
+   "rmse": 0.88,
+   "mae": 0.69,
+   "within90": 1.39,
+   "r2": 0.853,
+   "spearman": 0.833,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.36,
+   "mae": 1.16,
+   "within90": 2.05,
+   "r2": 0.65,
+   "spearman": 0.727,
+   "skill": -1.391
+  },
+  "peers": {
+   "rmse": 0.42,
+   "mae": 0.28,
+   "within90": 0.63,
+   "r2": 0.967,
+   "spearman": 0.968,
+   "skill": 0.775
+  }
+ },
+ {
+  "id": "event-gdacs-fl1104253",
+  "name": "Flood in Indonesia",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1792800000000.0,
+   "date": "2026-10-24",
+   "firstPassAfter": "2026-10-31",
+   "outside": 0.078,
+   "newVersion": {
+    "from": "P05023",
+    "to": "P05036"
+   }
+  },
+  "peerSurprise": {
+   "date": "2026-10-31",
+   "time": 1793447900000,
+   "outside": 0.078,
+   "expected": 0.31
+  },
+  "last": {
+   "rmse": 0.52,
+   "mae": 0.42,
+   "within90": 0.83,
+   "r2": 0.264,
+   "spearman": 0.524,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 0.77,
+   "mae": 0.61,
+   "within90": 1.32,
+   "r2": -0.59,
+   "spearman": 0.303,
+   "skill": -1.16
+  },
+  "peers": {
+   "rmse": 0.19,
+   "mae": 0.14,
+   "within90": 0.31,
+   "r2": 0.905,
+   "spearman": 0.947,
+   "skill": 0.871
+  }
+ },
+ {
+  "id": "event-usgs-us6000u2y1",
+  "name": "M 5.7 - 47 km WNW of Khuzdar, Pakistan",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1792195200000.0,
+   "date": "2026-10-17",
+   "firstPassAfter": "2026-10-22",
+   "outside": 0.25,
+   "newVersion": {
+    "from": "P05023",
+    "to": "P05036"
+   }
+  },
+  "peerSurprise": {
+   "date": "2026-10-22",
+   "time": 1792630453000,
+   "outside": 0.25,
+   "expected": 0.22
+  },
+  "last": {
+   "rmse": 0.48,
+   "mae": 0.32,
+   "within90": 0.87,
+   "r2": 0.963,
+   "spearman": 0.988,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 0.51,
+   "mae": 0.37,
+   "within90": 0.89,
+   "r2": 0.959,
+   "spearman": 0.988,
+   "skill": -0.119
+  },
+  "peers": {
+   "rmse": 0.18,
+   "mae": 0.12,
+   "within90": 0.27,
+   "r2": 0.995,
+   "spearman": 0.998,
+   "skill": 0.861
+  }
+ },
+ {
+  "id": "event-usgs-us6000u43g",
+  "name": "M 7.0 - 189 km ENE of Nagqu, China",
+  "cells": 576,
+  "passes": 6,
+  "best": "last",
+  "event": {
+   "time": 1792627200000.0,
+   "date": "2026-10-22",
+   "firstPassAfter": "2026-10-30",
+   "outside": 0.043,
+   "newVersion": {
+    "from": "P05023",
+    "to": "P05036"
+   }
+  },
+  "peerSurprise": {
+   "date": "2026-11-11",
+   "time": 1794400327000,
+   "outside": 0.073,
+   "expected": 1.51
+  },
+  "last": {
+   "rmse": 1.33,
+   "mae": 1.06,
+   "within90": 2.18,
+   "r2": 0.719,
+   "spearman": 0.911,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.82,
+   "mae": 1.5,
+   "within90": 2.9,
+   "r2": 0.472,
+   "spearman": 0.779,
+   "skill": -0.877
+  },
+  "peers": {
+   "rmse": 0.91,
+   "mae": 0.67,
+   "within90": 1.48,
+   "r2": 0.867,
+   "spearman": 0.94,
+   "skill": 0.527
   }
  },
  {
@@ -52,6 +296,13 @@
   "cells": 3600,
   "passes": 11,
   "best": "last",
+  "event": null,
+  "peerSurprise": {
+   "date": "2026-11-02",
+   "time": 1793589041000,
+   "outside": 0.1,
+   "expected": 1.25
+  },
   "last": {
    "rmse": 0.8,
    "mae": 0.57,
@@ -60,14 +311,6 @@
    "spearman": 0.952,
    "skill": 0.0
   },
-  "mean": {
-   "rmse": 1.06,
-   "mae": 0.76,
-   "within90": 1.55,
-   "r2": 0.969,
-   "spearman": 0.935,
-   "skill": -0.774
-  },
   "line": {
    "rmse": 1.25,
    "mae": 0.88,
@@ -75,6 +318,22 @@
    "r2": 0.957,
    "spearman": 0.927,
    "skill": -1.472
+  },
+  "peers": {
+   "rmse": 0.77,
+   "mae": 0.49,
+   "within90": 1.25,
+   "r2": 0.984,
+   "spearman": 0.96,
+   "skill": 0.075
+  },
+  "mean": {
+   "rmse": 1.06,
+   "mae": 0.76,
+   "within90": 1.55,
+   "r2": 0.969,
+   "spearman": 0.935,
+   "skill": -0.774
   },
   "trend": {
    "rmse": 0.9,
@@ -99,6 +358,13 @@
   "cells": 2304,
   "passes": 11,
   "best": "last",
+  "event": null,
+  "peerSurprise": {
+   "date": "2026-09-29",
+   "time": 1790725921000,
+   "outside": 0.416,
+   "expected": 1.2
+  },
   "last": {
    "rmse": 0.87,
    "mae": 0.64,
@@ -107,14 +373,6 @@
    "spearman": 0.958,
    "skill": 0.0
   },
-  "mean": {
-   "rmse": 1.47,
-   "mae": 1.11,
-   "within90": 2.48,
-   "r2": 0.788,
-   "spearman": 0.921,
-   "skill": -1.889
-  },
   "line": {
    "rmse": 1.23,
    "mae": 0.89,
@@ -122,6 +380,22 @@
    "r2": 0.853,
    "spearman": 0.93,
    "skill": -1.0
+  },
+  "peers": {
+   "rmse": 0.81,
+   "mae": 0.54,
+   "within90": 1.32,
+   "r2": 0.936,
+   "spearman": 0.964,
+   "skill": 0.132
+  },
+  "mean": {
+   "rmse": 1.47,
+   "mae": 1.11,
+   "within90": 2.48,
+   "r2": 0.788,
+   "spearman": 0.921,
+   "skill": -1.889
   },
   "trend": {
    "rmse": 1.07,
@@ -146,6 +420,13 @@
   "cells": 1024,
   "passes": 11,
   "best": "learnt",
+  "event": null,
+  "peerSurprise": {
+   "date": "2026-10-03",
+   "time": 1791026600000,
+   "outside": 0.139,
+   "expected": 0.62
+  },
   "last": {
    "rmse": 0.73,
    "mae": 0.47,
@@ -154,14 +435,6 @@
    "spearman": 0.966,
    "skill": 0.0
   },
-  "mean": {
-   "rmse": 0.77,
-   "mae": 0.53,
-   "within90": 1.13,
-   "r2": 0.941,
-   "spearman": 0.978,
-   "skill": -0.12
-  },
   "line": {
    "rmse": 1.14,
    "mae": 0.75,
@@ -169,6 +442,22 @@
    "r2": 0.87,
    "spearman": 0.918,
    "skill": -1.466
+  },
+  "peers": {
+   "rmse": 0.59,
+   "mae": 0.3,
+   "within90": 0.64,
+   "r2": 0.966,
+   "spearman": 0.988,
+   "skill": 0.347
+  },
+  "mean": {
+   "rmse": 0.77,
+   "mae": 0.53,
+   "within90": 1.13,
+   "r2": 0.941,
+   "spearman": 0.978,
+   "skill": -0.12
   },
   "trend": {
    "rmse": 0.87,
@@ -193,6 +482,13 @@
   "cells": 3600,
   "passes": 11,
   "best": "last",
+  "event": null,
+  "peerSurprise": {
+   "date": "2026-10-12",
+   "time": 1791778634000,
+   "outside": 0.267,
+   "expected": 0.66
+  },
   "last": {
    "rmse": 0.57,
    "mae": 0.41,
@@ -201,14 +497,6 @@
    "spearman": 0.967,
    "skill": 0.0
   },
-  "mean": {
-   "rmse": 1.49,
-   "mae": 1.1,
-   "within90": 2.55,
-   "r2": 0.449,
-   "spearman": 0.884,
-   "skill": -5.935
-  },
   "line": {
    "rmse": 0.64,
    "mae": 0.47,
@@ -216,6 +504,22 @@
    "r2": 0.899,
    "spearman": 0.952,
    "skill": -0.269
+  },
+  "peers": {
+   "rmse": 0.49,
+   "mae": 0.34,
+   "within90": 0.8,
+   "r2": 0.94,
+   "spearman": 0.975,
+   "skill": 0.248
+  },
+  "mean": {
+   "rmse": 1.49,
+   "mae": 1.1,
+   "within90": 2.55,
+   "r2": 0.449,
+   "spearman": 0.884,
+   "skill": -5.935
   },
   "trend": {
    "rmse": 0.57,
@@ -235,58 +539,18 @@
   }
  },
  {
-  "id": "punjab",
-  "name": "Punjab plains",
-  "cells": 1024,
-  "passes": 26,
-  "best": "last",
-  "last": {
-   "rmse": 1.08,
-   "mae": 0.73,
-   "within90": 1.64,
-   "r2": 0.894,
-   "spearman": 0.949,
-   "skill": 0.0
-  },
-  "mean": {
-   "rmse": 1.12,
-   "mae": 0.72,
-   "within90": 1.54,
-   "r2": 0.886,
-   "spearman": 0.956,
-   "skill": -0.073
-  },
-  "line": {
-   "rmse": 1.71,
-   "mae": 1.18,
-   "within90": 2.61,
-   "r2": 0.733,
-   "spearman": 0.884,
-   "skill": -1.518
-  },
-  "trend": {
-   "rmse": 1.28,
-   "mae": 0.9,
-   "within90": 2.03,
-   "r2": 0.851,
-   "spearman": 0.93,
-   "skill": -0.405
-  },
-  "learnt": {
-   "rmse": 1.19,
-   "mae": 0.85,
-   "within90": 1.8,
-   "r2": 0.872,
-   "spearman": 0.937,
-   "skill": -0.213
-  }
- },
- {
   "id": "rondonia",
   "name": "Rond\u00f4nia",
   "cells": 1361,
   "passes": 9,
   "best": "mean",
+  "event": null,
+  "peerSurprise": {
+   "date": "2026-09-29",
+   "time": 1790676077000,
+   "outside": 0.085,
+   "expected": 1.54
+  },
   "last": {
    "rmse": 1.19,
    "mae": 0.82,
@@ -295,14 +559,6 @@
    "spearman": 0.896,
    "skill": 0.0
   },
-  "mean": {
-   "rmse": 0.84,
-   "mae": 0.57,
-   "within90": 1.38,
-   "r2": 0.887,
-   "spearman": 0.948,
-   "skill": 0.5
-  },
   "line": {
    "rmse": 2.22,
    "mae": 1.54,
@@ -310,6 +566,22 @@
    "r2": 0.231,
    "spearman": 0.696,
    "skill": -2.61
+  },
+  "peers": {
+   "rmse": 0.93,
+   "mae": 0.64,
+   "within90": 1.37,
+   "r2": 0.863,
+   "spearman": 0.939,
+   "skill": 0.394
+  },
+  "mean": {
+   "rmse": 0.84,
+   "mae": 0.57,
+   "within90": 1.38,
+   "r2": 0.887,
+   "spearman": 0.948,
+   "skill": 0.5
   },
   "trend": {
    "rmse": 1.17,
@@ -334,6 +606,13 @@
   "cells": 1024,
   "passes": 28,
   "best": "last",
+  "event": null,
+  "peerSurprise": {
+   "date": "2026-05-23",
+   "time": 1779541775000,
+   "outside": 0.217,
+   "expected": 1.93
+  },
   "last": {
    "rmse": 1.38,
    "mae": 0.87,
@@ -342,14 +621,6 @@
    "spearman": 0.925,
    "skill": 0.0
   },
-  "mean": {
-   "rmse": 2.0,
-   "mae": 1.39,
-   "within90": 3.33,
-   "r2": 0.663,
-   "spearman": 0.824,
-   "skill": -1.086
-  },
   "line": {
    "rmse": 1.95,
    "mae": 1.25,
@@ -357,6 +628,22 @@
    "r2": 0.681,
    "spearman": 0.884,
    "skill": -0.974
+  },
+  "peers": {
+   "rmse": 1.31,
+   "mae": 0.8,
+   "within90": 2.01,
+   "r2": 0.855,
+   "spearman": 0.933,
+   "skill": 0.104
+  },
+  "mean": {
+   "rmse": 2.0,
+   "mae": 1.39,
+   "within90": 3.33,
+   "r2": 0.663,
+   "spearman": 0.824,
+   "skill": -1.086
   },
   "trend": {
    "rmse": 1.73,
@@ -381,6 +668,13 @@
   "cells": 1024,
   "passes": 12,
   "best": "learnt",
+  "event": null,
+  "peerSurprise": {
+   "date": "2026-10-06",
+   "time": 1791329857000,
+   "outside": 0.146,
+   "expected": 2.07
+  },
   "last": {
    "rmse": 1.95,
    "mae": 1.54,
@@ -389,14 +683,6 @@
    "spearman": 0.879,
    "skill": 0.0
   },
-  "mean": {
-   "rmse": 4.5,
-   "mae": 3.64,
-   "within90": 7.54,
-   "r2": -0.485,
-   "spearman": 0.495,
-   "skill": -4.342
-  },
   "line": {
    "rmse": 1.79,
    "mae": 1.32,
@@ -404,6 +690,22 @@
    "r2": 0.764,
    "spearman": 0.924,
    "skill": 0.151
+  },
+  "peers": {
+   "rmse": 1.28,
+   "mae": 0.95,
+   "within90": 1.95,
+   "r2": 0.879,
+   "spearman": 0.936,
+   "skill": 0.565
+  },
+  "mean": {
+   "rmse": 4.5,
+   "mae": 3.64,
+   "within90": 7.54,
+   "r2": -0.485,
+   "spearman": 0.495,
+   "skill": -4.342
   },
   "trend": {
    "rmse": 2.7,

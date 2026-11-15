@@ -111,6 +111,10 @@ repository: https://github.com/trisrota-commits/Dancing_with_the_SARs_NASA_Chall
   does not claim to foretell. It uses the prediction to tell a change
   from the ordinary: at the harvest pass 16 % of the cells fell outside
   the range they had kept to, against 0 to 4 % on the five passes before.
+  The idea is not new: NASA's OPERA DIST-ALERT-S1 product does this for
+  Sentinel-1, with a baseline from three years of passes. Ours applies
+  the same logic to NISAR as a prototype with a few months of history;
+  we found no such product for NISAR.
 - **NISAR itself, live.** The satellite's real position, its orbit, the
   edges of its radar swath, and an estimate of its next pass over any
   event, labelled as computed.

@@ -1,1 +1,4 @@
 __pycache__/
+
+# Working folders of AI helper sessions
+.claude/
