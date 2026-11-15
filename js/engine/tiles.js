@@ -310,7 +310,7 @@ export class TileGlobe {
     this.uniforms = {
       uSun: { value: new THREE.Vector3(1, 0, 0) },
       uNight: { value: 0 },
-      uExaggeration: { value: 2 },
+      uExaggeration: { value: 4 }, // relief is drawn 4 times its true height; the Terrain menu says so
       uRelief: { value: 1 },
       uSplit: { value: 0.5 },
       // Above zero, a tile with two pictures cross-fades between them over

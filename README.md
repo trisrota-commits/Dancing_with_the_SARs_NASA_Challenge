@@ -335,7 +335,8 @@ this app's workload:
   close; flood
   water is a mask the terrain shader animates; radar pictures cross-fade.
 - The camera orbits a point on the ground like Google Earth: drag to pan,
-  wheel or pinch to zoom, right-drag or two-finger drag to tilt and turn.
+  wheel or pinch to zoom; the 3D button tilts the view. Relief is drawn
+  4 times its true height.
 - A frame is drawn only when something changed. An idle globe draws only
   while the soft rings of recent events are spreading, about half the time.
 
@@ -447,6 +448,7 @@ app in headless Chromium against the live services.
 - `js/sky.js`, `js/stars-data.js` – the real star sky, the Sun and the
   shooting stars
 - `js/wildlife.js` – GBIF sightings by month, and the ocean landmarks
+- `data/wildlife/sightings.json` – the sightings, fetched once from GBIF by `tools/wildlife_snapshot.mjs`
 - `vendor/satellite.es.js` – satellite.js 5.0 (MIT), the SGP4 orbit model
 - `vendor/three.module.min.js` – three.js r170 (MIT), bundled so the engine
   has no CDN dependency

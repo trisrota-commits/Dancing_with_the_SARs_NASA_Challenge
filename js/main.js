@@ -3,7 +3,7 @@
 // Which version of the app this is. `tools/pack.sh` sets it; it shows at the
 // end of the credits line, so nobody has to wonder whether the browser is
 // still showing an older copy.
-const BUILD = '2026-11-15 19:07 UTC';
+const BUILD = '2026-11-15 19:21 UTC';
 
 import { CATEGORIES, FAMILIES, PALETTE, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START, RECENT_MS, OVERLAY_REACH_DAYS, NISAR_MOSAIC, NISAR_CHANGE, PREVIEW_STRETCH } from './config.js';
 import { fetchFeed, fetchArchive } from './feeds.js';
@@ -2011,7 +2011,8 @@ async function setWildlife(on) {
     globe.setAnimals([]);
     return;
   }
-  if (!live.sightings) {
+  // (A list with requests left unanswered is asked for again.)
+  if (!live.sightings || live.sightings.missed) {
     $('wildlife-status').textContent = 'loading…';
     try {
       live.sightings = await loadSightings((done, total) => ($('wildlife-status').textContent = `loading ${Math.round((done / total) * 100)}%`));
@@ -2019,7 +2020,11 @@ async function setWildlife(on) {
       $('wildlife-status').textContent = 'GBIF unavailable';
       return;
     }
-    $('wildlife-status').textContent = `${live.sightings.length.toLocaleString('en')} records`;
+    const { missed, asked, fetched } = live.sightings;
+    $('wildlife-status').textContent =
+      `${live.sightings.length.toLocaleString('en')} records` +
+      (fetched ? `, fetched from GBIF on ${fetched}` : '') +
+      (missed ? ` (incomplete: GBIF left ${missed} of ${asked} requests unanswered)` : '');
   }
   if (!$('wildlife').checked) return;
   renderSpeciesChips();
@@ -2571,10 +2576,6 @@ async function start() {
   $('date-next').onclick = () => shiftDate(1);
   $('date-play').onclick = togglePlay;
   $('terrain').onchange = (e) => globe.setTerrain(e.target.checked);
-  $('stretch').oninput = (e) => {
-    $('stretch-value').textContent = `×${e.target.value}`;
-    globe.setExaggeration(+e.target.value);
-  };
   $('nav-in').onclick = () => globe.zoom(0.5);
   $('nav-out').onclick = () => globe.zoom(2);
   $('nav-north').onclick = () => globe.faceNorth();

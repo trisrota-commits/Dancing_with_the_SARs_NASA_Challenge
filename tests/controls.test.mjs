@@ -91,39 +91,53 @@ test('inside a polar cap the globe turns freely', () => {
   assert.ok(Math.abs(c.heading) < 1e-6 && Math.abs(c.lat - 43) < 1e-6);
 });
 
-test('from far out nothing tilts the globe or pushes it off the middle', () => {
-  const c = rig(); // the whole globe in view
-  c.down(at(640, 300, { button: 2 })); // a right-drag, as a trackpad makes of a drag with two fingers down
-  assert.ok(c.grab, 'it holds the globe like any drag');
-  c.move(at(640, 200, { button: 2 }));
-  c.move(at(700, 150, { button: 2 }));
-  c.up(at(700, 150, { button: 2 }));
+test('no drag tilts or turns the view, whatever button or key', () => {
+  for (const alt of [3, 0.05]) {
+    for (const how of [{ button: 2 }, { ctrlKey: true }, { shiftKey: true }]) {
+      const c = rig({ alt });
+      c.down(at(640, 300, how));
+      assert.ok(c.grab, 'it holds the globe like any drag');
+      c.move(at(640, 220, how));
+      c.move(at(700, 180, how));
+      assert.ok(off(c, 700, 180) < 0.01, 'the grabbed point is under the cursor');
+      c.up(at(700, 180, how));
+      assert.equal(c.pitch, 0);
+      assert.equal(c.heading, 0);
+    }
+  }
+});
+
+test('two fingers zoom and do not tilt', () => {
+  const c = rig({ alt: 0.05 });
+  c.down(at(600, 360, { pointerId: 1 }));
+  c.down(at(680, 360, { pointerId: 2 }));
+  c.move(at(600, 300, { pointerId: 1 }));
+  c.move(at(680, 300, { pointerId: 2 }));
+  c.move(at(560, 300, { pointerId: 1 }));
   assert.equal(c.pitch, 0);
-  assert.equal(c.heading, 0);
-  // Nor does a tilt set from outside survive up here.
-  c.pitch = 60;
-  c.apply();
-  assert.equal(c.pitch, 0);
-  // Close to the ground it is all there.
-  c.alt = 0.01;
-  c.pitch = 60;
+  assert.ok(c.alt < 0.05, 'spreading the fingers zooms in');
+});
+
+test('the 3D view lies flat again from far out', () => {
+  const c = rig({ alt: 0.01 });
+  c.pitch = 60; // as the 3D button sets it
   c.apply();
   assert.equal(c.pitch, 60);
-  // Zooming out lays the view flat again.
   c.zoomBy(200);
+  assert.equal(c.pitch, 0);
+  // Nor does a tilt set from outside survive up there.
+  c.pitch = 60;
+  c.apply();
   assert.equal(c.pitch, 0);
 });
 
-test('a turn of the view by hand is kept through a drag', () => {
+test('a view turned away from north is kept through a drag', () => {
   const c = rig({ alt: 0.05 });
-  c.down(at(640, 360, { button: 2 }));
-  c.move(at(700, 360, { button: 2 })); // right-drag: turns the view
-  c.up(at(700, 360, { button: 2 }));
-  const turned = c.heading;
-  assert.ok(Math.abs(turned) > 5);
+  c.heading = c.home = -18;
+  c.apply();
   c.down(at(640, 360));
   c.move(at(600, 420));
-  assert.ok(Math.abs(c.heading - turned) < 1e-6, 'the heading chosen is held');
+  assert.ok(Math.abs(c.heading + 18) < 1e-6, 'the heading is held');
   assert.ok(off(c, 600, 420) < 0.01);
 });
 

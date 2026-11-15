@@ -1,7 +1,10 @@
 // Camera control for a globe, in the style of Google Earth: the camera
-// orbits a point on the ground. Drag pans, wheel or pinch zooms, and
-// right-drag (or Ctrl/Shift-drag, or a two-finger vertical drag) tilts and
-// turns the view.
+// orbits a point on the ground. Drag pans, wheel or pinch zooms. The view
+// is tilted only by the 3D button (flyTo with a pitch), never by a drag:
+// a right-drag, a Ctrl- or Shift-drag and a two-finger drag used to tilt
+// and turn the view, and on a trackpad that happened by accident and left
+// the globe hanging off the middle of the screen with no sign of why
+// (the project lead, 15 November 2026). Every drag now holds the globe.
 //
 // A drag holds the globe by the point that was grabbed: that point stays
 // under the cursor, wherever on the globe it is. Away from the poles the
@@ -15,11 +18,9 @@
 // first swung back by itself on letting go; that pulled the globe out of
 // the hand and was taken out.)
 //
-// Tilting and turning by hand need the view to be close to the ground.
-// From far out a tilt shows nothing more: it only pushes the globe off the
-// middle of the screen and makes it loom, and on a trackpad it happens by
-// accident (a drag with a second finger resting on the pad is a right-drag,
-// which tilts). So the whole globe always sits in the middle, upright.
+// A tilt needs the view to be close to the ground. From far out it shows
+// nothing more: it only pushes the globe off the middle of the screen and
+// makes it loom. So the whole globe always sits in the middle, upright.
 
 import * as THREE from '../../vendor/three.module.min.js';
 import { RAD, toVec, toLatLon, lonDelta } from './geo.js';
@@ -47,7 +48,7 @@ export class GlobeControls {
     this.alt = 3.8; // distance from the target point, in Earth radii
     this.pitch = 0; // 0 looks straight down
     this.heading = 0; // 0 has north at the top
-    this.home = 0; // the heading the reader chose; a drag near a pole may leave it for a while
+    this.home = 0; // the heading flights go to; a drag across a pole may leave the view turned away from it
     this.grab = null; // the point of the globe held by a drag, as a unit vector
     this.ground = 0;
     this.groundAt = null; // (lat, lon) => height in Earth radii
@@ -59,7 +60,6 @@ export class GlobeControls {
     this.pointers = new Map();
     this.pinch = 0;
     this.travel = 0;
-    this.tilting = false;
 
     element.style.touchAction = 'none';
     element.addEventListener('pointerdown', (e) => this.down(e));
@@ -110,10 +110,9 @@ export class GlobeControls {
     this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     this.stop();
     this.travel = 0;
-    // (From far out a right-drag holds the globe like any other drag.)
-    this.tilting = (e.button === 2 || e.ctrlKey || e.shiftKey) && this.alt < TILT_NONE;
     if (this.pointers.size === 2) this.pinch = this.spread();
-    this.grab = this.pointers.size === 1 && !this.tilting ? this.under(e.clientX, e.clientY) : null;
+    // Whatever button or key: one pointer holds the globe.
+    this.grab = this.pointers.size === 1 ? this.under(e.clientX, e.clientY) : null;
   }
 
   // The point of the globe under a place on the screen, as a unit vector;
@@ -219,18 +218,10 @@ export class GlobeControls {
     this.travel += Math.abs(dx) + Math.abs(dy);
 
     if (this.pointers.size === 2) {
-      // Two fingers: spreading zooms, sliding together up or down tilts.
+      // Two fingers: spreading zooms.
       const spread = this.spread();
       if (this.pinch > 0 && spread > 0) this.alt = Math.max(MIN_RANGE, Math.min(MAX_RANGE, (this.alt * this.pinch) / spread));
       this.pinch = spread;
-      this.pitch -= dy * 0.15;
-      this.apply();
-      return;
-    }
-    if (this.tilting) {
-      this.heading -= dx * 0.3;
-      this.pitch -= dy * 0.3;
-      this.home = this.heading;
       this.apply();
       return;
     }
@@ -262,7 +253,6 @@ export class GlobeControls {
   up(e) {
     if (!this.pointers.delete(e.pointerId)) return;
     this.pinch = 0;
-    if (this.tilting) this.velocity.lat = this.velocity.lon = 0;
     if (this.travel < 6 && this.pointers.size === 0 && this.onTap && e.button !== 2) {
       this.velocity.lat = this.velocity.lon = 0;
       this.onTap(e);
