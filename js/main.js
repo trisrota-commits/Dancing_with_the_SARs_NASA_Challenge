@@ -3,7 +3,7 @@
 // Which version of the app this is. `tools/pack.sh` sets it; it shows at the
 // end of the credits line, so nobody has to wonder whether the browser is
 // still showing an older copy.
-const BUILD = '2026-11-15 04:08 UTC';
+const BUILD = '2026-11-15 04:27 UTC';
 
 import { CATEGORIES, FAMILIES, PALETTE, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START, RECENT_MS, OVERLAY_REACH_DAYS, NISAR_MOSAIC, NISAR_TILES } from './config.js';
 import { fetchFeed, fetchArchive } from './feeds.js';
@@ -2159,23 +2159,18 @@ function goToPlace(place) {
 
 // ---------- layer controls ----------
 
-// Has NASA added passes to a day since the mosaic was built? It goes on
-// publishing passes for a day for two weeks and more, nearly every day
-// for some day or other. The mosaic carries a fingerprint of each day it
-// was made from, and NASA's current ones are compared with them.
+// The mosaic is a picture with a date on it: the far and the continent
+// view as they stood when it was built. It does not have to be current to
+// be right, because everything else comes live from NASA and only for
+// what is on screen: every day flown after the mosaic's last is drawn on
+// top of it, and close up it is always NASA's own tiles.
 //
-// A mosaic built within the last day and a half stands as it is: it is
-// meant to be rebuilt every night; the late passes show close up at once (that is
-// always NASA's own tiles) and join the far view at the next build, and
-// the menu says how many days are affected. Were every late pass to
-// switch its day and all later ones back to live, the mosaic would
-// hardly ever be used.
-//
-// An older mosaic means nobody is rebuilding it. Then from the
-// oldest day that differs onwards the days are drawn live on top again
-// (all of them, because the newest pass has to end on top): slower, and
-// right.
-const MOSAIC_FRESH_MS = 36 * 3600_000;
+// What a dated picture cannot hold is a pass NASA publishes late, for a
+// day the mosaic already covers (it does that for two weeks and more: one
+// for 31 October arrived half an hour after the first build). So NASA's
+// fingerprint of each day is compared with the one the mosaic was built
+// from, and the menu says how many days have been added to since. Those
+// passes show close up at once and join the far view at the next build.
 async function checkMosaic() {
   const about = state.mosaic;
   if (!about?.days) return;
@@ -2188,17 +2183,10 @@ async function checkMosaic() {
         .catch(() => null),
     ),
   );
-  // A day that could not be asked about is taken as unchanged: a failed
-  // request must not throw the mosaic away.
-  const changed = dates.filter((date, i) => now[i] && now[i] !== about.days[date]);
-  const built = Date.parse(String(about.built || '').replace(' UTC', 'Z').replace(' ', 'T'));
-  const fresh = Number.isFinite(built) && Date.now() - built < MOSAIC_FRESH_MS;
-  const settled = changed.length && !fresh ? day(Date.parse(changed[0]) - DAY) : about.to;
-  const late = fresh ? changed.length : 0;
-  if (settled === state.mosaicSettled && late === state.mosaicLate) return;
-  state.mosaicSettled = settled;
+  // A day that could not be asked about counts as unchanged.
+  const late = dates.filter((date, i) => now[i] && now[i] !== about.days[date]).length;
+  if (late === state.mosaicLate) return;
   state.mosaicLate = late;
-  globe.setMosaic(about, settled);
   applyLayers();
 }
 
@@ -2262,7 +2250,7 @@ function applyLayers() {
     // Says which of the two ways the whole planet is being shown.
     const m = globe.mosaicFor({ date, days: +$('stack').value });
     $('stack-note').textContent = m
-      ? `Every place NISAR images, land and ice. From far away this is one picture that this app put together ahead of time from NASA's daily layer for ${m.from} to ${m.to}, the newest pass on top (built ${state.mosaic.built}). Close up, NASA's own tiles are loaded live${m.settled < m.to ? `, and so is every day from ${day(Date.parse(m.settled) + DAY)} on, because NASA has added passes since the picture was made` : ', and so are passes flown since'}.${state.mosaicLate ? ` NASA has since added passes to ${state.mosaicLate} of its days: they show close up now and join this picture when it is next rebuilt.` : ''}`
+      ? `Every place NISAR images, land and ice. From far away this is one picture that this app put together ahead of time from NASA's daily layer for ${m.from} to ${m.to}, the newest pass on top (built ${state.mosaic.built}). Close up, and for every day flown since, NASA's own tiles are loaded live.${state.mosaicLate ? ` NASA has since added late passes to ${state.mosaicLate} of the picture's days: they show close up now and join the far view when the picture is next rebuilt.` : ''}`
       : "Every place NISAR images, land and ice, from its passes of the last 24 days; the newest pass over each place lies on top. NASA publishes passes up to two weeks late, so the newest days are thin and the last complete round is 12 to 24 days old. It takes longer to load.";
   }
   // Two wavelengths side by side, for the same days.
