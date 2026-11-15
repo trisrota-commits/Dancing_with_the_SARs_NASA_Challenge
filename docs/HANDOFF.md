@@ -1340,6 +1340,27 @@ picture instead, which is on one fixed scale for every date (checked:
 its green channel follows the calibrated HV values on one line at two
 places over 20 passes), though not a decibel scale.
 
+## Dragging the globe (15 November 2026, late evening)
+
+Found by the project lead on the live site: at a pole the globe could not
+be pulled across, slid away under the hand, and a spot grabbed away from
+the middle of the view did not stay under the cursor. The cause was the
+drag itself: it turned pixels into degrees of latitude and longitude at
+the middle of the view, with north fixed at the top and latitude stopped
+at 89.5 degrees.
+
+`js/engine/controls.js` now holds the globe by the point that was grabbed
+(`under`, `hold`, `settle`): it stays under the cursor to within metres,
+close up and far out, tilted or not. Away from the poles the view does
+not turn during a drag. Inside the polar caps (from 62 to 80 degrees the
+hold on north is let go of gradually) the globe turns freely like a ball,
+so a pole can be pulled across; it comes out upside down, and north
+swings back to where the reader had it once the pointer is let go below
+80 degrees. A drag that begins on the sky pans as before. `flyTo` goes to
+the heading the reader chose (`home`), not to one a pole left behind.
+Tests: `tests/controls.test.mjs` (no browser needed). Not tried on a
+touch screen: one finger uses the same code, two fingers are unchanged.
+
 ## How to run and test
 
 - No build step. Serve the folder and open it: `start.command` (macOS),
