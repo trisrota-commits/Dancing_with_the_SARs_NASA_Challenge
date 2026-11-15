@@ -1,4 +1,19 @@
 {
+ "stood": {
+  "date": "2026-10-30",
+  "time": 1793363526000,
+  "before": "2026-10-18",
+  "expected": 1.63,
+  "outside": 0.043,
+  "n": 24,
+  "image": "event-usgs-us6000u43g_stood.png",
+  "bounds": {
+   "west": 93.71990787112033,
+   "east": 93.84749212887967,
+   "south": 32.28370132950054,
+   "north": 32.391498670499466
+  }
+ },
  "id": "event-usgs-us6000u43g",
  "name": "M 7.0 - 189 km ENE of Nagqu, China",
  "track": "091-D-072-DHDH",
@@ -596,5 +611,5 @@
  },
  "method": "Calibrated NISAR backscatter (GCOV, gamma-naught) in cells of 500 m on track 091-D-072-DHDH. Each pass from the 5th on is predicted from the passes before it only, and compared with what was measured. RMSE and MAE in dB; '9 in 10' is the error nine cells in ten stay under. 'Up or down' asks whether a cell's echo goes down or up by 1 dB or more by the next pass, or stays; precision, recall and F1 are averaged over the three answers. The yes/no question is whether a cell changes by 3 dB or more by the next pass. 'Outside the expected range' is the share of cells whose miss was larger than nine in ten misses on the passes predicted before; about 10 % is ordinary.",
  "limits": "One season of data: no way of predicting has seen a harvest, a flood or a thaw here before it happened. Neighbouring cells change together, so they are fewer independent samples than their number. A pass made with a new version of NASA's processing can shift by itself; such passes are marked.",
- "generated": "2026-11-15T15:42:02Z"
+ "generated": "2026-11-15T15:55:40Z"
 }

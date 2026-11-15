@@ -44,9 +44,29 @@
       </details>
 
       <details open>
-        <summary>Stories: start here</summary>
-        <div id="stories"></div>
-        <p class="hint">Five places, five kinds of change, each explained from NISAR data.</p>
+        <summary>Events on the map <span id="event-count" class="count"></span></summary>
+        <div id="chips"></div>
+        <div class="row">
+          <span class="mini"><button id="chips-all">Show all</button> <button id="chips-none">Hide all</button></span>
+          <select id="window" aria-label="Time window">
+            <option value="1">Last 24 hours</option>
+            <option value="3">Last 3 days</option>
+            <option value="7" selected>Last 7 days</option>
+            <option value="14">Last 14 days</option>
+            <option value="nisar">Since NISAR data began</option>
+          </select>
+        </div>
+        <p class="hint" id="window-note" hidden></p>
+        <ul class="legend" id="event-key">
+          <li><i class="dot"></i>Colour: the kind of event (the buttons above). Point at a dot to read it.</li>
+          <li><i class="dot big"></i>Bigger dot, taller beam: a stronger event</li>
+          <li><i class="ring nisar"></i>Teal ring: NISAR imaged that spot in its latest passes</li>
+          <li><i class="ring"></i>White ring: the one you selected</li>
+          <li><i class="ring pulse"></i>Quick spreading rings: it arrived in the last minutes</li>
+          <li><i class="ring pulse soft"></i>One soft ring every few seconds: first reported in the last 24 hours</li>
+          <li><i class="line"></i>Line through a dot: the path it has taken</li>
+        </ul>
+        <p class="hint">Click a dot to see the event and what NISAR saw there.</p>
       </details>
 
       <details open>
@@ -93,30 +113,12 @@
         </div>
       </details>
 
+      <p class="menu-rule">More context</p>
+
       <details open>
-        <summary>Events on the map <span id="event-count" class="count"></span></summary>
-        <div id="chips"></div>
-        <div class="row">
-          <span class="mini"><button id="chips-all">Show all</button> <button id="chips-none">Hide all</button></span>
-          <select id="window" aria-label="Time window">
-            <option value="1">Last 24 hours</option>
-            <option value="3">Last 3 days</option>
-            <option value="7" selected>Last 7 days</option>
-            <option value="14">Last 14 days</option>
-            <option value="nisar">Since NISAR data began</option>
-          </select>
-        </div>
-        <p class="hint" id="window-note" hidden></p>
-        <ul class="legend" id="event-key">
-          <li><i class="dot"></i>Colour: the kind of event (the buttons above). Point at a dot to read it.</li>
-          <li><i class="dot big"></i>Bigger dot, taller beam: a stronger event</li>
-          <li><i class="ring nisar"></i>Teal ring: NISAR imaged that spot in its latest passes</li>
-          <li><i class="ring"></i>White ring: the one you selected</li>
-          <li><i class="ring pulse"></i>Quick spreading rings: it arrived in the last minutes</li>
-          <li><i class="ring pulse soft"></i>One soft ring every few seconds: first reported in the last 24 hours</li>
-          <li><i class="line"></i>Line through a dot: the path it has taken</li>
-        </ul>
-        <p class="hint">Click a dot to see the event and what NISAR saw there.</p>
+        <summary>Stories: five kinds of change, explained</summary>
+        <div id="stories"></div>
+        <p class="hint">Five places, five kinds of change, each explained from NISAR data.</p>
       </details>
 
       <details>
@@ -245,7 +247,7 @@
         <button id="welcome-close">Explore the globe</button>
       </div>
       <ol>
-        <li><b>Pick</b> a story from the <b>☰ Menu</b> at the top left, or click a dot on the globe.</li>
+        <li><b>Pick</b> a measured place from the <b>☰ Menu</b> at the top left, or click a dot on the globe.</li>
         <li><b>Drag</b> the timeline that appears at the bottom to go back in time.</li>
         <li><b>Read</b> the key that comes with each radar picture: it says what the colours mean.</li>
       </ol>

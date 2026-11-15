@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dancing with the SARs: the project in seven slides</title>
+    <meta name="description" content="Seven slides on Dancing with the SARs, a NASA Space Apps Challenge 2026 project: what a place normally reads on NISAR's radar, and where the ground did something else." />
+    <!--
+      The demo for the project page: seven slides, read at one's own pace.
+      Every picture is a screenshot of the running app; every number is
+      one the app shows (data/measured/, tools/forecast.py, tools/census.py).
+      Arrow keys or a click move between slides; printing gives one slide
+      a page (tools/slides.js makes the PDF that way).
+    -->
+    <style>
+      :root {
+        --bg: #05090f;
+        --panel: #0c1420;
+        --line: rgba(255, 255, 255, 0.14);
+        --text: #eef3f8;
+        --dim: #a9b6c6;
+        --accent: #39e6c4;
+        --weaker: #40aaff;
+        --stronger: #ffaa3c;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #000;
+        color: var(--text);
+        font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+      }
+      /* Each slide is drawn at 1920 x 1080 and scaled to fit the window. */
+      #stage {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+      }
+      .slide {
+        position: absolute;
+        width: 1920px;
+        height: 1080px;
+        padding: 84px 96px 72px;
+        background: var(--bg);
+        display: none;
+        transform-origin: center;
+        overflow: hidden;
+      }
+      .slide.on {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        gap: 36px;
+      }
+      .kicker {
+        color: var(--accent);
+        font-size: 24px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        margin: 0 0 14px;
+      }
+      h1 {
+        font-size: 112px;
+        line-height: 1.02;
+        margin: 0 0 28px;
+        letter-spacing: -0.02em;
+      }
+      h2 {
+        font-size: 62px;
+        line-height: 1.1;
+        margin: 0;
+        letter-spacing: -0.015em;
+        max-width: 1640px;
+      }
+      p,
+      li {
+        font-size: 33px;
+        line-height: 1.42;
+        margin: 0;
+        color: var(--text);
+      }
+      ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        gap: 24px;
+      }
+      li {
+        padding-left: 34px;
+        position: relative;
+      }
+      li::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0.62em;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--accent);
+      }
+      b {
+        color: #fff;
+      }
+      .dim {
+        color: var(--dim);
+      }
+      .cols {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 64px;
+        align-items: center;
+        min-height: 0;
+      }
+      .cols.wide-right {
+        grid-template-columns: 0.82fr 1.18fr;
+      }
+      .cols.wide-left {
+        grid-template-columns: 1.1fr 0.9fr;
+      }
+      figure {
+        margin: 0;
+        min-height: 0;
+        display: grid;
+        gap: 12px;
+        justify-items: center;
+      }
+      figure img {
+        max-width: 100%;
+        max-height: 700px;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        display: block;
+      }
+      figcaption {
+        font-size: 22px;
+        color: var(--dim);
+        text-align: center;
+      }
+      .foot {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 40px;
+        font-size: 22px;
+        color: var(--dim);
+      }
+      .foot .n {
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+      }
+      .big {
+        font-size: 150px;
+        font-weight: 700;
+        line-height: 1;
+        color: var(--stronger);
+        letter-spacing: -0.03em;
+      }
+      .stat {
+        display: grid;
+        gap: 6px;
+      }
+      .stat span {
+        font-size: 28px;
+        color: var(--dim);
+        line-height: 1.3;
+      }
+      table {
+        border-collapse: collapse;
+        font-size: 29px;
+        width: 100%;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 12px 18px 12px 0;
+        border-bottom: 1px solid var(--line);
+        font-weight: 400;
+      }
+      th {
+        color: var(--dim);
+        font-size: 23px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      td.num {
+        font-variant-numeric: tabular-nums;
+        text-align: right;
+        padding-right: 28px;
+      }
+      tr.hit td {
+        color: var(--stronger);
+        font-weight: 700;
+      }
+      .note {
+        font-size: 26px;
+        color: var(--dim);
+        line-height: 1.4;
+      }
+      .steps {
+        counter-reset: step;
+      }
+      .steps li {
+        padding-left: 62px;
+      }
+      .steps li::before {
+        counter-increment: step;
+        content: counter(step);
+        width: 42px;
+        height: 42px;
+        top: 0.08em;
+        border-radius: 50%;
+        background: none;
+        border: 2px solid var(--accent);
+        color: var(--accent);
+        font-size: 24px;
+        font-weight: 700;
+        display: grid;
+        place-items: center;
+      }
+      .two {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 56px;
+      }
+      .box {
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 34px 38px;
+        background: var(--panel);
+        display: grid;
+        gap: 20px;
+        align-content: start;
+      }
+      .box h3 {
+        margin: 0;
+        font-size: 30px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+      .box.no h3 {
+        color: var(--stronger);
+      }
+      .box li,
+      .box p {
+        font-size: 28px;
+      }
+      .box ul {
+        gap: 16px;
+      }
+      /* The title slide: the planet behind the words. */
+      .title {
+        background: linear-gradient(90deg, rgba(5, 9, 15, 0.96) 0%, rgba(5, 9, 15, 0.86) 42%, rgba(5, 9, 15, 0.1) 78%), url('img/hero.jpg') right center / cover no-repeat, var(--bg);
+      }
+      .title .lead {
+        font-size: 46px;
+        line-height: 1.3;
+        max-width: 1000px;
+        color: #fff;
+      }
+      .title .who {
+        font-size: 28px;
+        color: var(--dim);
+        max-width: 900px;
+        line-height: 1.5;
+      }
+      a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+      #nav {
+        position: fixed;
+        right: 18px;
+        bottom: 14px;
+        display: flex;
+        gap: 8px;
+        z-index: 5;
+      }
+      #nav button {
+        font: inherit;
+        font-size: 15px;
+        color: var(--text);
+        background: rgba(12, 20, 32, 0.85);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 8px 14px;
+        cursor: pointer;
+      }
+      #nav button:focus-visible {
+        outline: 2px solid var(--accent);
+      }
+      @media print {
+        @page {
+          size: 1920px 1080px;
+          margin: 0;
+        }
+        html,
+        body {
+          height: auto;
+          background: var(--bg);
+        }
+        #stage {
+          position: static;
+          display: block;
+        }
+        .slide,
+        .slide.on {
+          display: grid;
+          grid-template-rows: auto 1fr auto;
+          gap: 36px;
+          position: relative;
+          transform: none !important;
+          break-after: page;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+        #nav {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main id="stage">
+      <!-- 1 -->
+      <section class="slide title on" aria-label="Slide 1 of 7">
+        <div>
+          <p class="kicker">NASA Space Apps Challenge 2026 · Dancing with the SARs</p>
+        </div>
+        <div style="align-self: center; display: grid; gap: 30px">
+          <h1>Dancing<br />with the SARs</h1>
+          <p class="lead">What a place normally reads on radar, and where the ground did something else.</p>
+          <p class="who">A live 3D globe of NASA and ISRO's NISAR radar satellite. It runs in a browser, with no login, no key and nothing to install.</p>
+        </div>
+        <div class="foot">
+          <span>Team: LucidPaths · trisrota-commits · MadhuraSaha02</span>
+          <span class="n">1 / 7</span>
+        </div>
+      </section>
+
+      <!-- 2 -->
+      <section class="slide" aria-label="Slide 2 of 7">
+        <div>
+          <p class="kicker">The problem</p>
+          <h2>After a flood, the first question is simple: where did the ground change?</h2>
+        </div>
+        <div class="cols wide-left">
+          <ul>
+            <li><b>Cameras in orbit are blind when it matters.</b> Floods come with cloud, fires with smoke, and half of every day is night.</li>
+            <li><b>NISAR's radar sees through all three,</b> and passes every place on land and ice again every 12 days.</li>
+            <li><b>But a radar picture is hard to read,</b> and the measurements behind it sit in large files that need a login and special software.</li>
+            <li><b>Who needs the answer:</b> a relief organisation or a civil-protection office deciding where to send people first; a farm adviser asking how a crop is doing.</li>
+          </ul>
+          <figure>
+            <img src="img/flood-page.jpg" alt="The app showing NISAR's radar picture over Tuscany after a reported flood, with the event's card and a timeline of NISAR's passes" />
+            <figcaption>A reported flood in Italy, and NISAR's radar picture of the same ground</figcaption>
+          </figure>
+        </div>
+        <div class="foot">
+          <span>Challenge: “track and visualize surface change” with NISAR, for floods, wetlands, crops and more</span>
+          <span class="n">2 / 7</span>
+        </div>
+      </section>
+
+      <!-- 3 -->
+      <section class="slide" aria-label="Slide 3 of 7">
+        <div>
+          <p class="kicker">What we built</p>
+          <h2>One globe: what is reported, what the radar saw, and what it measured</h2>
+        </div>
+        <div class="cols wide-right">
+          <ul>
+            <li><b>The whole planet as NISAR sees it,</b> assembled from 48 days of passes and shown in 3D with real terrain.</li>
+            <li><b>Live events</b> from USGS, NASA EONET and GDACS: earthquakes, floods, fires, storms. Each opens on a timeline with NISAR's passes before and after it.</li>
+            <li><b>Measured, not just pictured.</b> Our own tool reads NISAR's calibrated data twice a day. 16 places and events now carry real values in decibels.</li>
+            <li><b>Any place on Earth:</b> click the ground for a time-lapse of every NISAR pass there.</li>
+          </ul>
+          <figure>
+            <img src="img/menu.jpg" alt="The app: the globe with live event markers, and the menu listing the places and events measured by NISAR, sorted by how much of the ground stood out" />
+            <figcaption>The menu lists every measured place by how much of its ground stood out</figcaption>
+          </figure>
+        </div>
+        <div class="foot">
+          <span>A static website: HTML, CSS and JavaScript on three.js, with our own tile engine. All data loads from public NASA and agency services.</span>
+          <span class="n">3 / 7</span>
+        </div>
+      </section>
+
+      <!-- 4 -->
+      <section class="slide" aria-label="Slide 4 of 7">
+        <div>
+          <p class="kicker">Detecting change · a flood in Italy, October 2026</p>
+          <h2>On the first pass after the flood, 31 % of the ground did something else</h2>
+        </div>
+        <div class="cols">
+          <div style="display: grid; gap: 34px">
+            <ul class="steps">
+              <li>Cut the ground into cells of 500 m and read each one's radar echo, pass by pass, from NISAR's calibrated data.</li>
+              <li>Compare each cell's change with what the cells around it did in the same pass. Rain and season move all of them alike, and drop out.</li>
+              <li>Count the cells that left the range nine in ten had kept to before. <b>About 10 % is ordinary.</b></li>
+            </ul>
+            <p class="note">It says that something changed, and where. It does not say what caused it.</p>
+          </div>
+          <div style="display: grid; gap: 26px">
+            <table>
+              <tr>
+                <th>NISAR pass</th>
+                <th style="text-align: right; padding-right: 28px">Cells that stood out</th>
+                <th></th>
+              </tr>
+              <tr>
+                <td>7 October</td>
+                <td class="num dim">–</td>
+                <td class="dim">flood reported (GDACS)</td>
+              </tr>
+              <tr class="hit">
+                <td>10 October</td>
+                <td class="num">31 %</td>
+                <td>first pass afterwards</td>
+              </tr>
+              <tr>
+                <td>22 October</td>
+                <td class="num">2 %</td>
+                <td class="dim"></td>
+              </tr>
+              <tr>
+                <td>3 November</td>
+                <td class="num">18 %</td>
+                <td class="dim"></td>
+              </tr>
+            </table>
+            <p class="note">576 cells around the reported point in Tuscany, seven passes, 23 August to 3 November 2026. The area's mean echo rose by 1.3 dB on 10 October.</p>
+          </div>
+        </div>
+        <div class="foot">
+          <span>Computed by tools/forecast.py from NISAR L2 GCOV. The same figures are in the app, under the event's card.</span>
+          <span class="n">4 / 7</span>
+        </div>
+      </section>
+
+      <!-- 5 -->
+      <section class="slide" aria-label="Slide 5 of 7">
+        <div>
+          <p class="kicker">Does it read real ground? · rice fields of Bardhaman, West Bengal</p>
+          <h2>One rice season, measured: flooded in July, tall in October, harvested in November</h2>
+        </div>
+        <div class="cols wide-right">
+          <div style="display: grid; gap: 30px">
+            <ul>
+              <li><b>−10.9 dB in July:</b> the paddies are under water, and smooth water sends little back.</li>
+              <li><b>−3.7 dB in October:</b> the rice stands tall and the echo is five times as strong.</li>
+              <li><b>November:</b> the harvest, and the echo falls again.</li>
+            </ul>
+            <p class="note">12 passes, 1,024 cells. How well the next pass can be expected is scored against four baselines: our small model is off by 1.62 dB (RMSE), the best baseline by 1.79 dB, the comparison with the neighbours by 1.28 dB.</p>
+          </div>
+          <figure>
+            <img src="img/crop-measured.jpg" alt="The app's chart of calibrated NISAR backscatter over the rice fields of Bardhaman, June to November 2026, in decibels" />
+            <figcaption>The app's chart: both radar channels, from NISAR's calibrated data</figcaption>
+          </figure>
+        </div>
+        <div class="foot">
+          <span>The place's text in the app said to expect this pattern before the measurements existed. A lost harvest is a disaster too.</span>
+          <span class="n">5 / 7</span>
+        </div>
+      </section>
+
+      <!-- 6 -->
+      <section class="slide" aria-label="Slide 6 of 7">
+        <div>
+          <p class="kicker">Everywhere else</p>
+          <h2>The whole planet: what changed in 48 days, at one switch</h2>
+        </div>
+        <div class="cols wide-right">
+          <div style="display: grid; gap: 30px">
+            <ul>
+              <li>Each pass against <b>the same pass 48 days earlier</b>, from NASA's map picture of NISAR. <span style="color: var(--weaker)">Blue</span>: the echo got weaker. <span style="color: var(--stronger)">Orange</span>: stronger.</li>
+              <li>The ground freezing across Siberia and Canada and the Sahel drying after the rains stand out.</li>
+              <li>A rough guide to where to look, not a measurement. Checked against our calibrated values at six places, the direction agrees at five.</li>
+            </ul>
+            <div class="stat">
+              <div class="big" style="font-size: 96px">43 %</div>
+              <span>of the NISAR tiles NASA's tile service delivered in our worldwide sample of 10,000 were damaged. The engine detects and replaces every one.</span>
+            </div>
+          </div>
+          <figure>
+            <img src="img/change.jpg" alt="The globe with the planet-wide change picture: blue where the radar picture got darker in 48 days, orange where brighter" />
+            <figcaption>20 October to 12 November against 2 to 25 September 2026</figcaption>
+          </figure>
+        </div>
+        <div class="foot">
+          <span>tools/change.py and tools/census.py: anyone can run both again.</span>
+          <span class="n">6 / 7</span>
+        </div>
+      </section>
+
+      <!-- 7 -->
+      <section class="slide" aria-label="Slide 7 of 7">
+        <div>
+          <p class="kicker">Honest limits</p>
+          <h2>What we can claim, and what we cannot</h2>
+        </div>
+        <div class="two">
+          <div class="box">
+            <h3>We can</h3>
+            <ul>
+              <li>Every number is computed from NASA's data, and every source is one click away in the app.</li>
+              <li>The flood in Italy stood out clearly; the rice season reads as rice does.</li>
+              <li>Two faults found in NASA's data are handled and documented: damaged map tiles, and strips with no signal in the data files.</li>
+              <li>38 automated tests; all tools are in the public repository.</li>
+            </ul>
+          </div>
+          <div class="box no">
+            <h3>We cannot</h3>
+            <ul>
+              <li><b>Not a detection rate.</b> Of five events tested, two can be read cleanly: the flood stood out (31 %), a prescribed fire did not (4 %).</li>
+              <li>At the other three, the first pass afterwards is also the first from a new version of NASA's processing, which shifted values by itself at 12 of our 15 places. The app marks those passes.</li>
+              <li><b>One season of data.</b> NISAR's archive began in mid-2026, so “ordinary” rests on a few passes.</li>
+              <li>NASA's OPERA DIST-ALERT does this for Sentinel-1 with three years of history. Ours is a prototype of the idea for NISAR.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="foot">
+          <span>Built on 14 and 15 November 2026 by three people with an AI coding assistant (Claude Code); no AI runs in the app. Code: <a href="https://github.com/trisrota-commits/Dancing_with_the_SARs_NASA_Challenge">github.com/trisrota-commits/Dancing_with_the_SARs_NASA_Challenge</a></span>
+          <span class="n">7 / 7</span>
+        </div>
+      </section>
+    </main>
+
+    <nav id="nav" aria-label="Slides">
+      <button id="prev" aria-label="Previous slide">◀</button>
+      <button id="next" aria-label="Next slide">▶</button>
+    </nav>
+
+    <script>
+      const slides = [...document.querySelectorAll('.slide')];
+      let at = Math.min(slides.length, Math.max(1, parseInt(location.hash.slice(1), 10) || 1)) - 1;
+      const fit = () => {
+        const k = Math.min(innerWidth / 1920, innerHeight / 1080);
+        slides.forEach((s) => (s.style.transform = `scale(${k})`));
+      };
+      const show = (n) => {
+        at = Math.min(slides.length - 1, Math.max(0, n));
+        slides.forEach((s, i) => s.classList.toggle('on', i === at));
+        history.replaceState(null, '', `#${at + 1}`);
+      };
+      addEventListener('resize', fit);
+      addEventListener('keydown', (e) => {
+        if (['ArrowRight', 'PageDown', ' ', 'Enter'].includes(e.key)) show(at + 1);
+        if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) show(at - 1);
+        if (e.key === 'Home') show(0);
+        if (e.key === 'End') show(slides.length - 1);
+      });
+      document.getElementById('next').onclick = () => show(at + 1);
+      document.getElementById('prev').onclick = () => show(at - 1);
+      fit();
+      show(at);
+    </script>
+  </body>
+</html>

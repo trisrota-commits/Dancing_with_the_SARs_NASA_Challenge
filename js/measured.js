@@ -101,6 +101,7 @@ function load(entry) {
 }
 
 export const changeImageUrl = (d) => DIR + d.change.image;
+export const stoodImageUrl = (f) => DIR + f.stood.image;
 
 // ---- how well the next pass can be predicted (tools/forecast.py) ----
 
@@ -150,7 +151,7 @@ export function forecastHtml(f) {
       const b = r[f.best] || {};
       const share = (v) => (v == null ? '–' : `${(v * 100).toFixed(0)} %`);
       const marked = f.event ? f.event.firstPassAfter === r.date : f.peerSurprise?.time === r.time;
-      return `<tr${marked ? ' class="best"' : ''}><td>${esc(r.date)}${f.event?.firstPassAfter === r.date ? ' <span class="tag">after the event</span>' : ''}${r.newVersion ? ` <span class="tag" title="NASA's processing changed from ${esc(r.newVersion.from)} to ${esc(r.newVersion.to)} with this pass; that alone can shift the values">new processing</span>` : ''}</td><td>${num(r.seenMean, 1)}</td><td>${num(b.predMean, 1)}</td><td>${share(b.outside)}</td><td>${share(r.peers?.outside)}</td></tr>`;
+      return `<tr${marked ? ' class="best"' : ''}><td>${esc(r.date)}${f.event?.firstPassAfter === r.date ? ' <span class="tag">after the event</span>' : ''}${r.newVersion ? ` <span class="tag" title="NASA's processing changed from ${esc(r.newVersion.from)} to ${esc(r.newVersion.to)} with this pass; that alone can shift the values">new processing</span>` : ''}</td><td>${num(r.seenMean, 1)}</td><td>${num(b.predMean, 1)}</td>${f.short ? '' : `<td>${share(b.outside)}</td>`}<td>${share(r.peers?.outside)}</td></tr>`;
     })
     .join('');
   // What the card is for: telling a change from the ordinary. The sentence
@@ -170,9 +171,18 @@ export function forecastHtml(f) {
     <div class="src">Computed from the measurements · detecting change, not forecasting it</div>
     ${stood ? `<p><strong>${stood}</strong></p>` : ''}
     <p class="hint">Each cell of ${f.cellM} m is compared with what was expected of it: from its own earlier passes, and from what the cells around it did in the same pass. Rain or a season moves every cell alike and drops out of the second comparison; what is left is ground that went its own way. It says that something changed and where, not what caused it.</p>
-    <table class="forecast-table">
-      <caption>Pass by pass: the mean over all cells, measured and as expected from the earlier passes; how many cells fell outside the range nine in ten had kept to before (about 10 % is ordinary), against their own past and against their neighbours</caption>
-      <tr><th scope="col">Pass</th><th scope="col">Measured</th><th scope="col">Expected</th><th scope="col" title="Cells outside the range expected from their own earlier passes">Off own past</th><th scope="col" title="Cells that did something other than their neighbours in the same pass">Off neighbours</th></tr>
+    ${
+      f.stood
+        ? `<div class="actions"><button class="primary" id="stood-map">Show where it stood out</button></div>
+    <ul class="legend">
+      <li><i style="--c: ${PALETTE.stronger}"></i>Orange: the echo rose more than around it, ${esc(f.stood.before)} to ${esc(f.stood.date)}</li>
+      <li><i style="--c: ${PALETTE.weaker}"></i>Blue: it fell more than around it</li>
+    </ul>`
+        : ''
+    }
+    <table class="forecast-table passes">
+      <caption>Pass by pass: the mean over all cells in dB, measured and as expected from the earlier passes, and the share of cells outside their usual range. About 10 % is ordinary</caption>
+      <tr><th scope="col">Pass</th><th scope="col">Measured</th><th scope="col">Expected</th>${f.short ? '' : '<th scope="col" title="Cells outside the range expected from their own earlier passes">Off own past</th>'}<th scope="col" title="Cells that did something other than their neighbours in the same pass">Off neigh&shy;bours</th></tr>
       ${dates}
     </table>
     <details class="fold inner"><summary>How good is the expectation? Baselines and error measures</summary>
