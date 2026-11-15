@@ -1,0 +1,125 @@
+{
+ "id": "west-bengal",
+ "name": "Rice fields of Bardhaman",
+ "lat": 23.3,
+ "lon": 87.7,
+ "radiusKm": 25,
+ "track": "098-A-013-DHDH",
+ "setup": {
+  "lat": 23.3,
+  "lon": 87.7,
+  "seriesRadiusM": 1000,
+  "mapRadiusM": 8000,
+  "mapPol": "co"
+ },
+ "event": null,
+ "pols": [
+  "HH",
+  "HV"
+ ],
+ "series": [
+  {
+   "time": 1781998660000,
+   "hh": -8.82,
+   "hv": -16.52,
+   "pixels": 31411,
+   "file": "NISAR_L2_PR_GCOV_023_098_A_013_4005_DHDH_A_20260620T233740_20260620T233815_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1783035460000,
+   "hh": -9.78,
+   "hv": -17.08,
+   "pixels": 31411,
+   "file": "NISAR_L2_PR_GCOV_024_098_A_013_4005_DHDH_A_20260702T233740_20260702T233814_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1784072259000,
+   "hh": -10.89,
+   "hv": -18.15,
+   "pixels": 31411,
+   "file": "NISAR_L2_PR_GCOV_025_098_A_013_4005_DHDH_A_20260714T233739_20260714T233814_P05023_F_F_J_001.h5"
+  },
+  {
+   "time": 1785109058000,
+   "hh": -10.48,
+   "hv": -17.54,
+   "pixels": 31411,
+   "file": "NISAR_L2_PR_GCOV_026_098_A_013_4005_DHDH_A_20260726T233738_20260726T233813_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1787182657000,
+   "hh": -10.2,
+   "hv": -17.97,
+   "pixels": 31411,
+   "file": "NISAR_L2_PR_GCOV_028_098_A_013_4005_DHDH_A_20260819T233737_20260819T233812_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1788219457000,
+   "hh": -8.5,
+   "hv": -17.5,
+   "pixels": 31411,
+   "file": "NISAR_L2_PR_GCOV_029_098_A_013_4005_DHDH_A_20260831T233737_20260831T233811_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1789256257000,
+   "hh": -6.63,
+   "hv": -17.09,
+   "pixels": 31411,
+   "file": "NISAR_L2_PR_GCOV_030_098_A_013_4005_DHDH_A_20260912T233737_20260912T233811_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1790293057000,
+   "hh": -4.97,
+   "hv": -16.55,
+   "pixels": 31411,
+   "file": "NISAR_L2_PR_GCOV_031_098_A_013_4005_DHDH_A_20260924T233737_20260924T233811_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1791329857000,
+   "hh": -3.78,
+   "hv": -14.71,
+   "pixels": 31411,
+   "file": "NISAR_L2_PR_GCOV_032_098_A_013_4005_DHDH_A_20261006T233737_20261006T233811_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1792366657000,
+   "hh": -3.73,
+   "hv": -14.91,
+   "pixels": 31411,
+   "file": "NISAR_L2_PR_GCOV_033_098_A_013_4005_DHDH_A_20261018T233737_20261018T233812_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1793403457000,
+   "hh": -4.32,
+   "hv": -14.73,
+   "pixels": 31411,
+   "file": "NISAR_L2_PR_GCOV_034_098_A_013_4005_DHDH_A_20261030T233737_20261030T233812_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1794440258000,
+   "hh": -6.27,
+   "hv": -14.13,
+   "pixels": 31411,
+   "file": "NISAR_L2_PR_GCOV_035_098_A_013_4005_DHDH_A_20261111T233738_20261111T233812_P05036_N_F_J_001.h5"
+  }
+ ],
+ "change": {
+  "before": 1781998660000,
+  "after": 1792366657000,
+  "pol": "HH",
+  "image": "west-bengal_change.png",
+  "bounds": {
+   "west": 87.62175384926206,
+   "east": 87.77824615073794,
+   "south": 23.22813510600072,
+   "north": 23.37186489399928
+  },
+  "weakerPct": 0.7,
+  "strongerPct": 66.0,
+  "spansEvent": false
+ },
+ "firstDrop": null,
+ "summary": "Between 2026-06-20 and 2026-10-18, HH backscatter here changed by +5.1 dB and HV by +1.6 dB (mean within 1000 m). Across the mapped area, 1% got at least 3 dB weaker and 66% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 12 passes on track 098-A-013-DHDH. Time series: mean linear power within 1000 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the pass that differs most from the first in HH.",
+ "generated": "2026-11-15T12:29:16Z"
+}

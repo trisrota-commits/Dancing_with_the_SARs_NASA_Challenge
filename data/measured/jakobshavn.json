@@ -1,0 +1,117 @@
+{
+ "id": "jakobshavn",
+ "name": "Sermeq Kujalleq (Jakobshavn)",
+ "lat": 69.17,
+ "lon": -49.9,
+ "radiusKm": 25,
+ "track": "059-A-037-SHNA",
+ "setup": {
+  "lat": 69.17,
+  "lon": -49.9,
+  "seriesRadiusM": 500,
+  "mapRadiusM": 12000,
+  "mapPol": "co"
+ },
+ "event": null,
+ "pols": [
+  "HH"
+ ],
+ "series": [
+  {
+   "time": 1781765754000,
+   "hh": -7.5,
+   "hv": null,
+   "pixels": 1965,
+   "file": "NISAR_L2_PR_GCOV_023_059_A_037_7700_SHNA_A_20260618T065554_20260618T065631_P05023_N_P_J_001.h5"
+  },
+  {
+   "time": 1782802554000,
+   "hh": -7.49,
+   "hv": null,
+   "pixels": 1965,
+   "file": "NISAR_L2_PR_GCOV_024_059_A_037_7700_SHNA_A_20260630T065554_20260630T065630_P05023_N_P_J_001.h5"
+  },
+  {
+   "time": 1783839353000,
+   "hh": -7.1,
+   "hv": null,
+   "pixels": 1965,
+   "file": "NISAR_L2_PR_GCOV_025_059_A_037_7700_SHNA_A_20260712T065553_20260712T065630_P05023_N_P_J_001.h5"
+  },
+  {
+   "time": 1784876152000,
+   "hh": -6.77,
+   "hv": null,
+   "pixels": 1965,
+   "file": "NISAR_L2_PR_GCOV_026_059_A_037_7700_SHNA_A_20260724T065552_20260724T065629_P05023_N_P_J_001.h5"
+  },
+  {
+   "time": 1786949751000,
+   "hh": -6.41,
+   "hv": null,
+   "pixels": 1965,
+   "file": "NISAR_L2_PR_GCOV_028_059_A_037_7700_SHNA_A_20260817T065551_20260817T065628_P05023_N_P_J_001.h5"
+  },
+  {
+   "time": 1787986551000,
+   "hh": -6.12,
+   "hv": null,
+   "pixels": 1965,
+   "file": "NISAR_L2_PR_GCOV_029_059_A_037_7700_SHNA_A_20260829T065551_20260829T065628_P05023_N_P_J_001.h5"
+  },
+  {
+   "time": 1789023351000,
+   "hh": -6.79,
+   "hv": null,
+   "pixels": 1965,
+   "file": "NISAR_L2_PR_GCOV_030_059_A_037_7700_SHNA_A_20260910T065551_20260910T065627_P05023_N_P_J_001.h5"
+  },
+  {
+   "time": 1790060151000,
+   "hh": -5.91,
+   "hv": null,
+   "pixels": 1965,
+   "file": "NISAR_L2_PR_GCOV_031_059_A_037_7700_SHNA_A_20260922T065551_20260922T065628_P05023_N_P_J_001.h5"
+  },
+  {
+   "time": 1791096951000,
+   "hh": -5.71,
+   "hv": null,
+   "pixels": 1965,
+   "file": "NISAR_L2_PR_GCOV_032_059_A_037_7700_SHNA_A_20261004T065551_20261004T065628_P05023_N_P_J_001.h5"
+  },
+  {
+   "time": 1792133751000,
+   "hh": -5.29,
+   "hv": null,
+   "pixels": 1965,
+   "file": "NISAR_L2_PR_GCOV_033_059_A_037_7700_SHNA_A_20261016T065551_20261016T065628_P05023_N_P_J_001.h5"
+  },
+  {
+   "time": 1793170551000,
+   "hh": -5.77,
+   "hv": null,
+   "pixels": 1965,
+   "file": "NISAR_L2_PR_GCOV_034_059_A_037_7700_SHNA_A_20261028T065551_20261028T065628_P05036_N_P_J_001.h5"
+  }
+ ],
+ "change": {
+  "before": 1781765754000,
+  "after": 1792133751000,
+  "pol": "HH",
+  "image": "jakobshavn_change.png",
+  "bounds": {
+   "west": -50.2031452085918,
+   "east": -49.5968547914082,
+   "south": 69.06220265900107,
+   "north": 69.27779734099893
+  },
+  "weakerPct": 8.4,
+  "strongerPct": 19.7,
+  "spansEvent": false
+ },
+ "firstDrop": null,
+ "summary": "Between 2026-06-18 and 2026-10-16, HH backscatter here changed by +2.2 dB (mean within 500 m). Across the mapped area, 8% got at least 3 dB weaker and 20% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 11 passes on track 059-A-037-SHNA. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the pass that differs most from the first in HH.",
+ "generated": "2026-11-15T12:24:40Z"
+}

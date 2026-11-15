@@ -1,0 +1,83 @@
+{
+ "id": "event-usgs-us6000u43g",
+ "name": "M 7.0 - 189 km ENE of Nagqu, China",
+ "lat": 32.3376,
+ "lon": 93.7837,
+ "radiusKm": 25,
+ "track": "091-D-072-DHDH",
+ "setup": {
+  "lat": 32.3376,
+  "lon": 93.7837,
+  "seriesRadiusM": 500,
+  "mapRadiusM": 6000,
+  "mapPol": "co"
+ },
+ "event": 1792627200000.0,
+ "pols": [
+  "HH",
+  "HV"
+ ],
+ "series": [
+  {
+   "time": 1789216326000,
+   "hh": -7.7,
+   "hv": -17.66,
+   "pixels": 1963,
+   "file": "NISAR_L2_PR_GCOV_030_091_D_072_2005_DHDH_M_20260912T123206_20260912T123240_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1790253126000,
+   "hh": -7.02,
+   "hv": -16.09,
+   "pixels": 1963,
+   "file": "NISAR_L2_PR_GCOV_031_091_D_072_2005_DHDH_M_20260924T123206_20260924T123240_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1791289926000,
+   "hh": -8.63,
+   "hv": -19.54,
+   "pixels": 1963,
+   "file": "NISAR_L2_PR_GCOV_032_091_D_072_2005_DHDH_M_20261006T123206_20261006T123241_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1792326726000,
+   "hh": -8.18,
+   "hv": -19.17,
+   "pixels": 1963,
+   "file": "NISAR_L2_PR_GCOV_033_091_D_072_2005_DHDH_M_20261018T123206_20261018T123241_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1793363526000,
+   "hh": -9.38,
+   "hv": -19.69,
+   "pixels": 1963,
+   "file": "NISAR_L2_PR_GCOV_034_091_D_072_2005_DHDH_M_20261030T123206_20261030T123237_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1794400327000,
+   "hh": -10.27,
+   "hv": -20.79,
+   "pixels": 1963,
+   "file": "NISAR_L2_PR_GCOV_035_091_D_072_2005_DHDH_A_20261111T123207_20261111T123238_P05036_N_F_J_001.h5"
+  }
+ ],
+ "change": {
+  "before": 1792326726000,
+  "after": 1793363526000,
+  "pol": "HH",
+  "image": "event-usgs-us6000u43g_change.png",
+  "bounds": {
+   "west": 93.71990787112033,
+   "east": 93.84749212887967,
+   "south": 32.28370132950054,
+   "north": 32.391498670499466
+  },
+  "weakerPct": 1.7,
+  "strongerPct": 0.2,
+  "spansEvent": true
+ },
+ "firstDrop": null,
+ "summary": "Across the event of 2026-10-22: between 2026-10-18 and 2026-10-30, HH backscatter here changed by -1.2 dB and HV by -0.5 dB (mean within 500 m). Across the mapped area, 2% got at least 3 dB weaker and 0% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 6 passes on track 091-D-072-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-10-22, and 'before' the last pass before it.",
+ "generated": "2026-11-15T12:37:16Z"
+}

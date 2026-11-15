@@ -1,0 +1,118 @@
+{
+ "id": "perito-moreno",
+ "name": "Perito Moreno Glacier",
+ "lat": -50.5,
+ "lon": -73.15,
+ "radiusKm": 25,
+ "track": "068-D-114-DHDH",
+ "setup": {
+  "lat": -50.5,
+  "lon": -73.15,
+  "seriesRadiusM": 500,
+  "mapRadiusM": 8000,
+  "mapPol": "co"
+ },
+ "event": null,
+ "pols": [
+  "HH",
+  "HV"
+ ],
+ "series": [
+  {
+   "time": 1781822301000,
+   "hh": -135.38,
+   "hv": -144.84,
+   "pixels": 1964,
+   "file": "NISAR_L2_PR_GCOV_023_068_D_114_2005_DHDH_M_20260618T223821_20260618T223856_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1782859100000,
+   "hh": -136.61,
+   "hv": -146.08,
+   "pixels": 1964,
+   "file": "NISAR_L2_PR_GCOV_024_068_D_114_2005_DHDH_M_20260630T223820_20260630T223856_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1783895900000,
+   "hh": -137.44,
+   "hv": -146.5,
+   "pixels": 1964,
+   "file": "NISAR_L2_PR_GCOV_025_068_D_114_2005_DHDH_M_20260712T223820_20260712T223855_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1784932699000,
+   "hh": -136.8,
+   "hv": -146.19,
+   "pixels": 1964,
+   "file": "NISAR_L2_PR_GCOV_026_068_D_114_2005_DHDH_M_20260724T223819_20260724T223854_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1787006298000,
+   "hh": -135.09,
+   "hv": -144.58,
+   "pixels": 1964,
+   "file": "NISAR_L2_PR_GCOV_028_068_D_114_2005_DHDH_M_20260817T223818_20260817T223853_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1788043098000,
+   "hh": -134.58,
+   "hv": -144.15,
+   "pixels": 1964,
+   "file": "NISAR_L2_PR_GCOV_029_068_D_114_2005_DHDH_M_20260829T223818_20260829T223853_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1789079897000,
+   "hh": -135.19,
+   "hv": -144.81,
+   "pixels": 1964,
+   "file": "NISAR_L2_PR_GCOV_030_068_D_114_2005_DHDH_M_20260910T223817_20260910T223853_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1790116697000,
+   "hh": -134.81,
+   "hv": -144.36,
+   "pixels": 1964,
+   "file": "NISAR_L2_PR_GCOV_031_068_D_114_2005_DHDH_M_20260922T223817_20260922T223853_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1791153498000,
+   "hh": -133.83,
+   "hv": -142.5,
+   "pixels": 1964,
+   "file": "NISAR_L2_PR_GCOV_032_068_D_114_2005_DHDH_M_20261004T223818_20261004T223853_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1792190298000,
+   "hh": -135.09,
+   "hv": -143.95,
+   "pixels": 1964,
+   "file": "NISAR_L2_PR_GCOV_033_068_D_114_2005_DHDH_M_20261016T223818_20261016T223853_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1793227098000,
+   "hh": -136.25,
+   "hv": -144.87,
+   "pixels": 1964,
+   "file": "NISAR_L2_PR_GCOV_034_068_D_114_2005_DHDH_M_20261028T223818_20261028T223853_P05036_N_F_J_001.h5"
+  }
+ ],
+ "change": {
+  "before": 1781822301000,
+  "after": 1783895900000,
+  "pol": "HH",
+  "image": "perito-moreno_change.png",
+  "bounds": {
+   "west": -73.26298122103269,
+   "east": -73.03701877896732,
+   "south": -50.57186489399928,
+   "north": -50.42813510600072
+  },
+  "weakerPct": 10.9,
+  "strongerPct": 0.5,
+  "spansEvent": false
+ },
+ "firstDrop": null,
+ "summary": "Between 2026-06-18 and 2026-07-12, HH backscatter here changed by -2.1 dB and HV by -1.7 dB (mean within 500 m). Across the mapped area, 11% got at least 3 dB weaker and 0% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 11 passes on track 068-D-114-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the pass that differs most from the first in HH.",
+ "generated": "2026-11-15T12:22:59Z"
+}

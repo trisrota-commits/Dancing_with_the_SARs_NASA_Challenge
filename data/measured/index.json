@@ -1,0 +1,119 @@
+[
+ {
+  "id": "aletsch",
+  "name": "Aletsch Glacier (Konkordiaplatz)",
+  "lat": 46.5,
+  "lon": 8.03,
+  "radiusKm": 25,
+  "event": null,
+  "file": "aletsch.json"
+ },
+ {
+  "id": "event-eonet-eonet-26057",
+  "name": "Wildfire Wild River, Coos, New Hampshire",
+  "lat": 44.3306,
+  "lon": -71.0313,
+  "radiusKm": 25,
+  "event": 1793577600000.0,
+  "file": "event-eonet-eonet-26057.json"
+ },
+ {
+  "id": "event-eonet-eonet-26260",
+  "name": "Prescribed Fire Cold Springs RX, Wasatch, Utah",
+  "lat": 40.5113,
+  "lon": -110.9435,
+  "radiusKm": 25,
+  "event": 1793664000000.0,
+  "file": "event-eonet-eonet-26260.json"
+ },
+ {
+  "id": "event-gdacs-fl1104253",
+  "name": "Flood in Indonesia",
+  "lat": 4.3685,
+  "lon": 97.0253,
+  "radiusKm": 25,
+  "event": 1792800000000.0,
+  "file": "event-gdacs-fl1104253.json"
+ },
+ {
+  "id": "event-gdacs-fl1104270",
+  "name": "Flood in France",
+  "lat": 43.5439,
+  "lon": 6.9359,
+  "radiusKm": 25,
+  "event": 1793750400000.0,
+  "file": "event-gdacs-fl1104270.json"
+ },
+ {
+  "id": "event-usgs-us6000u3jl",
+  "name": "M 6.3 - 202 km NW of Port-Olry, Vanuatu",
+  "lat": -13.9347,
+  "lon": 165.5746,
+  "radiusKm": 25,
+  "event": 1792454400000.0,
+  "file": "event-usgs-us6000u3jl.json"
+ },
+ {
+  "id": "event-usgs-us6000u43g",
+  "name": "M 7.0 - 189 km ENE of Nagqu, China",
+  "lat": 32.3376,
+  "lon": 93.7837,
+  "radiusKm": 25,
+  "event": 1792627200000.0,
+  "file": "event-usgs-us6000u43g.json"
+ },
+ {
+  "id": "gerd",
+  "name": "Grand Ethiopian Renaissance Dam reservoir",
+  "lat": 11.1,
+  "lon": 35.15,
+  "radiusKm": 25,
+  "event": null,
+  "file": "gerd.json"
+ },
+ {
+  "id": "jakobshavn",
+  "name": "Sermeq Kujalleq (Jakobshavn)",
+  "lat": 69.17,
+  "lon": -49.9,
+  "radiusKm": 25,
+  "event": null,
+  "file": "jakobshavn.json"
+ },
+ {
+  "id": "okavango",
+  "name": "Okavango Delta",
+  "lat": -19.3,
+  "lon": 22.9,
+  "radiusKm": 25,
+  "event": null,
+  "file": "okavango.json"
+ },
+ {
+  "id": "perito-moreno",
+  "name": "Perito Moreno Glacier",
+  "lat": -50.5,
+  "lon": -73.15,
+  "radiusKm": 25,
+  "event": null,
+  "file": "perito-moreno.json"
+ },
+ {
+  "id": "rondonia",
+  "name": "Rond\u00f4nia",
+  "lat": -9.9,
+  "lon": -63.0,
+  "radiusKm": 25,
+  "event": null,
+  "file": "rondonia.json"
+ },
+ {
+  "id": "west-bengal",
+  "name": "Rice fields of Bardhaman",
+  "lat": 23.3,
+  "lon": 87.7,
+  "radiusKm": 25,
+  "event": null,
+  "file": "west-bengal.json"
+ }
+]

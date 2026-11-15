@@ -1,0 +1,77 @@
+{
+  "about": "Written by tools/pick_events.mjs, not by hand: the strongest recent events that NISAR has passed over on one track both before and after. tools/measure.py measures them across the event date. Edit tools/measure_sites.json for places chosen by people.",
+  "sites": [
+    {
+      "id": "event-gdacs-fl1104270",
+      "event_id": "gdacs:FL1104270",
+      "name": "Flood in France",
+      "category": "flood",
+      "kind": "Flood",
+      "lat": 43.5439,
+      "lon": 6.9359,
+      "event": "2026-11-04",
+      "start": "2026-09-20",
+      "picked": "2026-11-15"
+    },
+    {
+      "id": "event-eonet-eonet-26260",
+      "event_id": "eonet:EONET_26260",
+      "name": "Prescribed Fire Cold Springs RX, Wasatch, Utah",
+      "category": "wildfire",
+      "kind": "Wildfire",
+      "lat": 40.5113,
+      "lon": -110.9435,
+      "event": "2026-11-03",
+      "start": "2026-09-19",
+      "picked": "2026-11-15"
+    },
+    {
+      "id": "event-eonet-eonet-26057",
+      "event_id": "eonet:EONET_26057",
+      "name": "Wildfire Wild River, Coos, New Hampshire",
+      "category": "wildfire",
+      "kind": "Wildfire",
+      "lat": 44.3306,
+      "lon": -71.0313,
+      "event": "2026-11-02",
+      "start": "2026-09-18",
+      "picked": "2026-11-15"
+    },
+    {
+      "id": "event-gdacs-fl1104253",
+      "event_id": "gdacs:FL1104253",
+      "name": "Flood in Indonesia",
+      "category": "flood",
+      "kind": "Flood",
+      "lat": 4.3685,
+      "lon": 97.0253,
+      "event": "2026-10-24",
+      "start": "2026-09-09",
+      "picked": "2026-11-15"
+    },
+    {
+      "id": "event-usgs-us6000u43g",
+      "event_id": "usgs:us6000u43g",
+      "name": "M 7.0 - 189 km ENE of Nagqu, China",
+      "category": "earthquake",
+      "kind": "Earthquake",
+      "lat": 32.3376,
+      "lon": 93.7837,
+      "event": "2026-10-22",
+      "start": "2026-09-07",
+      "picked": "2026-11-15"
+    },
+    {
+      "id": "event-usgs-us6000u3jl",
+      "event_id": "usgs:us6000u3jl",
+      "name": "M 6.3 - 202 km NW of Port-Olry, Vanuatu",
+      "category": "earthquake",
+      "kind": "Earthquake",
+      "lat": -13.9347,
+      "lon": 165.5746,
+      "event": "2026-10-20",
+      "start": "2026-09-05",
+      "picked": "2026-11-15"
+    }
+  ]
+}

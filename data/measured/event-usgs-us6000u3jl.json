@@ -1,0 +1,55 @@
+{
+ "id": "event-usgs-us6000u3jl",
+ "name": "M 6.3 - 202 km NW of Port-Olry, Vanuatu",
+ "lat": -13.9347,
+ "lon": 165.5746,
+ "radiusKm": 25,
+ "track": "123-A-171-DHDH",
+ "setup": {
+  "lat": -13.9347,
+  "lon": 165.5746,
+  "seriesRadiusM": 500,
+  "mapRadiusM": 6000,
+  "mapPol": "co"
+ },
+ "event": 1792454400000.0,
+ "pols": [
+  "HH",
+  "HV"
+ ],
+ "series": [
+  {
+   "time": 1789411474000,
+   "hh": -18.7,
+   "hv": -25.27,
+   "pixels": 1957,
+   "file": "NISAR_L2_PR_GCOV_030_123_A_171_2005_DHDH_A_20260914T184434_20260914T184452_P05023_N_P_J_001.h5"
+  },
+  {
+   "time": 1792521874000,
+   "hh": -18.31,
+   "hv": -24.79,
+   "pixels": 1957,
+   "file": "NISAR_L2_PR_GCOV_033_123_A_171_2005_DHDH_A_20261020T184434_20261020T184453_P05023_N_P_J_001.h5"
+  }
+ ],
+ "change": {
+  "before": 1789411474000,
+  "after": 1792521874000,
+  "pol": "HH",
+  "image": "event-usgs-us6000u3jl_change.png",
+  "bounds": {
+   "west": 165.5190670397071,
+   "east": 165.6301329602929,
+   "south": -13.98859867049946,
+   "north": -13.880801329500539
+  },
+  "weakerPct": 0.0,
+  "strongerPct": 0.0,
+  "spansEvent": true
+ },
+ "firstDrop": null,
+ "summary": "Across the event of 2026-10-20: between 2026-09-14 and 2026-10-20, HH backscatter here changed by +0.4 dB and HV by +0.5 dB (mean within 500 m). Across the mapped area, 0% got at least 3 dB weaker and 0% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 2 passes on track 123-A-171-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-10-20, and 'before' the last pass before it.",
+ "generated": "2026-11-15T12:37:34Z"
+}

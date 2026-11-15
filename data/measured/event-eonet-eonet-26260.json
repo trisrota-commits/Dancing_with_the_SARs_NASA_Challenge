@@ -1,0 +1,76 @@
+{
+ "id": "event-eonet-eonet-26260",
+ "name": "Prescribed Fire Cold Springs RX, Wasatch, Utah",
+ "lat": 40.5113,
+ "lon": -110.9435,
+ "radiusKm": 25,
+ "track": "048-A-022-DHDH",
+ "setup": {
+  "lat": 40.5113,
+  "lon": -110.9435,
+  "seriesRadiusM": 500,
+  "mapRadiusM": 6000,
+  "mapPol": "co"
+ },
+ "event": 1793664000000.0,
+ "pols": [
+  "HH",
+  "HV"
+ ],
+ "series": [
+  {
+   "time": 1789993707000,
+   "hh": -4.27,
+   "hv": -11.26,
+   "pixels": 7854,
+   "file": "NISAR_L2_PR_GCOV_031_048_A_022_4005_DHDH_A_20260921T122827_20260921T122902_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1791030507000,
+   "hh": -4.31,
+   "hv": -11.33,
+   "pixels": 7854,
+   "file": "NISAR_L2_PR_GCOV_032_048_A_022_4005_DHDH_A_20261003T122827_20261003T122902_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1792067307000,
+   "hh": -5.42,
+   "hv": -13.17,
+   "pixels": 7854,
+   "file": "NISAR_L2_PR_GCOV_033_048_A_022_4005_DHDH_A_20261015T122827_20261015T122902_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1793104107000,
+   "hh": -4.81,
+   "hv": -11.87,
+   "pixels": 7854,
+   "file": "NISAR_L2_PR_GCOV_034_048_A_022_4005_DHDH_A_20261027T122827_20261027T122902_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1794140908000,
+   "hh": -6.1,
+   "hv": -12.88,
+   "pixels": 7854,
+   "file": "NISAR_L2_PR_GCOV_035_048_A_022_4005_DHDH_A_20261108T122828_20261108T122903_P05036_N_F_J_001.h5"
+  }
+ ],
+ "change": {
+  "before": 1793104107000,
+  "after": 1794140908000,
+  "pol": "HH",
+  "image": "event-eonet-eonet-26260_change.png",
+  "bounds": {
+   "west": -111.01439338380612,
+   "east": -110.87260661619388,
+   "south": 40.457401329500534,
+   "north": 40.56519867049946
+  },
+  "weakerPct": 4.4,
+  "strongerPct": 0.0,
+  "spansEvent": true
+ },
+ "firstDrop": null,
+ "summary": "Across the event of 2026-11-03: between 2026-10-27 and 2026-11-08, HH backscatter here changed by -1.3 dB and HV by -1.0 dB (mean within 500 m). Across the mapped area, 4% got at least 3 dB weaker and 0% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 5 passes on track 048-A-022-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-11-03, and 'before' the last pass before it.",
+ "generated": "2026-11-15T12:34:32Z"
+}

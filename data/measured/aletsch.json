@@ -1,0 +1,118 @@
+{
+ "id": "aletsch",
+ "name": "Aletsch Glacier (Konkordiaplatz)",
+ "lat": 46.5,
+ "lon": 8.03,
+ "radiusKm": 25,
+ "track": "144-A-025-DHDH",
+ "setup": {
+  "lat": 46.5,
+  "lon": 8.03,
+  "seriesRadiusM": 500,
+  "mapRadiusM": 8000,
+  "mapPol": "co"
+ },
+ "event": null,
+ "pols": [
+  "HH",
+  "HV"
+ ],
+ "series": [
+  {
+   "time": 1782274746000,
+   "hh": -11.85,
+   "hv": -17.59,
+   "pixels": 7859,
+   "file": "NISAR_L2_PR_GCOV_023_144_A_025_4005_DHDH_A_20260624T041906_20260624T041942_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1783311546000,
+   "hh": -11.86,
+   "hv": -17.32,
+   "pixels": 7859,
+   "file": "NISAR_L2_PR_GCOV_024_144_A_025_4005_DHDH_A_20260706T041906_20260706T041941_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1784348345000,
+   "hh": -10.96,
+   "hv": -17.36,
+   "pixels": 7859,
+   "file": "NISAR_L2_PR_GCOV_025_144_A_025_4005_DHDH_A_20260718T041905_20260718T041940_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1786421944000,
+   "hh": -11.55,
+   "hv": -17.09,
+   "pixels": 7859,
+   "file": "NISAR_L2_PR_GCOV_027_144_A_025_4005_DHDH_A_20260811T041904_20260811T041939_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1787458740000,
+   "hh": -11.52,
+   "hv": -16.99,
+   "pixels": 7859,
+   "file": "NISAR_L2_PR_GCOV_028_144_A_025_4005_DHDH_A_20260823T041900_20260823T041938_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1788495543000,
+   "hh": -10.95,
+   "hv": -17.01,
+   "pixels": 7859,
+   "file": "NISAR_L2_PR_GCOV_029_144_A_025_4005_DHDH_A_20260904T041903_20260904T041938_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1789532343000,
+   "hh": -11.18,
+   "hv": -17.1,
+   "pixels": 7859,
+   "file": "NISAR_L2_PR_GCOV_030_144_A_025_4005_DHDH_A_20260916T041903_20260916T041938_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1790569140000,
+   "hh": -10.95,
+   "hv": -16.8,
+   "pixels": 7859,
+   "file": "NISAR_L2_PR_GCOV_031_144_A_025_4005_DHDH_A_20260928T041900_20260928T041938_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1791605940000,
+   "hh": -10.89,
+   "hv": -16.83,
+   "pixels": 7859,
+   "file": "NISAR_L2_PR_GCOV_032_144_A_025_4005_DHDH_A_20261010T041900_20261010T041938_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1792642740000,
+   "hh": -11.2,
+   "hv": -17.1,
+   "pixels": 7859,
+   "file": "NISAR_L2_PR_GCOV_033_144_A_025_4005_DHDH_A_20261022T041900_20261022T041938_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1793679541000,
+   "hh": -11.61,
+   "hv": -17.02,
+   "pixels": 7859,
+   "file": "NISAR_L2_PR_GCOV_034_144_A_025_4005_DHDH_A_20261103T041901_20261103T041938_P05036_N_F_J_001.h5"
+  }
+ ],
+ "change": {
+  "before": 1782274746000,
+  "after": 1791605940000,
+  "pol": "HH",
+  "image": "aletsch_change.png",
+  "bounds": {
+   "west": 7.925599017516731,
+   "east": 8.134400982483267,
+   "south": 46.42813510600072,
+   "north": 46.57186489399928
+  },
+  "weakerPct": 2.1,
+  "strongerPct": 18.8,
+  "spansEvent": false
+ },
+ "firstDrop": null,
+ "summary": "Between 2026-06-24 and 2026-10-10, HH backscatter here changed by +1.0 dB and HV by +0.8 dB (mean within 500 m). Across the mapped area, 2% got at least 3 dB weaker and 19% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 11 passes on track 144-A-025-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the pass that differs most from the first in HH.",
+ "generated": "2026-11-15T12:21:04Z"
+}
