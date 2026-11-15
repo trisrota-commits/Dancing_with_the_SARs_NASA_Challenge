@@ -12,7 +12,7 @@ import { edgeMarginKm, latestScenes, scenesAt, passesAt, bestPair, comparisonSta
 import { STORIES } from './stories.js';
 import { PLACES, PLACE_KINDS, otherHemisphere } from './places.js';
 import { loadFrames, spread, view, history, describeSeries, rankByCoverage, sampleAt, channelView } from './timelapse.js';
-import { measuredIndex, measuredSummary, measuredById, measuredNear, measuredHtml, measuredChart, measuredLine, changeImageUrl, forecastFor, forecastHtml, stoodImageUrl } from './measured.js';
+import { measuredIndex, measuredSummary, measuredById, measuredNear, measuredHtml, measuredChart, measuredLine, changeImageUrl, forecastFor, forecastHtml, stoodImageUrl, stoodLine } from './measured.js';
 import { fetchElements, positionAt, groundTrack, swathEdges, elementsEpoch } from './orbit.js';
 import { SPECIES, MONTHS, POIS, loadSightings } from './wildlife.js';
 import { historyChart } from './chart.js';
@@ -305,7 +305,7 @@ function renderCard() {
     <h4>What the agencies report</h4>
     ${body}
     <p class="nisar-line">${esc(nisarLine(inc, sel.found))}</p>
-    ${sel.measured ? `<p class="nisar-line measured-line">${esc(measuredLine(sel.measured, inc.time))}</p>` : ''}
+    ${sel.measured ? `<p class="nisar-line measured-line">${esc(measuredLine(sel.measured, inc.time))}${sel.check && stoodLine(sel.check) ? ` ${esc(stoodLine(sel.check))}` : ''}</p>` : ''}
     <div class="actions">
       <button class="primary" id="card-details">Show details</button>
       ${sel.found && bestPair(sel.found.backscatter, inc.time, true, inc) ? `<button id="card-change" aria-pressed="${stage.owner === 'change'}">${stage.owner === 'change' ? 'Back to the radar picture' : 'Show what changed'}</button>` : ''}
@@ -2046,6 +2046,7 @@ async function showMeasured(stillHere, pending, findCompare) {
   forecastFor(d).then((f) => {
     if (!f || !stillHere() || state.selected?.measured !== d || !$('forecast-slot')) return;
     state.selected.check = f;
+    if (state.selected.kind === 'incident') renderCard();
     $('forecast-slot').innerHTML = `<h4>What stood out here?</h4>${forecastHtml(f)}`;
   });
   // An event's card and text lead with the calibrated value once it is here.

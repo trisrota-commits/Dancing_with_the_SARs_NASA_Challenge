@@ -50,6 +50,15 @@ export function measuredLine(d, eventTime) {
   return `Measured (calibrated): the ${m.co} echo ${moved} between ${day(m.before)} and ${day(m.after)}${m.acrossEvent ? ', the passes on either side of the event' : ''}.`;
 }
 
+// One more line for the event card: how much of the ground stood out on
+// the first pass after the event (tools/forecast.py), with the caveat
+// when that pass cannot be read.
+export function stoodLine(f) {
+  const e = f?.event;
+  if (!e || e.outside == null) return '';
+  return `On NISAR's first pass afterwards (${e.firstPassAfter}), ${Math.round(e.outside * 100)} % of the ground did something other than the ground around it; about 10 % is ordinary.${e.newVersion ? " NASA's processing changed with that pass, so this cannot be put down to the event." : ''}`;
+}
+
 // Measured sites; an empty list when none have been made yet.
 export async function measuredIndex() {
   if (!index) {
