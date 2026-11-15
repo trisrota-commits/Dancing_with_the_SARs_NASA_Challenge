@@ -11,8 +11,8 @@
 //
 // [folder] takes the frames (default: /tmp/demo_gifs). `--assemble` skips the
 // recording and only joins frames already in the folder. Needs Playwright with
-// Chromium (`require('playwright')`) and python3 with Pillow. About four
-// minutes a case in a software renderer.
+// Chromium (`require('playwright')`) and python3 with Pillow. About two
+// minutes a case in a software renderer (longer when the tiles are new).
 //
 // What it does:
 // - Opens the case from the welcome card, closes the reports ticker, then
@@ -187,7 +187,7 @@ async function record(browser, name) {
   await page.close();
 }
 
-// Joins the frames of one case (Pillow). Smaller than 4 MB or it shrinks.
+// Joins the frames of one case (Pillow). Smaller than 4 MB, or it tries again with fewer colours or pixels.
 const ASSEMBLE = `
 import json, os, sys
 from PIL import Image
@@ -198,12 +198,14 @@ firsts = [i for i, r in enumerate(rows) if r['first']]
 hold = set(firsts[:1]) | {len(rows) - 1}
 durations = [2600 if i in hold else 1800 for i in range(len(rows))]
 still = firsts[0] if firsts else len(rows) - 1
-for w, colours in ((width, 256), (width, 128), (960, 128), (960, 64)):
+for w, colours in ((width, 256), (width, 192), (960, 256), (960, 128)):
     pics = []
     for r in rows:
         im = Image.open(os.path.join(folder, r['file'])).convert('RGB')
         pics.append(im.resize((w, round(im.height * w / im.width)), Image.LANCZOS))
-    pal = [p.quantize(colors=colours, method=Image.MEDIANCUT, dither=Image.FLOYDSTEINBERG) for p in pics]
+    # An octree palette: a median cut loses the orange and blue of the cells,
+    # which cover little of the picture, and turns them grey.
+    pal = [p.quantize(colors=colours, method=Image.FASTOCTREE) for p in pics]
     pal[0].save(out + '.gif', save_all=True, append_images=pal[1:], duration=durations, loop=0, optimize=True, disposal=1)
     size = os.path.getsize(out + '.gif')
     if size < 4_000_000: break
