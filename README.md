@@ -481,11 +481,11 @@ requests and issues.
   events) before relying on it.
 - **[MadhuraSaha02](https://github.com/MadhuraSaha02)**. Wrote up which
   data the challenge allows besides NISAR and the plan for the remaining
-  gaps (pull request 6). Contributed the changing places: glaciers
-  worldwide and other slow changes (12), the calibrated measuring tool and
-  its display, more kinds of events and more places (20), and the live
+  gaps. Contributed the changing places: glaciers
+  worldwide and other slow changes, the calibrated measuring tool and
+  its display, more kinds of events and more places, and the live
   NISAR satellite with its orbit, the real star sky and the wildlife
-  sightings (24). Supervised that NISAR's data is used properly
+  sightings. Supervised that NISAR's data is used properly
   throughout the project.
 
 Much of the code was written with an AI assistant under the team's
