@@ -36,6 +36,8 @@ const fs = require('fs');
     for (const img of document.querySelectorAll('img[data-still]')) img.src = img.dataset.still;
   });
   await page.waitForLoadState('networkidle');
+  // Swapped pictures may still be on their way: wait for each, up to 30 s.
+  await page.waitForFunction(() => [...document.images].every((i) => i.complete && i.naturalWidth), null, { timeout: 30000 }).catch(() => {});
   const missing = await page.evaluate(() => [...document.images].filter((i) => !i.complete || !i.naturalWidth).map((i) => i.getAttribute('src')));
   if (missing.length) throw new Error(`pictures missing: ${missing.join(', ')}`);
   const n = await page.locator('.slide').count();

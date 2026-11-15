@@ -18,7 +18,8 @@
 // the web page whatever fonts the reader has. Each animated picture is then
 // laid over the place it has on the page, as the GIF itself. The team's
 // name and members on slide 1 are a real text box, so that they can be
-// changed in PowerPoint or Google Slides without rebuilding anything. The
+// changed in PowerPoint or Google Slides without rebuilding anything, each
+// member on a line of their own. The
 // words of every slide are also in its speaker notes, for search and for
 // screen readers.
 const { chromium } = require('playwright');
@@ -56,7 +57,7 @@ const INCH = 13.333 / W; // LAYOUT_WIDE is 13.333 in by 7.5 in
       const who = s.querySelector('.who');
       return {
         gifs: [...s.querySelectorAll('img[data-still]')].map((img) => ({ ...box(img), src: img.getAttribute('src'), alt: img.alt })),
-        who: who && { ...box(who), team: s.querySelector('#team-name').textContent, members: s.querySelector('#team-members').textContent },
+        who: who && { ...box(who), team: s.querySelector('#team-name').textContent, members: [...s.querySelectorAll('#team-members li')].map((li) => ({ name: li.querySelector('b').textContent, rest: li.textContent.slice(li.querySelector('b').textContent.length) })) },
         words: s.innerText.replace(/\n{2,}/g, '\n').trim(),
         label: s.getAttribute('aria-label'),
       };
@@ -78,15 +79,16 @@ const INCH = 13.333 / W; // LAYOUT_WIDE is 13.333 in by 7.5 in
       slide.addImage({ path: path.join(demo, g.src), x: g.x * INCH, y: g.y * INCH, w: g.w * INCH, h: g.h * INCH, altText: g.alt, objectName: `Animation: ${path.basename(g.src)}` });
     }
     if (s.who) {
-      slide.addText(
-        [
-          { text: 'Team: ', options: { bold: true, color: 'FFFFFF' } },
-          { text: s.who.team, options: { color: 'A9B6C6', breakLine: true } },
-          { text: 'Members: ', options: { bold: true, color: 'FFFFFF' } },
-          { text: s.who.members, options: { color: 'A9B6C6' } },
-        ],
-        { x: s.who.x * INCH, y: s.who.y * INCH, w: 9, h: (s.who.h + 12) * INCH, fontFace: 'Arial', fontSize: 14, lineSpacingMultiple: 1.25, margin: 0, valign: 'top', isTextBox: true, objectName: 'Team and members' },
-      );
+      // The team and each member's part, as text that can be edited.
+      const runs = [
+        { text: 'Team: ', options: { bold: true, color: 'FFFFFF' } },
+        { text: s.who.team, options: { color: 'A9B6C6', breakLine: true } },
+      ];
+      s.who.members.forEach((m, k) => {
+        runs.push({ text: m.name, options: { bold: true, color: 'FFFFFF' } });
+        runs.push({ text: m.rest, options: { color: 'A9B6C6', breakLine: k < s.who.members.length - 1 } });
+      });
+      slide.addText(runs, { x: s.who.x * INCH, y: s.who.y * INCH, w: s.who.w * INCH + 0.3, h: (s.who.h + 12) * INCH, fontFace: 'Arial', fontSize: 13, lineSpacingMultiple: 1.3, margin: 0, valign: 'top', isTextBox: true, objectName: 'Team and members' });
     }
     slide.addNotes(s.words);
   }
