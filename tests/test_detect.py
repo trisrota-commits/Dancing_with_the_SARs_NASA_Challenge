@@ -188,6 +188,28 @@ def test_an_impossible_cell_is_left_out():
     assert D.detect(g)["cells"] == N * N - 1
 
 
+def test_open_water_is_left_out_and_a_window_at_sea_is_not_judged():
+    # The southern third of the window is water: a weak cross-polarised
+    # echo that the wind moves by several dB from pass to pass.
+    rng = np.random.default_rng(11)
+    sea = np.zeros((N, N), dtype=bool)
+    sea[16:, :] = True
+    sea = sea.ravel()
+    g = grid()
+    hh, hv = np.array(g["hh"]), np.array(g["hv"])
+    hh[:, sea] = -18 + rng.normal(0, 3.0, (hh.shape[0], 1)) + rng.normal(0, 0.5, (hh.shape[0], sea.sum()))
+    hv[:, sea] = -27 + rng.normal(0, 3.0, (hv.shape[0], 1)) + rng.normal(0, 0.5, (hv.shape[0], sea.sum()))
+    g["hh"], g["hv"] = hh.tolist(), hv.tolist()
+    d = D.detect(g)
+    assert abs(d["water"] - sea.mean()) < 0.01 and "left out" in d["method"]
+    assert all(r["stood"] < 0.01 for r in d["byDate"]), [r["stood"] for r in d["byDate"]]
+    # All of it water: nothing is said about change.
+    hh[:], hv[:] = -18 + rng.normal(0, 3.0, hh.shape), -27 + rng.normal(0, 3.0, hv.shape)
+    g["hh"], g["hv"] = hh.tolist(), hv.tolist()
+    d = D.detect(g, g["times"][5] - DAY)
+    assert d["byDate"] == [] and d["event"]["openWater"] and d["event"]["stood"] is None and "open water" in d["summary"]
+
+
 def test_too_few_passes_give_nothing():
     assert D.detect(grid(passes=3)) is None
 

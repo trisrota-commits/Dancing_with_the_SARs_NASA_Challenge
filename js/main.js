@@ -1317,15 +1317,15 @@ async function renderMeasuredList() {
     .map((e) => {
       const c = byId.get(e.id);
       const at = e.event != null ? c?.event : c?.most;
-      return { e, stood: at?.stood ?? null, rough: e.event != null && c?.event?.grade === 'pair', when: e.event != null ? c?.event?.firstPassAfter : c?.most?.date };
+      return { e, stood: at?.stood ?? null, rough: e.event != null && c?.event?.grade === 'pair', sea: !!c?.event?.openWater, when: e.event != null ? c?.event?.firstPassAfter : c?.most?.date };
     })
     .sort((a, b) => (b.stood ?? -1) - (a.stood ?? -1));
   if (!rows.length) return;
   state.measuredList = rows;
   $('measured-list').innerHTML = rows
-    .map(({ e, stood, rough, when }, i) => {
-      const label = stood == null ? 'measured' : `${share(stood)} stood out`;
-      const title = stood == null ? 'No pass can be judged yet' : `${e.event != null ? 'First pass after the event' : 'The pass that stood out most'}: ${when}${rough ? '. A rough reading: one pass before the event' : ''}`;
+    .map(({ e, stood, rough, sea, when }, i) => {
+      const label = sea ? 'open water' : stood == null ? 'measured' : `${share(stood)} stood out`;
+      const title = sea ? 'The reported point lies in open water, where the echo follows the wind: not judged' : stood == null ? 'No pass can be judged yet' : `${e.event != null ? 'First pass after the event' : 'The pass that stood out most'}: ${when}${rough ? '. A rough reading: one pass before the event' : ''}`;
       return `<li tabindex="0" role="button" data-n="${i}" class="${stoodOut(stood) && !rough ? 'out' : ''}" title="${esc(title)}"><span>${esc(e.name)}</span><span class="km">${label}</span></li>`;
     })
     .join('');

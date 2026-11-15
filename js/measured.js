@@ -62,6 +62,7 @@ export const stoodOut = (stood) => stood != null && stood >= 0.02;
 // the first pass after the event (tools/detect.py).
 export function stoodLine(f) {
   const e = f?.event;
+  if (e?.openWater) return 'The reported point lies in open water, where the radar echo follows the wind: nothing can be said about change there.';
   if (!e || e.stood == null) return '';
   const rough = e.grade === 'pair' ? ' (a rough reading: one pass before the event)' : e.grade === 'two' ? ' (two passes before the event)' : '';
   return `On NISAR's first pass afterwards (${e.firstPassAfter}), ${share(e.stood)} of the ground stood out from what it had read before${rough}.${stoodOut(e.stood) ? '' : ' That is no more than is flagged when nothing has happened.'}`;
@@ -237,10 +238,12 @@ export function sensitivity() {
 // number is computed by tools/detect.py; the sentences are templates.
 export function detectHtml(f, sens) {
   const e = f.event;
-  const at = e ? f.byDate.find((r) => r.date === e.firstPassAfter) : f.byDate.find((r) => r.time === f.most.time);
+  const at = e ? f.byDate.find((r) => r.date === e.firstPassAfter) : f.byDate.find((r) => r.time === f.most?.time);
   // What the detector flags when nothing has happened, from the test.
   const idle = sens?.groups?.all?.flaggedWithNothingPutIn?.new;
   let head = '';
+  // Nothing judged (a window of open water, say): the detector's own words.
+  if (!f.byDate.length) return `<div class="card measured forecast"><div class="src">Computed from the measurements · detecting change</div><p><strong>${esc(f.summary)}</strong></p></div>`;
   if (e && !at) head = `No pass after the event of ${esc(e.date)} can be judged yet.`;
   else if (at) {
     const lead = e ? `On NISAR's first pass after the event of ${esc(e.date)} (${esc(at.date)})` : `On the pass that stood out most (${esc(at.date)})`;

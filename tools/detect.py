@@ -69,6 +69,11 @@ step against its neighbours' step). Those are test results with changes
 put in by this script; they are written to data/detection/, never to
 data/measured/, and no measurement is altered.
 
+Open water is left out (cells whose cross-polarised echo is usually
+under -24 dB, the threshold NASA's archive uses to colour water): on
+water the echo follows the wind. A window that is nearly all water, as
+around an earthquake's epicentre at sea, is not judged, and says so.
+
 What it cannot tell: what caused a change. And NISAR's data began in
 mid-2026: a baseline of a few passes knows nothing of the season, so a
 crop growing or ground freezing stands out as well.
@@ -111,6 +116,12 @@ MOVED = 2.0  # spreads a channel must move to count as risen or fallen, for the 
 # it from: the score of one channel is normal, of two the root of a
 # chi-square with two degrees of freedom.
 THEORY = {1: 2.576, 2: 3.035}
+# Open water: a cell whose cross-polarised echo is usually under this, in
+# dB. It is the threshold NASA's archive (ASF) uses to colour water in its
+# NISAR pictures. Water is left out: its echo follows the wind from pass to
+# pass, which says nothing about the ground.
+WATER_HV_DB = -24.0
+LAND_NEEDED = 0.25  # share of the window that must be land for it to be judged
 
 
 def relative(x: np.ndarray) -> np.ndarray:
@@ -381,6 +392,25 @@ def detect(grid: dict, event: int | None = None) -> dict | None:
         return None
     made = F.versions(grid.get("files"), len(times))
     before = [i for i, t in enumerate(times) if event is None or t < event]
+    # Open water is left out, judged from the passes before the event (a
+    # flood makes water of land afterwards; that is what is looked for).
+    water = np.zeros(hh.shape[1], dtype=bool)
+    if hv is not None and before:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            water = np.nanmedian(hv[before], axis=0) < WATER_HV_DB
+    had = np.isfinite(hh).any(axis=0)
+    wet = float(water[had].mean()) if had.any() else 0.0
+    hh[:, water] = np.nan
+    if hv is not None:
+        hv[:, water] = np.nan
+    if 1 - wet < LAND_NEEDED:
+        about = f"{'Nearly all' if wet > 0.9 else f'{wet:.0%}'} of the window around this point reads as open water (the cross-polarised echo is under {WATER_HV_DB:.0f} dB there). On water the echo follows the wind from pass to pass, so nothing can be said about change here."
+        return {
+            "id": grid["id"], "name": grid["name"], "track": grid["track"], "cellM": grid["cellM"], "cells": 0, "passes": len(times), "from": F.day(times[0]), "to": F.day(times[-1]),
+            "water": round(wet, 3), "event": None if event is None else {"time": event, "date": F.day(event), "firstPassAfter": None, "stood": None, "openWater": True},
+            "most": None, "picture": None, "byDate": [], "summary": about, "method": "", "limits": "", "generated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        }
     rows, results = [], {}
     for t in range(len(times)):
         base = [i for i in before if i < t][-MAX_BASE:]
@@ -462,6 +492,7 @@ def detect(grid: dict, event: int | None = None) -> dict | None:
         "from": F.day(times[0]),
         "to": F.day(times[-1]),
         "falseAlarm": FALSE_ALARM,
+        "water": round(wet, 3),
         "event": None
         if event is None
         else {"time": event, "date": F.day(event), "firstPassAfter": after and after["date"], "stood": after and after["stood"], "recent": after and after["recent"], "long": after and after["long"], "stillNext": (after or {}).get("stillNext"), "newVersion": (after or {}).get("newVersion"), "baseline": after and after["baseline"], "grade": after and after["grade"]},
@@ -475,7 +506,8 @@ def detect(grid: dict, event: int | None = None) -> dict | None:
             f"NISAR L2 GCOV backscatter in cells of {grid['cellM']:.0f} m. From each pass the middle of all cells is taken away, so that what moved the whole area alike drops out. "
             f"A cell stands out if two keys both turn. Recent: its step from the mean of the {RECENT} latest passes before (at an event: before the event) is beyond the spread such steps had over the area. "
             f"Long: it lies beyond its own usual value and spread over the whole baseline (at most {MAX_BASE} passes). Both in HH and, where recorded, HV. "
-            f"Each threshold is the score that {FALSE_ALARM:.0%} of the cells exceeded when the baseline passes were judged against each other, and a cell counts only if at least {NEIGHBOURS} of its eight neighbours are over it too."
+            f"Each threshold is the score that {FALSE_ALARM:.0%} of the cells exceeded when the baseline passes were judged against each other, and a cell counts only if at least {NEIGHBOURS} of its eight neighbours are over it too. "
+            f"Open water (cells whose cross-polarised echo is usually under {WATER_HV_DB:.0f} dB) is left out{f': {wet:.0%} of this window' if wet >= 0.005 else ''}."
         ),
         "limits": "It says that the ground changed and where, not why. A baseline of a few passes knows nothing of the season: a crop growing or ground freezing stands out as well. Over open water the echo follows the wind from pass to pass. Cells next to each other share speckle and weather, so a cluster is weaker evidence than its size suggests.",
         "generated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -646,12 +678,17 @@ def main() -> None:
             continue
         site = json.loads((OUT_DIR / f"{grid['id']}.json").read_text())
         result["bounds"] = F.window_bounds(site["lat"], site["lon"], grid["radiusM"])
+        if result["picture"] is None and not result["byDate"]:
+            print(f"{result['name']}: {result['summary']}")
+            files[0].write_text(json.dumps(result, indent=1) + "\n")
+            lines.append({k: result.get(k) for k in ("id", "name", "cells", "passes", "event", "most", "water")})
+            continue
         for row in result["byDate"]:
             if "_rgba" in row:
                 (OUT_DIR / row["image"]).write_bytes(F.png(row.pop("_rgba")))
         files[0].write_text(json.dumps(result, indent=1) + "\n")
         print(f"{result['name']}: {result['summary']}")
-        lines.append({k: result[k] for k in ("id", "name", "cells", "passes", "event", "most")})
+        lines.append({k: result.get(k) for k in ("id", "name", "cells", "passes", "event", "most", "water")})
     if not args:
         (OUT_DIR / "detect.json").write_text(json.dumps(lines, indent=1) + "\n")
     print(f"\n{len(lines)} site(s) judged")
