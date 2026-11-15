@@ -1579,7 +1579,14 @@ that appears on a place, or an event nearby, once results exist.
    `.github/workflows/pages.yml` then publishes `main` on every push. The
    address would be
    `https://trisrota-commits.github.io/Dancing_with_the_SARs_NASA_Challenge/`.
-   Not yet switched on; until it is, the job says so and does nothing.
+   Switched on in the evening of 15 November 2026: the site is live at
+   that address and published again on every push to `main` (about half
+   a minute). A domain of the team's own (cloudpiercer.space, at
+   Cloudflare) was bought the same evening and pointed nowhere yet when
+   last checked. If it is to show this site through GitHub Pages: set
+   the DNS records first, and only then enter the domain under Settings
+   → Pages → Custom domain, because from that moment the github.io
+   address redirects to the domain, working or not.
 3. **Submission materials:** project description, a short demo video or
    slides, and the AI-use disclosure (this project was built largely with
    AI; Space Apps normally requires saying so). Check the submission form

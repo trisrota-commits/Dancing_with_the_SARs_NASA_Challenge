@@ -34,26 +34,34 @@ nothing needs a login, a key or an installation.
 
 ## Link to the project
 
-[Team: the GitHub Pages address once hosting is switched on, and the
-repository: https://github.com/trisrota-commits/Dancing_with_the_SARs_NASA_Challenge]
+The app, live (checked 15 November 2026, 18:10 UTC; it is published
+again by itself on every change to the repository):
+https://trisrota-commits.github.io/Dancing_with_the_SARs_NASA_Challenge/
+
+The code and the data:
+https://github.com/trisrota-commits/Dancing_with_the_SARs_NASA_Challenge
+
+[Team: a domain of your own (cloudpiercer.space) can be given as well
+once it opens the same page, but keep the github.io address as the link
+in the form: web filters often block a domain registered days ago, and
+the submission guide warns of exactly that.]
 
 ## Link to the demo
 
-Seven slides, with three animations in them.
+Seven slides, with three animations in them. Live, public, no login,
+the animations playing (arrow keys or the two buttons at the bottom
+right move between slides):
+https://trisrota-commits.github.io/Dancing_with_the_SARs_NASA_Challenge/demo/
 
-[Team: the animations play in a slide show, not in a PDF. Do this once:
-upload `demo/dancing-with-the-sars-slides.pptx` to Google Drive, open it
-with Google Slides, press Share → "Anyone with the link" → Viewer, and
-paste that link here. Open it in a private browser window to check that
-it needs no login and that the pictures on slides 4, 5 and 6 move. Put
-your team's name and your names on slide 1 first; that line is ordinary
-text.]
+[Team: if you would rather give a Google Slides link: upload
+`demo/dancing-with-the-sars-slides.pptx` to Google Drive, open it with
+Google Slides, press Share → "Anyone with the link" → Viewer. Put your
+team's name and your names on slide 1 first; that line is ordinary text.
+Whichever link you give, open it in a private browser window to check
+that it needs no login and that the pictures on slides 4, 5 and 6 move.]
 
-Fallbacks, both public with no login:
-- the same slides as a PDF (stills in place of the animations):
-  https://github.com/trisrota-commits/Dancing_with_the_SARs_NASA_Challenge/blob/main/demo/dancing-with-the-sars-slides.pdf
-- the same slides as a web page, animated, once the site is hosted:
-  `demo/index.html`.
+The same slides as a PDF, with stills in place of the animations:
+https://trisrota-commits.github.io/Dancing_with_the_SARs_NASA_Challenge/demo/dancing-with-the-sars-slides.pdf
 
 ## Project details
 
