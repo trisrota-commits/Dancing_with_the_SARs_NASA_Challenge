@@ -1038,8 +1038,16 @@ the paddy's November value?
 - **Past data for the model** (the lead's question): Bardhaman is
   measured from 29 October 2025 on and three more rice regions are
   added, to see whether a model that has seen a harvest predicts one.
-  The measuring run for it was started at 14:32 UTC; its result is not
-  in this section.
+  Result: NASA has nothing earlier for Bardhaman's track (its 12 passes
+  start on 20 June 2026). Punjab and the Sacramento Valley have a full
+  year (26 and 28 passes from late November 2025), the Mekong 11 passes.
+  Training the same model on those regions' history as well made
+  Bardhaman's predictions worse, not better: RMSE 1.70 dB against 1.62
+  with its own past alone, and 2.38 against 1.92 at the harvest pass. The
+  regions differ too much for a model that only looks three passes back.
+  What would help is a second year at the same place. Not built in.
+  (The point measured for "Punjab plains" lies in a town: its HH is near
+  0 dB all year. It should be moved onto fields.)
 - **`tools/film.js`** films the app frame by frame with a stepped clock;
   its header holds what was learnt. The 30-second demo of the Bardhaman
   case is made with it.
