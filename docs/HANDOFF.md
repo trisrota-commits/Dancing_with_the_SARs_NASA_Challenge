@@ -782,6 +782,38 @@ and there were sand-coloured slivers in the Sahara.
   tile compresses on the page's own thread (at most 12 tiles a frame are
   let go to bound that).
 
+### A dead square at one zoom step (lead's QA, 15 Nov, morning)
+
+The lead found a dark grey square over north-east China that showed for
+one or two zoom steps only (far and close were fine).
+
+- **What it was.** Tile 9/425/182 of 22 October 2026 and its neighbours.
+  NASA's tile service delivers every sound NISAR tile as one kind of PNG
+  (colour type 2: colour, with pure black as the see-through colour). For
+  some days, places and levels it delivers the same tile as another kind
+  (0, 3, 4 or 6), and that file decodes as noise, as solid black, as
+  blank, or as a dark grey square. Measured over that region at level 9,
+  26 days: 563 tiles, 388 of kind 2 and all sound, 175 of other kinds and
+  all damaged. Levels 6 and 7 there: 1,044 tiles, all kind 2.
+- **Why the engine let it through.** It judged tiles by their pixels
+  (`inspect`): noise in the transparency, solid black, grey. The grey
+  rule ignores dark pixels (real dark ground must not count as grey), and
+  this square is dark grey. Pixel rules will always have such a hole.
+- **Root fix.** A tile of a layer marked `colour` is judged by what the
+  file says it is (`pngKind` in `js/engine/tiles.js`, used in
+  `fetchTile`): anything but kind 2 from the tile service, or from the
+  browser's store of earlier visits, is refused and NASA's map service
+  is asked instead, which is sound. This holds at every level, for every
+  day and place. The pixel rules stay as a second net. `tools/mosaic.py`
+  has used the same rule since it was written (`sound`), which is why
+  the far view never showed such squares.
+- Sentinel-1's sound tiles are kind 6 and its blank ones kind 3, so the
+  rule is for NISAR's layer only; Sentinel-1 keeps the pixel rules.
+- **Checked** by zooming in slowly over the spot (1,500 km to 100 km in
+  eight steps): the engine before the fix shows two grey tiles at level
+  9; after it none, with 389 damaged answers replaced from the map
+  service. Unit test: `tests/engine.test.mjs`.
+
 ### Visual rules (lead, 14 Nov, night)
 
 The lead, after one screenshot confused them: no arbitrary colours; one
