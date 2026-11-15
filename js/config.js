@@ -119,7 +119,9 @@ export const ARCHIVE = {
 export const CMR = 'https://cmr.earthdata.nasa.gov/search/granules.json';
 export const NISAR_GCOV = ['NISAR_L2_GCOV_V1', 'NISAR_L2_GCOV_PROVISIONAL_V1', 'NISAR_UR_L2'];
 export const NISAR_GUNW = ['NISAR_L2_GUNW_V1', 'NISAR_L2_GUNW_PROVISIONAL_V1'];
-export const NISAR_LATEST_EVERY_MS = 5 * 60_000;
+// A pass reaches the catalogue hours after it was flown, so a quarter of
+// an hour is often enough to look.
+export const NISAR_LATEST_EVERY_MS = 15 * 60_000;
 // How far before an event to look for a "before" radar scene.
 export const NISAR_LOOKBACK_DAYS = 45;
 

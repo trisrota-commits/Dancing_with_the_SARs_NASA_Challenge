@@ -667,6 +667,34 @@ assemble the pieces itself. It does now, once, ahead of time.
   something better lies under it (`backed`).
 - Tests: `python tests/test_mosaic.py` (the build's arithmetic, offline).
 
+### What an idle page asks for (lead's question, 15 Nov, early morning)
+
+The lead asked whether the regular checks could add up to spam. Counted
+over six idle minutes with the 12-day view: 27 requests, about 270 an
+hour, 120 of them to NASA's map service (one small fingerprint tile per
+day on the globe, every five minutes). That is about what one zoom asks
+for. The mosaic check is one 9 kB file from our own site every ten
+minutes.
+
+- **The real waste was elsewhere.** The list of the newest passes from
+  NASA's catalogue is 10 MB and is not compressed, and the app fetched it
+  whole every five minutes: about 120 MB an hour for a page nobody
+  touches. Now it is fetched whole once; after that only what the
+  catalogue has added since the last look (`updated_since`, with two
+  minutes of overlap) is fetched and merged in (`latestScenes` in
+  `js/nisar.js`, `refreshNisar` in `js/main.js`). NASA adds about 170
+  passes an hour, so that is one to two megabytes a look. The look is
+  every fifteen minutes, not five: a pass reaches the catalogue hours
+  after it was flown. After six hours without a look, the whole list
+  again.
+- **A hidden tab asks for nothing.** Every regular check waits while the
+  page is in a tab nobody is looking at, and runs once when it is seen
+  again (`whileSeen`). The map engine's own checks ride on the drawing
+  loop, which browsers stop in a hidden tab anyway.
+- The only bulk job in the project is `tools/mosaic.py` (about 10,000
+  requests in five minutes). It runs when a person runs it, never in the
+  app.
+
 ### Visual rules (lead, 14 Nov, night)
 
 The lead, after one screenshot confused them: no arbitrary colours; one
