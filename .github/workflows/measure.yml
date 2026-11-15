@@ -54,6 +54,8 @@ jobs:
   measure:
     runs-on: ubuntu-latest
     timeout-minutes: 120
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
     env:
       EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
       EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
@@ -117,6 +119,7 @@ jobs:
           fi
 
       - name: Commit the results
+        id: commit
         if: steps.login.outputs.ready == 'true'
         run: |
           git config user.name "github-actions[bot]"
@@ -128,4 +131,16 @@ jobs:
             git commit -m "Calibrated NISAR measurements, $(date -u +%Y-%m-%d)"
             git pull --rebase --quiet
             git push
+            echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
+
+  # A commit made by a job is not published to the site by itself (see the
+  # top of pages.yml), so the site is published here.
+  publish:
+    needs: measure
+    if: needs.measure.outputs.changed == 'true'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/pages.yml
