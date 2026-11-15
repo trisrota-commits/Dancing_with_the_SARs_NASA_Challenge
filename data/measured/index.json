@@ -18,6 +18,15 @@
   "file": "event-eonet-eonet-26057.json"
  },
  {
+  "id": "event-eonet-eonet-26258",
+  "name": "Wildfire FOOT CREEK, Johnson, Wyoming",
+  "lat": 44.3187,
+  "lon": -106.9326,
+  "radiusKm": 25,
+  "event": 1793836800000.0,
+  "file": "event-eonet-eonet-26258.json"
+ },
+ {
   "id": "event-eonet-eonet-26260",
   "name": "Prescribed Fire Cold Springs RX, Wasatch, Utah",
   "lat": 40.5113,
@@ -25,6 +34,15 @@
   "radiusKm": 25,
   "event": 1793664000000.0,
   "file": "event-eonet-eonet-26260.json"
+ },
+ {
+  "id": "event-gdacs-fl1104220",
+  "name": "Flood in Italy",
+  "lat": 43.4587,
+  "lon": 11.1389,
+  "radiusKm": 25,
+  "event": 1791331200000.0,
+  "file": "event-gdacs-fl1104220.json"
  },
  {
   "id": "event-gdacs-fl1104253",
@@ -43,6 +61,15 @@
   "radiusKm": 25,
   "event": 1793750400000.0,
   "file": "event-gdacs-fl1104270.json"
+ },
+ {
+  "id": "event-usgs-us6000u2y1",
+  "name": "M 5.7 - 47 km WNW of Khuzdar, Pakistan",
+  "lat": 28.0196,
+  "lon": 66.1855,
+  "radiusKm": 25,
+  "event": 1792195200000.0,
+  "file": "event-usgs-us6000u2y1.json"
  },
  {
   "id": "event-usgs-us6000u3jl",
