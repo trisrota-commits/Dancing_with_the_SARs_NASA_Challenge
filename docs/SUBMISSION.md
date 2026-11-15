@@ -364,13 +364,17 @@ in is taken from its pull requests and issues.
   possible for an event, the radar history that loads when an event is
   selected, and the explanations of radar change by kind of event.
   Proposed the countdown to NISAR's next pass and the live reports bar,
-  both of which are in the app.
+  both of which are in the app. The data analysis behind the prediction
+  check is this member's idea and input: to predict NISAR's next pass from the
+  passes before it, and to judge that prediction by its measured error
+  before relying on it.
 - **MadhuraSaha02**. Wrote up which data the challenge allows besides
   NISAR and the plan for the remaining gaps. Contributed the changing
   places (glaciers worldwide and other slow changes), the calibrated
   measuring tool and its display, more kinds of events, and the live
   NISAR satellite with its orbit, the real star sky and the wildlife
-  sightings.
+  sightings. Supervised that NISAR's data is used properly throughout
+  the project.
 
 [Team: replace the GitHub names with the names you want on the project
 page, correct anything above that is not how you see it, and add anyone
