@@ -49,6 +49,7 @@ import math
 import os
 import re
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -537,6 +538,7 @@ def main() -> None:
     ap.add_argument("--event", metavar="YYYY-MM-DD", help="with --point: the change map compares the last pass before this date with the first after it")
     ap.add_argument("--save", action="store_true", help="with --point: also add it to the site list")
     ap.add_argument("--fresh", action="store_true", help="read every pass again instead of keeping earlier values")
+    ap.add_argument("--budget", type=float, metavar="MINUTES", help="start no further site once this many minutes have passed; what is measured by then is kept, the rest waits for the next run")
     ap.add_argument("--start", default=NISAR_START)
     ap.add_argument("--end", default=datetime.now(timezone.utc).strftime("%Y-%m-%d"))
     args = ap.parse_args()
@@ -558,7 +560,14 @@ def main() -> None:
             sites = [s for s in sites if s["id"] in args.sites]
 
     written = 0
-    for site in sites:
+    started = time.monotonic()
+    for number, site in enumerate(sites):
+        # A run that is cut off loses whatever it has not written. So no
+        # new site is begun once the time is up: the next run takes the
+        # rest, and reads no pass again that is already measured.
+        if args.budget and time.monotonic() - started > args.budget * 60:
+            print(f"\n{args.budget:g} minutes are up: {len(sites) - number} site(s) left for the next run")
+            break
         print(f"\n{site['name']} ({site['lat']}, {site['lon']})")
         passes = local_passes(args.local) if args.local else remote_passes(site, site.get("start", args.start), site.get("end", args.end))
         if args.list:
@@ -586,6 +595,9 @@ def main() -> None:
             out.write_text(json.dumps(result, indent=1) + "\n")
             written += 1
             print(f"  → {result['summary']}")
+            # The list the app reads is brought up to date after every
+            # site, so a run that is cut off later leaves a whole result.
+            write_index()
 
     if not args.list:
         write_index()
