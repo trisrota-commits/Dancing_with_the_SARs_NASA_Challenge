@@ -52,6 +52,58 @@ pass over any spot, the real star sky and sunlight.
 </tr>
 </table>
 
+## Take the tour: click the globe
+
+<p align="center">
+  <sub>Recorded from the app. Click the <b>left half</b> of the globe for a flood, the <b>right half</b> for an earthquake.<br>
+  Then click each picture to go one step further.</sub>
+</p>
+
+<p align="center"><a href="#tour-a-flood-in-italy"><img src="docs/img/tour/home-left.gif" width="320" alt="Left half of the globe: click for the flood in Italy"></a><a href="#tour-an-earthquake-in-pakistan"><img src="docs/img/tour/home-right.gif" width="320" alt="Right half of the globe: click for the earthquake in Pakistan"></a></p>
+
+### Tour: a flood in Italy
+
+<details>
+<summary><img src="docs/img/tour/turn-left.gif" width="640" alt="The globe turns to the flood in Italy"><br><sub>▸ Click to zoom in</sub></summary>
+
+<details>
+<summary><img src="docs/img/tour/zoom-left.gif" width="640" alt="The camera zooms in to the measured site"><br><sub>▸ Click to play NISAR's passes</sub></summary>
+
+<img src="docs/img/tour/play-left.gif" width="640" alt="Seven NISAR passes over the site, then the cells that stood out after the flood">
+
+<sub>Seven calibrated NISAR passes, 23 Aug to 3 Nov 2026. Each 500 m cell is compared with its own past.
+After the flood, 11.8% of cells stood out; on a normal date it is 0.2%.
+<a href="#take-the-tour-click-the-globe">↺ Back to the globe</a> · <a href="#tour-an-earthquake-in-pakistan">Earthquake ▸</a></sub>
+
+</details>
+</details>
+
+### Tour: an earthquake in Pakistan
+
+<details>
+<summary><img src="docs/img/tour/turn-right.gif" width="640" alt="The globe turns to the earthquake in Pakistan"><br><sub>▸ Click to see its seismic waves</sub></summary>
+
+<details>
+<summary><img src="docs/img/tour/waves-right.gif" width="640" alt="The two seismic wave fronts spread from the epicentre, as in the app"><br><sub>▸ Click to zoom in</sub></summary>
+
+<sub>The wave fronts are drawn at typical crust speeds (P 6 km/s, S 3.5 km/s), sped up about 6×. They show how the waves travel; they are not measured.</sub>
+
+<details>
+<summary><img src="docs/img/tour/zoom-right.gif" width="640" alt="The camera zooms in to the measured site"><br><sub>▸ Click to play NISAR's passes</sub></summary>
+
+<img src="docs/img/tour/play-right.gif" width="640" alt="Five NISAR passes over the site, then the cells that stood out after the earthquake">
+
+<sub>Five calibrated NISAR passes, 4 Sep to 22 Oct 2026. After the quake, 6.4% of cells stood out; on a normal date it is 0.1%.
+NASA's processing version changed between these passes, so some of that change may come from processing.
+<a href="#take-the-tour-click-the-globe">↺ Back to the globe</a> · <a href="#tour-a-flood-in-italy">Flood ▸</a></sub>
+
+</details>
+</details>
+</details>
+
+<sub>How the tour works: GitHub cannot run the app inside a README, so each step is a short GIF.
+Links and folded sections stand in for the clicks. For the real, free-to-explore globe, see <a href="#run-it">Run it</a>.</sub>
+
 ## What stood out: a flood in Italy
 
 For 16 places and events the app has NISAR's calibrated backscatter, cut
