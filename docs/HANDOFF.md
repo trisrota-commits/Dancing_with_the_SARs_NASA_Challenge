@@ -600,6 +600,53 @@ Three causes in the engine, and one that is NASA's.
   zoom in and out; zooming back to a place already loaded completes in
   2.4 s with 34 requests (first time: 37 s, 353 requests).
 
+### A ready-made mosaic of the whole planet (lead's idea, 15 Nov, early morning)
+
+NASA has no mosaic of NISAR, only the daily layer, so the whole-planet
+view stacked 24 daily layers live: up to 24 pictures per map tile, about
+500 requests for a continent. The lead asked why the engine does not
+assemble the pieces itself. It does now, once, ahead of time.
+
+- **`tools/mosaic.py`** takes each day's tiles (about 10,000 small
+  requests, five and a half minutes, no login), stacks them oldest first
+  so the newest pass ends on top, and writes one tile set to
+  `data/mosaic/`: levels 0 to 5, 1,068 tiles, 10 MB as WebP. It checks
+  every tile the way the engine does and takes damaged ones from NASA's
+  map service (6 of 10,379 in the first build). `about.json` says which
+  days it holds, when it was built, which tiles exist, and carries a
+  fingerprint of every day.
+- **In the app** ("Whole planet" under "Days stacked"): the mosaic is one
+  layer under the daily ones. The daily layers it was made from carry
+  `minLevel` 7 and `backed`: they are neither fetched nor drawn until the
+  view is close enough for them to be sharper than the mosaic, and until
+  their own tile is here the mosaic is their stand-in. Their world
+  pictures are fetched behind everything else (`lazy`).
+- **It must never hide newer data**, and it cannot:
+  - Days after the mosaic's last are drawn live on top, at every distance.
+  - NASA goes on adding passes to a day for up to two weeks. `checkMosaic`
+    (`js/main.js`) compares NASA's fingerprint of each day with the
+    mosaic's, at the start and every ten minutes. From the oldest day
+    that differs onwards, every day is drawn live again
+    (`mosaic.settled`). Every day from there, not only the changed ones,
+    because the newest pass has to end on top.
+  - For a date before the mosaic's last day the mosaic is not used at
+    all: it would show passes not yet flown.
+  - Without `data/mosaic/` the app stacks live, as before.
+- **The debt.** On screen new passes replace old ones at once. The stored
+  mosaic is not rewritten by the browser, so the longer since the build,
+  the more days are live and the slower the far view. Rebuilding pays it
+  off: `python tools/mosaic.py`, then commit `data/mosaic/`. Unchanged
+  tiles come out byte for byte the same, so a rebuild only adds the tiles
+  that changed to the repository.
+- **Measured headless, Europe at 2,500 km:** 72 requests to NASA and 12 s
+  with the mosaic, 494 and 45 s without; and the picture is whole from
+  the first second, where it used to start as a blur. Close up it is as
+  before (NASA's tiles).
+- Engine pieces, all in `js/engine/tiles.js`: a layer may bring a list of
+  its tiles (`has`), a level it starts at (`minLevel`), and say that
+  something better lies under it (`backed`).
+- Tests: `python tests/test_mosaic.py` (the build's arithmetic, offline).
+
 ### Visual rules (lead, 14 Nov, night)
 
 The lead, after one screenshot confused them: no arbitrary colours; one

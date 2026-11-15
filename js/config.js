@@ -139,6 +139,15 @@ const gibsMap = (layer) =>
 // tiles put together.
 const gibsSheet = (layer) => gibsMap(layer).replace('{bbox}', '-20037508.34,-20037508.34,20037508.34,20037508.34').replaceAll('{px}', '1024');
 
+// The whole planet as NISAR sees it, put together ahead of time by
+// tools/mosaic.py from NASA's daily layer: one ready-made tile set in place
+// of up to 24 daily pictures per map tile. `about.json` says which days it
+// holds, when it was built and which tiles exist.
+export const NISAR_MOSAIC = {
+  url: 'data/mosaic/{z}/{x}/{y}.webp',
+  about: 'data/mosaic/about.json',
+};
+
 export const NISAR_TILES = {
   id: 'NISAR_L2_Geocoded_Polarimetric_Covariance',
   url: gibs('NISAR_L2_Geocoded_Polarimetric_Covariance', 'png', 13),

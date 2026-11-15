@@ -5,7 +5,7 @@
 // still showing an older copy.
 const BUILD = '2026-11-15 03:14 UTC';
 
-import { CATEGORIES, FAMILIES, PALETTE, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START, RECENT_MS, OVERLAY_REACH_DAYS } from './config.js';
+import { CATEGORIES, FAMILIES, PALETTE, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START, RECENT_MS, OVERLAY_REACH_DAYS, NISAR_MOSAIC, NISAR_TILES } from './config.js';
 import { fetchFeed, fetchArchive } from './feeds.js';
 import { buildIncidents, tagNisarCoverage, pointInPolygon, distanceKm } from './incidents.js';
 import { edgeMarginKm, latestScenes, scenesAt, passesAt, bestPair, comparisonStatus, imageBounds, latestTileDate, likelyTileDate, historyAt, newestAt, nextPass, interferogramsAt, REPEAT_DAYS } from './nisar.js';
@@ -19,6 +19,7 @@ import { SPECIES, MONTHS, POIS, loadSightings } from './wildlife.js';
 import { historyChart } from './chart.js';
 import { narrate, nisarLine, timeline, SOURCE_NOTES } from './narrative.js';
 import { Globe, loadPicture } from './globe.js';
+import { fingerprint } from './engine/tiles.js';
 import { Replay } from './replay/replay.js';
 import { changeMap, CHANGE_THRESHOLD } from './change.js';
 import { searchEvents, searchPlaces } from './search.js';
@@ -2158,6 +2159,34 @@ function goToPlace(place) {
 
 // ---------- layer controls ----------
 
+// Has NASA added passes to a day since the mosaic was built? It goes on
+// publishing passes for a day for up to two weeks. The mosaic carries a
+// fingerprint of each day it was made from; NASA's current ones are
+// compared with them, and from the oldest day that differs onwards the
+// days are drawn live on top of the mosaic again. So a mosaic that has
+// aged costs speed, never correctness.
+async function checkMosaic() {
+  const about = state.mosaic;
+  if (!about?.days) return;
+  const dates = Object.keys(about.days).sort();
+  const now = await Promise.all(
+    dates.map((date) =>
+      fetch(NISAR_TILES.url.replace('{date}', date).replace('{z}/{y}/{x}', '0/0/0'), { cache: 'no-store' })
+        .then((res) => (res.ok ? res.arrayBuffer() : null))
+        .then((bytes) => (bytes ? `${bytes.byteLength}:${fingerprint(bytes)}` : null))
+        .catch(() => null),
+    ),
+  );
+  // A day that could not be asked about is taken as unchanged: a failed
+  // request must not throw the mosaic away.
+  const changed = dates.find((date, i) => now[i] && now[i] !== about.days[date]);
+  const settled = changed ? day(Date.parse(changed) - DAY) : about.to;
+  if (settled === state.mosaicSettled) return;
+  state.mosaicSettled = settled;
+  globe.setMosaic(about, settled);
+  applyLayers();
+}
+
 // The day a context layer is shown for: the chosen day, or the newest day
 // before it that NASA has published. Several layers run days behind, and
 // asking for a day they do not have returns an error for every tile. One
@@ -2212,7 +2241,15 @@ function applyLayers() {
     });
   }
   $('nisar-tiles-key').hidden = !$('nisar-tiles').checked;
-  $('stack-note').hidden = !($('nisar-tiles').checked && +$('stack').value > 12);
+  const planet = $('nisar-tiles').checked && +$('stack').value > 12;
+  $('stack-note').hidden = !planet;
+  if (planet) {
+    // Says which of the two ways the whole planet is being shown.
+    const m = globe.mosaicFor({ date, days: +$('stack').value });
+    $('stack-note').textContent = m
+      ? `Every place NISAR images, land and ice. From far away this is one picture that this app put together ahead of time from NASA's daily layer for ${m.from} to ${m.to}, the newest pass on top (built ${state.mosaic.built}). Close up, NASA's own tiles are loaded live${m.settled < m.to ? `, and so is every day from ${day(Date.parse(m.settled) + DAY)} on, because NASA has added passes since the picture was made` : ', and so are passes flown since'}.`
+      : "Every place NISAR images, land and ice, from its passes of the last 24 days; the newest pass over each place lies on top. NASA publishes passes up to two weeks late, so the newest days are thin and the last complete round is 12 to 24 days old. It takes longer to load.";
+  }
   // Two wavelengths side by side, for the same days.
   const compared = state.bands;
   state.bands = $('bands').checked;
@@ -2282,6 +2319,18 @@ async function start() {
     .join('');
   globe.setBasemap('esri');
   renderStatus();
+  // The ready-made whole-planet picture, if this copy of the app has one.
+  fetch(NISAR_MOSAIC.about)
+    .then((res) => (res.ok ? res.json() : null))
+    .then((about) => {
+      if (!about) return;
+      state.mosaic = about;
+      globe.setMosaic(about);
+      applyLayers();
+      checkMosaic();
+      setInterval(checkMosaic, 10 * 60_000);
+    })
+    .catch(() => {});
 
   $('basemap').onchange = (e) => {
     $('basemap-note').hidden = true;
