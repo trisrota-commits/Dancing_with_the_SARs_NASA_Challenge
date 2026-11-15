@@ -2212,6 +2212,7 @@ function applyLayers() {
     });
   }
   $('nisar-tiles-key').hidden = !$('nisar-tiles').checked;
+  $('stack-note').hidden = !($('nisar-tiles').checked && +$('stack').value > 12);
   // Two wavelengths side by side, for the same days.
   const compared = state.bands;
   state.bands = $('bands').checked;

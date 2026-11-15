@@ -110,6 +110,8 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
 - A **"Since NISAR data began"** time window loads larger events back to
   17 June 2026, so older events have radar passes on both sides.
 - Drapes daily NISAR backscatter and other satellite layers over the terrain.
+  Stacked over 24 days it is **the whole planet as NISAR sees it**: every
+  place it images, land and ice, with the newest pass on top.
 - One search box for events (fuzzy match, no keyword list) and places.
 - **What the agencies report** per event, on its card: depth, estimated
   impact, felt reports, burnt hectares, alert level, each with its source

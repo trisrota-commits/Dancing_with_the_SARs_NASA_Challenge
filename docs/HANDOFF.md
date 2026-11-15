@@ -532,6 +532,35 @@ windows, a long session, share links opened cold.
 Tests: 30 unit tests (5 new, four of them in `tests/events.test.mjs`), smoke test, and
 the zoom-and-drag over Colorado (111 damaged tiles, 111 replaced).
 
+### The whole planet as NISAR sees it (lead's idea, 15 Nov, night)
+
+The lead asked whether there are enough pictures in total to cover the
+planet. Measured on NASA's whole-world pictures of the last 120 days,
+newest on top: 12 days cover 25 % of the map picture, 24 days cover
+59.9 %, and 120 days cover 60.2 %. So the map is complete after 24 days
+and nothing is gained after that. Twelve days are strips because NASA
+publishes passes up to two weeks late: the newest days are thin, and the
+last complete round is 12 to 24 days old.
+
+- "Days stacked" has a fifth choice, **24 days, whole planet**, with a
+  note beside it saying what it is and that it loads longer. The default
+  stays 12 days.
+- **Hidden days are not fetched** (`drawLayers`, `exactOf`, `full` in
+  `js/engine/tiles.js`). Over most land several passes lie on top of each
+  other. A tile that is here and solid from edge to edge hides every
+  earlier day, so those are neither drawn nor asked for, and what the
+  tile had asked of them is let go. NASA's radar tiles count pure black
+  as see-through, which leaves scattered single holes in nearly every
+  tile, so "solid" means 99.5 % (`FULL_SHARE`). Within a stack the newest
+  day is fetched first (`age`).
+- While 24 days are shown the day and night shading eases back, as it
+  does under a radar picture: the radar works at night.
+- Measured headless, Alps at 150 km: 24 days needed 236 requests and
+  30 MB without the rule, 118 requests and 14 MB with it (12 days: 80
+  requests, 10 MB). The far view takes 6 s against 3 s, a continent at
+  2,500 km 45 s against 18 s: at that distance few tiles are solid, so
+  the rule helps little there.
+
 ### Visual rules (lead, 14 Nov, night)
 
 The lead, after one screenshot confused them: no arbitrary colours; one

@@ -67,9 +67,11 @@ repository: https://github.com/trisrota-commits/Dancing_with_the_SARs_NASA_Chall
   would miss.
 - **Two wavelengths side by side.** NISAR's L-band on the left of a
   divider, Sentinel-1's C-band on the right, for the same days.
-- **The whole 12-day cycle on the globe.** NASA's daily NISAR map layer
-  is on from the start, stacked over the mission's full repeat cycle,
-  with NASA's own colour description beside it.
+- **The whole planet as NISAR sees it.** NASA's daily NISAR map layer is
+  on from the start, stacked over the mission's 12-day repeat cycle, with
+  NASA's own colour description beside it. One switch stacks 24 days,
+  which covers every place NISAR images, land and ice, with the newest
+  pass on top.
 - **NISAR itself, live.** The satellite's real position, its orbit, the
   edges of its radar swath, and an estimate of its next pass over any
   event, labelled as computed.
