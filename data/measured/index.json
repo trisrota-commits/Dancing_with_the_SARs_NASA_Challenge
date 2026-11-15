@@ -83,8 +83,8 @@
  {
   "id": "gerd",
   "name": "Grand Ethiopian Renaissance Dam reservoir",
-  "lat": 11.1,
-  "lon": 35.15,
+  "lat": 11.0618,
+  "lon": 35.2072,
   "radiusKm": 25,
   "event": null,
   "file": "gerd.json"
