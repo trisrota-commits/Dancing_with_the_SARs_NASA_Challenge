@@ -307,7 +307,7 @@ requests and issues.
   worldwide and other slow changes (12), the calibrated measuring tool and
   its display, more kinds of events and more places (20), and the live
   NISAR satellite with its orbit, the real star sky and the wildlife
-  sightings (24). Researched the past winners of the challenge.
+  sightings (24).
 
 Much of the code was written with an AI assistant under the team's
 direction; `docs/SUBMISSION.md` says how.
