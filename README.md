@@ -447,6 +447,7 @@ app in headless Chromium against the live services.
 - `js/sky.js`, `js/stars-data.js` – the real star sky, the Sun and the
   shooting stars
 - `js/wildlife.js` – GBIF sightings by month, and the ocean landmarks
+- `data/wildlife/sightings.json` – the sightings, fetched once from GBIF by `tools/wildlife_snapshot.mjs`
 - `vendor/satellite.es.js` – satellite.js 5.0 (MIT), the SGP4 orbit model
 - `vendor/three.module.min.js` – three.js r170 (MIT), bundled so the engine
   has no CDN dependency

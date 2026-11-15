@@ -85,7 +85,40 @@ export const SPECIES = [
 
 export const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-async function fetchMonth(species, month) {
+// GBIF refuses requests that come too fast (answer 429, "too many API
+// requests have been detected from your client"). Measured from a browser
+// on 15 November 2026: five requests one after another were answered, the
+// sixth and the twenty after it refused, and on the live site about 100
+// of this layer's 108 requests were refused: it showed a tenth of its
+// records without saying so.
+//
+// So the app does not ask GBIF 108 times in every visitor's browser. The
+// same 108 requests are made once, slowly, by tools/wildlife_snapshot.mjs,
+// and their answers are kept in data/wildlife/sightings.json with the day
+// they were fetched. The records are from 2010 to 2025, so a kept copy
+// loses nothing; each record still links to its page at GBIF. Only when
+// that file is missing does the app ask GBIF itself, slowly, and it says
+// so when requests stayed unanswered.
+const SNAPSHOT = 'data/wildlife/sightings.json';
+const TRIES = 3;
+let quietUntil = 0;
+const sleep = (ms) => new Promise((done) => setTimeout(done, ms));
+
+async function ask(url) {
+  for (let n = 0; ; n++) {
+    const wait = quietUntil - Date.now();
+    if (wait > 0) await sleep(wait + Math.random() * 400);
+    const res = await fetch(url);
+    if (res.ok) return res;
+    const busy = res.status === 429 || res.status === 503;
+    if (!busy || n + 1 >= TRIES) throw new Error(`GBIF answered ${res.status}`);
+    // Everything waits together: 3 seconds, then 6.
+    quietUntil = Math.max(quietUntil, Date.now() + 3000 * 2 ** n);
+  }
+}
+
+// The request for one species in one month of the year.
+export function monthUrl(species, month) {
   const q = new URLSearchParams({
     scientificName: species.sci,
     hasCoordinate: 'true',
@@ -95,9 +128,11 @@ async function fetchMonth(species, month) {
     month: String(month),
     limit: String(PER_MONTH),
   });
-  const res = await fetch(`${API}?${q}`);
-  if (!res.ok) throw new Error(`GBIF answered ${res.status}`);
-  const json = await res.json();
+  return `${API}?${q}`;
+}
+
+// What the app keeps of GBIF's answer to that request.
+export function monthRecords(species, month, json) {
   return (json.results || [])
     .filter((r) => Number.isFinite(r.decimalLatitude) && Number.isFinite(r.decimalLongitude))
     .map((r) => ({
@@ -115,9 +150,45 @@ async function fetchMonth(species, month) {
     }));
 }
 
-// All sightings for all species, loaded a few requests at a time.
-// onProgress(done, total) reports progress.
+// Drops exact duplicates (the same spot and date from several datasets).
+export function withoutDoubles(list) {
+  const seen = new Set();
+  return list.filter((s) => {
+    const key = `${s.species}:${s.lat.toFixed(2)}:${s.lon.toFixed(2)}:${s.date}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+export const REQUESTS = SPECIES.length * 12;
+
+// The kept copy; null when there is none.
+async function kept() {
+  try {
+    const res = await fetch(SNAPSHOT);
+    if (!res.ok) return null;
+    const file = await res.json();
+    if (!Array.isArray(file.sightings) || !file.sightings.length) return null;
+    const by = new Map(SPECIES.map((s) => [s.id, s]));
+    const list = file.sightings.filter((s) => by.has(s.species)).map((s) => ({ ...s, common: by.get(s.species).common, sci: by.get(s.species).sci }));
+    list.fetched = file.fetched;
+    list.missed = 0;
+    list.asked = REQUESTS;
+    return list;
+  } catch {
+    return null;
+  }
+}
+
+// All sightings for all species: from the kept copy, or else from GBIF, a
+// few requests at a time. onProgress(done, total) reports progress. The
+// list that comes back carries `fetched` (the day of the kept copy, or
+// nothing when it is fresh from GBIF) and `missed`: how many of the
+// requests got no answer in the end.
 export async function loadSightings(onProgress) {
+  const copy = await kept();
+  if (copy) return copy;
   const jobs = [];
   for (const species of SPECIES) for (let m = 1; m <= 12; m++) jobs.push([species, m]);
   const out = [];
@@ -127,23 +198,19 @@ export async function loadSightings(onProgress) {
     while (jobs.length) {
       const [species, m] = jobs.shift();
       try {
-        out.push(...(await fetchMonth(species, m)));
+        out.push(...monthRecords(species, m, await (await ask(monthUrl(species, m))).json()));
       } catch {
         failed++;
       }
-      onProgress?.(++done, SPECIES.length * 12);
+      onProgress?.(++done, REQUESTS);
     }
   };
-  await Promise.all(Array.from({ length: 6 }, worker));
+  await Promise.all(Array.from({ length: 2 }, worker));
   if (!out.length && failed) throw new Error('GBIF could not be reached');
-  // Drop exact duplicates (the same spot and date from several datasets).
-  const seen = new Set();
-  return out.filter((s) => {
-    const key = `${s.species}:${s.lat.toFixed(2)}:${s.lon.toFixed(2)}:${s.date}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+  const list = withoutDoubles(out);
+  list.missed = failed;
+  list.asked = REQUESTS;
+  return list;
 }
 
 // Points of interest, purely for exploring: not NISAR data and not events.

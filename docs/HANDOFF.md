@@ -1381,6 +1381,24 @@ not something that was reproduced: either the 3D button followed by
 zooming out, or a drag that the trackpad reported as a right-drag. Both
 ways are closed. Checked in Chromium by script, not on a Mac.
 
+## Wildlife sightings come from a kept copy (15 November 2026, evening)
+
+Found while looking at the new animal figurines on the live site: GBIF
+answered about 100 of the layer's 108 requests with 429 ("too many API
+requests have been detected from your client"), and the layer showed 155
+of some 2,100 records without saying so. Measured from a browser: five
+requests one after another were answered, the next twenty refused.
+
+The 108 requests are now made once by `tools/wildlife_snapshot.mjs`
+(one after another, with a pause; nothing is written unless all are
+answered) and kept in `data/wildlife/sightings.json` with the day they
+were fetched. The app reads that file and shows the day beside the count.
+The records are from 2010 to 2025, so the copy loses nothing; every
+record still links to its page at GBIF, which names dataset and licence.
+If the file is missing the app asks GBIF itself, two requests at a time
+with waits, and says how many requests stayed unanswered. To refresh the
+copy: `node tools/wildlife_snapshot.mjs`.
+
 ## How to run and test
 
 - No build step. Serve the folder and open it: `start.command` (macOS),
