@@ -2,22 +2,22 @@
  {
   "id": "aletsch",
   "name": "Aletsch Glacier (Konkordiaplatz)",
-  "cells": 1021,
+  "cells": 1020,
   "passes": 11,
   "best": "last",
   "last": {
    "rmse": 0.88,
    "mae": 0.58,
    "within90": 1.24,
-   "r2": 0.938,
+   "r2": 0.934,
    "spearman": 0.967,
    "skill": 0.0
   },
   "line": {
    "rmse": 1.52,
    "mae": 0.96,
-   "within90": 2.06,
-   "r2": 0.816,
+   "within90": 2.05,
+   "r2": 0.804,
    "spearman": 0.912,
    "skill": -1.983
   },
@@ -25,15 +25,15 @@
    "rmse": 0.84,
    "mae": 0.55,
    "within90": 1.17,
-   "r2": 0.944,
-   "spearman": 0.971,
+   "r2": 0.941,
+   "spearman": 0.97,
    "skill": 0.095
   },
   "mean": {
    "rmse": 1.0,
    "mae": 0.74,
    "within90": 1.61,
-   "r2": 0.92,
+   "r2": 0.915,
    "spearman": 0.955,
    "skill": -0.291
   },
@@ -41,48 +41,17 @@
    "rmse": 1.0,
    "mae": 0.67,
    "within90": 1.43,
-   "r2": 0.921,
-   "spearman": 0.96,
+   "r2": 0.915,
+   "spearman": 0.959,
    "skill": -0.288
   },
   "learnt": {
    "rmse": 0.89,
    "mae": 0.65,
    "within90": 1.38,
-   "r2": 0.937,
+   "r2": 0.933,
    "spearman": 0.964,
-   "skill": -0.024
-  }
- },
- {
-  "id": "event-eonet-eonet-26258",
-  "name": "Wildfire FOOT CREEK, Johnson, Wyoming",
-  "cells": 517,
-  "passes": 5,
-  "best": "last",
-  "last": {
-   "rmse": 4.39,
-   "mae": 1.22,
-   "within90": 1.71,
-   "r2": 0.995,
-   "spearman": 0.975,
-   "skill": 0.0
-  },
-  "line": {
-   "rmse": 6.35,
-   "mae": 2.27,
-   "within90": 2.39,
-   "r2": 0.99,
-   "spearman": 0.94,
-   "skill": -1.09
-  },
-  "peers": {
-   "rmse": 4.36,
-   "mae": 0.74,
-   "within90": 0.81,
-   "r2": 0.995,
-   "spearman": 0.996,
-   "skill": 0.014
+   "skill": -0.022
   }
  },
  {

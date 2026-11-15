@@ -18,15 +18,6 @@
   "file": "event-eonet-eonet-26057.json"
  },
  {
-  "id": "event-eonet-eonet-26258",
-  "name": "Wildfire FOOT CREEK, Johnson, Wyoming",
-  "lat": 44.3187,
-  "lon": -106.9326,
-  "radiusKm": 25,
-  "event": 1793836800000.0,
-  "file": "event-eonet-eonet-26258.json"
- },
- {
   "id": "event-eonet-eonet-26260",
   "name": "Prescribed Fire Cold Springs RX, Wasatch, Utah",
   "lat": 40.5113,

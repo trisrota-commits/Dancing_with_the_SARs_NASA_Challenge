@@ -108,12 +108,12 @@ def main() -> None:
         # and such a value in an earlier result is not carried on.
         make_file(tmp, "20260901T053000", -135.0)
         guarded = measure.measure(site, measure.local_passes(tmp))
-        assert guarded and all(-50 <= s["hh"] <= 20 for s in guarded["series"]), guarded["series"]
+        assert guarded and all(-40 <= s["hh"] <= 20 for s in guarded["series"]), guarded["series"]
         assert not any("20260901" in s["file"] for s in guarded["series"]), guarded["series"]
         tainted = {**guarded, "series": guarded["series"] + [{"time": 1, "hh": -135.0, "hv": -144.0, "pixels": 9, "file": "x.h5"}]}
         carried = measure.measure(site, measure.local_passes(tmp), tainted)
-        assert all(-50 <= s["hh"] <= 20 for s in carried["series"]), carried["series"]
-        assert measure.plausible(-25.0) and not measure.plausible(-135.38) and not measure.plausible(None)
+        assert all(-40 <= s["hh"] <= 20 for s in carried["series"]), carried["series"]
+        assert measure.plausible(-25.0) and not measure.plausible(-135.38) and not measure.plausible(-43.79) and not measure.plausible(None)
 
         # With --grid the window is also written cell by cell.
         measure.GRID_M = 500

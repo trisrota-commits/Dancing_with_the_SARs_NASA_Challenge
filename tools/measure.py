@@ -240,10 +240,15 @@ def read_window(f, lat: float, lon: float, radius_m: float) -> dict | None:
 # lies near -25 dB and the brightest city blocks stay under +10 dB, so a
 # mean outside these generous bounds is not a reading of the ground. The
 # first run on real files (15 November 2026) gave -135 dB for every pass
-# over Perito Moreno, with a believable difference between the channels:
-# the values in those files are scaled differently, for a reason not yet
-# found. Such a pass is left out and said so; it is never written.
-PLAUSIBLE_DB = (-50.0, 20.0)
+# over Perito Moreno, and at a fire in Wyoming a band across the window
+# read -145 dB while the point itself read -43 to -48 dB, pass after pass
+# in the same cells. Those files hold a strip with next to no signal
+# where the ground should be; why is not established (NISAR's radar
+# cannot listen while it transmits, which leaves such strips, but that
+# is our guess). The lower bound is therefore 15 dB under the noise, not
+# lower: the first bound of -50 let the Wyoming point through. Such a
+# pass is left out and said so; it is never written.
+PLAUSIBLE_DB = (-40.0, 20.0)
 
 
 def plausible(db) -> bool:
@@ -268,7 +273,8 @@ GRID_M = None
 def cell_means_db(win: dict, pol: str, radius_m: float, cell_m: float):
     """Mean backscatter of each square cell of the window, averaged in
     linear power, in dB: rows from north to south, columns from west to
-    east. A cell with less than half its pixels valid is NaN."""
+    east. A cell with less than half its pixels valid, or with a mean no
+    radar could measure, is NaN."""
     band = win.get(pol)
     if band is None:
         return None
@@ -286,6 +292,9 @@ def cell_means_db(win: dict, pol: str, radius_m: float, cell_m: float):
     with np.errstate(divide="ignore", invalid="ignore"):
         out = to_db(sums / counts)
     out[(total == 0) | (counts < 0.5 * total)] = np.nan
+    # A cell outside what can be measured is no reading (see PLAUSIBLE_DB).
+    with np.errstate(invalid="ignore"):
+        out[(out < PLAUSIBLE_DB[0]) | (out > PLAUSIBLE_DB[1])] = np.nan
     return out
 
 

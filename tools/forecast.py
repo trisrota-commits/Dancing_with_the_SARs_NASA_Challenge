@@ -79,6 +79,7 @@ FIRST = LAGS + 1  # the first pass predicted: there must be history to learn fro
 MIN_PASSES = 8  # fewer passes than this are too little history to test a prediction on
 MIN_SHORT = 5  # with this many, the comparison with the neighbours can still be made
 QUIET = 0.9  # "the expected range": what this share of cells stayed within on the passes before
+PLAUSIBLE_DB = (-40.0, 20.0)  # as in tools/measure.py: outside this, no reading of the ground
 STRONG_DB = 3.0  # "a strong change": half or double the echo's power
 RIDGE = 1.0
 DAY = 86_400_000
@@ -248,6 +249,15 @@ def forecast(grid: dict, event: int | None = None) -> dict | None:
     times = grid["times"]
     hh = np.array(grid["hh"], dtype=float)
     hv = np.array(grid["hv"], dtype=float) if grid.get("hv") else None
+    # A cell that ever read a value no radar could measure is left out
+    # whole: its other passes come from the same faulty strip of the file.
+    with np.errstate(invalid="ignore"):
+        faulty = ((hh < PLAUSIBLE_DB[0]) | (hh > PLAUSIBLE_DB[1])).any(axis=0)
+        if hv is not None:
+            faulty |= ((hv < PLAUSIBLE_DB[0]) | (hv > PLAUSIBLE_DB[1])).any(axis=0)
+    hh[:, faulty] = np.nan
+    if hv is not None:
+        hv[:, faulty] = np.nan
     if len(times) < MIN_SHORT:
         return None
     short = len(times) < MIN_PASSES
