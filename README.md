@@ -264,8 +264,10 @@ app in headless Chromium against the live services.
 - `tools/smoke.js` – browser smoke test against the live services
 - `tools/film.js` – films the app frame by frame (the 30-second demo); its
   header says how, and what was learnt making it
-- `tools/forecast.py` – tests how well NISAR's next pass over a measured
-  place can be predicted, against simple baselines
+- `tools/forecast.py` – for every measured place, sets each pass against
+  what was expected (from the place's own past and from its neighbours
+  in the same pass) and says how much of the ground stood out; the
+  expectation is scored against simple baselines
 - `tools/change.py` – the planet-wide change picture: each pass against
   the same pass 48 days earlier, into `data/change/`
 - `docs/HANDOFF.md` – where the project stands and how to continue it

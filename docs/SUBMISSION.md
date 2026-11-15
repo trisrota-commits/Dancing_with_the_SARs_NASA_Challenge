@@ -6,7 +6,7 @@ form. Lines in [square brackets] are for the team to fill in or decide;
 everything else can be pasted as it is.
 
 Everything stated here was checked against the code and the commit
-history on 14 November 2026. If the app changes, change the text.
+history on 15 November 2026. If the app changes, change the text.
 
 ---
 
@@ -17,18 +17,20 @@ Dancing with the SARs: a live globe of Earth's changing surface, seen by NISAR
 ## High-level summary
 
 Radar satellites see the ground through cloud, smoke and darkness, but a
-radar picture means little to most people. Our app opens on the whole
-planet as NASA's NISAR radar sees it and lets anyone follow one place
-through time. Our lead case is the rice bowl of West Bengal. From
-NISAR's calibrated data the app shows the fields of Bardhaman flooded in
-July, the rice standing tall by October and the harvest in November,
-measured in decibels over twelve passes. It then tests how well each
-next pass could have been predicted from the ones before, and shows how
-far off that prediction was. The same globe carries the earthquakes,
-fires, floods and storms the world's agencies report as they happen,
-with NISAR's passes before and after each and what changed between
-them. Every number is computed from the data, every source is one click
-away, and nothing needs a login, a key or an installation.
+radar picture means little to most people, and after a flood, an
+earthquake or a failed harvest the question is a simple one: where did
+the ground change? Our app opens on the whole planet as NASA's NISAR
+radar sees it and follows the radar echo of a place through time: what
+it normally reads, and where it did something else. At a flood in Italy
+in October 2026, NISAR's calibrated data show 31 % of the ground doing
+something other than the ground around it on the first pass afterwards,
+where about 10 % is ordinary. Over the rice fields of Bardhaman in West
+Bengal the same measurements follow one crop from flooded paddies in
+July to standing rice in October and the harvest in November. The globe
+carries the earthquakes, fires, floods and storms the world's agencies
+report as they happen, with NISAR's passes before and after each. Every
+number is computed from the data, every source is one click away, and
+nothing needs a login, a key or an installation.
 
 ## Link to the project
 
@@ -92,51 +94,68 @@ repository: https://github.com/trisrota-commits/Dancing_with_the_SARs_NASA_Chall
   brightness of NASA's picture, not a calibrated measurement, and the
   app says so; checked against our calibrated measurements at six
   places, the direction agrees at five.
-- **A prediction, with its error.** For every place measured through
-  eight passes or more, the app tests how well the next pass could have
-  been predicted from the passes before it, in cells of 500 m, and shows
-  the error: RMSE, MAE, an error margin, R² and Spearman, and accuracy,
-  precision, recall and F1 for "a strong change by the next pass". Over
-  the rice fields of Bardhaman a small model that has learnt how the
-  fields moved beats "the same as last time" (RMSE 1.62 against 1.95 dB)
-  and follows the growing crop to within 0.3 dB on the area's average.
-  It misses the harvest by 1.7 dB: it had never seen one. It is set
-  against four baselines (the same as last time, the mean so far, a line
-  through the last two passes, a least-squares trend) and beats the best
-  of them here; asked whether a field's echo will go down, stay or go
-  up, it is right 57 % of the time, against 44 % for always naming the
-  commonest answer. Where little
-  changes (a delta, a reservoir, glaciers, forest) nothing beats "the
-  same as last time", which is off by about half a decibel. So the app
-  does not claim to foretell. It uses the prediction to tell a change
-  from the ordinary: at the harvest pass 16 % of the cells fell outside
-  the range they had kept to, against 0 to 4 % on the five passes before.
-  The idea is not new: NASA's OPERA DIST-ALERT-S1 product does this for
-  Sentinel-1, with a baseline from three years of passes. Ours applies
-  the same logic to NISAR as a prototype with a few months of history;
-  we found no such product for NISAR.
+- **What stood out, measured.** For 16 places and events the app has
+  NISAR's calibrated backscatter in decibels, read by our own tool from
+  the full data files. In cells of 500 m it sets every pass against
+  what was expected of it, in two ways: from the cell's own earlier
+  passes, and from what the cells around it did in the same pass. Rain
+  or a season moves every cell alike and drops out of the second
+  comparison; what is left is ground that went its own way. The share
+  of cells outside the range nine in ten had kept to is the result:
+  about 10 % is ordinary. At a flood in Italy it was 31 % on the first
+  pass after the flood was reported, then 2 % and 18 % on the two
+  passes after that. A list in the menu shows every measured place by
+  this share.
+- **The expectation is tested, not assumed.** How well the next pass
+  can be predicted is scored against four baselines (the same as last
+  time, the mean so far, a line through the last two passes, a
+  least-squares trend) with RMSE, MAE, an error margin, R² and Spearman,
+  and with accuracy, precision, recall and F1 for "will the echo go
+  down, stay or go up". Over the rice fields of Bardhaman a small model
+  that has learnt how the fields moved beats the best baseline (RMSE
+  1.62 against 1.79 dB); the comparison with the neighbours is closer
+  still (1.28 dB), and at all but one of the places tested. Where little
+  changes, nothing beats "the same as last time". So the app does not
+  claim to foretell: it uses the expectation to tell a change from the
+  ordinary.
+- **What it cannot claim.** NISAR's data began in mid-2026: no place has
+  been seen through the same season twice, and events have five to
+  seven passes. Of the five events tested, two have a first pass
+  afterwards that can be read cleanly: the flood in Italy stood out
+  (31 %), a prescribed fire in Utah did not (4 %). At the other three
+  that pass is also the first made with a new version of NASA's
+  processing, which by itself shifted the values at 12 of our 15 places
+  (by 0.4 dB in the middle); the app marks such passes and does not put
+  them down to the event. It says that something changed and where, not
+  what caused it.
+- **Not a new idea, a new instrument.** NASA's OPERA DIST-ALERT-S1
+  product does this for Sentinel-1, with a baseline from three years of
+  passes. Ours applies the same logic to NISAR as a prototype with a few
+  months of history; we found no such product for NISAR.
 - **NISAR itself, live.** The satellite's real position, its orbit, the
   edges of its radar swath, and an estimate of its next pass over any
   event, labelled as computed.
 
 ### Who it is for
 
-**First: people who need to know when and where a crop was planted and
-harvested**, without waiting for a field survey or a cloud-free day. That
-is a farm adviser deciding where to send people this week, and a
-food-security planner who has to estimate a district's harvest before it
-is reported. Our lead case is the rice bowl of West Bengal, the fields of
-Bardhaman: the app shows NISAR's calibrated measurements there through a
-whole monsoon crop, from flooded paddies in July to standing rice in
-October and the harvest in November, what the next pass was expected to
-read, and how many fields did something else.
+**First: people who respond to disasters and shortages**: a relief
+organisation or a civil-protection office that has to decide, a few
+days after a flood or an earthquake, where to send people first. Radar
+sees through the cloud and smoke that hide such places from cameras, and
+NISAR passes every place on land every 12 days. The app shows the
+events the world's agencies report, NISAR's passes before and after
+each, and, where it has been measured, how much of the ground did
+something other than the ground around it.
+
+**Also: people who need to know how a crop is doing** without waiting
+for a field survey or a cloud-free day: a farm adviser, a food-security
+planner. A flooded paddy and a lost harvest are disasters too, and the
+rice bowl of West Bengal is where we show that the method reads real
+ground: the fields of Bardhaman through a whole monsoon crop, from
+flooded paddies in July to standing rice in October and the harvest in
+November.
 [Team: one sentence on your own connection to West Bengal and to
 farming, if you want it in. The challenge text invites it.]
-
-**Also: people who respond to disasters.** The same globe carries the
-floods, fires, storms and earthquakes the world's agencies report as they
-happen, with NISAR's passes before and after each. Radar sees through the
-cloud and smoke that hide such places from cameras.
 
 **And anyone learning to read radar.** The app uses plain words, folds
 detail away until it is asked for, and explains every mark it draws in a
@@ -186,15 +205,19 @@ journalist can open it alone and understand it.
   backscatter in dB over time and between two passes. A scheduled job on
   GitHub runs it twice a day for the strongest recent events and a list
   of places. Its first run on real NISAR products, on 15 November 2026,
-  measured twelve places and events from 2 to 12 passes each. The clearest
+  measured its first places and events; 16 are in the app now, from 2 to
+  28 passes each. The clearest
   result is the rice fields of Bardhaman in West Bengal: over one crop
   season the HH echo fell to -10.9 dB when the paddies were flooded in
   July, rose to -3.7 dB by mid-October as the rice stood tall, and fell
   again in November with the harvest; 66 % of the mapped area got at
   least 3 dB stronger between June and October. The place's text in the
   app, written before the data existed, says to expect exactly this. A
-  thirteenth site (Perito Moreno) gave values that cannot be backscatter
-  (-135 dB); the tool now refuses such values, and that site is not shown.
+  site (Perito Moreno) gave values that cannot be backscatter (-135 dB),
+  and at a fire in Wyoming a band across the window read -145 dB on
+  every pass; the tool refuses anything under the radar's own noise, and
+  neither is shown. Why NASA's files hold such strips is not
+  established.
 - 38 unit tests and a browser test against the live services guard the
   rules above.
 
@@ -207,9 +230,10 @@ Playwright for tests; GitHub Actions and GitHub Pages.
 
 ### What we would do next
 
-Run the calibrated measurements on real products and show them beside
-the preview-based change view; add NISAR's soil-moisture and
-pixel-offset products; translate the texts.
+Measure every reported event automatically and keep a longer history,
+so that "ordinary" rests on a year of passes and not on five; check the
+flags against what was mapped on the ground; add NISAR's soil-moisture
+and pixel-offset products; translate the texts.
 
 ## How we made it
 
