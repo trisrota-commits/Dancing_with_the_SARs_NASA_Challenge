@@ -250,7 +250,7 @@ def day(ms: int) -> str:
 
 
 WEAKER, STRONGER = (0x40, 0xAA, 0xFF), (0xFF, 0xAA, 0x3C)  # the app's blue and orange
-STOOD_PIXELS = 8  # pixels a cell in the picture
+STOOD_PIXELS = 16  # pixels a cell in the picture
 
 
 def stood_rgba(residual: np.ndarray, expected: float, n: int) -> np.ndarray:

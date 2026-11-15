@@ -936,7 +936,7 @@ function setLegend(kind, info = {}) {
     html = `<b>What stood out · ${esc(st.date)}</b>
       <p>Cells of ${info.f.cellM} m that read differently on this NISAR pass from their own past, from NISAR's calibrated data.</p>
       <ul>${row(PALETTE.stronger, "Orange: the echo rose against the cell's own past") + row(PALETTE.weaker, 'Blue: it fell')}</ul>
-      <small>The past is the passes from ${esc(st.baselineFrom)} to ${esc(st.baselineTo)}. What moved the whole area alike (rain, a season) is taken away first. ${share(st.stood)} of the cells are coloured; on those earlier passes the same rules flag ${share(st.quiet)}. A cell counts only with flagged neighbours. It shows where something changed, not what caused it. Placed to within about half a cell.</small>`;
+      <small>The past is the passes from ${esc(st.baselineFrom)} to ${esc(st.baselineTo)}. What moved the whole area alike (rain, a season) is taken away first. ${share(st.stood)} of the cells are coloured; on those earlier passes the same rules flag ${share(st.quiet)}. A cell counts only with flagged neighbours. It shows where something changed, not what caused it. Each square is one cell of the measurement, placed to within about half a cell; the satellite map underneath (Esri) is there to show what ground it is, and is not from the same day.</small>`;
   } else if (kind === 'measured') {
     const c = info.d.change;
     html = `<b>Measured change · ${day(c.before)} to ${day(c.after)}</b>
@@ -1009,6 +1009,7 @@ function take(owner) {
   if (replay.timeline) replay.report();
   setLegend(null);
   globe.clearScenes();
+  globe.showGround(false);
   // The divider stays up, where it is, while the two radar wavelengths
   // are being compared.
   if (state.bands) showBandSplit(false);
@@ -2084,7 +2085,9 @@ async function showStoodMap(button) {
   try {
     const picture = await loadPicture(stoodImageUrl(f));
     if (token !== stage.token) return;
-    globe.addPicture(picture, f.picture.bounds, undefined, 0.9);
+    // On the satellite map, so that it shows what ground the cells lie on.
+    globe.showGround(true);
+    globe.addPicture(picture, f.picture.bounds, undefined, 1);
     globe.flyToBounds(f.picture.bounds);
     setLegend('stood', { f });
     button.textContent = 'Shown on the globe';

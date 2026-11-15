@@ -178,16 +178,28 @@ def judge(hh: np.ndarray, hv: np.ndarray | None, base: list[int], t: int, n: int
     return {"valid": valid, "over": over, "kept": kept, "lead": lead, "threshold": threshold, "quietRaw": quiet_raw, "quiet": quiet_kept, "channels": len(use), "baseline": len(base)}
 
 
+EDGE = 2  # pixels of a cell's outline in the picture
+INSIDE = 105  # how solid a cell is inside its outline, of 255: the map shows through
+
+
 def stood_rgba(kept: np.ndarray, lead: np.ndarray, n: int) -> np.ndarray:
     """The flagged cells as a picture, north at the top: orange where the
     echo rose against the cell's usual value, blue where it fell (by the
-    channel that moved most). Everything else is see-through."""
-    out = np.zeros((n, n, 4), dtype=np.uint8)
+    channel that moved most). A cell is drawn as an outline with a light
+    fill, so that the map under it can still be read; everything else is
+    see-through."""
+    px = F.STOOD_PIXELS
+    out = np.zeros((n * px, n * px, 4), dtype=np.uint8)
     k, z = kept.reshape(n, n), lead.reshape(n, n)
+    # Within one cell: solid along its edge, light inside.
+    inside = np.zeros((px, px), dtype=bool)
+    inside[EDGE : px - EDGE, EDGE : px - EDGE] = True
+    alpha = np.where(np.tile(inside, (n, n)), INSIDE, 245).astype(np.uint8)
     for mask, colour in ((k & (z > 0), F.STRONGER), (k & (z < 0), F.WEAKER)):
-        out[mask, :3] = colour
-        out[mask, 3] = 235
-    return out.repeat(F.STOOD_PIXELS, axis=0).repeat(F.STOOD_PIXELS, axis=1)
+        big = mask.repeat(px, axis=0).repeat(px, axis=1)
+        out[big, :3] = colour
+        out[big, 3] = alpha[big]
+    return out
 
 
 def read(grid: dict) -> tuple[np.ndarray, np.ndarray | None]:

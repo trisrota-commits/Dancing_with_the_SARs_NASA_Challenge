@@ -133,6 +133,8 @@ def test_the_picture_marks_rise_and_fall():
     px = D.F.STOOD_PIXELS
     assert tuple(img[0, 0, :3]) == D.F.STRONGER and tuple(img[0, px, :3]) == D.F.WEAKER
     assert img[0, 2 * px, 3] == 0 and img.shape == (N * px, N * px, 4)
+    # An outline with a light fill: the map shows through the middle of a cell.
+    assert img[0, 0, 3] > 200 and img[px // 2, px // 2, 3] == D.INSIDE
 
 
 def test_the_sensitivity_test_counts_what_was_put_in():
