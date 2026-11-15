@@ -40,7 +40,7 @@
       <details open id="measured-menu" hidden>
         <summary>Measured by NISAR <span id="measured-count" class="count"></span></summary>
         <ul id="measured-list" class="links"></ul>
-        <p class="hint">Places and events read from NISAR's calibrated data, in decibels. The share is how much of the ground stood out from what it had read before: at an event on the first pass after it, elsewhere on the pass that stood out most. Highlighted from 2 % on; with nothing happening the rules flag under 1 %.</p>
+        <p class="hint">Places and events read from NISAR's calibrated data, in decibels. The share is how much of the ground stood out from what it had read before: at an event on the first pass after it, elsewhere on the pass that stood out most. Highlighted from 2 % on; with nothing happening the rules flag under 1 %. An earthquake seldom changes how the ground reflects radar: its mark is ground movement, which the event's own card shows where NISAR has measured it.</p>
       </details>
 
       <details open>
@@ -222,7 +222,7 @@
 
     <div id="welcome" role="dialog" aria-labelledby="welcome-title" hidden>
       <h2 id="welcome-title">Earth's surface never holds still.</h2>
-      <p>Every 12 days the NISAR radar satellite images the planet's land and ice again, through cloud and at night. This globe follows the radar echo of a place through time: what it normally reads, and where it did something else, at a flood, an earthquake or a harvest.</p>
+      <p>Every 12 days the NISAR radar satellite images the planet's land and ice again, through cloud and at night. This globe shows what a place normally reads on radar, and where the ground did something else.</p>
       <!-- The lead cases, measured from NISAR's calibrated data. The
            sentence is filled in from the measured files; without them the
            box stays hidden. -->
@@ -246,12 +246,6 @@
         <button id="welcome-story">Start with a story</button>
         <button id="welcome-close">Explore the globe</button>
       </div>
-      <ol>
-        <li><b>Pick</b> a measured place from the <b>☰ Menu</b> at the top left, or click a dot on the globe.</li>
-        <li><b>Drag</b> the timeline that appears at the bottom to go back in time.</li>
-        <li><b>Read</b> the key that comes with each radar picture: it says what the colours mean.</li>
-      </ol>
-      <p class="hint">Anywhere else on land, click the ground to see NISAR's passes there. Right-drag, or drag with two fingers, to tilt the view.</p>
     </div>
 
     <footer id="credits">Imagery: Esri, Maxar, Earthstar Geographics · NASA GIBS · NISAR: NASA/ISRO, ASF DAAC · Elevation: Mapzen Terrain Tiles · Places: Photon, OpenStreetMap</footer>

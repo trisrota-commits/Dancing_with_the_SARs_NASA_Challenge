@@ -3,7 +3,7 @@
 // Which version of the app this is. `tools/pack.sh` sets it; it shows at the
 // end of the credits line, so nobody has to wonder whether the browser is
 // still showing an older copy.
-const BUILD = '2026-11-15 17:34 UTC';
+const BUILD = '2026-11-15 18:00 UTC';
 
 import { CATEGORIES, FAMILIES, PALETTE, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START, RECENT_MS, OVERLAY_REACH_DAYS, NISAR_MOSAIC, NISAR_CHANGE, PREVIEW_STRETCH } from './config.js';
 import { fetchFeed, fetchArchive } from './feeds.js';
@@ -933,7 +933,7 @@ function setLegend(kind, info = {}) {
       <small>Tight bands around one place are ground movement. Broad bands are mostly the atmosphere. Speckle means the passes did not match, as over water.</small>`;
   } else if (kind === 'stood') {
     const { f, row: r } = info;
-    const how = r.grade === 'both' ? `had left both what the place read on its two latest passes and their own usual reading over ${r.history} passes` : r.baseline === 1 ? 'stood out against the pass before (a rough reading)' : 'stood out against the two passes before';
+    const how = r.grade === 'both' ? `read differently both from the two passes just before and from their own history over ${r.history} passes` : r.baseline === 1 ? 'stood out against the pass before (a rough reading)' : 'stood out against the two passes before';
     html = `<b>What stood out · ${esc(r.date)}</b>
       <p>${share(r.stood)} of the cells of ${f.cellM} m ${how}. From NISAR's calibrated data.</p>
       <ul>${row(PALETTE.stronger, 'Orange: the echo rose against what was usual') + row(PALETTE.weaker, 'Blue: it fell')}</ul>
@@ -1273,7 +1273,7 @@ function renderSpotlight() {
   $('spotlight-title').innerHTML = `${dot(incident.category)}${esc(CATEGORIES[incident.category].label)}: ${esc(incident.title)}`;
   // No day count here: this only knows NISAR's newest passes, and the
   // event's own card searches the whole archive and may find an earlier one.
-  $('spotlight-text').textContent = `It began ${ago(incident.time)}. NISAR has flown over it since, so there is a radar picture from after it.`;
+  $('spotlight-text').textContent = `It began ${ago(incident.time)}. NISAR has flown over it since.`;
 }
 
 // The two lead cases on the opening card. Both are measured sites; the
@@ -1295,7 +1295,7 @@ async function renderProof() {
     const hh = crop.series.filter((p) => p.hh != null);
     const low = hh.reduce((a, b) => (b.hh < a.hh ? b : a));
     const high = hh.reduce((a, b) => (b.hh > a.hh ? b : a));
-    parts.push(`Over the rice fields of Bardhaman the echo ran from ${low.hh.toFixed(1)} dB (${day(low.time)}) to ${high.hh.toFixed(1)} dB (${day(high.time)}) through one crop, over ${hh.length} passes.`);
+    parts.push(`Over the rice fields of Bardhaman the echo ran from ${low.hh.toFixed(1)} to ${high.hh.toFixed(1)} dB through one crop.`);
   }
   $('proof-flood').hidden = found == null;
   $('proof-crop').hidden = parts.length === (found == null ? 0 : 1);
@@ -2069,6 +2069,9 @@ async function showMeasuredMap(button) {
   try {
     const picture = await loadPicture(changeImageUrl(d));
     if (token !== stage.token) return;
+    // On the satellite map, as for the cells that stood out: NASA's own
+    // radar colours under an orange and blue picture cannot be told from it.
+    globe.showGround(true);
     globe.addPicture(picture, d.change.bounds, undefined, 0.95);
     globe.flyToBounds(d.change.bounds);
     setLegend('measured', { d });
@@ -2081,17 +2084,21 @@ async function showMeasuredMap(button) {
 // The cells that did something other than their neighbours, on the globe.
 async function showStoodMap(button, index) {
   const f = state.selected?.check;
-  if (!f?.picture) return;
+  if (!f?.picture) return null;
   // The pass asked for, or the one the card is about.
   const row = index != null ? f.byDate[index] : f.byDate.find((r) => r.time === f.picture.time);
-  if (!row) return;
-  const token = take('measured');
+  if (!row) return null;
+  // The first pass shown takes the globe; the next ones only change places
+  // with it, so that the key and the buttons do not flicker between passes.
+  const held = stage.owner === 'measured' && stood.token === stage.token;
+  const token = held ? stage.token : take('measured');
+  stood.token = token;
   if (button) button.textContent = 'Loading…';
-  const base = f.byDate.slice(0, f.byDate.indexOf(row));
   try {
     // A pass on which nothing stood out has no picture: the map alone says so.
     const picture = row.image ? await loadPicture(stoodImageUrl(row)) : null;
-    if (token !== stage.token) return;
+    if (token !== stage.token) return null;
+    if (held) globe.clearScenes();
     // On the satellite map, so that it shows what ground the cells lie on.
     globe.showGround(true);
     if (picture) globe.addPicture(picture, f.bounds, undefined, 1);
@@ -2106,19 +2113,25 @@ async function showStoodMap(button, index) {
 }
 
 // Plays the passes of the place one after another on the globe: the
-// detection as a time series. It stops when anything else takes the globe.
-const stood = { playing: false };
+// detection as a time series, ending on the pass the card is about. It
+// stops when the reader picks something else.
+const stood = { playing: false, token: null, run: 0 };
 async function playStood(button) {
   const f = state.selected?.check;
   if (!f?.picture || stood.playing) return;
-  globe.flyToBounds(f.bounds);
+  const run = ++stood.run;
+  const about = f.byDate.findIndex((r) => r.time === f.picture.time);
+  const order = [...f.byDate.keys(), ...(about >= 0 && about !== f.byDate.length - 1 ? [about] : [])];
   stood.playing = true;
   button.textContent = 'Playing…';
   try {
-    for (let i = 0; i < f.byDate.length; i++) {
-      const token = await showStoodMap(null, i);
-      await new Promise((r) => setTimeout(r, 1500));
-      if (token !== stage.token || state.selected?.check !== f) return;
+    await showStoodMap(null, order[0]);
+    globe.flyToBounds(f.bounds);
+    for (const [n, i] of order.entries()) {
+      if (n && !(await showStoodMap(null, i))) return;
+      await new Promise((r) => setTimeout(r, n ? 1600 : 2600));
+      // Something else took the globe, or the reader moved on.
+      if (run !== stood.run || state.selected?.check !== f || stage.owner !== 'measured' || stood.token !== stage.token) return;
     }
   } finally {
     stood.playing = false;
@@ -2910,7 +2923,7 @@ async function start() {
 }
 
 // Handy in the browser console while developing.
-window.app = { state, globe, replay, build: BUILD };
+window.app = { state, globe, replay, stage, build: BUILD };
 $('credits').append(` · Version ${BUILD}`);
 
 start();

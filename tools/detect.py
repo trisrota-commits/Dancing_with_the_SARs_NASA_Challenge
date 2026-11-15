@@ -473,7 +473,7 @@ def detect(grid: dict, event: int | None = None) -> dict | None:
 
     def told(r: dict) -> str:
         if r["grade"] == "both":
-            return f"{pct(r['stood'])} of the cells stood out: they had left both what the place read on its two latest passes and their own usual reading over {r['history']} passes."
+            return f"{pct(r['stood'])} of the cells stood out: they read differently both from the two passes just before and from their own history over {r['history']} passes."
         against = "the pass before" if r["baseline"] == 1 else f"the {r['baseline']} passes before"
         return f"{pct(r['stood'])} of the cells stood out against {against}."
 
@@ -509,8 +509,8 @@ def detect(grid: dict, event: int | None = None) -> dict | None:
         "summary": summary,
         "method": (
             f"NISAR L2 GCOV backscatter in cells of {grid['cellM']:.0f} m. From each pass the middle of all cells is taken away, so that what moved the whole area alike drops out. "
-            f"A cell stands out if two keys both turn. Recent: its step from the mean of the {RECENT} latest passes before (at an event: before the event) is beyond the spread such steps had over the area. "
-            f"Long: it lies beyond its own usual value and spread over the whole baseline (at most {MAX_BASE} passes). Both in HH and, where recorded, HV. "
+            f"A cell stands out if two checks agree. One: its step from the mean of the {RECENT} latest passes before (at an event: before the event) is beyond the spread such steps had over the area. "
+            f"Two: it lies beyond its own usual value and spread over the whole baseline (at most {MAX_BASE} passes). Both in HH and, where recorded, HV. "
             f"Each threshold is the score that {FALSE_ALARM:.0%} of the cells exceeded when the baseline passes were judged against each other, and a cell counts only if at least {NEIGHBOURS} of its eight neighbours are over it too. "
             f"Open water (cells whose cross-polarised echo is usually under {WATER_HV_DB:.0f} dB) is left out{f': {wet:.0%} of this window' if wet >= 0.005 else ''}."
         ),
