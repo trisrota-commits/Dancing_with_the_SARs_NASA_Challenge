@@ -1224,6 +1224,39 @@ Two findings about NASA's data, both handled at the root:
   picture (rainforest 5 to 7 units), which compares September (old
   version) with late October and November (mostly new).
 
+**Can it be done for the whole planet? Tried; the answer is no, not
+from the picture.** The calibrated comparison needs NISAR's full data
+file for every place, which is out of reach for the planet. Its rough
+counterpart was built from the planet-wide change picture
+(`tools/change.py --standout DIR`): from each pixel's 48-day change the
+median change of the 270 km around it is taken away (same pair of days
+only), and what is left beyond three robust spreads is coloured. It
+removes what whole regions did, as intended (Siberia's median goes from
+-15.9 to +0.1 units, the central Amazon's from -6.6 to +0.2). What is
+left is uneven seasonal change, wind on water and strip edges, not
+events. Checked once, with the threshold fixed beforehand, against
+events reported between the two passes: 507 wildfires are more coloured
+than a random covered point 57 times in 100 (50 is chance), 51 floods 51
+times, 15 earthquakes 34 times; around the flood in Italy it colours
+nothing. A pixel of 5 km in a picture that is not in decibels cannot
+see what calibrated cells of 500 m see. The layer is therefore **not in
+the app** and its tiles are not in the repository; the code, the test
+and the result (`CHECKED_STANDOUT`) are. `main()` with `--standout` was
+not run end to end after the change (the tiles were written by calling
+`write_standout()` on arrays from the same steps); the plain run is
+unchanged (651 of 682 rebuilt change tiles were byte-identical, the
+rest lie where NASA had published new passes). Also: the `checked` text
+in `data/change/about.json` was added by hand and a rerun drops it.
+
+The interface follows the direction: the opening card offers the
+measured cases first; the menu runs measured, events, radar, then "More
+context"; a panel opens on "What stood out here?" with a button that
+draws the cells on the globe (`<site>_stood.png`, written by
+`tools/forecast.py`, placed to within about half a cell); the small
+event card carries the share. Seven demo slides are in `demo/`
+(`tools/slides.js` prints them to PDF; their pictures are screenshots
+of the app and must be retaken when it changes).
+
 PR 78 (MadhuraSaha02, why preview brightness is relative) is merged,
 with three corrections after checking NASA's sources: the previews are
 not shown to be converted to dB, the stretch limits are "not stored in
