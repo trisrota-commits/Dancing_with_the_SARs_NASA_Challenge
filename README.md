@@ -21,8 +21,9 @@
 </p>
 
 <p align="center">
-  <img src="docs/img/globe-spin.gif" alt="The globe turning, covered in NISAR's radar picture of the planet, with diamonds marking measured places" width="560"><br>
-  <sub>The app's globe wearing NISAR's own picture of the planet (NASA GIBS, 27 Sep – 13 Nov 2026).
+  <img src="docs/img/globe-quake.gif" alt="The globe makes one full turn, slows over Pakistan, dives into a magnitude 5.7 earthquake and shows its two seismic wave fronts spreading, then rises back out" width="560"><br>
+  <sub>Recorded from the app: the globe wearing NISAR's own picture of the planet, then the M 5.7 earthquake in Pakistan (17 Oct 2026, USGS).
+  The wave fronts are drawn at typical crust speeds, sped up about 6×; they are illustrated, not measured.
   Diamonds mark places measured with calibrated NISAR data.</sub>
 </p>
 
@@ -51,58 +52,6 @@ pass over any spot, the real star sky and sunlight.
 </td>
 </tr>
 </table>
-
-## Take the tour: click the globe
-
-<p align="center">
-  <sub>Recorded from the app. Click the <b>left half</b> of the globe for a flood, the <b>right half</b> for an earthquake.<br>
-  Then click each picture to go one step further.</sub>
-</p>
-
-<p align="center"><a href="#tour-a-flood-in-italy"><img src="docs/img/tour/home-left.gif" width="320" alt="Left half of the globe: click for the flood in Italy"></a><a href="#tour-an-earthquake-in-pakistan"><img src="docs/img/tour/home-right.gif" width="320" alt="Right half of the globe: click for the earthquake in Pakistan"></a></p>
-
-### Tour: a flood in Italy
-
-<details>
-<summary><a name="tour-flood-turn"><img src="docs/img/tour/turn-left.gif" width="640" alt="The globe turns to the flood in Italy"></a><br><sub>▸ Click to zoom in</sub></summary>
-
-<details>
-<summary><a name="tour-flood-zoom"><img src="docs/img/tour/zoom-left.gif" width="640" alt="The camera zooms in to the measured site"></a><br><sub>▸ Click to play NISAR's passes</sub></summary>
-
-<img src="docs/img/tour/play-left.gif" width="640" alt="Seven NISAR passes over the site, with the cells that stood out drawn after the flood">
-
-<sub>Seven calibrated NISAR passes, 23 Aug to 3 Nov 2026, in 500 m cells. Nothing stood out before the flood,
-3.5% of cells three days after it, 2.8% a pass later and nothing after that.
-<a href="#take-the-tour-click-the-globe">↺ Back to the globe</a> · <a href="#tour-an-earthquake-in-pakistan">Earthquake ▸</a></sub>
-
-</details>
-</details>
-
-### Tour: an earthquake in Pakistan
-
-<details>
-<summary><a name="tour-quake-turn"><img src="docs/img/tour/turn-right.gif" width="640" alt="The globe turns to the earthquake in Pakistan"></a><br><sub>▸ Click to see its seismic waves</sub></summary>
-
-<details>
-<summary><a name="tour-quake-waves"><img src="docs/img/tour/waves-right.gif" width="640" alt="The two seismic wave fronts spread from the epicentre, as in the app"></a><br><sub>▸ Click to zoom in</sub></summary>
-
-<sub>The wave fronts are drawn at typical crust speeds (P 6 km/s, S 3.5 km/s), sped up about 6×. They show how the waves travel; they are not measured.</sub>
-
-<details>
-<summary><a name="tour-quake-zoom"><img src="docs/img/tour/zoom-right.gif" width="640" alt="The camera zooms in to the measured site"></a><br><sub>▸ Click to play NISAR's passes</sub></summary>
-
-<img src="docs/img/tour/play-right.gif" width="640" alt="Five NISAR passes over the site, with the few cells that stood out after the earthquake">
-
-<sub>Five calibrated NISAR passes, 4 Sep to 22 Oct 2026. After the quake, 0.9% of cells stood out, all where the echo fell.
-That is small, like most earthquakes measured so far. NASA's processing version also changed on that pass.
-<a href="#take-the-tour-click-the-globe">↺ Back to the globe</a> · <a href="#tour-a-flood-in-italy">Flood ▸</a></sub>
-
-</details>
-</details>
-</details>
-
-<sub>How the tour works: GitHub cannot run the app inside a README, so each step is a short GIF.
-Links and folded sections stand in for the clicks. For the real, free-to-explore globe, see <a href="#run-it">Run it</a>.</sub>
 
 ## What stood out: a flood in Italy
 
