@@ -632,33 +632,32 @@ assemble the pieces itself. It does now, once, ahead of time.
   - For a date before the mosaic's last day the mosaic is not used: it
     would show passes not yet flown.
   - Without `data/mosaic/` the app stacks live, as before.
-  - What it cannot hold is a pass NASA publishes late for a day it
-    already covers. NASA does that for two weeks and more: half an hour
-    after the first build it added one to 31 October. `checkMosaic`
-    (`js/main.js`) compares NASA's fingerprint of each day with the one
-    the mosaic was built from (stable: five requests for each of the 24
-    days agreed), and the menu says how many days have been added to
-    since. Those passes show close up at once and join the far view at
-    the next build.
-  - Two stricter rules were built and dropped the same night. "From the
-    oldest changed day on, draw every day live" switched 13 days to live
-    for one late pass, so the mosaic was hardly used. "Strict only when
-    the mosaic is older than 36 hours" made a nightly rebuild a
-    requirement, and brought the blurred stand-ins back whenever it was
-    missed.
+  - Where the newest pass is not in it, it shows the one before. NASA
+    publishes passes late for two weeks and more (half an hour after the
+    first build it added one to 31 October), so some such place always
+    exists. Close up the late pass is there at once; in the far view it
+    is there after the next build. Nothing is done about it in between,
+    and nothing needs to be.
+  - A page left open for days looks every ten minutes whether a newer
+    mosaic has been put online and takes it (`refreshMosaic`). The
+    build's time is part of each tile's address, so the new tiles are
+    fetched and the old ones let go.
+  - Three stricter schemes were built and dropped the same night: from
+    the oldest changed day on, draw every day live (one late pass
+    switched 13 days to live, so the mosaic was hardly used); strict
+    only once the mosaic is older than 36 hours (made a nightly rebuild a
+    requirement and brought the blurred stand-ins back when it was
+    missed); and counting the late passes in the menu (noise: the far
+    view showing the pass before is not an error). `about.json` still
+    carries a fingerprint of each day, unused by the app.
 - **Rebuilding** is `python tools/mosaic.py`, then commit `data/mosaic/`:
-  five minutes, no login. It builds afresh and never patches the mosaic
-  in place, so the newest pass ends on top without bookkeeping and the
-  tiles are compressed once. An unchanged tile comes out byte for byte
-  the same, so only changed tiles add to the repository. A build with
-  under 80 % of the tiles of the mosaic in place (NASA's services
-  failing) is refused. The build's time is part of each tile's address,
-  so a browser never shows tiles kept from an earlier build.
-  - A rebuild is worth doing, not required: it takes the late passes
-    into the far view and keeps the live part small. A nightly job on
-    GitHub could do it (free for this public repository). It commits by
-    itself, so it is only added on the lead's explicit yes; the lead was
-    asked on 15 November.
+  five minutes, no login. Nothing depends on it; it is done when someone
+  wants the far view brought up to date. It builds afresh and never
+  patches the mosaic in place, so the newest pass ends on top without
+  bookkeeping and the tiles are compressed once. A build with under 80 %
+  of the tiles of the mosaic in place (NASA's services failing) is
+  refused. The lead decided on 15 November that no scheduled job is
+  wanted for this.
 - **Measured headless, Europe at 2,500 km:** 72 requests to NASA and 12 s
   with the mosaic, 494 and 45 s without; and the picture is whole from
   the first second, where it used to start as a blur. Close up it is as

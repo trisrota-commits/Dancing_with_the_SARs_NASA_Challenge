@@ -5,7 +5,7 @@
 // still showing an older copy.
 const BUILD = '2026-11-15 04:27 UTC';
 
-import { CATEGORIES, FAMILIES, PALETTE, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START, RECENT_MS, OVERLAY_REACH_DAYS, NISAR_MOSAIC, NISAR_TILES } from './config.js';
+import { CATEGORIES, FAMILIES, PALETTE, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START, RECENT_MS, OVERLAY_REACH_DAYS, NISAR_MOSAIC } from './config.js';
 import { fetchFeed, fetchArchive } from './feeds.js';
 import { buildIncidents, tagNisarCoverage, pointInPolygon, distanceKm } from './incidents.js';
 import { edgeMarginKm, latestScenes, scenesAt, passesAt, bestPair, comparisonStatus, imageBounds, latestTileDate, likelyTileDate, historyAt, newestAt, nextPass, interferogramsAt, REPEAT_DAYS } from './nisar.js';
@@ -19,7 +19,6 @@ import { SPECIES, MONTHS, POIS, loadSightings } from './wildlife.js';
 import { historyChart } from './chart.js';
 import { narrate, nisarLine, timeline, SOURCE_NOTES } from './narrative.js';
 import { Globe, loadPicture } from './globe.js';
-import { fingerprint } from './engine/tiles.js';
 import { Replay } from './replay/replay.js';
 import { changeMap, CHANGE_THRESHOLD } from './change.js';
 import { searchEvents, searchPlaces } from './search.js';
@@ -2163,30 +2162,19 @@ function goToPlace(place) {
 // view as they stood when it was built. It does not have to be current to
 // be right, because everything else comes live from NASA and only for
 // what is on screen: every day flown after the mosaic's last is drawn on
-// top of it, and close up it is always NASA's own tiles.
+// top of it, and close up it is always NASA's own tiles. Where the newest
+// pass is not in it yet, it shows the one before.
 //
-// What a dated picture cannot hold is a pass NASA publishes late, for a
-// day the mosaic already covers (it does that for two weeks and more: one
-// for 31 October arrived half an hour after the first build). So NASA's
-// fingerprint of each day is compared with the one the mosaic was built
-// from, and the menu says how many days have been added to since. Those
-// passes show close up at once and join the far view at the next build.
-async function checkMosaic() {
-  const about = state.mosaic;
-  if (!about?.days) return;
-  const dates = Object.keys(about.days).sort();
-  const now = await Promise.all(
-    dates.map((date) =>
-      fetch(NISAR_TILES.url.replace('{date}', date).replace('{z}/{y}/{x}', '0/0/0'), { cache: 'no-store' })
-        .then((res) => (res.ok ? res.arrayBuffer() : null))
-        .then((bytes) => (bytes ? `${bytes.byteLength}:${fingerprint(bytes)}` : null))
-        .catch(() => null),
-    ),
-  );
-  // A day that could not be asked about counts as unchanged.
-  const late = dates.filter((date, i) => now[i] && now[i] !== about.days[date]).length;
-  if (late === state.mosaicLate) return;
-  state.mosaicLate = late;
+// A page left open for days looks now and then whether a newer mosaic has
+// been put online, and takes it. (The build's time is part of each tile's
+// address, so the new tiles are fetched and the old ones are let go.)
+async function refreshMosaic() {
+  const about = await fetch(NISAR_MOSAIC.about, { cache: 'no-store' })
+    .then((res) => (res.ok ? res.json() : null))
+    .catch(() => null);
+  if (!about?.built || about.built === state.mosaic?.built) return;
+  state.mosaic = about;
+  globe.setMosaic(about);
   applyLayers();
 }
 
@@ -2250,7 +2238,7 @@ function applyLayers() {
     // Says which of the two ways the whole planet is being shown.
     const m = globe.mosaicFor({ date, days: +$('stack').value });
     $('stack-note').textContent = m
-      ? `Every place NISAR images, land and ice. From far away this is one picture that this app put together ahead of time from NASA's daily layer for ${m.from} to ${m.to}, the newest pass on top (built ${state.mosaic.built}). Close up, and for every day flown since, NASA's own tiles are loaded live.${state.mosaicLate ? ` NASA has since added late passes to ${state.mosaicLate} of the picture's days: they show close up now and join the far view when the picture is next rebuilt.` : ''}`
+      ? `Every place NISAR images, land and ice. From far away this is one picture that this app put together ahead of time from NASA's daily layer for ${m.from} to ${m.to}, the newest pass on top (built ${state.mosaic.built}). Close up, and for every day flown since, NASA's own tiles are loaded live.`
       : "Every place NISAR images, land and ice, from its passes of the last 24 days; the newest pass over each place lies on top. NASA publishes passes up to two weeks late, so the newest days are thin and the last complete round is 12 to 24 days old. It takes longer to load.";
   }
   // Two wavelengths side by side, for the same days.
@@ -2323,17 +2311,8 @@ async function start() {
   globe.setBasemap('esri');
   renderStatus();
   // The ready-made whole-planet picture, if this copy of the app has one.
-  fetch(NISAR_MOSAIC.about)
-    .then((res) => (res.ok ? res.json() : null))
-    .then((about) => {
-      if (!about) return;
-      state.mosaic = about;
-      globe.setMosaic(about);
-      applyLayers();
-      checkMosaic();
-      setInterval(checkMosaic, 10 * 60_000);
-    })
-    .catch(() => {});
+  refreshMosaic();
+  setInterval(refreshMosaic, 10 * 60_000);
 
   $('basemap').onchange = (e) => {
     $('basemap-note').hidden = true;
