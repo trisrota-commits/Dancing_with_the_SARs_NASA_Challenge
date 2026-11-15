@@ -16,5 +16,5 @@ grep -q "const BUILD = '$STAMP';" js/main.js || { echo "could not stamp js/main.
 node --test tests/*.test.mjs >/dev/null || { echo "unit tests fail; not packing"; exit 1; }
 rm -f "$OUT"
 rm -rf tests/__pycache__ tools/__pycache__
-zip -qr "$OUT" index.html css js vendor data docs tests tools README.md LICENSE .nojekyll start.bat start.sh start.command -x '*__pycache__*'
+zip -qr "$OUT" index.html css js vendor data demo docs tests tools README.md LICENSE .nojekyll start.bat start.sh start.command -x '*__pycache__*'
 echo "packed version $STAMP into $OUT"
