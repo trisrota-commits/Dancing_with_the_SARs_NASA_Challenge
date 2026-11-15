@@ -64,10 +64,10 @@ pass over any spot, the real star sky and sunlight.
 ### Tour: a flood in Italy
 
 <details>
-<summary><a><img src="docs/img/tour/turn-left.gif" width="640" alt="The globe turns to the flood in Italy"></a><br><sub>▸ Click to zoom in</sub></summary>
+<summary><a name="tour-flood-turn"><img src="docs/img/tour/turn-left.gif" width="640" alt="The globe turns to the flood in Italy"></a><br><sub>▸ Click to zoom in</sub></summary>
 
 <details>
-<summary><a><img src="docs/img/tour/zoom-left.gif" width="640" alt="The camera zooms in to the measured site"></a><br><sub>▸ Click to play NISAR's passes</sub></summary>
+<summary><a name="tour-flood-zoom"><img src="docs/img/tour/zoom-left.gif" width="640" alt="The camera zooms in to the measured site"></a><br><sub>▸ Click to play NISAR's passes</sub></summary>
 
 <img src="docs/img/tour/play-left.gif" width="640" alt="Seven NISAR passes over the site, then the cells that stood out after the flood">
 
@@ -81,15 +81,15 @@ After the flood, 11.8% of cells stood out; on a normal date it is 0.2%.
 ### Tour: an earthquake in Pakistan
 
 <details>
-<summary><a><img src="docs/img/tour/turn-right.gif" width="640" alt="The globe turns to the earthquake in Pakistan"></a><br><sub>▸ Click to see its seismic waves</sub></summary>
+<summary><a name="tour-quake-turn"><img src="docs/img/tour/turn-right.gif" width="640" alt="The globe turns to the earthquake in Pakistan"></a><br><sub>▸ Click to see its seismic waves</sub></summary>
 
 <details>
-<summary><a><img src="docs/img/tour/waves-right.gif" width="640" alt="The two seismic wave fronts spread from the epicentre, as in the app"></a><br><sub>▸ Click to zoom in</sub></summary>
+<summary><a name="tour-quake-waves"><img src="docs/img/tour/waves-right.gif" width="640" alt="The two seismic wave fronts spread from the epicentre, as in the app"></a><br><sub>▸ Click to zoom in</sub></summary>
 
 <sub>The wave fronts are drawn at typical crust speeds (P 6 km/s, S 3.5 km/s), sped up about 6×. They show how the waves travel; they are not measured.</sub>
 
 <details>
-<summary><a><img src="docs/img/tour/zoom-right.gif" width="640" alt="The camera zooms in to the measured site"></a><br><sub>▸ Click to play NISAR's passes</sub></summary>
+<summary><a name="tour-quake-zoom"><img src="docs/img/tour/zoom-right.gif" width="640" alt="The camera zooms in to the measured site"></a><br><sub>▸ Click to play NISAR's passes</sub></summary>
 
 <img src="docs/img/tour/play-right.gif" width="640" alt="Five NISAR passes over the site, then the cells that stood out after the earthquake">
 
