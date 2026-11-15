@@ -621,53 +621,44 @@ assemble the pieces itself. It does now, once, ahead of time.
   view is close enough for them to be sharper than the mosaic, and until
   their own tile is here the mosaic is their stand-in. Their world
   pictures are fetched behind everything else (`lazy`).
-- **It must never hide newer data**, and it cannot:
-  - Days after the mosaic's last are drawn live on top, at every distance.
-  - NASA goes on adding passes to a day for two weeks and more: half an
-    hour after the first build it added one to 31 October, fifteen days
-    after it was flown. `checkMosaic` (`js/main.js`) compares NASA's
-    fingerprint of each day with the mosaic's, at the start and every ten
-    minutes. The fingerprint is stable: five requests for each of the 24
-    days agreed.
-    - A mosaic built within the last 36 hours stands. The late passes
-      show close up at once (always NASA's own tiles) and join the far
-      view at the next build; the menu says how many days are
-      affected. The first rule tried was stricter and made the mosaic
-      useless: one late pass for a day two weeks back switched 13 days
-      to live.
-    - An older mosaic means nobody is rebuilding it. Then from
-      the oldest day that differs onwards, every day is drawn live again
-      (`mosaic.settled`). Every day from there, not only the changed
-      ones, because the newest pass has to end on top.
-  - For a date before the mosaic's last day the mosaic is not used at
-    all: it would show passes not yet flown.
+- **What the mosaic is, and is not.** It is a picture with a date on it:
+  the far and the continent view as they stood when it was built. It
+  does not have to be current to be right, because everything else comes
+  live from NASA, and only for what is on screen (the lead's point: why
+  hold the whole planet in full detail when nobody can see all of it).
+  - Days flown after the mosaic's last are drawn live on top, at every
+    distance.
+  - Close up it is always NASA's own tiles.
+  - For a date before the mosaic's last day the mosaic is not used: it
+    would show passes not yet flown.
   - Without `data/mosaic/` the app stacks live, as before.
-- **Who keeps it up to date.** On screen new passes replace old ones at
-  once. But the stored mosaic cannot be rewritten by the app: the app
-  runs in each visitor's browser, only while their tab is open, and a
-  browser cannot write to the files everyone else loads. What the lead
-  described (a service that fetches each day's new pictures and feeds
-  them to the assembly) needs something that runs without a visitor. For
-  a static site that is a scheduled job on GitHub: `tools/mosaic.py`
-  every night, committing `data/mosaic/` if it changed. No login, no
-  secret. **That job is not in the repository yet.** The session's safety
-  check does not let a job that commits by itself be added without the
-  lead's explicit yes, and when this was written the lead had not been
-  asked in so many words. Until it exists the script is run by hand
-  (`python tools/mosaic.py`, then commit `data/mosaic/`), and a mosaic
-  older than 36 hours falls back to the strict rule above, which is
-  right and slow.
-  - It builds afresh every time and never patches the mosaic in place:
-    the newest pass ends on top without any bookkeeping, and the tiles
-    are compressed once, not again and again. The effort is the same
-    every night (24 days, about 10,000 small requests, five minutes on
-    GitHub's machine) and the mosaic does not grow.
-  - A tile that has not changed comes out byte for byte the same, so
-    only changed tiles add to the repository.
-  - A build that fails, or comes out with under 80 % of the tiles of the
-    mosaic in place (NASA's services failing), changes nothing.
-  - The build's time is part of each tile's address, so a browser never
-    shows tiles it kept from an earlier build.
+  - What it cannot hold is a pass NASA publishes late for a day it
+    already covers. NASA does that for two weeks and more: half an hour
+    after the first build it added one to 31 October. `checkMosaic`
+    (`js/main.js`) compares NASA's fingerprint of each day with the one
+    the mosaic was built from (stable: five requests for each of the 24
+    days agreed), and the menu says how many days have been added to
+    since. Those passes show close up at once and join the far view at
+    the next build.
+  - Two stricter rules were built and dropped the same night. "From the
+    oldest changed day on, draw every day live" switched 13 days to live
+    for one late pass, so the mosaic was hardly used. "Strict only when
+    the mosaic is older than 36 hours" made a nightly rebuild a
+    requirement, and brought the blurred stand-ins back whenever it was
+    missed.
+- **Rebuilding** is `python tools/mosaic.py`, then commit `data/mosaic/`:
+  five minutes, no login. It builds afresh and never patches the mosaic
+  in place, so the newest pass ends on top without bookkeeping and the
+  tiles are compressed once. An unchanged tile comes out byte for byte
+  the same, so only changed tiles add to the repository. A build with
+  under 80 % of the tiles of the mosaic in place (NASA's services
+  failing) is refused. The build's time is part of each tile's address,
+  so a browser never shows tiles kept from an earlier build.
+  - A rebuild is worth doing, not required: it takes the late passes
+    into the far view and keeps the live part small. A nightly job on
+    GitHub could do it (free for this public repository). It commits by
+    itself, so it is only added on the lead's explicit yes; the lead was
+    asked on 15 November.
 - **Measured headless, Europe at 2,500 km:** 72 requests to NASA and 12 s
   with the mosaic, 494 and 45 s without; and the picture is whole from
   the first second, where it used to start as a blur. Close up it is as

@@ -377,7 +377,7 @@ export class Globe {
       if (mosaic) layers.push({ url: `${NISAR_MOSAIC.url}?v=${encodeURIComponent(mosaic.built || '')}`, maxLevel: mosaic.levels, has: mosaic.has });
       for (let i = s.nisar.days - 1; i >= 0; i--) {
         const date = iso(end - i * DAY);
-        const under = mosaic && date <= mosaic.settled ? { minLevel: mosaic.levels + 2, backed: true } : null;
+        const under = mosaic && date <= mosaic.to ? { minLevel: mosaic.levels + 2, backed: true } : null;
         // Radar passes are thin strips on an empty globe: see `sparse` in the tile engine.
         if (date >= NISAR_TILES.firstDate) layers.push({ url: NISAR_TILES.url.replace('{date}', date), sheet: NISAR_TILES.sheet.replace('{date}', date), map: NISAR_TILES.map.replace('{date}', date), colour: true, stack: 'nisar', age: i, maxLevel: NISAR_TILES.maxLevel, sparse: true, ...under });
       }
@@ -402,17 +402,12 @@ export class Globe {
   }
 
   // The ready-made whole-planet picture, from its `about.json`:
-  // { from, to, levels, tiles: { level: ['x/y', …] } }, or null for none.
-  // `settled` is the last day it can still stand for: NASA goes on adding
-  // passes to a day for up to two weeks, and from the first day that has
-  // changed since the mosaic was built, every day is drawn live again, on
-  // top of it. (Every day from there on, not only the changed ones: the
-  // newest pass has to end on top.)
-  setMosaic(about, settled = about?.to) {
+  // { from, to, built, levels, tiles: { level: ['x/y', …] } }, or null.
+  setMosaic(about) {
     this.mosaic = null;
     if (about?.tiles && about.to && Number.isInteger(about.levels)) {
       const held = Object.fromEntries(Object.entries(about.tiles).map(([z, list]) => [z, new Set(list)]));
-      this.mosaic = { from: about.from, to: about.to, built: about.built, settled, levels: about.levels, has: (z, x, y) => !!held[z]?.has(`${x}/${y}`) };
+      this.mosaic = { from: about.from, to: about.to, built: about.built, levels: about.levels, has: (z, x, y) => !!held[z]?.has(`${x}/${y}`) };
     }
     this.applyLayers();
   }
