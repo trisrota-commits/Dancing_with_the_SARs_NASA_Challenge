@@ -8,6 +8,8 @@ function reader(bytes) {
     let value = 0;
     let shift = 0;
     for (;;) {
+      // A tile cut short ends the number where the bytes end.
+      if (pos >= bytes.length) return value;
       const b = bytes[pos++];
       value += (b & 0x7f) * 2 ** shift;
       if (b < 0x80) return value;
@@ -16,7 +18,7 @@ function reader(bytes) {
   };
   // Walks the fields of one message, handing length-delimited ones to `on`.
   const fields = (end, on) => {
-    while (pos < end) {
+    while (pos < end && pos < bytes.length) {
       const tag = varint();
       const field = tag >> 3;
       const wire = tag & 7;

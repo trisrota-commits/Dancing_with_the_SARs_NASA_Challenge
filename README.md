@@ -152,6 +152,8 @@ this app's workload:
   sometimes sends a damaged picture for a freshly added day; the engine
   then takes that tile from NASA's map service, which draws the same data
   on request, and keeps the sound one.
+- If the satellite basemap cannot be reached, NASA's Blue Marble takes its
+  place and the menu says so; the globe is never left black.
 - Tiles are painted and fetched from the middle of the view outwards,
   ahead of a flying camera and ahead of a turning globe.
 - Event effects live in shaders: the earthquake front is drawn and lifted

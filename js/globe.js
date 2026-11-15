@@ -54,6 +54,8 @@ export class Globe {
 
     this.tiles = new TileGlobe(this.scene, this.shared);
     this.tiles.wake = () => (this.dirty = true);
+    // The basemap's server cannot be reached: whoever listens may pick another.
+    this.tiles.onBaseFailed = () => this.onBasemapFailed?.(this.state.base);
     this.glow = atmosphere(this.scene);
     this.trackLines = new Lines(this.scene, this.shared, { width: 2 });
     this.linkLines = new Lines(this.scene, this.shared, { width: 1.8, dash: 14 });
@@ -359,7 +361,9 @@ export class Globe {
         layers.push({ url: OVERLAYS.s1.url.replace('{date}', date), sheet: OVERLAYS.s1.sheet.replace('{date}', date), map: OVERLAYS.s1.map.replace('{date}', date), stack: 's1', maxLevel: OVERLAYS.s1.maxLevel, side: 'right', sparse: true });
       }
     }
-    if (s.nisar) {
+    // (Not while the two wavelengths are compared: the stack has no side,
+    // so NISAR's strips would show on Sentinel-1's side of the divider too.)
+    if (s.nisar && !s.bands) {
       const end = Date.parse(s.nisar.date);
       for (let i = s.nisar.days - 1; i >= 0; i--) {
         const date = iso(end - i * DAY);
@@ -1010,17 +1014,23 @@ export function loadPicture(url) {
   pictureCache.set(url, picture);
   picture.then(
     (canvas) => {
+      // Dropped from the cache while it was loading: it is not counted.
+      if (pictureCache.get(url) !== picture) return;
       pictureSizes.set(url, canvas.width * canvas.height * 4);
       let total = 0;
       for (const size of pictureSizes.values()) total += size;
       for (const key of [...pictureCache.keys()]) {
-        if (total <= PICTURE_MEMORY || key === url) break;
-        total -= pictureSizes.get(key) || 0;
+        if (total <= PICTURE_MEMORY) break;
+        // Pictures still loading have no size yet and free nothing.
+        if (key === url || !pictureSizes.has(key)) continue;
+        total -= pictureSizes.get(key);
         pictureSizes.delete(key);
         pictureCache.delete(key);
       }
     },
-    () => pictureCache.delete(url),
+    () => {
+      if (pictureCache.get(url) === picture) pictureCache.delete(url);
+    },
   );
   return picture;
 }

@@ -116,10 +116,18 @@ async function quake(inc, globe) {
   const centre = { lat: inc.lat, lon: inc.lon };
   const mag = inc.magnitude?.value ?? 5;
   const radius = mag >= 7 ? 500 : mag >= 6 ? 300 : 150;
+  // A request that fails is not an answer of "none": it is told apart, so
+  // the text says "could not be loaded" and not "there are none".
+  const failed = {};
+  const or = (name, empty) => (err) => {
+    if (err?.name === 'AbortError') throw err;
+    failed[name] = true;
+    return empty;
+  };
   const [contours, shapes, nearby] = await Promise.all([
-    shakeContours(inc).catch(() => []),
-    gdacsShapes(inc).catch(() => ({ polygons: [], lines: [] })),
-    quakesNear(inc.lat, inc.lon, radius, inc.time - 30 * DAY).catch(() => []),
+    shakeContours(inc).catch(or('usgs', [])),
+    gdacsShapes(inc).catch(or('gdacs', { polygons: [], lines: [] })),
+    quakesNear(inc.lat, inc.lon, radius, inc.time - 30 * DAY).catch(or('catalogue', [])),
   ]);
 
   // Prefer the USGS contours; fall back to the GDACS intensity zones.
@@ -195,12 +203,17 @@ async function quake(inc, globe) {
     timeOf: (ms) => WAVE + 0.5 + (AFTER ? Math.max(0, Math.min(1, (ms - inc.time) / span)) * AFTER : 0),
     frameKm: rmax * 1.3,
     parts: [
-      { kind: 'observed', text: `Epicentre, magnitude ${mag.toFixed(1)} and time`, source: 'USGS' },
+      // Named after the feed the place, time and magnitude really come from.
+      { kind: 'observed', text: `Epicentre, magnitude ${mag.toFixed(1)} and time`, source: inc.reports.some((r) => r.source === 'usgs') ? 'USGS' : inc.reports.some((r) => r.source === 'gdacs') ? 'GDACS' : 'the reporting feed' },
       zones.length
         ? { kind: 'analysis', text: `Shaking intensity outlines, levels ${Math.min(...zones.map((z) => z.value))} to ${Math.max(...zones.map((z) => z.value))}`, source: zoneSource }
-        : { kind: 'note', text: 'No shaking map has been published for this earthquake.' },
+        : failed.usgs || failed.gdacs
+          ? { kind: 'note', text: 'The shaking map could not be loaded just now, so no outlines are drawn. Opening the event again asks once more.' }
+          : { kind: 'note', text: 'No shaking map has been published for this earthquake.' },
       { kind: 'computed', text: `Wave fronts at typical crust speeds (P 6 km/s, S 3.5 km/s), played ${speedup}× faster than real time. The glow and ripple on the ground mark where the fronts are; their brightness and height are not to scale. The rings then rest where the fronts stood ${reached} s after the quake.` },
-      { kind: 'observed', text: `${after.length} later and ${before.length} earlier quakes of M2.5+ within ${radius} km, from 30 days before the quake until now${nearby.length >= 600 ? ' (the catalogue query stops at 600, so the newest may be missing)' : ''}`, source: 'USGS catalogue' },
+      failed.catalogue
+        ? { kind: 'note', text: 'The catalogue of nearby earthquakes could not be loaded just now, so earlier and later quakes are not shown.' }
+        : { kind: 'observed', text: `${after.length} later and ${before.length} earlier quakes of M2.5+ within ${radius} km, from 30 days before the quake until now${nearby.length >= 600 ? ' (the catalogue query stops at 600, so the newest may be missing)' : ''}`, source: 'USGS catalogue' },
     ],
     draw(t, started, ms) {
       if (started === false) {
@@ -278,6 +291,7 @@ async function quake(inc, globe) {
     },
     caption(t) {
       if (t < WAVE) return `Seismic waves spreading from the epicentre · ${Math.round((Math.min(1, t / WAVE) * rmax) / 3.5)} s after the quake`;
+      if (failed.catalogue) return 'Later quakes could not be loaded just now';
       if (!AFTER) return 'No later quakes catalogued nearby so far';
       return `${day(this.now)} · ${this.count} of ${after.length} later quakes nearby`;
     },
@@ -378,12 +392,17 @@ async function fire(inc, globe) {
   if (!dates.length) return null;
   const days = await fireDetections(inc.lat, inc.lon, radius, dates);
   const total = days.reduce((n, d) => n + d.points.length, 0);
+  // Requests that failed: detections may be missing, and the text says so.
+  const lost = days.reduce((n, d) => n + (d.failed || 0), 0);
+  const gaps = lost ? ` ${lost} request${lost > 1 ? 's' : ''} for this data failed, so detections may be missing.` : '';
   const STEP = 1.1;
 
   const first = Date.parse(dates[0]);
   const showZones = outlines(globe, burnt.map((b) => ({ ring: b.ring, color: rgba(PALETTE.family.fire, 0.95), fill: rgba(PALETTE.family.fire, 0.07), width: 2 })));
   return {
     from: first,
+    // The event may have begun before the days shown here.
+    began: Math.min(first, inc.time),
     to: first + days.length * DAY,
     timeOf: (ms) => Math.max(0, Math.min(days.length, (ms - first) / DAY)) * STEP,
     frameKm: radius * 1.1,
@@ -394,8 +413,10 @@ async function fire(inc, globe) {
     ],
     parts: [
       total
-        ? { kind: 'observed', text: `${total} active-fire detections over ${days.length} days within ${Math.round(radius)} km`, source: 'VIIRS on NOAA-20, NASA GIBS' }
-        : { kind: 'note', text: `No satellite fire detections within ${Math.round(radius)} km from ${dates[0]} to ${dates[dates.length - 1]}.` },
+        ? { kind: 'observed', text: `${total} active-fire detections over ${days.length} days within ${Math.round(radius)} km.${gaps}`, source: 'VIIRS on NOAA-20, NASA GIBS' }
+        : lost
+          ? { kind: 'note', text: `The satellite fire detections could not be loaded just now (${lost} request${lost > 1 ? 's' : ''} failed), so none are drawn. Opening the event again asks once more.` }
+          : { kind: 'note', text: `No satellite fire detections within ${Math.round(radius)} km from ${dates[0]} to ${dates[dates.length - 1]}.` },
       ...(burnt.length ? [{ kind: 'analysis', text: 'Burnt-area outline', source: 'GDACS / GWIS' }] : []),
       { kind: 'computed', text: 'Each detection glows at the sensor\'s 375 m pixel size, fades in during its day (the satellite gives the day, not the hour) and cools to dark red over about three days. Nothing is drawn between detections.' },
       { kind: 'computed', text: 'Closer in, each spot sits on the exact position of its detection at true size, reddest at its centre. The shape of the glow, its shimmer and the thin smoke are animation, not measurements; the smoke rises straight up because the feeds carry no wind.' },
@@ -421,7 +442,9 @@ async function fire(inc, globe) {
     caption() {
       const d = days[this.index ?? 0];
       const sofar = days.slice(0, (this.index ?? 0) + 1).reduce((n, x) => n + x.points.length, 0);
-      return d ? `${d.date} · ${d.points.length} fire detections that day · ${sofar} so far` : '';
+      if (!d) return '';
+      if (d.failed && !d.points.length) return `${d.date} · fire detections could not be loaded for this day`;
+      return `${d.date} · ${d.points.length} fire detections that day · ${sofar} so far`;
     },
   };
 }
@@ -452,9 +475,12 @@ async function flood(inc, globe) {
   const showZones = outlines(globe, area.map((a) => ({ ring: a.ring, color: rgba(PALETTE.family.water, 0.95), fill: rgba(PALETTE.family.water, 0.06), width: 2 })));
   return {
     from: first,
+    // The event may have begun before the maps shown here.
+    began: Math.min(first, inc.time),
     to: Date.parse(dates[dates.length - 1]) + DAY,
-    // The passes used are two days apart; each has fully arrived a day later.
-    timeOf: (ms) => Math.max(0, Math.min(dates.length, (ms - first) / (2 * DAY) + 0.5)) * STEP,
+    // The maps used are two days apart. Each starts to show at the start
+    // of its own day and is all there a day later (see the terrain shader).
+    timeOf: (ms) => Math.max(0, Math.min(dates.length, (ms - first) / (2 * DAY))) * STEP,
     frameKm: Math.min(600, Math.max(120, area.length ? reach(centre, area.flatMap((a) => a.ring)) * 1.2 : 150)),
     key: [
       { mark: 'fill', color: 'linear-gradient(90deg,#3d99d6,#0d4580)', text: 'Blue water: water a radar satellite saw on land (Sentinel-1). Rivers and lakes show too. Its ripples are animation.' },
@@ -577,10 +603,11 @@ export class Replay {
 
   // Opens an event on its latest state. With keepView the event is already
   // open and has new reports: its plan is rebuilt behind the one on screen
-  // and swapped in, without touching the camera or showing "loading".
-  async start(incident, { keepView = false } = {}) {
+  // and swapped in, without touching the camera or showing "loading". With
+  // `still` the event's timeline comes back after something else had the
+  // bar: the camera stays where it is and the opening is not played again.
+  async start(incident, { keepView = false, still: inPlace = false } = {}) {
     const refresh = keepView && this.plan && this.timeline && !this.plan.lapse;
-    const held = refresh ? { from: this.range.from, marks: this.marks } : null;
     if (!refresh) {
       this.stop();
       this.pending = null;
@@ -599,6 +626,9 @@ export class Replay {
     }
     if (token !== this.token) return;
     if (!plan || !Number.isFinite(plan.from) || !Number.isFinite(plan.to)) plan = still(incident);
+    // What the bar holds now, read after the wait: the reach and marks may
+    // have been set, and the handle moved, while the new plan was loading.
+    const held = refresh && this.plan ? { from: this.range.from, marks: this.marks, ms: this.live ? null : this.ms } : null;
     if (refresh && this.plan) {
       this.plan.teardown?.();
       this.globe.clearEffects();
@@ -609,16 +639,16 @@ export class Replay {
     // The bar always runs to now, so passes after the event have a place.
     // It also reaches back at least two weeks, so a fresh event is not a
     // bar with nothing on it.
-    this.range = { from: Math.min(plan.from - DAY, now - 14 * DAY), to: now };
+    this.range = { from: Math.min((plan.began ?? plan.from) - DAY, now - 14 * DAY), to: now };
     this.marks = [];
-    this.ms = now;
-    this.intro = !!plan.intro && !refresh;
+    this.ms = held?.ms ?? now;
+    this.intro = !!plan.intro && !refresh && !inPlace;
     this.time = 0;
     this.playing = this.intro;
     plan.setup?.();
     this.loop = ++this.loops;
     const focus = plan.focus || incident;
-    if (!refresh) this.globe.flyTo(focus.lat, focus.lon, Math.min(9_000_000, plan.frameKm * 1000 * 3.4), { pitch: plan.frameKm < 400 ? 40 : 15 });
+    if (!refresh && !inPlace) this.globe.flyTo(focus.lat, focus.lon, Math.min(9_000_000, plan.frameKm * 1000 * 3.4), { pitch: plan.frameKm < 400 ? 40 : 15 });
     this.globe.setFocus({ lat: focus.lat, lon: focus.lon, radiusKm: plan.frameKm * 1.15 });
     if (!this.intro) this.show();
     // The reach and marks asked for while this was loading, or the ones the
@@ -673,10 +703,11 @@ export class Replay {
     return this.timeline && !this.intro && this.ms >= this.range.to - 60_000;
   }
 
-  // Draws the event as it stood at this.ms.
+  // Draws the event as it stood at this.ms. `began` is when the event
+  // itself started, where that is earlier than the data the plan draws.
   show() {
     const plan = this.plan;
-    plan.draw(plan.timeOf(this.ms), this.ms >= plan.from, this.ms);
+    plan.draw(plan.timeOf(this.ms), this.ms >= (plan.began ?? plan.from), this.ms);
     this.globe.dirty = true;
   }
 
@@ -762,7 +793,14 @@ export class Replay {
     if (!plan) return;
     const { from, to } = this.range;
     const at = (ms) => Math.max(0, Math.min(1, (ms - from) / (to - from)));
-    const caption = this.intro ? plan.caption(Math.min(this.time, plan.intro)) : this.ms < plan.from ? 'Before the event' : plan.caption(plan.timeOf(this.ms));
+    const began = plan.began ?? plan.from;
+    const caption = this.intro
+      ? plan.caption(Math.min(this.time, plan.intro))
+      : this.ms < began
+        ? 'Before the event'
+        : this.ms < plan.from
+          ? `Under way · the satellite data shown here starts on ${day(plan.from)}`
+          : plan.caption(plan.timeOf(this.ms));
     this.onUpdate({
       state: this.playing ? 'playing' : 'paused',
       timeline: true,
@@ -770,7 +808,7 @@ export class Replay {
       ms: this.intro ? plan.from : this.ms,
       progress: at(this.intro ? plan.from : this.ms),
       // A place has no event on its line, only passes.
-      span: plan.lapse ? null : [at(plan.from), at(Math.max(plan.to, plan.from))],
+      span: plan.lapse ? null : [at(began), at(Math.max(plan.to, began))],
       marks: this.marks.map(at),
       range: this.range,
       live: this.live,
