@@ -128,6 +128,13 @@ repository: https://github.com/trisrota-commits/Dancing_with_the_SARs_NASA_Chall
   (by 0.4 dB in the middle); the app marks such passes and does not put
   them down to the event. It says that something changed and where, not
   what caused it.
+- **Not for the whole planet, and we checked.** The measurement needs
+  NISAR's full data for every place. We built its rough counterpart from
+  NASA's planet picture and tested it against 573 reported events: it
+  does not find floods or earthquakes (51 and 34 in 100 against a
+  random point, where 50 is chance) and wildfires only slightly (57).
+  So it is not in the app. A planet-wide version needs calibrated data
+  everywhere, which is what NASA's own products are for.
 - **Not a new idea, a new instrument.** NASA's OPERA DIST-ALERT-S1
   product does this for Sentinel-1, with a baseline from three years of
   passes. Ours applies the same logic to NISAR as a prototype with a few

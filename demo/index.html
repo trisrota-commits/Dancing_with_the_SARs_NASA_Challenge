@@ -360,8 +360,8 @@
             <li><b>Who needs the answer:</b> a relief organisation or a civil-protection office deciding where to send people first; a farm adviser asking how a crop is doing.</li>
           </ul>
           <figure>
-            <img src="img/flood-page.jpg" alt="The app showing NISAR's radar picture over Tuscany after a reported flood, with the event's card and a timeline of NISAR's passes" />
-            <figcaption>A reported flood in Italy, and NISAR's radar picture of the same ground</figcaption>
+            <img src="img/flood-page.jpg" alt="The app showing NISAR's radar picture over Tuscany after a reported flood, with what stood out at the top of the event's panel and a timeline of NISAR's passes" />
+            <figcaption>A reported flood in Italy, NISAR's radar picture of the same ground, and what stood out</figcaption>
           </figure>
         </div>
         <div class="foot">
@@ -400,31 +400,23 @@
           <p class="kicker">Detecting change · a flood in Italy, October 2026</p>
           <h2>On the first pass after the flood, 31 % of the ground did something else</h2>
         </div>
-        <div class="cols">
-          <div style="display: grid; gap: 34px">
-            <ul class="steps">
-              <li>Cut the ground into cells of 500 m and read each one's radar echo, pass by pass, from NISAR's calibrated data.</li>
-              <li>Compare each cell's change with what the cells around it did in the same pass. Rain and season move all of them alike, and drop out.</li>
-              <li>Count the cells that left the range nine in ten had kept to before. <b>About 10 % is ordinary.</b></li>
+        <div class="cols wide-right">
+          <div style="display: grid; gap: 28px">
+            <ul class="steps" style="gap: 18px">
+              <li>Cut the ground into cells of 500 m and read each one's radar echo from NISAR's calibrated data.</li>
+              <li>Compare each cell's change with what the cells around it did in the same pass. Rain and season move all alike, and drop out.</li>
+              <li>Count the cells that left their usual range. <b>About 10 % is ordinary.</b></li>
             </ul>
-            <p class="note">It says that something changed, and where. It does not say what caused it.</p>
-          </div>
-          <div style="display: grid; gap: 26px">
             <table>
               <tr>
                 <th>NISAR pass</th>
-                <th style="text-align: right; padding-right: 28px">Cells that stood out</th>
+                <th style="text-align: right; padding-right: 28px">Stood out</th>
                 <th></th>
-              </tr>
-              <tr>
-                <td>7 October</td>
-                <td class="num dim">–</td>
-                <td class="dim">flood reported (GDACS)</td>
               </tr>
               <tr class="hit">
                 <td>10 October</td>
                 <td class="num">31 %</td>
-                <td>first pass afterwards</td>
+                <td>3 days after the report</td>
               </tr>
               <tr>
                 <td>22 October</td>
@@ -437,11 +429,14 @@
                 <td class="dim"></td>
               </tr>
             </table>
-            <p class="note">576 cells around the reported point in Tuscany, seven passes, 23 August to 3 November 2026. The area's mean echo rose by 1.3 dB on 10 October.</p>
           </div>
+          <figure>
+            <img src="img/flood-stood-map.jpg" alt="The app's globe over Tuscany with the 500 m cells that stood out drawn in orange and blue, the key on the left and the pass-by-pass table on the right" />
+            <figcaption>“Show where it stood out”: <span style="color: var(--stronger)">orange</span>, the echo rose more than around it; <span style="color: var(--weaker)">blue</span>, it fell more. It says where, not why.</figcaption>
+          </figure>
         </div>
         <div class="foot">
-          <span>Computed by tools/forecast.py from NISAR L2 GCOV. The same figures are in the app, under the event's card.</span>
+          <span>576 cells around the point GDACS reported in Tuscany on 7 October, seven passes. Computed by tools/forecast.py from NISAR L2 GCOV; the same figures are in the app.</span>
           <span class="n">4 / 7</span>
         </div>
       </section>
@@ -476,17 +471,16 @@
       <section class="slide" aria-label="Slide 6 of 7">
         <div>
           <p class="kicker">Everywhere else</p>
-          <h2>The whole planet: what changed in 48 days, at one switch</h2>
+          <h2>The whole planet: what changed in 48 days, and what a picture cannot do</h2>
         </div>
         <div class="cols wide-right">
-          <div style="display: grid; gap: 30px">
-            <ul>
-              <li>Each pass against <b>the same pass 48 days earlier</b>, from NASA's map picture of NISAR. <span style="color: var(--weaker)">Blue</span>: the echo got weaker. <span style="color: var(--stronger)">Orange</span>: stronger.</li>
-              <li>The ground freezing across Siberia and Canada and the Sahel drying after the rains stand out.</li>
-              <li>A rough guide to where to look, not a measurement. Checked against our calibrated values at six places, the direction agrees at five.</li>
+          <div style="display: grid; gap: 28px">
+            <ul style="gap: 20px">
+              <li>Each pass against <b>the same pass 48 days earlier</b>, from NASA's map picture of NISAR. <span style="color: var(--weaker)">Blue</span>: the echo got weaker. <span style="color: var(--stronger)">Orange</span>: stronger. Siberia and Canada freezing and the Sahel drying stand out.</li>
+              <li><b>Can it find events everywhere? We built that and tested it</b> against 573 reported fires, floods and earthquakes. It does not: floods and quakes are no more marked than random ground. So it is not in the app. Finding events needs the calibrated data, place by place.</li>
             </ul>
             <div class="stat">
-              <div class="big" style="font-size: 96px">43 %</div>
+              <div class="big" style="font-size: 92px">43 %</div>
               <span>of the NISAR tiles NASA's tile service delivered in our worldwide sample of 10,000 were damaged. The engine detects and replaces every one.</span>
             </div>
           </div>

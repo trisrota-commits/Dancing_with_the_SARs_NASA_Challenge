@@ -54,11 +54,45 @@ reason not established; and there are holes where no pair was accepted.
     python tools/change.py                      # 24 days up to NASA's newest day
     python tools/change.py --end 2026-11-12 --cache /some/folder
 
+A second product, "what stands out from its surroundings" (written to
+data/standout/, levels 0 to 4), is the rough planet-wide counterpart of
+the calibrated "peers" measure in tools/forecast.py. From each pixel's
+change it takes away the median change of the ground around it, about
+270 km across at every latitude, counted only among pixels of the same
+pair of days. What hit a whole region alike (freezing, a dry season, a
+pass that reads darker as a whole) goes; what is left is how a pixel
+differs from its neighbours of the same pass. It is coloured only beyond
+three robust spreads (1.4826 x the median absolute deviation) of that
+remainder over the whole covered map. The median is taken on a grid of
+8-pixel cells (the median of the cells' medians) and enlarged again, so
+it is quick; a pixel with under a quarter of its surroundings covered by
+its own pair gets no value. It says "unlike its surroundings", not what
+happened there: a field harvested, a lake frozen, a flood and the edge
+of a strip all stand out alike.
+
+Result of 15 November 2026: a threshold of 8.7 of 255; 42 % of the map
+has a value and 11.6 % of that is coloured (27 % north of 60 degrees,
+under 1 % in the Sahara core and the central Amazon). The regional part
+goes as intended: where the change itself has a median of -16 (Siberia,
+Canada), -13 (Sahel) or -7 (Amazon forest), the remainder's median is
+within 0.3 of zero. What is left is mostly unevenness of the season
+(patchy freezing, harvest, burning) and wind on water; the edges of
+strips are a smaller part (one in six of the coloured pixels lies
+within 3 pixels of an edge of its strip, where one in nine of all
+valued pixels lies).
+Checked against events reported between the two passes: see
+CHECKED_STANDOUT below. Wildfires are coloured a little more often than
+other ground; floods and earthquakes are not, and the two events the
+calibrated measurement shows best are not coloured at all. It is a
+picture of where the change was uneven, not an event finder.
+
 It makes about 21,000 small requests (no login) and takes about a quarter
 of an hour; the day tiles are kept in --cache (900 MB) so that the
 stacking can be redone without asking NASA again. It writes
 data/change/{z}/{x}/{y}.webp (see-through tiles, levels 0 to 5) and
-data/change/about.json.
+data/change/about.json, and data/standout/ in the same shape (levels 0
+to 4). The tiles are Web Mercator (GoogleMapsCompatible), so a level-5
+pixel is 4.9 km at the equator and 2.4 km at 60 degrees.
 """
 
 from __future__ import annotations
@@ -89,6 +123,37 @@ DEAD_BAND = 10.0  # changes smaller than this are not drawn
 FULL = 40.0  # full colour from here
 WEAKER = (0x40, 0xAA, 0xFF)  # as PALETTE.weaker in js/config.js
 STRONGER = (0xFF, 0xAA, 0x3C)  # as PALETTE.stronger
+
+# What stands out from its surroundings.
+STANDOUT_LEVEL = 4  # the finest level written
+CELL = 8  # pixels to a cell of the reduced grid the regional median is taken on
+ACROSS_KM = 270.0  # the surroundings: a square about this wide, at every latitude
+MOST_CELLS = 10  # the square reaches at most this many cells each way (met beyond 73 degrees)
+ENOUGH = 0.25  # of the surroundings must be covered by the pixel's own pair of days
+SPREADS = 3.0  # coloured beyond this many robust spreads of the remainder
+FAINTEST = 0.35  # opacity just beyond the threshold; full at twice the threshold
+EQUATOR_KM = 40075.0
+LIMITS_STANDOUT = (
+    "It says where a pixel changed differently from the ground around it, not what happened there, and not that anything happened: "
+    "a patch that stayed as it was while everything around it froze or dried reads orange just as one that got brighter. "
+    "A harvested field, a lake freezing, wind on open water (seas and lakes are not masked out), wet snow, a flood, a burn and the edge of a radar strip all stand out alike; "
+    "pixels beside the edge of their strip are coloured about one and a half times as often as the rest. "
+    "Something that fills more than half of the 270 km square around it becomes its own surroundings and disappears. "
+    "One threshold serves the whole planet, so busy regions (the freezing north, the drying Sahel) are coloured several times as often as deserts and rainforest. "
+    "NASA's processing version changed from P05023 to P05036 with the passes from about 21 October 2026, between the 'before' and most of the 'after' days; calibrated measurements fell by about 0.4 dB at that step. "
+    "A step that is alike across a region is taken out here with the regional median, but one that differs within a strip is not. "
+    "It is the brightness of a picture, not calibrated backscatter, and mixes both radar channels. "
+    "No value (holes): no pair of passes that compares like with like, or the pixel's own pair covers under a quarter of its surroundings."
+)
+# What the check against reported events gave; only true of the window it was made on.
+CHECKED_STANDOUT_WINDOW = ("2026-11-12", 24)
+CHECKED_STANDOUT = (
+    "Checked on 15 November 2026 against events reported between the two passes of the ground around them (NASA EONET, USGS, GDACS), within 25 km of each, with the threshold fixed beforehand. "
+    "507 wildfires: 21 % of the ground around them coloured on average, against 15 % at 2,000 random covered points and 16 % at covered points 100 to 400 km from the fires; a fire is more coloured than a random point 57 times in 100 (50 would be chance). "
+    "51 floods (placed only by the middle of a reported outline): 12 %, no more than random ground. 15 earthquakes of M 5.5 or more on covered ground: 7 %, less than random ground. "
+    "At the flood in Italy of 7 October and the earthquake near Khuzdar of 17 October, where the calibrated measurement found 31 % and 25 % of its 500 m cells standing out, this picture colours nothing within 25 km. "
+    "So it does not find events: it shows where the change was uneven."
+)
 
 
 def day_pairs(end: datetime.date, days: int) -> list[tuple[str, str]]:
@@ -254,13 +319,102 @@ def halve(a: np.ndarray) -> np.ndarray:
     return out.astype(np.float32)
 
 
-def colour(delta: np.ndarray) -> np.ndarray:
+def median_of_present(a: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Along the last axis: the median of the values that are there (NaN
+    where none), and how many there were."""
+    ordered = np.sort(a, axis=-1)  # NaN goes to the end
+    n = np.isfinite(a).sum(axis=-1)
+    low = np.take_along_axis(ordered, np.maximum((n - 1) // 2, 0)[..., None], axis=-1)[..., 0]
+    high = np.take_along_axis(ordered, np.minimum(n // 2, a.shape[-1] - 1)[..., None], axis=-1)[..., 0]
+    return ((low + high) / 2).astype(np.float32), n
+
+
+def reach_of_rows(rows: int) -> np.ndarray:
+    """For each row of cells of a Web Mercator world `rows` cells high: how
+    many cells the surroundings reach each way, so that the square is about
+    ACROSS_KM wide on the ground at that latitude."""
+    y = (np.arange(rows) + 0.5) / rows
+    lat = np.arctan(np.sinh(np.pi * (1 - 2 * y)))
+    cell_km = EQUATOR_KM / rows * np.cos(lat)
+    return np.clip(np.round((ACROSS_KM / cell_km - 1) / 2), 1, MOST_CELLS).astype(int)
+
+
+def window_median(cells: np.ndarray, reach: np.ndarray) -> np.ndarray:
+    """The median of the cells in a square around each cell, reaching
+    reach[row] cells each way, of those that hold a value; NaN where
+    fewer than ENOUGH of the square do. Closes from west to east."""
+    out = np.full(cells.shape, np.nan, np.float32)
+    held = np.isfinite(cells).any(axis=1)
+    for h in np.unique(reach):
+        near = np.convolve(held, np.ones(2 * h + 1), "same") > 0
+        at = np.flatnonzero((reach == h) & near)
+        if not at.size:
+            continue
+        padded = np.pad(cells, ((h, h), (0, 0)), constant_values=np.nan)
+        layers = np.stack([np.roll(padded[at + h + dy], dx, axis=1) for dy in range(-h, h + 1) for dx in range(-h, h + 1)], axis=-1)
+        med, n = median_of_present(layers)
+        med[n < ENOUGH * (2 * h + 1) ** 2] = np.nan
+        out[at] = med
+    return out
+
+
+def enlarge(cells: np.ndarray, by: int) -> np.ndarray:
+    """A grid of cells back at full size, sliding from one cell's value to
+    the next; holes stay holes."""
+    ok = np.isfinite(cells)
+    size = (cells.shape[1] * by, cells.shape[0] * by)
+    value = np.asarray(Image.fromarray(np.where(ok, cells, 0).astype(np.float32)).resize(size, Image.BILINEAR))
+    weight = np.asarray(Image.fromarray(ok.astype(np.float32)).resize(size, Image.BILINEAR))
+    with np.errstate(invalid="ignore", divide="ignore"):
+        return np.where(weight >= 0.5, value / weight, np.nan).astype(np.float32)
+
+
+def surroundings(delta: np.ndarray, pair: np.ndarray, reach: np.ndarray) -> np.ndarray:
+    """For each pixel the median change of the ground around it, taken only
+    from pixels of the same pair of days: the median of each CELL x CELL
+    cell, then the median of the cells in the square around it, enlarged
+    to full size again. NaN where the pixel's pair covers too little of
+    its surroundings."""
+    out = np.full(delta.shape, np.nan, np.float32)
+    have = np.isfinite(delta) & (pair > 0)
+    cols = delta.shape[1] // CELL
+    for k in np.unique(pair[have]):
+        mine = have & (pair == k)
+        rows = np.flatnonzero(mine.any(axis=1))
+        r0, r1 = rows[0] // CELL, rows[-1] // CELL + 1
+        part, own = delta[r0 * CELL : r1 * CELL], mine[r0 * CELL : r1 * CELL]
+        four = np.where(own, part, np.nan).reshape(r1 - r0, CELL, cols, CELL).transpose(0, 2, 1, 3)
+        cells, n = median_of_present(four.reshape(r1 - r0, cols, CELL * CELL))
+        cells[n < CELL] = np.nan  # a sliver of a cell does not speak for it
+        around = enlarge(window_median(cells, reach[r0:r1]), CELL)
+        out[r0 * CELL : r1 * CELL][own] = around[own]
+    return out
+
+
+def robust_spread(a: np.ndarray) -> float:
+    """1.4826 x the median distance from the median: the standard deviation
+    a bell curve with the same middle half would have."""
+    v = a[np.isfinite(a)]
+    return float(1.4826 * np.median(np.abs(v - np.median(v))))
+
+
+def standout(delta: np.ndarray, pair: np.ndarray) -> tuple[np.ndarray, float, float]:
+    """How each pixel's change differs from its surroundings', the
+    threshold beyond which that is drawn, and the spread it comes from."""
+    rest = delta - surroundings(delta, pair, reach_of_rows(delta.shape[0] // CELL))
+    spread = robust_spread(rest)
+    return rest, SPREADS * spread, spread
+
+
+def colour(delta: np.ndarray, dead: float = DEAD_BAND, full: float = FULL, faintest: float = 0.0) -> np.ndarray:
     """The change as a see-through picture: blue where the echo got weaker,
     orange where stronger, the strength as opacity; nothing inside the
     dead band or where there is no pair."""
     out = np.zeros(delta.shape + (4,), np.uint8)
     size = np.abs(np.nan_to_num(delta, nan=0.0))
-    alpha = np.clip((size - DEAD_BAND) / (FULL - DEAD_BAND), 0, 1)
+    alpha = np.clip((size - dead) / (full - dead), 0, 1)
+    if faintest:
+        alpha = np.where(size > dead, faintest + (1 - faintest) * alpha, 0)
     for mask, rgb in ((delta < 0, WEAKER), (delta > 0, STRONGER)):
         out[mask, 0], out[mask, 1], out[mask, 2] = rgb
     out[..., 3] = (alpha * 255).round().astype(np.uint8)
@@ -268,16 +422,19 @@ def colour(delta: np.ndarray) -> np.ndarray:
     return out
 
 
-def write(delta: np.ndarray, out_dir: str, quality: int) -> dict:
-    """The tiles of every level; returns which exist."""
+def write(delta: np.ndarray, out_dir: str, quality: int, top: int = LEVEL, **how) -> dict:
+    """The tiles of every level from `top` down; returns which exist."""
     tiles = {}
     level = LEVEL
+    while level > top:
+        delta = halve(delta)
+        level -= 1
     while True:
         n = 2**level
         here = []
         for y in range(n):
             for x in range(n):
-                rgba = colour(delta[y * 256 : (y + 1) * 256, x * 256 : (x + 1) * 256])
+                rgba = colour(delta[y * 256 : (y + 1) * 256, x * 256 : (x + 1) * 256], **how)
                 if not rgba[..., 3].any():
                     continue
                 path = os.path.join(out_dir, str(level), str(x), f"{y}.webp")
@@ -297,6 +454,7 @@ def main() -> None:
     ap.add_argument("--days", type=int, default=24, help="days in the window (default 24: two rounds of the orbit)")
     ap.add_argument("--cache", default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".change-cache"), help="folder for the day tiles (900 MB; not part of the repository)")
     ap.add_argument("--out", default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "change"))
+    ap.add_argument("--standout", default="", help="folder for a second product, what stands out from its surroundings (left out by default: the app does not show it, see CHECKED_STANDOUT)")
     ap.add_argument("--quality", type=int, default=84)
     ap.add_argument("--workers", type=int, default=16)
     args = ap.parse_args()
@@ -335,16 +493,78 @@ def main() -> None:
             "sd": round(float(finite.std()), 2),
             "beyond25": round(float((np.abs(finite) > 25).mean()), 4),
         },
-        "limits": "The 'after' day differs by up to 24 days from place to place, so neighbouring passes can show different amounts of change with a straight edge between them. The picture mixes both radar channels: where they move in opposite directions (as over rice at harvest, where HH falls and HV rises) it can read brighter while the HH echo got weaker. Rainforest reads 5 to 7 units darker for a reason not established. NASA's picture is on one fixed scale for every date (checked against calibrated values at two places over 20 passes), but it is not a decibel scale: brightness goes with the square root of the echo power, red is capped for strong echoes, and its colour rule switches where HV falls below -24 dB. Holes: no pair of passes that compares like with like.",
+        "limits": "The 'after' day differs by up to 24 days from place to place, so neighbouring passes can show different amounts of change with a straight edge between them. The picture mixes both radar channels: where they move in opposite directions (as over rice at harvest, where HH falls and HV rises) it can read brighter while the HH echo got weaker. Rainforest reads 5 to 7 units darker for a reason not established. Holes: no pair of passes that compares like with like.",
         "tiles": tiles,
     }
     with open(os.path.join(tmp, "about.json"), "w") as f:
         json.dump(about, f, separators=(",", ":"))
     shutil.rmtree(args.out, ignore_errors=True)
     os.replace(tmp, args.out)
+    report(args.out, tiles, f"{covered:.0%} of the map covered")
+    if args.standout:
+        write_standout(delta, pair_w, pairs, args.standout, args.quality)
+
+
+def report(folder: str, tiles: dict, note: str) -> None:
     count = sum(len(v) for v in tiles.values())
-    size = sum(os.path.getsize(os.path.join(root, name)) for root, _, names in os.walk(args.out) for name in names)
-    print(f"written to {args.out}: {count} tiles, {size / 1e6:.1f} MB; {covered:.0%} of the map covered")
+    size = sum(os.path.getsize(os.path.join(root, name)) for root, _, names in os.walk(folder) for name in names)
+    print(f"written to {folder}: {count} tiles, {size / 1e6:.1f} MB; {note}")
+
+
+def write_standout(delta: np.ndarray, pair_w: np.ndarray, pairs, out: str, quality: int) -> None:
+    """The second product: tiles and about.json of what stands out from its surroundings."""
+    rest, threshold, spread = standout(delta, pair_w)
+    valued = np.isfinite(rest)
+    beyond = np.abs(rest[valued]) > threshold
+    shown = rest
+    for _ in range(LEVEL - STANDOUT_LEVEL):
+        shown = halve(shown)
+    shown_valued = np.isfinite(shown)
+    tmp = out.rstrip("/") + ".new"
+    shutil.rmtree(tmp, ignore_errors=True)
+    tiles = write(rest, tmp, quality, top=STANDOUT_LEVEL, dead=threshold, full=2 * threshold, faintest=FAINTEST)
+    about = {
+        "what": "Where the 48-day change of NASA's NISAR picture differs from the change of the ground around it: from each pixel's change (see data/change) the median change of its surroundings is taken away, and what is left is coloured where it is unusually large. Blue: got darker than its surroundings did (the radar echo weaker); orange: brighter. Made by tools/change.py.",
+        "source": "NASA GIBS, layer " + M.LAYER,
+        "notCalibrated": "The brightness of NASA's false-colour picture (mean of red and green, 0 to 255), not calibrated backscatter. The rough planet-wide counterpart of the calibrated 'peers' measure, which exists only for the measured places.",
+        "after": {"from": pairs[-1][0], "to": pairs[0][0]},
+        "before": {"from": pairs[-1][1], "to": pairs[0][1]},
+        "gapDays": GAP_DAYS,
+        "built": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
+        "levels": STANDOUT_LEVEL,
+        "neighbourhood": {
+            "acrossKm": ACROSS_KM,
+            "cellPixels": CELL,
+            "samePairOnly": True,
+            "enough": ENOUGH,
+            "how": f"A square about {ACROSS_KM:.0f} km wide around the pixel at every latitude (7 cells of 39 km at the equator, 21 cells of 13 km at 70 degrees; a little smaller beyond 73 degrees). The median is taken over cells of {CELL} x {CELL} level-5 pixels (the median of the cells' medians), only from pixels that come from the same pair of days as the pixel itself, and slid from cell to cell. No value where under {ENOUGH:.0%} of the square is covered by that pair. Why this size: wider than a flood, a burn or a town, so those do not become their own surroundings; no wider than one strip of the radar (240 km), beyond which the same pair of days has nothing to say.",
+        },
+        "threshold": {
+            "value": round(threshold, 2),
+            "spreads": SPREADS,
+            "spread": round(spread, 2),
+            "full": round(2 * threshold, 2),
+            "how": f"{SPREADS:g} x the robust spread of the remainder over every valued pixel of the map at level 5 (1.4826 x the median absolute deviation from the median). One threshold for the whole planet, fixed before any check against reported events. Opacity runs from {FAINTEST:.0%} just beyond it to full at twice the threshold. Coarser levels show the mean of the pixels below them against the same threshold.",
+        },
+        "numbers": {
+            "covered": round(float(valued.mean()), 4),
+            "coveredByChange": round(float(np.isfinite(delta).mean()), 4),
+            "coloured": round(float(beyond.mean()), 4),
+            "colouredWeaker": round(float((rest[valued] < -threshold).mean()), 4),
+            "colouredStronger": round(float((rest[valued] > threshold).mean()), 4),
+            "colouredAtLevel" + str(STANDOUT_LEVEL): round(float((np.abs(shown[shown_valued]) > threshold).mean()), 4),
+            "beyondTwiceTheThreshold": round(float((np.abs(rest[valued]) > 2 * threshold).mean()), 4),
+        },
+        "limits": LIMITS_STANDOUT,
+        "tiles": tiles,
+    }
+    if (pairs[0][0], len(pairs)) == CHECKED_STANDOUT_WINDOW:
+        about["checked"] = CHECKED_STANDOUT
+    with open(os.path.join(tmp, "about.json"), "w") as f:
+        json.dump(about, f, separators=(",", ":"))
+    shutil.rmtree(out, ignore_errors=True)
+    os.replace(tmp, out)
+    report(out, tiles, f"{valued.mean():.0%} of the map valued, {beyond.mean():.1%} of that coloured beyond {threshold:.1f}")
 
 
 if __name__ == "__main__":
