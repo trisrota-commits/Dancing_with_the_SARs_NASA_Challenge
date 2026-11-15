@@ -72,7 +72,8 @@ pass over any spot, the real star sky and sunlight.
 <img src="docs/img/tour/play-left.gif" width="640" alt="Seven NISAR passes over the site, then the cells that stood out after the flood">
 
 <sub>Seven calibrated NISAR passes, 23 Aug to 3 Nov 2026. Each 500 m cell is compared with its own past.
-After the flood, 11.8% of cells stood out; on a normal date it is 0.2%.
+On the first pass after the flood (10 Oct, three days after the report), 3.5% of cells stood out; on the pass before the flood (28 Sep) it was 0.0%.
+A pass later (22 Oct) it was 2.8%, and on 3 Nov 0.0% again. With nothing happening, the detector flags 0.06% of cells on quiet ground.
 <a href="#take-the-tour-click-the-globe">↺ Back to the globe</a> · <a href="#tour-an-earthquake-in-pakistan">Earthquake ▸</a></sub>
 
 </details>
@@ -91,10 +92,11 @@ After the flood, 11.8% of cells stood out; on a normal date it is 0.2%.
 <details>
 <summary><a name="tour-quake-zoom"><img src="docs/img/tour/zoom-right.gif" width="640" alt="The camera zooms in to the measured site"></a><br><sub>▸ Click to play NISAR's passes</sub></summary>
 
-<img src="docs/img/tour/play-right.gif" width="640" alt="Five NISAR passes over the site, then the cells that stood out after the earthquake">
+<img src="docs/img/tour/play-right.gif" width="640" alt="Five NISAR passes over the site, then the few cells flagged after the earthquake">
 
-<sub>Five calibrated NISAR passes, 4 Sep to 22 Oct 2026. After the quake, 6.4% of cells stood out; on a normal date it is 0.1%.
-NASA's processing version changed between these passes, so some of that change may come from processing.
+<sub>Five calibrated NISAR passes, 4 Sep to 22 Oct 2026. On the first pass after the quake (22 Oct), 0.9% of cells were flagged.
+That is under the 2% from which we say "stood out", so nothing clear stood out here.
+NASA's processing version also changed with that pass, so even that small share may come from processing.
 <a href="#take-the-tour-click-the-globe">↺ Back to the globe</a> · <a href="#tour-a-flood-in-italy">Flood ▸</a></sub>
 
 </details>

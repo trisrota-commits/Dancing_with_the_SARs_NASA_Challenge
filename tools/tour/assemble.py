@@ -72,6 +72,7 @@ def fmt(day):
 
 NAMES = {"left": "the flood in Italy", "right": "the earthquake in Pakistan"}
 TITLES = {"left": "Flood in Italy, 7 Oct 2026", "right": "Earthquake M 5.7, Pakistan, 17 Oct 2026"}
+WHAT = {"left": "flood", "right": "quake"}
 NEXT = {"left": "Click to zoom in", "right": "Click to see its seismic waves"}
 
 
@@ -131,10 +132,18 @@ def play(side):
     for cap in c["caps"]:
         im = frame(f"play-{side}", cap["frame"])
         if cap["when"] == "stood":
-            sub = f"Blue: echo fell · Orange: echo rose · Normal rate: {c['quiet'] * 100:.1f}%"
+            share = f"{fmt(cap['date'])[:-5]}: {c['stood'] * 100:.1f}%"
+            if c["stood"] >= c["stoodOut"]:
+                text = f"{share} of cells stood out against their own past"
+                sub = "Blue: echo fell · Orange: echo rose"
+                if c.get("before") is not None:
+                    sub += f" · Before the {WHAT[side]}: {c['before'] * 100:.1f}%"
+            else:  # too few to say in words that the place stood out
+                text = f"{share} of cells flagged: nothing clear stood out"
+                sub = f"We say “stood out” from {c['stoodOut'] * 100:.0f}% on."
             if c.get("newVersion"):
-                sub = "NASA's processing version changed between these passes, so some change may be processing."
-            seq.append((label(im, f"{c['stood'] * 100:.1f}% of cells stood out against their own past", sub), 4.0))
+                sub += " NASA's processing version changed with this pass."
+            seq.append((label(im, text, sub), 4.0))
         else:
             first = " · first pass after" if cap["first_after"] else ""
             seq.append((label(im, f"NISAR pass, {fmt(cap['date'])}", f"{cap['when'].capitalize()}{first}"), 0.9))
