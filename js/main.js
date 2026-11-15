@@ -3,7 +3,7 @@
 // Which version of the app this is. `tools/pack.sh` sets it; it shows at the
 // end of the credits line, so nobody has to wonder whether the browser is
 // still showing an older copy.
-const BUILD = '2026-11-15 18:45 UTC';
+const BUILD = '2026-11-15 19:07 UTC';
 
 import { CATEGORIES, FAMILIES, PALETTE, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START, RECENT_MS, OVERLAY_REACH_DAYS, NISAR_MOSAIC, NISAR_CHANGE, PREVIEW_STRETCH } from './config.js';
 import { fetchFeed, fetchArchive } from './feeds.js';
@@ -2584,7 +2584,11 @@ async function start() {
   globe.onView = (camera) => {
     const heading = Math.round(camera.heading);
     const tilted = camera.pitch > 5;
-    if (heading !== shown.heading) $('needle').style.transform = `rotate(${-heading}deg)`;
+    if (heading !== shown.heading) {
+      $('needle').style.transform = `rotate(${-heading}deg)`;
+      // North is no longer turned back by itself: the button shows when it is off.
+      $('nav-north').classList.toggle('turned', Math.abs(heading) > 2);
+    }
     if (tilted !== shown.tilted) {
       $('nav-tilt').classList.toggle('on', tilted);
       $('nav-tilt').textContent = tilted ? '2D' : '3D';

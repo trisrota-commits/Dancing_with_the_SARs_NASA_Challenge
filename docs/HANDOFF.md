@@ -1354,12 +1354,32 @@ at 89.5 degrees.
 close up and far out, tilted or not. Away from the poles the view does
 not turn during a drag. Inside the polar caps (from 62 to 80 degrees the
 hold on north is let go of gradually) the globe turns freely like a ball,
-so a pole can be pulled across; it comes out upside down, and north
-swings back to where the reader had it once the pointer is let go below
-80 degrees. A drag that begins on the sky pans as before. `flyTo` goes to
+so a pole can be pulled across; it comes out upside down and stays as it
+was left (see below). A drag that begins on the sky pans as before. `flyTo` goes to
 the heading the reader chose (`home`), not to one a pole left behind.
 Tests: `tests/controls.test.mjs` (no browser needed). Not tried on a
 touch screen: one finger uses the same code, two fingers are unchanged.
+
+Second round, the same evening, after the lead's screen recordings
+(MacBook, Safari, trackpad): the globe sat low on the screen, looking
+larger, and after letting go near a pole it was pulled round "like a
+rubber band".
+
+- The pull was the swing back to north. It is taken out: the view stays
+  as it was left. The north button (red outline when north is not at the
+  top) and going to any place turn it upright.
+- A globe low on the screen is a tilted view seen from far out. Tilt is
+  now limited by height (`mostTilt`: all of it up to 0.2 Earth radii, none
+  from 0.8 on), and a right-, Ctrl- or Shift-drag from that far out holds
+  the globe like any other drag. So the whole globe is always upright in
+  the middle; zooming out of a 3D view lays it flat.
+- Safari's trackpad pinch (`gesturestart`/`gesturechange`) zooms the
+  globe; before, it enlarged the page.
+
+How the tilt got there in the recordings is a reading of the pictures,
+not something that was reproduced: either the 3D button followed by
+zooming out, or a drag that the trackpad reported as a right-drag. Both
+ways are closed. Checked in Chromium by script, not on a Mac.
 
 ## How to run and test
 

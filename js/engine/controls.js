@@ -10,8 +10,16 @@
 // there: with north fixed, the pole is a wall the view cannot be pulled
 // across, and a small sideways drag beside it spins the whole planet. There
 // the globe turns freely like a ball in the hand. A view pulled across a
-// pole comes out upside down, as a ball would; once the pointer is let go
-// outside the cap, north swings back to where the reader had it.
+// pole comes out upside down, as a ball would, and stays as the reader left
+// it: the north button, or going to any place, turns it upright again. (It
+// first swung back by itself on letting go; that pulled the globe out of
+// the hand and was taken out.)
+//
+// Tilting and turning by hand need the view to be close to the ground.
+// From far out a tilt shows nothing more: it only pushes the globe off the
+// middle of the screen and makes it loom, and on a trackpad it happens by
+// accident (a drag with a second finger resting on the pad is a right-drag,
+// which tilts). So the whole globe always sits in the middle, upright.
 
 import * as THREE from '../../vendor/three.module.min.js';
 import { RAD, toVec, toLatLon, lonDelta } from './geo.js';
@@ -24,6 +32,10 @@ const CLEARANCE = 4e-5; // the camera stays about 250 m above the ground
 // above the second.
 const CAP_FROM = 62;
 const CAP_FREE = 80;
+// Tilt by height above the ground, in Earth radii: all of it up to the
+// first, none from the second on (the whole globe is in view from there).
+const TILT_FULL = 0.2;
+const TILT_NONE = 0.8;
 const MAX_TURN = 0.35; // radians one pointer event may turn the globe (a grazing ray near the edge would ask for more)
 
 export class GlobeControls {
@@ -57,7 +69,28 @@ export class GlobeControls {
     element.addEventListener('wheel', (e) => this.wheel(e), { passive: false });
     element.addEventListener('dblclick', () => this.zoomBy(0.45));
     element.addEventListener('contextmenu', (e) => e.preventDefault());
+    // Safari reports a pinch on a trackpad as its own "gesture" events and
+    // would otherwise enlarge the whole page: the pinch zooms the globe.
+    element.addEventListener('gesturestart', (e) => {
+      e.preventDefault();
+      this.stop();
+      this.pinchFrom = this.alt;
+    });
+    element.addEventListener('gesturechange', (e) => {
+      e.preventDefault();
+      if (this.pinchFrom && e.scale > 0) {
+        this.alt = Math.max(MIN_RANGE, Math.min(MAX_RANGE, this.pinchFrom / e.scale));
+        this.apply();
+      }
+    });
+    element.addEventListener('gestureend', (e) => e.preventDefault());
     this.apply();
+  }
+
+  // The steepest tilt the view may have at its present height.
+  mostTilt() {
+    const t = Math.max(0, Math.min(1, (TILT_NONE - this.alt) / (TILT_NONE - TILT_FULL)));
+    return MAX_PITCH * t * t * (3 - 2 * t);
   }
 
   // Degrees of latitude that one screen pixel covers at the target.
@@ -77,7 +110,8 @@ export class GlobeControls {
     this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     this.stop();
     this.travel = 0;
-    this.tilting = e.button === 2 || e.ctrlKey || e.shiftKey;
+    // (From far out a right-drag holds the globe like any other drag.)
+    this.tilting = (e.button === 2 || e.ctrlKey || e.shiftKey) && this.alt < TILT_NONE;
     if (this.pointers.size === 2) this.pinch = this.spread();
     this.grab = this.pointers.size === 1 && !this.tilting ? this.under(e.clientX, e.clientY) : null;
   }
@@ -282,13 +316,6 @@ export class GlobeControls {
     } else if (this.spin) {
       this.lon += dt * 2.2;
       this.apply();
-    } else if (this.pointers.size === 0 && Math.abs(this.lat) < CAP_FREE && Math.abs(lonDelta(this.home, this.heading)) > 0.01) {
-      // Let go of after a pull across a pole: north swings back to where
-      // the reader had it, about the middle of the view.
-      const left = lonDelta(this.home, this.heading);
-      this.heading = Math.abs(left) < 0.2 ? this.home : this.heading + left * Math.min(1, dt * 5);
-      this.velocity.lat = this.velocity.lon = 0;
-      this.apply();
     } else if (this.pointers.size === 0 && (Math.abs(this.velocity.lat) > 1e-5 || Math.abs(this.velocity.lon) > 1e-5)) {
       this.lat += this.velocity.lat;
       this.lon += this.velocity.lon;
@@ -313,7 +340,7 @@ export class GlobeControls {
   apply() {
     this.lat = Math.max(-89.5, Math.min(89.5, this.lat));
     this.lon = ((((this.lon + 180) % 360) + 360) % 360) - 180;
-    this.pitch = Math.max(0, Math.min(MAX_PITCH, this.pitch));
+    this.pitch = Math.max(0, Math.min(this.mostTilt(), this.pitch));
     this.heading = ((((this.heading + 180) % 360) + 360) % 360) - 180;
 
     const cam = this.camera;
