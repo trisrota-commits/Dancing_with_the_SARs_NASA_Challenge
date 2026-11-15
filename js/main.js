@@ -2204,7 +2204,7 @@ async function loadChange() {
     `Each pass from ${about.after.from} to ${about.after.to} against the same pass ${about.gapDays} days earlier (${about.before.from} to ${about.before.to}); NISAR flies the same tracks every 12 days. ` +
     `${about.notCalibrated} Changes under ${about.deadBand} are not drawn; full colour is ${about.full} or more. ` +
     `A pair of passes is only used where it compares like with like: ${pct(about.numbers.accepted)} of the overlap was, and ${pct(about.numbers.covered)} of the map is covered. ` +
-    `${about.limits} While this is on, the radar picture itself is hidden. Built ${about.built} by tools/change.py.`;
+    `${about.limits} ${about.checked || ''} While this is on, the radar picture itself is hidden. Built ${about.built} by tools/change.py.`;
 }
 
 // The day a context layer is shown for: the chosen day, or the newest day

@@ -36,6 +36,14 @@ footprint rule, 26 % by the colour rule; half the map covered. Ground
 that should not change reads near zero (Sahara core -1.3, central
 Australia -0.6 of 255), where the mosaic comparison read up to -22.
 
+Checked against the calibrated measurements in data/measured/ at the six
+places where the picture and a measurement are the same two passes: the
+direction agrees at five, at 7 to 10 units of the picture per decibel
+(Aletsch, a fire in Utah, a flood in Italy, the Okavango, Rondonia). At
+the rice fields of Bardhaman it does not: between 24 September and 11
+November HH fell by 1.3 dB and HV rose by 2.4 dB, and the picture, which
+mixes both channels, got brighter.
+
 What remains, and is said in the app: the "after" day differs by up to 24
 days from place to place, so where the ground was freezing during the
 window neighbouring passes show different amounts of change with a
@@ -327,7 +335,7 @@ def main() -> None:
             "sd": round(float(finite.std()), 2),
             "beyond25": round(float((np.abs(finite) > 25).mean()), 4),
         },
-        "limits": "The 'after' day differs by up to 24 days from place to place, so neighbouring passes can show different amounts of change with a straight edge between them. Rainforest reads 5 to 7 units darker for a reason not established. Holes: no pair of passes that compares like with like.",
+        "limits": "The 'after' day differs by up to 24 days from place to place, so neighbouring passes can show different amounts of change with a straight edge between them. The picture mixes both radar channels: where they move in opposite directions (as over rice at harvest, where HH falls and HV rises) it can read brighter while the HH echo got weaker. Rainforest reads 5 to 7 units darker for a reason not established. Holes: no pair of passes that compares like with like.",
         "tiles": tiles,
     }
     with open(os.path.join(tmp, "about.json"), "w") as f:

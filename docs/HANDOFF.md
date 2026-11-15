@@ -1011,6 +1011,40 @@ the paddy's November value?
   mean nothing; on the M 7.0 near Nagqu it was three times worse than
   "the same as last time").
 
+### The planet-wide change picture, baselines, and a film tool (15 Nov, late afternoon)
+
+- **`tools/change.py` and `data/change/`** (970 tiles, 14 MB): each pass
+  of 20 October to 12 November against the same pass 48 days earlier.
+  The method, the two rules that leave pairs out, the numbers and the
+  limits are in the script's header and in `about.json`. In the app: a
+  switch "What changed in 48 days, whole planet" in the NISAR menu
+  (`loadChange`, `globe.showChange`); a veil layer (`fill`, new in the
+  engine) dims the basemap under it and the radar picture is hidden
+  while it is on. A helper session did the feasibility step; comparing
+  two mosaics, tried first, gives false strips.
+- **Checked against the calibrated measurements** where the picture and
+  a measurement are the same two passes (6 places): same direction at 5,
+  at 7 to 10 picture units per dB. Not at Bardhaman at harvest, where HH
+  fell and HV rose: the picture mixes both channels. The key says so.
+- **Baselines for the prediction check** (asked for by the team's data
+  analyst): persistence, the mean of the earlier passes, a line through
+  the last two, a least-squares trend through the last four; the model
+  is judged against the best of them. A three-way question (down, stay,
+  up; 1 dB is a move) gives a flat-out accuracy next to the accuracy of
+  always naming the commonest answer. Bardhaman: model RMSE 1.62 dB
+  against 1.79 for the best baseline; direction accuracy 0.57 against
+  0.44 for the commonest answer and 0.56 for the two-point line. At the
+  five other places no model beats the best baseline.
+- **Past data for the model** (the lead's question): Bardhaman is
+  measured from 29 October 2025 on and three more rice regions are
+  added, to see whether a model that has seen a harvest predicts one.
+  The measuring run for it was started at 14:32 UTC; its result is not
+  in this section.
+- **`tools/film.js`** films the app frame by frame with a stepped clock;
+  its header holds what was learnt. The 30-second demo of the Bardhaman
+  case is made with it.
+- The measuring job's Earthdata token lasts 60 days.
+
 ### Visual rules (lead, 14 Nov, night)
 
 The lead, after one screenshot confused them: no arbitrary colours; one
