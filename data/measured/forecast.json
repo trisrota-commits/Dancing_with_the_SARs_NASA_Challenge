@@ -93,6 +93,37 @@
   }
  },
  {
+  "id": "mekong",
+  "name": "Mekong Delta",
+  "cells": 1024,
+  "passes": 11,
+  "best": "learnt",
+  "last": {
+   "rmse": 0.73,
+   "mae": 0.47,
+   "within90": 0.97,
+   "r2": 0.947,
+   "spearman": 0.966,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.14,
+   "mae": 0.75,
+   "within90": 1.51,
+   "r2": 0.87,
+   "spearman": 0.918,
+   "skill": -1.466
+  },
+  "learnt": {
+   "rmse": 0.7,
+   "mae": 0.44,
+   "within90": 0.96,
+   "r2": 0.951,
+   "spearman": 0.972,
+   "skill": 0.077
+  }
+ },
+ {
   "id": "okavango",
   "name": "Okavango Delta",
   "cells": 3600,
@@ -124,6 +155,37 @@
   }
  },
  {
+  "id": "punjab",
+  "name": "Punjab plains",
+  "cells": 1024,
+  "passes": 26,
+  "best": "last",
+  "last": {
+   "rmse": 1.08,
+   "mae": 0.73,
+   "within90": 1.64,
+   "r2": 0.894,
+   "spearman": 0.949,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.71,
+   "mae": 1.18,
+   "within90": 2.61,
+   "r2": 0.733,
+   "spearman": 0.884,
+   "skill": -1.518
+  },
+  "learnt": {
+   "rmse": 1.19,
+   "mae": 0.85,
+   "within90": 1.8,
+   "r2": 0.872,
+   "spearman": 0.937,
+   "skill": -0.213
+  }
+ },
+ {
   "id": "rondonia",
   "name": "Rond\u00f4nia",
   "cells": 1361,
@@ -152,6 +214,37 @@
    "r2": 0.749,
    "spearman": 0.884,
    "skill": -0.218
+  }
+ },
+ {
+  "id": "sacramento",
+  "name": "Sacramento Valley rice",
+  "cells": 1024,
+  "passes": 28,
+  "best": "last",
+  "last": {
+   "rmse": 1.38,
+   "mae": 0.87,
+   "within90": 2.15,
+   "r2": 0.838,
+   "spearman": 0.925,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.95,
+   "mae": 1.25,
+   "within90": 3.06,
+   "r2": 0.681,
+   "spearman": 0.884,
+   "skill": -0.974
+  },
+  "learnt": {
+   "rmse": 1.39,
+   "mae": 0.91,
+   "within90": 2.14,
+   "r2": 0.837,
+   "spearman": 0.922,
+   "skill": -0.009
   }
  },
  {
