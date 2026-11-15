@@ -4,7 +4,7 @@
 // something changed.
 
 import * as THREE from '../vendor/three.module.min.js';
-import { CATEGORIES, BASEMAPS, OVERLAYS, NISAR_TILES, NISAR_MOSAIC, PALETTE } from './config.js';
+import { CATEGORIES, BASEMAPS, OVERLAYS, NISAR_TILES, NISAR_MOSAIC, NISAR_CHANGE, PALETTE } from './config.js';
 import { pointInPolygon } from './incidents.js';
 import { RAD, EARTH_RADIUS_M, toVec, toLatLon, greatCircle, sunDirection, rgb } from './engine/geo.js';
 import { GlobeControls } from './engine/controls.js';
@@ -233,7 +233,7 @@ export class Globe {
     // Day and night shading eases back while data is on the ground.
     // (Also while the whole planet is shown as the radar sees it: the
     // radar works at night, and the picture is the point.)
-    const night = !this.nightOn ? 0 : this.pictures.length || this.focusTarget || this.state.nisar?.days > 12 ? 0.25 : 1;
+    const night = !this.nightOn ? 0 : this.pictures.length || this.focusTarget || this.state.nisar?.days > 12 || this.state.change ? 0.25 : 1;
     if (Math.abs(this.night - night) > 0.002) {
       this.night = Math.abs(this.night - night) < 0.01 ? night : this.night + (night - this.night) * Math.min(1, dt * 2.5);
       this.tiles.uniforms.uNight.value = this.night;
@@ -396,7 +396,17 @@ export class Globe {
     }
     // (Not while the two wavelengths are compared: the stack has no side,
     // so NISAR's strips would show on Sentinel-1's side of the divider too.)
-    if (s.nisar && !s.bands) {
+    // The planet-wide change picture stands in for the radar picture
+    // while it is on: blue and orange over the radar's own greens and
+    // oranges would be unreadable. A veil dims the basemap under it, so
+    // that the colours stand out and a place without a pair of passes to
+    // compare reads as "nothing to show", not as "no change".
+    const change = s.change && !s.bands ? this.change : null;
+    if (change) {
+      layers.push({ fill: 'rgba(5, 9, 15, 0.74)' });
+      layers.push({ url: `${NISAR_CHANGE.url}?v=${encodeURIComponent(change.built || '')}`, maxLevel: change.levels, has: change.has });
+    }
+    if (s.nisar && !s.bands && !change) {
       const end = Date.parse(s.nisar.date);
       // The whole planet with the ready-made mosaic: that one picture
       // serves the far and the continent view, and the daily layers it
@@ -434,6 +444,23 @@ export class Globe {
 
   // The ready-made whole-planet picture, from its `about.json`:
   // { from, to, built, levels, tiles: { level: ['x/y', …] } }, or null.
+  // The planet-wide change picture, from its `about.json` (see
+  // tools/change.py); `showChange` puts it on the globe.
+  setChange(about) {
+    this.change = null;
+    if (about?.tiles && Number.isInteger(about.levels)) {
+      const held = Object.fromEntries(Object.entries(about.tiles).map(([z, list]) => [z, new Set(list)]));
+      this.change = { built: about.built, levels: about.levels, has: (z, x, y) => !!held[z]?.has(`${x}/${y}`) };
+    }
+    if (this.state.change) this.applyLayers();
+  }
+
+  showChange(on) {
+    if (!!on === !!this.state.change) return;
+    this.state.change = !!on;
+    this.applyLayers();
+  }
+
   setMosaic(about) {
     this.mosaic = null;
     if (about?.tiles && about.to && Number.isInteger(about.levels)) {

@@ -837,6 +837,15 @@ export class TileGlobe {
     const { z, x, y } = tile;
     const peek = round === 'peek';
     const only = peek ? undefined : round;
+    // A layer that is one colour everywhere (a veil that dims what lies
+    // under it): nothing to fetch.
+    if (layer.fill) {
+      if (only === 'sharp') return false;
+      target.globalAlpha = alpha;
+      target.fillStyle = layer.fill;
+      target.fillRect(0, 0, SIZE, SIZE);
+      return true;
+    }
     // A layer may only show from a certain level on: further out, a
     // ready-made picture of the same data (the mosaic) takes its place.
     if (layer.minLevel && z < layer.minLevel) return false;
@@ -1009,7 +1018,7 @@ export class TileGlobe {
       const up = Math.max(0, z - SHEET_REACH);
       for (const layer of this.layers) {
         if (layer.base) this.drawLayer(ctx, tile, layer, 1, round);
-        else if (layer.has) this.drawLayer(ctx, tile, layer, layer.alpha ?? 1, round);
+        else if (layer.has || layer.fill) this.drawLayer(ctx, tile, layer, layer.alpha ?? 1, round);
         else if (layer.sparse && layer.sheet && !layer.side && layer.mask == null && !layer.minLevel) {
           const sheet = this.images.get(layer.sheet);
           if (sheet?.state === 'ready' && this.sheetHolds(sheet, z - up, x >> up, y >> up)) this.drawSheet(ctx, tile, sheet, layer.alpha ?? 1);
@@ -2266,7 +2275,7 @@ export class TileGlobe {
           const name = `${level}/${x}/${y}`;
           if (this.tiles.get(name)?.whole || this.kept.has(`${this.look}/${name}`)) continue;
           for (const layer of this.layers) {
-            if (layer.mask != null || layer.keep) continue;
+            if (layer.mask != null || layer.keep || layer.fill) continue;
             // From this far the world picture is the layer: no tile is drawn.
             if (layer.sparse && layer.sheet && level <= SHEET_LEVEL + 1) continue;
             if (layer.minLevel && level < layer.minLevel) continue;

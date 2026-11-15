@@ -150,6 +150,14 @@ export const NISAR_MOSAIC = {
   about: 'data/mosaic/about.json',
 };
 
+// How the whole planet's radar picture changed in 48 days, pass against
+// the same pass: see-through tiles made by tools/change.py, with an
+// `about.json` that says which days were compared and how.
+export const NISAR_CHANGE = {
+  url: 'data/change/{z}/{x}/{y}.webp',
+  about: 'data/change/about.json',
+};
+
 export const NISAR_TILES = {
   id: 'NISAR_L2_Geocoded_Polarimetric_Covariance',
   url: gibs('NISAR_L2_Geocoded_Polarimetric_Covariance', 'png', 13),
