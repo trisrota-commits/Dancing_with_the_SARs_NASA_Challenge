@@ -1930,6 +1930,18 @@ export class TileGlobe {
         // real picture is grey (ice, bare ground), it is the one that says so.
         const fromMap = source === 'map' || (source === 'kept' && kept.headers.get('x-from') === 'map');
         seen = bitmap ? this.inspect(bitmap, !fromMap && !!entry.layer?.colour, !!entry.layer?.colour) : { faulty: 'it is not a picture' };
+        // The file itself says whether it is sound, before any pixel is
+        // judged: the tile service's damaged files are the wrong kind of
+        // PNG (see `pngKind`), whatever they happen to look like. The
+        // pixel checks above stay as a second net. (A blank one is left
+        // to the rule for empty tiles below.)
+        if (!fromMap && entry.layer?.colour && !seen.blank) {
+          const kind = pngKind(new Uint8Array(await blob.slice(0, 26).arrayBuffer()));
+          if (kind !== 2) {
+            if (!seen.faulty) seen.picture?.close?.();
+            seen = { faulty: `it is the wrong kind of picture (PNG colour type ${kind}, not 2)` };
+          }
+        }
         if (seen.faulty) bitmap?.close?.();
       }
       // Nothing here. The map service is believed; the tile service only
@@ -2322,6 +2334,23 @@ export class TileGlobe {
   get busy() {
     return this.downloading > 0 || this.queue.length > 0 || this.elevationLoading > 0 || this.elevationQueue.length > 0;
   }
+}
+
+// The kind of PNG a file says it is: its colour type (0 grey, 2 colour,
+// 3 palette, 4 grey with transparency, 6 colour with transparency), or -1
+// if it is no PNG. NASA's tile service delivers every sound NISAR tile as
+// kind 2 (colour, with pure black as the see-through colour). For some
+// days and places it delivers the same tile as another kind, and that file
+// decodes as noise, as solid black, or as a dark grey square. Measured on
+// 15 Nov over north-east China, level 9, 26 days: 388 of 563 tiles were
+// kind 2 and all sound; the other 175 were kinds 0, 3, 4 and 6 and all
+// damaged. Judging pixels caught 174 of them and showed one, a dark grey
+// square; the kind catches all 175. (Sentinel-1's sound tiles are kind 6,
+// so this rule is for layers marked `colour` only.)
+export function pngKind(bytes) {
+  const png = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+  if (bytes.length < 26 || png.some((b, i) => bytes[i] !== b)) return -1;
+  return bytes[25];
 }
 
 // A short fingerprint of some bytes (FNV-1a), to tell whether a picture
