@@ -17,14 +17,18 @@ Dancing with the SARs: a live globe of Earth's changing surface, seen by NISAR
 ## High-level summary
 
 Radar satellites see the ground through cloud, smoke and darkness, but a
-radar picture means little to most people. Our app puts the NISAR radar
-mission on a 3D globe next to the natural events the world's agencies
-report as they happen: earthquakes, fires, floods, storms, volcanoes.
-Click an event and you see what NISAR saw there before and after, what
-changed between the two passes, and a labelled hypothesis of why. Click
-any other spot on Earth and you get a NISAR time-lapse of it. Every
-number is computed from the data, every source is one click away, and
-nothing needs a login, a key or an installation.
+radar picture means little to most people. Our app opens on the whole
+planet as NASA's NISAR radar sees it and lets anyone follow one place
+through time. Our lead case is the rice bowl of West Bengal. From
+NISAR's calibrated data the app shows the fields of Bardhaman flooded in
+July, the rice standing tall by October and the harvest in November,
+measured in decibels over twelve passes. It then tests how well each
+next pass could have been predicted from the ones before, and shows how
+far off that prediction was. The same globe carries the earthquakes,
+fires, floods and storms the world's agencies report as they happen,
+with NISAR's passes before and after each and what changed between
+them. Every number is computed from the data, every source is one click
+away, and nothing needs a login, a key or an installation.
 
 ## Link to the project
 
@@ -79,6 +83,20 @@ repository: https://github.com/trisrota-commits/Dancing_with_the_SARs_NASA_Chall
   since. What a visitor has looked at stays sharp for the rest
   of the visit. One switch shows a single 12-day cycle, 6, 3 or 1 day
   instead.
+- **A prediction, with its error.** For every place measured through
+  eight passes or more, the app tests how well the next pass could have
+  been predicted from the passes before it, in cells of 500 m, and shows
+  the error: RMSE, MAE, an error margin, R² and Spearman, and accuracy,
+  precision, recall and F1 for "a strong change by the next pass". Over
+  the rice fields of Bardhaman a small model that has learnt how the
+  fields moved beats "the same as last time" (RMSE 1.62 against 1.95 dB)
+  and follows the growing crop to within 0.3 dB on the area's average.
+  It misses the harvest by 1.7 dB: it had never seen one. Where little
+  changes (a delta, a reservoir, glaciers, forest) nothing beats "the
+  same as last time", which is off by about half a decibel. So the app
+  does not claim to foretell. It uses the prediction to tell a change
+  from the ordinary: at the harvest pass 16 % of the cells fell outside
+  the range they had kept to, against 0 to 4 % on the five passes before.
 - **NISAR itself, live.** The satellite's real position, its orbit, the
   edges of its radar swath, and an estimate of its next pass over any
   event, labelled as computed.
@@ -92,8 +110,8 @@ food-security planner who has to estimate a district's harvest before it
 is reported. Our lead case is the rice bowl of West Bengal, the fields of
 Bardhaman: the app shows NISAR's calibrated measurements there through a
 whole monsoon crop, from flooded paddies in July to standing rice in
-October and the harvest in November, and what a pass 12 days later is
-expected to read.
+October and the harvest in November, what the next pass was expected to
+read, and how many fields did something else.
 [Team: one sentence on your own connection to West Bengal and to
 farming, if you want it in. The challenge text invites it.]
 

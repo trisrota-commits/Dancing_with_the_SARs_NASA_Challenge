@@ -1,0 +1,467 @@
+{
+ "id": "rondonia",
+ "name": "Rond\u00f4nia",
+ "track": "161-A-173-DHDH",
+ "cellM": 500.0,
+ "cells": 1361,
+ "passes": 9,
+ "from": "2026-06-25",
+ "to": "2026-10-23",
+ "channel": "co-polarised backscatter, dB",
+ "strongDb": 3.0,
+ "ways": [
+  {
+   "key": "last",
+   "name": "Same as last time",
+   "how": "The next pass is predicted to read what the last one read."
+  },
+  {
+   "key": "line",
+   "name": "Straight line on",
+   "how": "The last value plus the last step."
+  },
+  {
+   "key": "learnt",
+   "name": "Learnt from the cells' past",
+   "how": "A ridge regression on the last 3 passes of both channels and the days since the last pass, fitted on every cell's history before the pass predicted."
+  }
+ ],
+ "overall": {
+  "last": {
+   "n": 7995,
+   "rmse": 1.19,
+   "mae": 0.82,
+   "within90": 1.91,
+   "r2": 0.775,
+   "spearman": 0.896,
+   "skill": 0.0,
+   "strong": {
+    "happened": 0.026,
+    "accuracy": 0.974,
+    "precision": null,
+    "recall": 0.0,
+    "f1": null,
+    "tp": 0,
+    "fp": 0,
+    "fn": 208,
+    "tn": 7787
+   }
+  },
+  "line": {
+   "n": 7756,
+   "rmse": 2.22,
+   "mae": 1.54,
+   "within90": 3.59,
+   "r2": 0.231,
+   "spearman": 0.696,
+   "skill": -2.61,
+   "strong": {
+    "happened": 0.025,
+    "accuracy": 0.965,
+    "precision": 0.307,
+    "recall": 0.34,
+    "f1": 0.323,
+    "tp": 65,
+    "fp": 147,
+    "fn": 126,
+    "tn": 7418
+   }
+  },
+  "learnt": {
+   "n": 7517,
+   "rmse": 1.27,
+   "mae": 0.93,
+   "within90": 1.97,
+   "r2": 0.749,
+   "spearman": 0.884,
+   "skill": -0.218,
+   "strong": {
+    "happened": 0.024,
+    "accuracy": 0.945,
+    "precision": 0.138,
+    "recall": 0.251,
+    "f1": 0.179,
+    "tp": 45,
+    "fp": 280,
+    "fn": 134,
+    "tn": 7058
+   }
+  }
+ },
+ "best": "last",
+ "byDate": [
+  {
+   "time": 1788602477000,
+   "date": "2026-09-05",
+   "seenMean": -6.58,
+   "lastMean": -7.91,
+   "last": {
+    "n": 1595,
+    "rmse": 1.79,
+    "mae": 1.34,
+    "within90": 2.86,
+    "r2": 0.394,
+    "spearman": 0.924,
+    "skill": 0.0,
+    "strong": {
+     "happened": 0.088,
+     "accuracy": 0.912,
+     "precision": null,
+     "recall": 0.0,
+     "f1": null,
+     "tp": 0,
+     "fp": 0,
+     "fn": 141,
+     "tn": 1454
+    },
+    "predMean": -7.91
+   },
+   "line": {
+    "n": 1361,
+    "rmse": 2.54,
+    "mae": 1.83,
+    "within90": 4.14,
+    "r2": -0.094,
+    "spearman": 0.897,
+    "skill": -0.983,
+    "strong": {
+     "happened": 0.091,
+     "accuracy": 0.914,
+     "precision": 1.0,
+     "recall": 0.056,
+     "f1": 0.107,
+     "tp": 7,
+     "fp": 0,
+     "fn": 117,
+     "tn": 1237
+    },
+    "predMean": -8.29
+   },
+   "learnt": {
+    "n": 1361,
+    "rmse": 1.72,
+    "mae": 1.23,
+    "within90": 2.8,
+    "r2": 0.498,
+    "spearman": 0.929,
+    "skill": 0.091,
+    "strong": {
+     "happened": 0.091,
+     "accuracy": 0.909,
+     "precision": null,
+     "recall": 0.0,
+     "f1": null,
+     "tp": 0,
+     "fp": 0,
+     "fn": 124,
+     "tn": 1237
+    },
+    "predMean": -7.71
+   }
+  },
+  {
+   "time": 1789639277000,
+   "date": "2026-09-17",
+   "seenMean": -7.43,
+   "lastMean": -6.58,
+   "last": {
+    "n": 1600,
+    "rmse": 1.26,
+    "mae": 0.9,
+    "within90": 1.99,
+    "r2": 0.78,
+    "spearman": 0.931,
+    "skill": 0.0,
+    "strong": {
+     "happened": 0.029,
+     "accuracy": 0.971,
+     "precision": null,
+     "recall": 0.0,
+     "f1": null,
+     "tp": 0,
+     "fp": 0,
+     "fn": 46,
+     "tn": 1554
+    },
+    "predMean": -6.58
+   },
+   "line": {
+    "n": 1595,
+    "rmse": 2.99,
+    "mae": 2.19,
+    "within90": 4.74,
+    "r2": -0.227,
+    "spearman": 0.619,
+    "skill": -4.586,
+    "strong": {
+     "happened": 0.029,
+     "accuracy": 0.939,
+     "precision": 0.319,
+     "recall": 0.978,
+     "f1": 0.481,
+     "tp": 45,
+     "fp": 96,
+     "fn": 1,
+     "tn": 1453
+    },
+    "predMean": -5.26
+   },
+   "learnt": {
+    "n": 1361,
+    "rmse": 0.98,
+    "mae": 0.64,
+    "within90": 1.6,
+    "r2": 0.875,
+    "spearman": 0.974,
+    "skill": 0.329,
+    "strong": {
+     "happened": 0.025,
+     "accuracy": 0.925,
+     "precision": 0.246,
+     "recall": 0.971,
+     "f1": 0.393,
+     "tp": 33,
+     "fp": 101,
+     "fn": 1,
+     "tn": 1226
+    },
+    "predMean": -7.56
+   }
+  },
+  {
+   "time": 1790676077000,
+   "date": "2026-09-29",
+   "seenMean": -7.08,
+   "lastMean": -7.43,
+   "last": {
+    "n": 1600,
+    "rmse": 0.94,
+    "mae": 0.66,
+    "within90": 1.54,
+    "r2": 0.839,
+    "spearman": 0.949,
+    "skill": 0.0,
+    "strong": {
+     "happened": 0.009,
+     "accuracy": 0.991,
+     "precision": null,
+     "recall": 0.0,
+     "f1": null,
+     "tp": 0,
+     "fp": 0,
+     "fn": 15,
+     "tn": 1585
+    },
+    "predMean": -7.43,
+    "expected": 2.47,
+    "outside": 0.022
+   },
+   "line": {
+    "n": 1600,
+    "rmse": 2.04,
+    "mae": 1.39,
+    "within90": 3.39,
+    "r2": 0.242,
+    "spearman": 0.902,
+    "skill": -3.703,
+    "strong": {
+     "happened": 0.009,
+     "accuracy": 0.974,
+     "precision": 0.217,
+     "recall": 0.667,
+     "f1": 0.328,
+     "tp": 10,
+     "fp": 36,
+     "fn": 5,
+     "tn": 1549
+    },
+    "predMean": -8.27,
+    "expected": 4.52,
+    "outside": 0.043
+   },
+   "learnt": {
+    "n": 1595,
+    "rmse": 1.51,
+    "mae": 1.3,
+    "within90": 2.21,
+    "r2": 0.584,
+    "spearman": 0.92,
+    "skill": -1.579,
+    "strong": {
+     "happened": 0.009,
+     "accuracy": 0.894,
+     "precision": 0.062,
+     "recall": 0.733,
+     "f1": 0.115,
+     "tp": 11,
+     "fp": 165,
+     "fn": 4,
+     "tn": 1415
+    },
+    "predMean": -5.81,
+    "expected": 2.35,
+    "outside": 0.081
+   }
+  },
+  {
+   "time": 1791712877000,
+   "date": "2026-10-11",
+   "seenMean": -7.63,
+   "lastMean": -7.08,
+   "last": {
+    "n": 1600,
+    "rmse": 0.91,
+    "mae": 0.68,
+    "within90": 1.45,
+    "r2": 0.888,
+    "spearman": 0.967,
+    "skill": 0.0,
+    "strong": {
+     "happened": 0.002,
+     "accuracy": 0.998,
+     "precision": null,
+     "recall": 0.0,
+     "f1": null,
+     "tp": 0,
+     "fp": 0,
+     "fn": 3,
+     "tn": 1597
+    },
+    "predMean": -7.08,
+    "expected": 2.17,
+    "outside": 0.028
+   },
+   "line": {
+    "n": 1600,
+    "rmse": 1.74,
+    "mae": 1.25,
+    "within90": 2.8,
+    "r2": 0.591,
+    "spearman": 0.803,
+    "skill": -2.643,
+    "strong": {
+     "happened": 0.002,
+     "accuracy": 0.991,
+     "precision": 0.133,
+     "recall": 0.667,
+     "f1": 0.222,
+     "tp": 2,
+     "fp": 13,
+     "fn": 1,
+     "tn": 1584
+    },
+    "predMean": -6.73,
+    "expected": 4.12,
+    "outside": 0.036
+   },
+   "learnt": {
+    "n": 1600,
+    "rmse": 1.31,
+    "mae": 1.08,
+    "within90": 2.01,
+    "r2": 0.769,
+    "spearman": 0.967,
+    "skill": -1.064,
+    "strong": {
+     "happened": 0.002,
+     "accuracy": 0.99,
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": null,
+     "tp": 0,
+     "fp": 13,
+     "fn": 3,
+     "tn": 1584
+    },
+    "predMean": -6.56,
+    "expected": 2.27,
+    "outside": 0.071
+   }
+  },
+  {
+   "time": 1792749677000,
+   "date": "2026-10-23",
+   "seenMean": -7.38,
+   "lastMean": -7.63,
+   "last": {
+    "n": 1600,
+    "rmse": 0.74,
+    "mae": 0.52,
+    "within90": 1.18,
+    "r2": 0.896,
+    "spearman": 0.977,
+    "skill": 0.0,
+    "strong": {
+     "happened": 0.002,
+     "accuracy": 0.998,
+     "precision": null,
+     "recall": 0.0,
+     "f1": null,
+     "tp": 0,
+     "fp": 0,
+     "fn": 3,
+     "tn": 1597
+    },
+    "predMean": -7.63,
+    "expected": 2.02,
+    "outside": 0.024
+   },
+   "line": {
+    "n": 1600,
+    "rmse": 1.53,
+    "mae": 1.08,
+    "within90": 2.58,
+    "r2": 0.554,
+    "spearman": 0.948,
+    "skill": -3.276,
+    "strong": {
+     "happened": 0.002,
+     "accuracy": 0.998,
+     "precision": 0.333,
+     "recall": 0.333,
+     "f1": 0.333,
+     "tp": 1,
+     "fp": 2,
+     "fn": 2,
+     "tn": 1595
+    },
+    "predMean": -8.19,
+    "expected": 3.85,
+    "outside": 0.027
+   },
+   "learnt": {
+    "n": 1600,
+    "rmse": 0.53,
+    "mae": 0.41,
+    "within90": 0.85,
+    "r2": 0.946,
+    "spearman": 0.975,
+    "skill": 0.486,
+    "strong": {
+     "happened": 0.002,
+     "accuracy": 0.998,
+     "precision": 0.5,
+     "recall": 0.333,
+     "f1": 0.4,
+     "tp": 1,
+     "fp": 1,
+     "fn": 2,
+     "tn": 1596
+    },
+    "predMean": -7.13,
+    "expected": 2.19,
+    "outside": 0.003
+   }
+  }
+ ],
+ "summary": "Predicting the next pass one step ahead, 5 times over 7,995 cell readings: the best way here is \"same as last time\", off by 0.82 dB on average, and within 1.91 dB for nine cells in ten. It was furthest off for the pass of 2026-09-05 (1.79 dB). The most surprising pass was that of 2026-10-11: 3% of the cells fell outside the range nine in ten had kept to before (\u00b12.17 dB).",
+ "surprise": {
+  "date": "2026-10-11",
+  "time": 1791712877000,
+  "outside": 0.028,
+  "expected": 2.17
+ },
+ "method": "Calibrated NISAR backscatter (GCOV, gamma-naught) in cells of 500 m on track 161-A-173-DHDH. Each pass from the 5th on is predicted from the passes before it only, and compared with what was measured. RMSE and MAE in dB; '9 in 10' is the error nine cells in ten stay under. The yes/no question is whether a cell changes by 3 dB or more by the next pass. 'Outside the expected range' is the share of cells whose miss was larger than nine in ten misses on the passes predicted before; about 10 % is ordinary.",
+ "limits": "One season of data: no way of predicting has seen a harvest, a flood or a thaw here before it happened. Neighbouring cells change together, so they are fewer independent samples than their number.",
+ "generated": "2026-11-15T14:19:13Z"
+}

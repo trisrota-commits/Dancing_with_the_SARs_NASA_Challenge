@@ -963,6 +963,54 @@ on 15 November found otherwise. Do not claim a first.
 - Also learnt: NASA's layer starts on 29 October 2025, not in 2026; the
   app's date picker starts on 1 April 2026.
 
+### Can the next pass be predicted? (team discussion, 15 Nov, afternoon)
+
+The idea is Trisrota's: predict what NISAR's next pass over a place will
+read, and judge the prediction by its measured error (RMSE, MAE, R²,
+Spearman; accuracy, precision, recall and F1 for rare events) before
+building anything on it. The lead added: what is the error margin for
+the paddy's November value?
+
+- **Data.** `tools/measure.py --grid 500` writes every pass cell by cell
+  (`<site>_grid.json`); the scheduled job does so now. Bardhaman: 1,024
+  cells of 500 m, 12 passes.
+- **`tools/forecast.py`** predicts each pass from the fifth on, from the
+  passes before it only, three ways: the same as last time; a straight
+  line on; and a ridge regression on the last three passes of both
+  channels, fitted on every cell's history so far ("learnt"). It writes
+  `<site>_forecast.json` for sites with eight passes or more (six sites
+  on 15 November) and the app shows it under the measurements
+  (`forecastHtml` in `js/measured.js`). Test: `python
+  tests/test_forecast.py` (made-up cells whose behaviour is known; a
+  check that nothing of the future goes into a prediction).
+- **What it found, rice fields of Bardhaman.** Learnt: RMSE 1.62 dB, MAE
+  1.19, nine cells in ten within 2.61 dB, R² 0.81, Spearman 0.92. Same
+  as last time: RMSE 1.95, MAE 1.54. While the crop grew (12 September
+  to 18 October) the learnt way had the area's mean right to within
+  0.3 dB. At the harvest pass (11 November) it predicted -4.4 dB and
+  NISAR measured -6.1 dB: 1.7 dB off, RMSE 1.92. It had never seen a
+  harvest. "A change of 3 dB or more by the next pass" happened in
+  11.9 % of cell readings; the learnt way called it with precision 0.41
+  and recall 0.15 (F1 0.22). That is poor.
+- **What it found elsewhere.** Aletsch, the GERD reservoir, Jakobshavn,
+  the Okavango and Rondônia: nothing beats "the same as last time", off
+  by 0.4 to 0.8 dB on average, nine cells in ten within 0.9 to 1.9 dB.
+  That figure is the yardstick for calling a change real there.
+- **What the prediction is good for.** Not for foretelling. For telling
+  a change from the ordinary: the share of cells outside the range nine
+  in ten had kept to on the passes before. Bardhaman: 1, 0, 4, 1 and 0 %
+  on the five passes of the growing crop, 16 % at the harvest pass.
+  Okavango: 25 % on 24 October. Jakobshavn: 36 % on 29 September.
+- **What must not be claimed.** That the app predicts harvests, floods
+  or fires. There is one season of data, so no model here has seen a
+  turning point before it happened; a seasonal forecast needs a second
+  year. Cells next to each other change together, so the thousands of
+  cell readings are fewer independent samples.
+- Events with fewer than eight passes get no prediction check (with five
+  passes the learnt way is fitted on one or two steps and its numbers
+  mean nothing; on the M 7.0 near Nagqu it was three times worse than
+  "the same as last time").
+
 ### Visual rules (lead, 14 Nov, night)
 
 The lead, after one screenshot confused them: no arbitrary colours; one

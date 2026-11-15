@@ -126,7 +126,11 @@ export function forecastHtml(f) {
   };
   const happened = f.overall.last?.strong?.happened;
   const dates = f.byDate
-    .map((r) => `<tr><td>${esc(r.date)}</td><td>${num(r.seenMean, 1)}</td><td>${num(r[f.best]?.predMean, 1)}</td><td>${num(r[f.best]?.rmse)}</td></tr>`)
+    .map((r) => {
+      const b = r[f.best] || {};
+      const out = b.outside == null ? '–' : `${(b.outside * 100).toFixed(0)} %`;
+      return `<tr${f.surprise?.time === r.time ? ' class="best"' : ''}><td>${esc(r.date)}</td><td>${num(r.seenMean, 1)}</td><td>${num(b.predMean, 1)}</td><td>${num(b.rmse)}</td><td>${out}</td></tr>`;
+    })
     .join('');
   return `<div class="card measured forecast">
     <div class="src">Computed from the measurements · a test of predictability, not a forecast</div>
@@ -141,10 +145,11 @@ export function forecastHtml(f) {
       <tr><th scope="col">Way of predicting</th><th scope="col">Accuracy</th><th scope="col">Precision</th><th scope="col">Recall</th><th scope="col">F1</th></tr>
       ${f.ways.map(strong).join('')}
     </table>
-    <details class="chart-table">
-      <summary>Every pass that was predicted</summary>
-      <table><tr><th>Pass</th><th>Measured (mean)</th><th>Predicted (mean)</th><th>RMSE</th></tr>${dates}</table>
-    </details>
+    <table class="forecast-table">
+      <caption>Pass by pass, with the best way: the mean over all cells, and how many cells fell outside the range nine in ten had kept to before (about 10 % is ordinary)</caption>
+      <tr><th scope="col">Pass</th><th scope="col">Measured</th><th scope="col">Predicted</th><th scope="col">RMSE</th><th scope="col">Outside</th></tr>
+      ${dates}
+    </table>
     <p class="hint"><strong>Method.</strong> ${esc(f.method)}</p>
     <p class="hint"><strong>Limits.</strong> ${esc(f.limits)} Made ${esc(f.generated.slice(0, 10))}.</p>
   </div>`;

@@ -28,7 +28,13 @@ passes before the one predicted are ever used):
        R2, Spearman      how well prediction and measurement agree
        skill             how much smaller the squared error is than that
                          of "last" (0 = no better, 1 = perfect)
-  3. A yes/no question, for the measures used with rare events: "will
+  3. Says how surprising each pass was: the share of cells that fell
+     outside the range nine cells in ten had stayed within on the passes
+     predicted before it. About one in ten is nothing unusual; many more
+     means the ground did something the passes before gave no sign of.
+     This is the use a prediction has here: not to foretell, but to tell
+     a change from the ordinary.
+  4. A yes/no question, for the measures used with rare events: "will
      this cell change by 3 dB or more (half or double the echo's power)
      by the next pass?" Answered by each way's own prediction and scored
      with accuracy, precision, recall and F1, next to how often it
@@ -60,6 +66,8 @@ import numpy as np
 OUT_DIR = Path(__file__).resolve().parent.parent / "data" / "measured"
 LAGS = 3  # passes of history a prediction looks at
 FIRST = LAGS + 1  # the first pass predicted: there must be history to learn from as well
+MIN_PASSES = 8  # fewer passes than this are too little history to test a prediction on
+QUIET = 0.9  # "the expected range": what this share of cells stayed within on the passes before
 STRONG_DB = 3.0  # "a strong change": half or double the echo's power
 RIDGE = 1.0
 DAY = 86_400_000
@@ -172,15 +180,25 @@ def forecast(grid: dict) -> dict | None:
     times = grid["times"]
     hh = np.array(grid["hh"], dtype=float)
     hv = np.array(grid["hv"], dtype=float) if grid.get("hv") else None
-    if len(times) <= FIRST:
+    if len(times) < MIN_PASSES:
         return None
     by_date, pooled = [], {w["key"]: {"pred": [], "seen": [], "last": []} for w in WAYS}
+    earlier = {w["key"]: [] for w in WAYS}  # each way's misses on the passes predicted so far
     for t in range(FIRST, len(times)):
         preds = predict(hh, hv, times, t)
         row = {"time": times[t], "date": day(times[t]), "seenMean": round(float(np.nanmean(hh[t])), 2), "lastMean": round(float(np.nanmean(hh[t - 1])), 2)}
         for key, p in preds.items():
             s = scores(p, hh[t], hh[t - 1])
             row[key] = s and {**s, "predMean": round(float(np.nanmean(p)), 2)}
+            miss = np.abs(p - hh[t])
+            miss = miss[np.isfinite(miss)]
+            # How surprising this pass was, going by the misses before it only.
+            if row[key] and len(earlier[key]) >= 2 and len(miss):
+                expected = float(np.quantile(np.concatenate(earlier[key]), QUIET))
+                row[key]["expected"] = round(expected, 2)
+                row[key]["outside"] = round(float((miss > expected).mean()), 3)
+            if len(miss):
+                earlier[key].append(miss)
             pooled[key]["pred"].append(p)
             pooled[key]["seen"].append(hh[t])
             pooled[key]["last"].append(hh[t - 1])
@@ -191,6 +209,8 @@ def forecast(grid: dict) -> dict | None:
     best = min((k for k in overall if overall[k]), key=lambda k: overall[k]["rmse"])
     margin = overall[best]["within90"]
     worst = max(by_date, key=lambda r: (r[best] or {}).get("rmse", 0))
+    judged = [r for r in by_date if r[best] and "outside" in r[best]]
+    surprise = max(judged, key=lambda r: r[best]["outside"]) if judged else None
     return {
         "id": grid["id"],
         "name": grid["name"],
@@ -210,12 +230,19 @@ def forecast(grid: dict) -> dict | None:
             f"Predicting the next pass one step ahead, {len(by_date)} times over {overall[best]['n']:,} cell readings: "
             f"the best way here is \"{next(w['name'] for w in WAYS if w['key'] == best).lower()}\", off by {overall[best]['mae']} dB on average, "
             f"and within {margin} dB for nine cells in ten. It was furthest off for the pass of {worst['date']} ({worst[best]['rmse']} dB)."
+            + (
+                f" The most surprising pass was that of {surprise['date']}: {surprise[best]['outside']:.0%} of the cells fell outside the range nine in ten had kept to before (±{surprise[best]['expected']} dB)."
+                if surprise
+                else ""
+            )
         ),
+        "surprise": surprise and {"date": surprise["date"], "time": surprise["time"], "outside": surprise[best]["outside"], "expected": surprise[best]["expected"]},
         "method": (
             f"Calibrated NISAR backscatter (GCOV, gamma-naught) in cells of {grid['cellM']:g} m on track {grid['track']}. "
             f"Each pass from the {FIRST + 1}th on is predicted from the passes before it only, and compared with what was measured. "
-            "RMSE and MAE in dB; 'within90' is the error nine cells in ten stay under; 'skill' compares the squared error with that of 'same as last time'. "
-            f"The yes/no question is whether a cell changes by {STRONG_DB:g} dB or more by the next pass."
+            "RMSE and MAE in dB; '9 in 10' is the error nine cells in ten stay under. "
+            f"The yes/no question is whether a cell changes by {STRONG_DB:g} dB or more by the next pass. "
+            "'Outside the expected range' is the share of cells whose miss was larger than nine in ten misses on the passes predicted before; about 10 % is ordinary."
         ),
         "limits": "One season of data: no way of predicting has seen a harvest, a flood or a thaw here before it happened. Neighbouring cells change together, so they are fewer independent samples than their number.",
         "generated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -231,7 +258,10 @@ def main() -> None:
             continue
         result = forecast(grid)
         if not result:
-            print(f"{grid['id']}: too few passes to test a prediction ({len(grid['times'])})")
+            print(f"{grid['id']}: too few passes to test a prediction ({len(grid['times'])}; {MIN_PASSES} are needed)")
+            stale = OUT_DIR / f"{grid['id']}_forecast.json"
+            if stale.exists():
+                stale.unlink()
             continue
         (OUT_DIR / f"{grid['id']}_forecast.json").write_text(json.dumps(result, indent=1) + "\n")
         o = result["overall"]

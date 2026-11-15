@@ -77,8 +77,22 @@ def main() -> None:
     print("still fields:", {k: (v["rmse"], v["skill"]) for k, v in flat.items()})
 
     # Too few passes: no result, not a made-up one.
-    short = make_grid(passes=forecast.FIRST)
+    short = make_grid(passes=forecast.MIN_PASSES - 1)
     assert forecast.forecast(short) is None
+
+    # A pass on which the fields do something new is a surprise: most cells
+    # fall outside the range they had kept to; on the passes before, about
+    # one in ten does.
+    sudden = make_grid()
+    for c in range(0, 400, 2):
+        sudden["hh"][10][c] -= 4.0  # half the fields are cut on the eleventh pass
+    by_date = forecast.forecast(sudden)
+    quiet = [r["learnt"]["outside"] for r in by_date["byDate"] if "outside" in r["learnt"] and r["time"] < sudden["times"][10]]
+    hit = next(r for r in by_date["byDate"] if r["time"] == sudden["times"][10])["learnt"]["outside"]
+    assert quiet and max(quiet) < 0.25 and 0.45 < hit < 0.6, (quiet, hit)
+    # (The pass after is a surprise as well: the fields did not go on falling, as their last step suggested.)
+    assert by_date["surprise"]["date"] in (forecast.day(sudden["times"][10]), forecast.day(sudden["times"][11])), by_date["surprise"]
+    print("a sudden change:", [round(q, 2) for q in quiet], "->", hit)
 
     # Cells with gaps are left out of the count, not filled.
     holes = make_grid()
