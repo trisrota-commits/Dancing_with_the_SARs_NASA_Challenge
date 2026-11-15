@@ -53,17 +53,18 @@ export function measuredLine(d, eventTime) {
 // A share of the cells as the app writes it: one decimal under 10 %.
 export const share = (v) => (v == null ? '–' : v < 0.095 ? `${(v * 100).toFixed(1)} %` : `${Math.round(v * 100)} %`);
 
-// When the app says "stood out" in words: the share is at least 2 % of the
-// cells and five times what the same rules flag on the passes before.
-export const stoodOut = (stood, quiet) => stood != null && stood >= 0.02 && stood >= 5 * (quiet ?? 0);
+// When the app says "stood out" in words: at least 2 % of the cells. With
+// nothing happening the detector flags under 1 % (measured, see the test
+// with changes put in), so 2 % is at least twice that.
+export const stoodOut = (stood) => stood != null && stood >= 0.02;
 
 // One more line for the event card: how much of the ground stood out on
-// the first pass after the event (tools/detect.py), next to the place's
-// own quiet level.
+// the first pass after the event (tools/detect.py).
 export function stoodLine(f) {
   const e = f?.event;
   if (!e || e.stood == null) return '';
-  return `On NISAR's first pass afterwards (${e.firstPassAfter}), ${share(e.stood)} of the ground read differently from its own past; on the passes before, the same rules flag ${share(e.quiet)}.`;
+  const rough = e.grade === 'pair' ? ' (a rough reading: one pass before the event)' : e.grade === 'two' ? ' (two passes before the event)' : '';
+  return `On NISAR's first pass afterwards (${e.firstPassAfter}), ${share(e.stood)} of the ground stood out from what it had read before${rough}.${stoodOut(e.stood) ? '' : ' That is no more than is flagged when nothing has happened.'}`;
 }
 
 // Measured sites; an empty list when none have been made yet.
@@ -117,7 +118,8 @@ function load(entry) {
 }
 
 export const changeImageUrl = (d) => DIR + d.change.image;
-export const stoodImageUrl = (f) => DIR + f.picture.image;
+// The picture of one pass's flagged cells (a row of the detector's result).
+export const stoodImageUrl = (row) => DIR + row.image;
 
 // ---- how well the next pass can be predicted (tools/forecast.py) ----
 
@@ -236,19 +238,32 @@ export function sensitivity() {
 export function detectHtml(f, sens) {
   const e = f.event;
   const at = e ? f.byDate.find((r) => r.date === e.firstPassAfter) : f.byDate.find((r) => r.time === f.most.time);
+  // What the detector flags when nothing has happened, from the test.
+  const idle = sens?.groups?.all?.flaggedWithNothingPutIn?.new;
   let head = '';
   if (e && !at) head = `No pass after the event of ${esc(e.date)} can be judged yet.`;
   else if (at) {
+    const lead = e ? `On NISAR's first pass after the event of ${esc(e.date)} (${esc(at.date)})` : `On the pass that stood out most (${esc(at.date)})`;
     head =
-      `${e ? `On NISAR's first pass after the event of ${esc(e.date)} (${esc(at.date)})` : `On the pass that stood out most (${esc(at.date)})`}, ${share(at.stood)} of the ground read differently from its own past. On the passes before, the same rules flag ${share(at.quiet)}.` +
-      (stoodOut(at.stood, at.quiet) ? '' : ' That is within what is ordinary here: nothing stood out.') +
-      (at.stillNext != null && at.stood > 0 ? ` A pass later, ${share(at.stillNext)} of those cells were still changed.` : '') +
+      `${lead}, ${share(at.stood)} of the ground stood out` +
+      (at.grade === 'both' ? ': it had left both what the place read on its two latest passes and its own usual reading.' : at.baseline === 1 ? ' against the pass before it.' : ' against the two passes before it.') +
+      (stoodOut(at.stood) ? '' : ` That is no more than these rules flag when nothing has happened${idle != null ? ` (${share(idle)} in our test)` : ''}: nothing stood out.`) +
+      (f.rough?.[at.grade] ? ` ${esc(f.rough[at.grade])}` : '') +
+      (at.stillNext != null && at.stood > 0 ? ` A pass later, ${share(at.stillNext)} of those cells still stood out.` : '') +
       (at.newVersion ? ` This pass is also the first made with a newer version of NASA's processing (${esc(at.newVersion.to)} after ${esc(at.newVersion.from)}): a step that is the same everywhere drops out of this comparison, an uneven one would not.` : '');
   }
+  // What kind of change: the flagged cells by how the two channels moved.
+  const kinds = at?.kinds
+    ? Object.entries(at.kinds)
+        .filter(([k, v]) => v >= 0.05 && f.kindsOfChange?.[k])
+        .sort((a, b) => b[1] - a[1])
+        .map(([k, v]) => `<li><b>${share(v)}</b> ${esc(f.kindsOfChange[k])}</li>`)
+        .join('')
+    : '';
   const rows = f.byDate
     .map(
-      (r) =>
-        `<tr${r === at ? ' class="best"' : ''}><td>${esc(r.date)}${e?.firstPassAfter === r.date ? ' <span class="tag">after the event</span>' : ''}${r.newVersion ? ` <span class="tag" title="NASA's processing changed from ${esc(r.newVersion.from)} to ${esc(r.newVersion.to)} with this pass">new processing</span>` : ''}</td><td>${share(r.stood)}</td><td>${share(r.quiet)}</td><td>${r.stillNext == null ? '–' : share(r.stillNext)}</td></tr>`,
+      (r, i) =>
+        `<tr data-pass="${i}" tabindex="0" role="button" title="Show this pass on the globe"${r === at ? ' class="best"' : ''}><td>${esc(r.date)}${e?.firstPassAfter === r.date ? ' <span class="tag">after the event</span>' : ''}${r.newVersion ? ` <span class="tag" title="NASA's processing changed from ${esc(r.newVersion.from)} to ${esc(r.newVersion.to)} with this pass">new processing</span>` : ''}${r.grade !== 'both' ? ` <span class="tag" title="${esc(f.rough?.[r.grade] || '')}">${r.grade === 'pair' ? 'one pass before' : 'two passes before'}</span>` : ''}</td><td>${share(r.stood)}</td><td>${share(r.recent)}</td><td>${share(r.long)}</td></tr>`,
     )
     .join('');
   const p = f.picture;
@@ -259,17 +274,17 @@ export function detectHtml(f, sens) {
   const group = sens?.groups?.[mine?.group || 'quiet'];
   if (group?.rows?.length) {
     const wide = Math.max(...group.rows.map((r) => r.cells));
-    const line = (r) => `<tr><th scope="row">${r.db > 0 ? '+' : '−'}${Math.abs(r.db)} dB</th><td>${num(r.new.recall)}</td><td>${num(r.new.precision)}</td><td>${num(r.new.f1)}</td><td>${num(r.old.f1)}</td></tr>`;
     const other = sens.groups[mine?.group === 'changing' ? 'quiet' : 'changing'];
     const three = (g) => g?.rows?.find((r) => r.cells === wide && r.db === -3);
+    const line = (r) => `<tr><th scope="row">${r.db > 0 ? '+' : '−'}${Math.abs(r.db)} dB</th><td>${num(r.new.recall)}</td><td>${num(r.new.precision)}</td><td>${num(r.new.f1)}</td><td>${num(r.long.f1)}</td><td>${num(r.old.f1)}</td></tr>`;
     trust = `<details class="fold inner"><summary>How far can this be trusted? A test with changes put in</summary>
-    <p class="hint">Not a measurement: a patch of ${wide} by ${wide} cells in a real, quiet pass was raised or lowered by a set amount, ${sens.trialsEach} times a pass, and the detector run on it. ${mine ? `This place counts as ${mine.group === 'quiet' ? 'quiet' : 'changing by itself'}: with nothing put in, the detector flags ${share(mine.new)} of its cells.` : ''}</p>
+    <p class="hint">Not a measurement: a patch of ${wide} by ${wide} cells in a real pass before any event was raised or lowered by a set amount, ${sens.trialsEach} times a pass, and the detector run on it. ${mine ? `This place counts as ${mine.group === 'quiet' ? 'quiet' : 'changing by itself'}.` : ''}</p>
     <table class="forecast-table">
       <caption>${esc(group.what)}: ${group.places.length} places, ${group.passes} passes. Recall: how much of the patch was found. Precision: how much of what was flagged lay in the patch</caption>
-      <tr><th scope="col">Change put in</th><th scope="col">Recall</th><th scope="col">Precision</th><th scope="col">F1</th><th scope="col" title="${esc(sens.names.old)}">F1, rule used before</th></tr>
+      <tr><th scope="col">Change put in</th><th scope="col">Recall</th><th scope="col">Precision</th><th scope="col">F1</th><th scope="col" title="${esc(sens.names.long)}">F1, one key</th><th scope="col" title="${esc(sens.names.old)}">F1, first rule</th></tr>
       ${group.rows.filter((r) => r.cells === wide).map(line).join('')}
     </table>
-    <p class="hint">With nothing put in, this detector flags ${share(group.flaggedWithNothingPutIn.new)} of the cells in this group and the rule used before ${share(group.flaggedWithNothingPutIn.old)}.${three(other) ? ` In the other group (${esc(other.what.toLowerCase())}) a drop of 3 dB is found with recall ${num(three(other).new.recall)} at precision ${num(three(other).new.precision)}.` : ''} ${esc(sens.limits)}</p>
+    <p class="hint">With nothing put in, the detector flags ${share(group.flaggedWithNothingPutIn.new)} of the cells in this group; the long key alone ${share(group.flaggedWithNothingPutIn.long)}, the rule we used first ${share(group.flaggedWithNothingPutIn.old)}.${three(other) ? ` In the other group (${esc(other.what.toLowerCase())}) a drop of 3 dB is found with recall ${num(three(other).new.recall)} at precision ${num(three(other).new.precision)}.` : ''} With few passes before an event it is rougher: for a drop of 3 dB in this group, recall ${num(three(group).recent.recall)} at precision ${num(three(group).recent.precision)} with two passes before, ${num(three(group).pair.recall)} at ${num(three(group).pair.precision)} with one. ${esc(sens.limits)}</p>
     </details>`;
   }
   return `<div class="card measured forecast">
@@ -277,20 +292,21 @@ export function detectHtml(f, sens) {
     ${head ? `<p><strong>${head}</strong></p>` : ''}
     ${
       p
-        ? `<div class="actions"><button class="primary" id="stood-map">Show where it stood out</button></div>
+        ? `<div class="actions"><button class="primary" id="stood-map">Show where it stood out</button>${f.byDate.length > 1 ? ' <button id="stood-play">Play the passes</button>' : ''}</div>
     <ul class="legend">
-      <li><i style="--c: ${PALETTE.stronger}"></i>Orange: the echo rose against the cell's own past</li>
+      <li><i style="--c: ${PALETTE.stronger}"></i>Orange: the echo rose against what was usual</li>
       <li><i style="--c: ${PALETTE.weaker}"></i>Blue: it fell</li>
     </ul>`
         : ''
     }
+    ${kinds ? `<p class="hint"><strong>What kind of change?</strong> <span class="badge computed">Hypothesis</span> Of the cells that stood out, by how the two radar channels moved:</p><ul class="plain kinds">${kinds}</ul>` : ''}
     <table class="forecast-table passes">
-      <caption>Pass by pass: the share of cells that stood out, what the same rules flag on the passes before (the quiet level here), and how many of the flagged cells were still changed a pass later</caption>
-      <tr><th scope="col">Pass</th><th scope="col">Stood out</th><th scope="col">Quiet level</th><th scope="col">Still changed</th></tr>
+      <caption>Pass by pass: the share of cells that stood out (both keys), and each key alone: against the two latest passes, and against the cell's own history. Click a pass to see it on the globe</caption>
+      <tr><th scope="col">Pass</th><th scope="col">Stood out</th><th scope="col" title="Cells that left what the place read on its two latest passes">Latest two</th><th scope="col" title="Cells that left their own usual reading over the longer history">Own history</th></tr>
       ${rows}
     </table>
     ${trust}
-    <p class="hint"><strong>Method.</strong> ${esc(f.method)} “Stood out” is said in words where the share is at least 2 % and five times the quiet level.</p>
+    <p class="hint"><strong>Method.</strong> ${esc(f.method)} “Stood out” is said in words from 2 % of the cells on.</p>
     <p class="hint"><strong>Limits.</strong> ${esc(f.limits)} Made ${esc(f.generated.slice(0, 10))}.</p>
   </div>`;
 }

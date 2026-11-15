@@ -4,7 +4,7 @@
  "falseAlarm": 0.01,
  "groups": {
   "quiet": {
-   "what": "Places where the detector, with nothing put in, flags no more than its false-alarm rate (1%) of the cells",
+   "what": "Places where the long baseline, with nothing put in, flags no more than the false-alarm rate (1%) of the cells",
    "places": [
     "Aletsch Glacier (Konkordiaplatz)",
     "Prescribed Fire Cold Springs RX, Wasatch, Utah",
@@ -17,7 +17,10 @@
    ],
    "passes": 27,
    "flaggedWithNothingPutIn": {
-    "new": 0.0038,
+    "new": 0.0007,
+    "recent": 0.0066,
+    "long": 0.0038,
+    "pair": 0.0671,
     "old": 0.1161
    },
    "rows": [
@@ -27,8 +30,23 @@
      "km": 1.5,
      "new": {
       "recall": 0.976,
+      "precision": 0.894,
+      "f1": 0.933
+     },
+     "recent": {
+      "recall": 1.0,
+      "precision": 0.522,
+      "f1": 0.686
+     },
+     "long": {
+      "recall": 0.976,
       "precision": 0.638,
       "f1": 0.772
+     },
+     "pair": {
+      "recall": 1.0,
+      "precision": 0.111,
+      "f1": 0.2
      },
      "old": {
       "recall": 1.0,
@@ -41,9 +59,24 @@
      "cells": 3,
      "km": 1.5,
      "new": {
+      "recall": 0.812,
+      "precision": 0.876,
+      "f1": 0.843
+     },
+     "recent": {
+      "recall": 0.888,
+      "precision": 0.493,
+      "f1": 0.634
+     },
+     "long": {
       "recall": 0.873,
       "precision": 0.616,
       "f1": 0.722
+     },
+     "pair": {
+      "recall": 0.985,
+      "precision": 0.11,
+      "f1": 0.197
      },
      "old": {
       "recall": 0.989,
@@ -56,9 +89,24 @@
      "cells": 3,
      "km": 1.5,
      "new": {
+      "recall": 0.459,
+      "precision": 0.803,
+      "f1": 0.584
+     },
+     "recent": {
+      "recall": 0.514,
+      "precision": 0.362,
+      "f1": 0.425
+     },
+     "long": {
       "recall": 0.711,
       "precision": 0.57,
       "f1": 0.633
+     },
+     "pair": {
+      "recall": 0.929,
+      "precision": 0.104,
+      "f1": 0.187
      },
      "old": {
       "recall": 0.925,
@@ -71,9 +119,24 @@
      "cells": 3,
      "km": 1.5,
      "new": {
+      "recall": 0.086,
+      "precision": 0.432,
+      "f1": 0.143
+     },
+     "recent": {
+      "recall": 0.122,
+      "precision": 0.119,
+      "f1": 0.121
+     },
+     "long": {
       "recall": 0.335,
       "precision": 0.388,
       "f1": 0.36
+     },
+     "pair": {
+      "recall": 0.589,
+      "precision": 0.069,
+      "f1": 0.123
      },
      "old": {
       "recall": 0.596,
@@ -86,9 +149,24 @@
      "cells": 3,
      "km": 1.5,
      "new": {
+      "recall": 0.11,
+      "precision": 0.496,
+      "f1": 0.181
+     },
+     "recent": {
+      "recall": 0.148,
+      "precision": 0.142,
+      "f1": 0.145
+     },
+     "long": {
       "recall": 0.337,
       "precision": 0.393,
       "f1": 0.363
+     },
+     "pair": {
+      "recall": 0.641,
+      "precision": 0.075,
+      "f1": 0.134
      },
      "old": {
       "recall": 0.633,
@@ -101,9 +179,24 @@
      "cells": 3,
      "km": 1.5,
      "new": {
+      "recall": 0.437,
+      "precision": 0.794,
+      "f1": 0.564
+     },
+     "recent": {
+      "recall": 0.53,
+      "precision": 0.37,
+      "f1": 0.436
+     },
+     "long": {
       "recall": 0.673,
       "precision": 0.568,
       "f1": 0.616
+     },
+     "pair": {
+      "recall": 0.937,
+      "precision": 0.106,
+      "f1": 0.19
      },
      "old": {
       "recall": 0.938,
@@ -116,9 +209,24 @@
      "cells": 3,
      "km": 1.5,
      "new": {
+      "recall": 0.817,
+      "precision": 0.876,
+      "f1": 0.846
+     },
+     "recent": {
+      "recall": 0.897,
+      "precision": 0.497,
+      "f1": 0.639
+     },
+     "long": {
       "recall": 0.892,
       "precision": 0.636,
       "f1": 0.742
+     },
+     "pair": {
+      "recall": 0.989,
+      "precision": 0.111,
+      "f1": 0.2
      },
      "old": {
       "recall": 0.984,
@@ -132,8 +240,23 @@
      "km": 2.5,
      "new": {
       "recall": 0.982,
+      "precision": 0.959,
+      "f1": 0.97
+     },
+     "recent": {
+      "recall": 0.999,
+      "precision": 0.749,
+      "f1": 0.857
+     },
+     "long": {
+      "recall": 0.982,
       "precision": 0.816,
       "f1": 0.891
+     },
+     "pair": {
+      "recall": 1.0,
+      "precision": 0.268,
+      "f1": 0.423
      },
      "old": {
       "recall": 0.998,
@@ -146,9 +269,24 @@
      "cells": 5,
      "km": 2.5,
      "new": {
+      "recall": 0.799,
+      "precision": 0.951,
+      "f1": 0.868
+     },
+     "recent": {
+      "recall": 0.897,
+      "precision": 0.73,
+      "f1": 0.805
+     },
+     "long": {
       "recall": 0.863,
       "precision": 0.8,
       "f1": 0.83
+     },
+     "pair": {
+      "recall": 0.988,
+      "precision": 0.266,
+      "f1": 0.419
      },
      "old": {
       "recall": 0.987,
@@ -161,9 +299,24 @@
      "cells": 5,
      "km": 2.5,
      "new": {
+      "recall": 0.459,
+      "precision": 0.919,
+      "f1": 0.612
+     },
+     "recent": {
+      "recall": 0.531,
+      "precision": 0.617,
+      "f1": 0.571
+     },
+     "long": {
       "recall": 0.689,
       "precision": 0.767,
       "f1": 0.726
+     },
+     "pair": {
+      "recall": 0.937,
+      "precision": 0.256,
+      "f1": 0.402
      },
      "old": {
       "recall": 0.925,
@@ -176,9 +329,24 @@
      "cells": 5,
      "km": 2.5,
      "new": {
+      "recall": 0.079,
+      "precision": 0.666,
+      "f1": 0.141
+     },
+     "recent": {
+      "recall": 0.117,
+      "precision": 0.264,
+      "f1": 0.162
+     },
+     "long": {
       "recall": 0.342,
       "precision": 0.639,
       "f1": 0.445
+     },
+     "pair": {
+      "recall": 0.596,
+      "precision": 0.179,
+      "f1": 0.275
      },
      "old": {
       "recall": 0.596,
@@ -191,9 +359,24 @@
      "cells": 5,
      "km": 2.5,
      "new": {
+      "recall": 0.105,
+      "precision": 0.724,
+      "f1": 0.184
+     },
+     "recent": {
+      "recall": 0.154,
+      "precision": 0.325,
+      "f1": 0.209
+     },
+     "long": {
       "recall": 0.335,
       "precision": 0.645,
       "f1": 0.441
+     },
+     "pair": {
+      "recall": 0.634,
+      "precision": 0.19,
+      "f1": 0.292
      },
      "old": {
       "recall": 0.61,
@@ -206,9 +389,24 @@
      "cells": 5,
      "km": 2.5,
      "new": {
+      "recall": 0.454,
+      "precision": 0.916,
+      "f1": 0.607
+     },
+     "recent": {
+      "recall": 0.564,
+      "precision": 0.635,
+      "f1": 0.598
+     },
+     "long": {
       "recall": 0.683,
       "precision": 0.789,
       "f1": 0.732
+     },
+     "pair": {
+      "recall": 0.941,
+      "precision": 0.259,
+      "f1": 0.407
      },
      "old": {
       "recall": 0.937,
@@ -221,9 +419,24 @@
      "cells": 5,
      "km": 2.5,
      "new": {
+      "recall": 0.83,
+      "precision": 0.951,
+      "f1": 0.886
+     },
+     "recent": {
+      "recall": 0.92,
+      "precision": 0.739,
+      "f1": 0.819
+     },
+     "long": {
       "recall": 0.888,
       "precision": 0.83,
       "f1": 0.858
+     },
+     "pair": {
+      "recall": 0.993,
+      "precision": 0.27,
+      "f1": 0.425
      },
      "old": {
       "recall": 0.989,
@@ -234,7 +447,7 @@
    ]
   },
   "changing": {
-   "what": "Places that are themselves changing from pass to pass (the detector flags more than that with nothing put in)",
+   "what": "Places that are themselves changing from pass to pass (the long baseline flags more than that with nothing put in)",
    "places": [
     "Grand Ethiopian Renaissance Dam reservoir",
     "Sermeq Kujalleq (Jakobshavn)",
@@ -244,7 +457,10 @@
    ],
    "passes": 58,
    "flaggedWithNothingPutIn": {
-    "new": 0.0339,
+    "new": 0.0126,
+    "recent": 0.0429,
+    "long": 0.0339,
+    "pair": 0.0978,
     "old": 0.1087
    },
    "rows": [
@@ -253,9 +469,24 @@
      "cells": 3,
      "km": 1.5,
      "new": {
+      "recall": 0.778,
+      "precision": 0.248,
+      "f1": 0.376
+     },
+     "recent": {
+      "recall": 0.989,
+      "precision": 0.115,
+      "f1": 0.205
+     },
+     "long": {
       "recall": 0.781,
       "precision": 0.079,
       "f1": 0.144
+     },
+     "pair": {
+      "recall": 0.996,
+      "precision": 0.051,
+      "f1": 0.096
      },
      "old": {
       "recall": 0.994,
@@ -268,9 +499,24 @@
      "cells": 3,
      "km": 1.5,
      "new": {
+      "recall": 0.331,
+      "precision": 0.123,
+      "f1": 0.18
+     },
+     "recent": {
+      "recall": 0.658,
+      "precision": 0.079,
+      "f1": 0.142
+     },
+     "long": {
       "recall": 0.436,
       "precision": 0.046,
       "f1": 0.083
+     },
+     "pair": {
+      "recall": 0.94,
+      "precision": 0.048,
+      "f1": 0.091
      },
      "old": {
       "recall": 0.92,
@@ -283,9 +529,24 @@
      "cells": 3,
      "km": 1.5,
      "new": {
+      "recall": 0.162,
+      "precision": 0.065,
+      "f1": 0.092
+     },
+     "recent": {
+      "recall": 0.384,
+      "precision": 0.048,
+      "f1": 0.085
+     },
+     "long": {
       "recall": 0.26,
       "precision": 0.028,
       "f1": 0.051
+     },
+     "pair": {
+      "recall": 0.847,
+      "precision": 0.043,
+      "f1": 0.083
      },
      "old": {
       "recall": 0.724,
@@ -298,9 +559,24 @@
      "cells": 3,
      "km": 1.5,
      "new": {
+      "recall": 0.044,
+      "precision": 0.018,
+      "f1": 0.026
+     },
+     "recent": {
+      "recall": 0.108,
+      "precision": 0.014,
+      "f1": 0.025
+     },
+     "long": {
       "recall": 0.111,
       "precision": 0.012,
       "f1": 0.022
+     },
+     "pair": {
+      "recall": 0.466,
+      "precision": 0.024,
+      "f1": 0.046
      },
      "old": {
       "recall": 0.277,
@@ -313,9 +589,24 @@
      "cells": 3,
      "km": 1.5,
      "new": {
+      "recall": 0.048,
+      "precision": 0.02,
+      "f1": 0.028
+     },
+     "recent": {
+      "recall": 0.113,
+      "precision": 0.015,
+      "f1": 0.026
+     },
+     "long": {
       "recall": 0.099,
       "precision": 0.011,
       "f1": 0.02
+     },
+     "pair": {
+      "recall": 0.463,
+      "precision": 0.024,
+      "f1": 0.046
      },
      "old": {
       "recall": 0.267,
@@ -328,9 +619,24 @@
      "cells": 3,
      "km": 1.5,
      "new": {
+      "recall": 0.23,
+      "precision": 0.091,
+      "f1": 0.13
+     },
+     "recent": {
+      "recall": 0.396,
+      "precision": 0.049,
+      "f1": 0.088
+     },
+     "long": {
       "recall": 0.336,
       "precision": 0.036,
       "f1": 0.066
+     },
+     "pair": {
+      "recall": 0.864,
+      "precision": 0.044,
+      "f1": 0.084
      },
      "old": {
       "recall": 0.703,
@@ -343,9 +649,24 @@
      "cells": 3,
      "km": 1.5,
      "new": {
+      "recall": 0.468,
+      "precision": 0.169,
+      "f1": 0.249
+     },
+     "recent": {
+      "recall": 0.667,
+      "precision": 0.08,
+      "f1": 0.143
+     },
+     "long": {
       "recall": 0.596,
       "precision": 0.065,
       "f1": 0.117
+     },
+     "pair": {
+      "recall": 0.943,
+      "precision": 0.048,
+      "f1": 0.092
      },
      "old": {
       "recall": 0.911,
@@ -358,9 +679,24 @@
      "cells": 5,
      "km": 2.5,
      "new": {
+      "recall": 0.778,
+      "precision": 0.475,
+      "f1": 0.59
+     },
+     "recent": {
+      "recall": 0.985,
+      "precision": 0.265,
+      "f1": 0.417
+     },
+     "long": {
       "recall": 0.783,
       "precision": 0.189,
       "f1": 0.305
+     },
+     "pair": {
+      "recall": 0.997,
+      "precision": 0.133,
+      "f1": 0.235
      },
      "old": {
       "recall": 0.994,
@@ -373,9 +709,24 @@
      "cells": 5,
      "km": 2.5,
      "new": {
+      "recall": 0.347,
+      "precision": 0.289,
+      "f1": 0.315
+     },
+     "recent": {
+      "recall": 0.668,
+      "precision": 0.196,
+      "f1": 0.303
+     },
+     "long": {
       "recall": 0.439,
       "precision": 0.118,
       "f1": 0.186
+     },
+     "pair": {
+      "recall": 0.938,
+      "precision": 0.126,
+      "f1": 0.222
      },
      "old": {
       "recall": 0.912,
@@ -388,9 +739,24 @@
      "cells": 5,
      "km": 2.5,
      "new": {
+      "recall": 0.155,
+      "precision": 0.154,
+      "f1": 0.154
+     },
+     "recent": {
+      "recall": 0.372,
+      "precision": 0.12,
+      "f1": 0.181
+     },
+     "long": {
       "recall": 0.248,
       "precision": 0.071,
       "f1": 0.11
+     },
+     "pair": {
+      "recall": 0.843,
+      "precision": 0.115,
+      "f1": 0.202
      },
      "old": {
       "recall": 0.693,
@@ -403,9 +769,24 @@
      "cells": 5,
      "km": 2.5,
      "new": {
+      "recall": 0.039,
+      "precision": 0.044,
+      "f1": 0.041
+     },
+     "recent": {
+      "recall": 0.096,
+      "precision": 0.034,
+      "f1": 0.05
+     },
+     "long": {
       "recall": 0.095,
       "precision": 0.029,
       "f1": 0.044
+     },
+     "pair": {
+      "recall": 0.451,
+      "precision": 0.064,
+      "f1": 0.113
      },
      "old": {
       "recall": 0.257,
@@ -418,9 +799,24 @@
      "cells": 5,
      "km": 2.5,
      "new": {
+      "recall": 0.063,
+      "precision": 0.071,
+      "f1": 0.067
+     },
+     "recent": {
+      "recall": 0.123,
+      "precision": 0.043,
+      "f1": 0.064
+     },
+     "long": {
       "recall": 0.12,
       "precision": 0.036,
       "f1": 0.056
+     },
+     "pair": {
+      "recall": 0.477,
+      "precision": 0.068,
+      "f1": 0.12
      },
      "old": {
       "recall": 0.282,
@@ -433,9 +829,24 @@
      "cells": 5,
      "km": 2.5,
      "new": {
+      "recall": 0.239,
+      "precision": 0.228,
+      "f1": 0.234
+     },
+     "recent": {
+      "recall": 0.418,
+      "precision": 0.133,
+      "f1": 0.202
+     },
+     "long": {
       "recall": 0.343,
       "precision": 0.103,
       "f1": 0.159
+     },
+     "pair": {
+      "recall": 0.847,
+      "precision": 0.116,
+      "f1": 0.204
      },
      "old": {
       "recall": 0.712,
@@ -448,9 +859,24 @@
      "cells": 5,
      "km": 2.5,
      "new": {
+      "recall": 0.472,
+      "precision": 0.37,
+      "f1": 0.415
+     },
+     "recent": {
+      "recall": 0.683,
+      "precision": 0.2,
+      "f1": 0.31
+     },
+     "long": {
       "recall": 0.596,
       "precision": 0.185,
       "f1": 0.282
+     },
+     "pair": {
+      "recall": 0.943,
+      "precision": 0.127,
+      "f1": 0.224
      },
      "old": {
       "recall": 0.918,
@@ -479,7 +905,10 @@
    ],
    "passes": 85,
    "flaggedWithNothingPutIn": {
-    "new": 0.0243,
+    "new": 0.0089,
+    "recent": 0.0314,
+    "long": 0.0243,
+    "pair": 0.088,
     "old": 0.1111
    },
    "rows": [
@@ -488,9 +917,24 @@
      "cells": 3,
      "km": 1.5,
      "new": {
+      "recall": 0.841,
+      "precision": 0.336,
+      "f1": 0.481
+     },
+     "recent": {
+      "recall": 0.993,
+      "precision": 0.152,
+      "f1": 0.264
+     },
+     "long": {
       "recall": 0.843,
       "precision": 0.116,
       "f1": 0.204
+     },
+     "pair": {
+      "recall": 0.997,
+      "precision": 0.061,
+      "f1": 0.115
      },
      "old": {
       "recall": 0.996,
@@ -503,9 +947,24 @@
      "cells": 3,
      "km": 1.5,
      "new": {
+      "recall": 0.482,
+      "precision": 0.226,
+      "f1": 0.308
+     },
+     "recent": {
+      "recall": 0.731,
+      "precision": 0.117,
+      "f1": 0.201
+     },
+     "long": {
       "recall": 0.573,
       "precision": 0.083,
       "f1": 0.144
+     },
+     "pair": {
+      "recall": 0.954,
+      "precision": 0.059,
+      "f1": 0.11
      },
      "old": {
       "recall": 0.942,
@@ -518,9 +977,24 @@
      "cells": 3,
      "km": 1.5,
      "new": {
+      "recall": 0.255,
+      "precision": 0.135,
+      "f1": 0.176
+     },
+     "recent": {
+      "recall": 0.425,
+      "precision": 0.071,
+      "f1": 0.122
+     },
+     "long": {
       "recall": 0.402,
       "precision": 0.059,
       "f1": 0.104
+     },
+     "pair": {
+      "recall": 0.873,
+      "precision": 0.054,
+      "f1": 0.102
      },
      "old": {
       "recall": 0.787,
@@ -533,9 +1007,24 @@
      "cells": 3,
      "km": 1.5,
      "new": {
+      "recall": 0.057,
+      "precision": 0.034,
+      "f1": 0.042
+     },
+     "recent": {
+      "recall": 0.113,
+      "precision": 0.02,
+      "f1": 0.034
+     },
+     "long": {
       "recall": 0.181,
       "precision": 0.028,
       "f1": 0.048
+     },
+     "pair": {
+      "recall": 0.505,
+      "precision": 0.032,
+      "f1": 0.06
      },
      "old": {
       "recall": 0.377,
@@ -548,9 +1037,24 @@
      "cells": 3,
      "km": 1.5,
      "new": {
+      "recall": 0.067,
+      "precision": 0.04,
+      "f1": 0.05
+     },
+     "recent": {
+      "recall": 0.124,
+      "precision": 0.022,
+      "f1": 0.037
+     },
+     "long": {
       "recall": 0.174,
       "precision": 0.027,
       "f1": 0.046
+     },
+     "pair": {
+      "recall": 0.519,
+      "precision": 0.033,
+      "f1": 0.062
      },
      "old": {
       "recall": 0.382,
@@ -563,9 +1067,24 @@
      "cells": 3,
      "km": 1.5,
      "new": {
+      "recall": 0.295,
+      "precision": 0.155,
+      "f1": 0.203
+     },
+     "recent": {
+      "recall": 0.438,
+      "precision": 0.074,
+      "f1": 0.126
+     },
+     "long": {
       "recall": 0.442,
       "precision": 0.066,
       "f1": 0.115
+     },
+     "pair": {
+      "recall": 0.887,
+      "precision": 0.055,
+      "f1": 0.103
      },
      "old": {
       "recall": 0.777,
@@ -578,9 +1097,24 @@
      "cells": 3,
      "km": 1.5,
      "new": {
+      "recall": 0.578,
+      "precision": 0.264,
+      "f1": 0.362
+     },
+     "recent": {
+      "recall": 0.739,
+      "precision": 0.118,
+      "f1": 0.204
+     },
+     "long": {
       "recall": 0.689,
       "precision": 0.102,
       "f1": 0.178
+     },
+     "pair": {
+      "recall": 0.957,
+      "precision": 0.059,
+      "f1": 0.111
      },
      "old": {
       "recall": 0.934,
@@ -593,9 +1127,24 @@
      "cells": 5,
      "km": 2.5,
      "new": {
+      "recall": 0.842,
+      "precision": 0.582,
+      "f1": 0.689
+     },
+     "recent": {
+      "recall": 0.989,
+      "precision": 0.333,
+      "f1": 0.498
+     },
+     "long": {
       "recall": 0.845,
       "precision": 0.263,
       "f1": 0.401
+     },
+     "pair": {
+      "recall": 0.998,
+      "precision": 0.158,
+      "f1": 0.273
      },
      "old": {
       "recall": 0.995,
@@ -608,9 +1157,24 @@
      "cells": 5,
      "km": 2.5,
      "new": {
+      "recall": 0.488,
+      "precision": 0.448,
+      "f1": 0.468
+     },
+     "recent": {
+      "recall": 0.74,
+      "precision": 0.272,
+      "f1": 0.397
+     },
+     "long": {
       "recall": 0.572,
       "precision": 0.198,
       "f1": 0.294
+     },
+     "pair": {
+      "recall": 0.954,
+      "precision": 0.152,
+      "f1": 0.262
      },
      "old": {
       "recall": 0.935,
@@ -623,9 +1187,24 @@
      "cells": 5,
      "km": 2.5,
      "new": {
+      "recall": 0.25,
+      "precision": 0.295,
+      "f1": 0.271
+     },
+     "recent": {
+      "recall": 0.422,
+      "precision": 0.176,
+      "f1": 0.248
+     },
+     "long": {
       "recall": 0.386,
       "precision": 0.143,
       "f1": 0.209
+     },
+     "pair": {
+      "recall": 0.873,
+      "precision": 0.141,
+      "f1": 0.242
      },
      "old": {
       "recall": 0.766,
@@ -638,9 +1217,24 @@
      "cells": 5,
      "km": 2.5,
      "new": {
+      "recall": 0.051,
+      "precision": 0.08,
+      "f1": 0.063
+     },
+     "recent": {
+      "recall": 0.102,
+      "precision": 0.049,
+      "f1": 0.066
+     },
+     "long": {
       "recall": 0.172,
       "precision": 0.07,
       "f1": 0.1
+     },
+     "pair": {
+      "recall": 0.496,
+      "precision": 0.085,
+      "f1": 0.145
      },
      "old": {
       "recall": 0.363,
@@ -653,9 +1247,24 @@
      "cells": 5,
      "km": 2.5,
      "new": {
+      "recall": 0.076,
+      "precision": 0.117,
+      "f1": 0.092
+     },
+     "recent": {
+      "recall": 0.133,
+      "precision": 0.063,
+      "f1": 0.086
+     },
+     "long": {
       "recall": 0.188,
       "precision": 0.077,
       "f1": 0.109
+     },
+     "pair": {
+      "recall": 0.526,
+      "precision": 0.09,
+      "f1": 0.154
      },
      "old": {
       "recall": 0.385,
@@ -668,9 +1277,24 @@
      "cells": 5,
      "km": 2.5,
      "new": {
+      "recall": 0.306,
+      "precision": 0.35,
+      "f1": 0.327
+     },
+     "recent": {
+      "recall": 0.464,
+      "precision": 0.19,
+      "f1": 0.27
+     },
+     "long": {
       "recall": 0.449,
       "precision": 0.176,
       "f1": 0.253
+     },
+     "pair": {
+      "recall": 0.877,
+      "precision": 0.142,
+      "f1": 0.245
      },
      "old": {
       "recall": 0.783,
@@ -683,9 +1307,24 @@
      "cells": 5,
      "km": 2.5,
      "new": {
+      "recall": 0.584,
+      "precision": 0.508,
+      "f1": 0.543
+     },
+     "recent": {
+      "recall": 0.757,
+      "precision": 0.277,
+      "f1": 0.405
+     },
+     "long": {
       "recall": 0.688,
       "precision": 0.27,
       "f1": 0.387
+     },
+     "pair": {
+      "recall": 0.959,
+      "precision": 0.154,
+      "f1": 0.265
      },
      "old": {
       "recall": 0.94,
@@ -701,7 +1340,10 @@
    "id": "aletsch",
    "name": "Aletsch Glacier (Konkordiaplatz)",
    "passes": 8,
-   "new": 0.0038,
+   "new": 0.0009,
+   "recent": 0.0062,
+   "long": 0.0038,
+   "pair": 0.0576,
    "old": 0.0857,
    "group": "quiet"
   },
@@ -710,6 +1352,9 @@
    "name": "Prescribed Fire Cold Springs RX, Wasatch, Utah",
    "passes": 1,
    "new": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
+   "pair": 0.0503,
    "old": 0.0017,
    "group": "quiet"
   },
@@ -718,6 +1363,9 @@
    "name": "Flood in Italy",
    "passes": 1,
    "new": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
+   "pair": 0.0191,
    "old": 0.0312,
    "group": "quiet"
   },
@@ -726,6 +1374,9 @@
    "name": "Flood in Indonesia",
    "passes": 1,
    "new": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
+   "pair": 0.0087,
    "old": 0.1701,
    "group": "quiet"
   },
@@ -734,6 +1385,9 @@
    "name": "M 5.7 - 47 km WNW of Khuzdar, Pakistan",
    "passes": 1,
    "new": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
+   "pair": 0.0226,
    "old": 0.0278,
    "group": "quiet"
   },
@@ -742,6 +1396,9 @@
    "name": "M 7.0 - 189 km ENE of Nagqu, China",
    "passes": 1,
    "new": 0.0,
+   "recent": 0.0052,
+   "long": 0.0,
+   "pair": 0.1302,
    "old": 0.1024,
    "group": "quiet"
   },
@@ -749,7 +1406,10 @@
    "id": "gerd",
    "name": "Grand Ethiopian Renaissance Dam reservoir",
    "passes": 8,
-   "new": 0.0856,
+   "new": 0.0013,
+   "recent": 0.0196,
+   "long": 0.0856,
+   "pair": 0.1113,
    "old": 0.0975,
    "group": "changing"
   },
@@ -757,7 +1417,10 @@
    "id": "jakobshavn",
    "name": "Sermeq Kujalleq (Jakobshavn)",
    "passes": 8,
-   "new": 0.0237,
+   "new": 0.0058,
+   "recent": 0.0147,
+   "long": 0.0237,
+   "pair": 0.0458,
    "old": 0.1209,
    "group": "changing"
   },
@@ -765,7 +1428,10 @@
    "id": "mekong",
    "name": "Mekong Delta",
    "passes": 8,
-   "new": 0.0042,
+   "new": 0.0,
+   "recent": 0.007,
+   "long": 0.0042,
+   "pair": 0.0907,
    "old": 0.1096,
    "group": "quiet"
   },
@@ -773,7 +1439,10 @@
    "id": "okavango",
    "name": "Okavango Delta",
    "passes": 8,
-   "new": 0.0333,
+   "new": 0.0185,
+   "recent": 0.0438,
+   "long": 0.0333,
+   "pair": 0.0655,
    "old": 0.0856,
    "group": "changing"
   },
@@ -781,7 +1450,10 @@
    "id": "rondonia",
    "name": "Rond\u00f4nia",
    "passes": 6,
-   "new": 0.0067,
+   "new": 0.0021,
+   "recent": 0.0113,
+   "long": 0.0067,
+   "pair": 0.0658,
    "old": 0.2065,
    "group": "quiet"
   },
@@ -789,7 +1461,10 @@
    "id": "sacramento",
    "name": "Sacramento Valley rice",
    "passes": 25,
-   "new": 0.0261,
+   "new": 0.0163,
+   "recent": 0.0352,
+   "long": 0.0261,
+   "pair": 0.137,
    "old": 0.1303,
    "group": "changing"
   },
@@ -797,15 +1472,21 @@
    "id": "west-bengal",
    "name": "Rice fields of Bardhaman",
    "passes": 9,
-   "new": 0.0189,
+   "new": 0.0135,
+   "recent": 0.1096,
+   "long": 0.0189,
+   "pair": 0.0515,
    "old": 0.0684,
    "group": "changing"
   }
  ],
  "names": {
-  "new": "This detector (baseline per cell, both channels, clusters)",
+  "new": "This detector: both keys",
+  "recent": "The recent key alone (the two latest passes): what an event with two passes before it gets",
+  "long": "The long key alone (each cell's own history)",
+  "pair": "With a single pass before (the two-date test)",
   "old": "The rule used before (step against the neighbours' step, HH)"
  },
- "limits": "Only passes before any reported event are used. What is flagged outside the patch counts as a false alarm, though some of it may be real change nobody reported, so precision is a lower bound. Precision also depends on how much of the window the patch fills (a patch of 5 by 5 cells is 0.7 to 4 % of it). A real change is not a square and not the same in both channels. The two groups are told apart by the detector's own behaviour on the same passes, after the fact.",
- "generated": "2026-11-15T16:29:17Z"
+ "limits": "Only passes before any reported event are used. What is flagged outside the patch counts as a false alarm, though some of it may be real change nobody reported, so precision is a lower bound. Precision also depends on how much of the window the patch fills (a patch of 5 by 5 cells is 0.7 to 4 % of it). A real change is not a square and not the same in both channels. The two groups are told apart by the long baseline's own behaviour on the same passes, after the fact.",
+ "generated": "2026-11-15T17:20:01Z"
 }
