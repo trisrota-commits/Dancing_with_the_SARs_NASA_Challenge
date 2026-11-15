@@ -347,6 +347,29 @@ export class TileGlobe {
     this.kept = new Map();
     this.keptBytes = 0;
     this.keptLimit = KEPT_BYTES; // for whoever tells the reader about it
+    // A helper on another thread that compresses the kept tiles (see
+    // `compress`); null where the browser cannot run one.
+    this.keeper = null;
+    this.keeperJobs = new Map();
+    this.keeperId = 0;
+    try {
+      if (typeof Worker !== 'undefined' && typeof OffscreenCanvas !== 'undefined' && typeof createImageBitmap !== 'undefined') {
+        this.keeper = new Worker(new URL('./keeper.js', import.meta.url));
+        const answer = (id, blob) => {
+          const resolve = this.keeperJobs.get(id);
+          this.keeperJobs.delete(id);
+          resolve?.(blob);
+        };
+        this.keeper.onmessage = (event) => answer(event.data.id, event.data.blob);
+        // A helper that cannot be started or breaks is done without.
+        this.keeper.onerror = () => {
+          this.keeper = null;
+          for (const id of [...this.keeperJobs.keys()]) answer(id, null);
+        };
+      }
+    } catch {
+      this.keeper = null;
+    }
     // The bytes of a listed layer's tiles (the mosaic), by address: small
     // enough to hold for the whole planet (see `fill`).
     this.filled = new Map();
@@ -788,7 +811,7 @@ export class TileGlobe {
 
   drop(key, tile) {
     // What it shows is kept: when the reader comes back, it is there.
-    if (!tile.dirty || tile.keepFirst) this.keep(tile);
+    if (!tile.dirty || tile.keepFirst) this.keep(tile, true);
     this.group.remove(tile.mesh);
     tile.mesh.geometry.dispose();
     tile.mesh.material.dispose();
@@ -797,7 +820,8 @@ export class TileGlobe {
     tile.textureW?.dispose();
     // A canvas keeps its memory until it is collected; emptying it gives
     // the memory back at once, which matters on phones.
-    for (const c of [tile.canvas, tile.canvasB, tile.canvasW, tile.base]) if (c) c.width = c.height = 0;
+    // (The one being kept is emptied when it has been compressed.)
+    for (const c of [tile.canvas, tile.canvasB, tile.canvasW, tile.base]) if (c && c !== tile.keeping) c.width = c.height = 0;
     tile.dead = true;
     this.tiles.delete(key);
   }
@@ -1118,7 +1142,11 @@ export class TileGlobe {
   //
   // A kept tile belongs to one `look` (one exact list of layers) and
   // holds the layers only, never an outline or a single picture.
-  keep(tile) {
+  //
+  // `dying`: the tile is being let go, so its canvas can be handed over
+  // as it is (and is emptied once it is compressed). Otherwise the tile
+  // is about to be painted over, and a copy is taken first.
+  keep(tile, dying = false) {
     // (Not what was painted before the data behind the layers changed.)
     const epoch = this.epoch;
     const cut = this.cut;
@@ -1131,26 +1159,51 @@ export class TileGlobe {
       this.kept.set(name, have);
       return;
     }
-    // (The picture is taken now; only its compression happens later.)
-    (tile.base || tile.canvas).toBlob(
-      (blob) => {
-        if (!blob || epoch !== this.epoch || cut !== this.cut) return;
-        const old = this.kept.get(name);
-        if (old) this.keptBytes -= old.size;
-        this.kept.delete(name);
-        this.kept.set(name, blob);
-        this.keptBytes += blob.size;
-        for (const [oldest, b] of this.kept) {
-          if (this.keptBytes <= KEPT_BYTES) break;
-          this.kept.delete(oldest);
-          this.keptBytes -= b.size;
-        }
-      },
-      // Without loss: what comes back is the picture that left, pixel for
-      // pixel. (A lossy copy at a quarter of the size was tried; it washed
-      // the fine colour detail of the radar picture out visibly.)
-      'image/png',
-    );
+    let source = tile.base || tile.canvas;
+    if (dying) tile.keeping = source;
+    else {
+      const copy = document.createElement('canvas');
+      copy.width = copy.height = SIZE;
+      copy.getContext('2d').drawImage(source, 0, 0);
+      source = copy;
+    }
+    this.compress(source).then((blob) => {
+      source.width = source.height = 0;
+      if (!blob || epoch !== this.epoch || cut !== this.cut) return;
+      const old = this.kept.get(name);
+      if (old) this.keptBytes -= old.size;
+      this.kept.delete(name);
+      this.kept.set(name, blob);
+      this.keptBytes += blob.size;
+      for (const [oldest, b] of this.kept) {
+        if (this.keptBytes <= KEPT_BYTES) break;
+        this.kept.delete(oldest);
+        this.keptBytes -= b.size;
+      }
+    });
+  }
+
+  // A canvas as a PNG: without loss, so that what comes back is the
+  // picture that left, pixel for pixel. (A lossy copy at a quarter of the
+  // size was tried; it washed the fine colour detail of the radar picture
+  // out visibly.) The compressing is done on another thread where the
+  // browser allows: in Safari a canvas compresses itself on the page's
+  // own thread, and with a dozen tiles leaving the screen in one frame
+  // that showed as stutter while the globe was turned or zoomed.
+  compress(canvas) {
+    const here = () => new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+    if (!this.keeper) return here();
+    return createImageBitmap(canvas)
+      .then(
+        (bitmap) =>
+          new Promise((resolve) => {
+            if (!this.keeper) return resolve(null);
+            const id = ++this.keeperId;
+            this.keeperJobs.set(id, resolve);
+            this.keeper.postMessage({ id, bitmap }, [bitmap]);
+          }),
+      )
+      .then((blob) => blob || here(), here);
   }
 
   // A tile that has just been built takes its kept picture, if there is
