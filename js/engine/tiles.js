@@ -504,6 +504,7 @@ export class TileGlobe {
         if (!tile) {
           tile = this.build(leaf, key);
           this.tiles.set(key, tile);
+          this.prepaint(tile);
         }
         tile.lastUsed = this.frame;
         tile.mesh.visible = true;
@@ -695,6 +696,10 @@ export class TileGlobe {
     // A much coarser stand-in is fine for a picture but would smear a water
     // mask over the whole tile, so masks only reach two levels down.
     const lowest = layer.mask != null ? Math.max(0, top - 2) : 0;
+    // What was sharp once does not go soft again: while this level's own
+    // tile is on its way, the tiles one level finer stand in if they are
+    // here (after zooming out they are).
+    if (exact.state !== 'ready' && only !== 'sharp' && this.drawFiner(target, tile, layer, top, alpha)) return true;
     for (let level = top; level >= lowest; level--) {
       const shift = z - level;
       const entry = level === top ? exact : this.images.get(this.key(layer, level, x >> shift, y >> shift));
@@ -707,6 +712,7 @@ export class TileGlobe {
       target.globalAlpha = alpha;
       target.drawImage(entry.img, (x % scale) * span, (y % scale) * span, span, span, 0, 0, SIZE, SIZE);
       entry.lastUsed = this.frame;
+      tile.used?.add(entry);
       return true;
     }
     // Nothing sharper is here yet: the world picture stands in.
@@ -757,12 +763,85 @@ export class TileGlobe {
     }
   }
 
+  // Draws a layer for this tile from the level finer than the one it would
+  // use, when all of that is here: one finer tile where the layer's level
+  // is coarser than the map tile's, or the four that make up its area.
+  // Nothing is requested. Returns whether anything was drawn.
+  drawFiner(target, tile, layer, top, alpha) {
+    const { z, x, y } = tile;
+    if (top + 1 > layer.maxLevel || layer.mask != null) return false;
+    const at = (lx, ly) => this.images.get(this.key(layer, top + 1, lx, ly));
+    const put = (entry, ...where) => {
+      target.globalAlpha = alpha;
+      target.drawImage(entry.img, ...where);
+      entry.lastUsed = this.frame;
+      tile.used?.add(entry);
+    };
+    if (z > top) {
+      // The map tile lies inside one tile of the finer level.
+      const shift = z - top - 1;
+      const entry = at(x >> shift, y >> shift);
+      if (entry?.state !== 'ready') return false;
+      const scale = 2 ** shift;
+      const span = SIZE / scale;
+      put(entry, (x % scale) * span, (y % scale) * span, span, span, 0, 0, SIZE, SIZE);
+      return true;
+    }
+    const four = [0, 1, 2, 3].map((i) => at(x * 2 + (i & 1), y * 2 + (i >> 1)));
+    // All four must be known: a quarter still on its way would be a hole.
+    if (!four.every((e) => e && (e.state === 'ready' || e.state === 'empty')) || !four.some((e) => e.state === 'ready')) return false;
+    const half = SIZE / 2;
+    four.forEach((entry, i) => entry.state === 'ready' && put(entry, 0, 0, SIZE, SIZE, (i & 1) * half, (i >> 1) * half, half, half));
+    return true;
+  }
+
   // The entry a layer's own tile for this map tile is kept under, if it
   // has been asked for. Nothing is requested.
   exactOf(layer, tile) {
     const { z, x, y } = tile;
     const top = Math.min(layer.sparse && z > 2 && z < COARSER_BELOW ? z - 1 : z, layer.maxLevel);
     return this.images.get(this.key(layer, top, x >> (z - top), y >> (z - top)));
+  }
+
+  // A tile that has just come into view is never shown empty. Painting it
+  // takes its turn (a few tiles a frame, the middle of the view first), and
+  // until then it shows what its relatives already hold: the four tiles one
+  // level finer put together, which is as sharp as it will ever be; or its
+  // quarter of the tile one level coarser; or at least the basemap.
+  prepaint(tile) {
+    const { z, x, y, ctx } = tile;
+    // Only a relative whose own picture is up to date: one waiting to be
+    // painted again (the layers or the date changed while it was out of
+    // view) would lend an outdated picture.
+    const held = (key) => {
+      const t = this.tiles.get(key);
+      return t && t.painted && !t.dead && !t.dirty && !t.stale ? t : null;
+    };
+    const half = SIZE / 2;
+    const finer = [0, 1, 2, 3].map((i) => held(`${z + 1}/${x * 2 + (i & 1)}/${y * 2 + (i >> 1)}`));
+    const coarser = held(`${z - 1}/${x >> 1}/${y >> 1}`);
+    ctx.globalAlpha = 1;
+    if (finer.every(Boolean)) {
+      finer.forEach((t, i) => ctx.drawImage(t.canvas, 0, 0, SIZE, SIZE, (i & 1) * half, (i >> 1) * half, half, half));
+    } else if (coarser) {
+      ctx.drawImage(coarser.canvas, (x & 1) * half, (y & 1) * half, half, half, 0, 0, SIZE, SIZE);
+    } else {
+      // No relative to borrow from: the basemap, and over it each radar
+      // layer's picture of the whole world where it shows anything here.
+      // Those are in memory already, so this asks for nothing.
+      ctx.fillStyle = '#0a1826';
+      ctx.fillRect(0, 0, SIZE, SIZE);
+      const up = Math.max(0, z - SHEET_REACH);
+      for (const layer of this.layers) {
+        if (layer.base) this.drawLayer(ctx, tile, layer, 1);
+        else if (layer.sparse && layer.sheet && !layer.side && layer.mask == null) {
+          const sheet = this.images.get(layer.sheet);
+          if (sheet?.state === 'ready' && this.sheetHolds(sheet, z - up, x >> up, y >> up)) this.drawSheet(ctx, tile, sheet, layer.alpha ?? 1);
+        }
+      }
+      ctx.globalAlpha = 1;
+    }
+    tile.texture.needsUpdate = true;
   }
 
   // Composites everything for this tile. Layers and pictures with a side
@@ -772,6 +851,9 @@ export class TileGlobe {
     const ctx = tile.ctx;
     tile.dirty = false;
     tile.patchy = false;
+    // The pictures this tile is made of, so that the cache never drops one
+    // the screen is showing (see `trim`).
+    tile.used = new Set();
     ctx.globalAlpha = 1;
     ctx.fillStyle = '#0a1826';
     ctx.fillRect(0, 0, SIZE, SIZE);
@@ -826,6 +908,7 @@ export class TileGlobe {
     tile.mesh.material.uniforms.uUseB.value = sided ? 1 : 0;
     if (!sided) this.release(tile, 'B');
     tile.texture.needsUpdate = true;
+    tile.painted = true;
   }
 
   // Gives back a tile's second ('B') or water ('W') canvas once nothing
@@ -1833,10 +1916,17 @@ export class TileGlobe {
     if (idle.length > 600) for (const entry of idle.sort((a, b) => a.lastUsed - b.lastUsed).slice(0, idle.length - 300)) this.images.delete(entry.key);
     // Pictures: overlay tiles go before basemap tiles, then the least
     // recently used. The whole-world pictures and the pinned basemap stay.
+    // A picture a tile on screen is made of is never dropped, however full
+    // the cache: the next repaint of that tile would find it gone, show a
+    // blurred stand-in and fetch it again. With many layers that happened
+    // all the time and showed as blinking.
+    const shown = new Set();
+    for (const tile of this.tiles.values()) if (tile.mesh.visible && tile.used) for (const entry of tile.used) shown.add(entry);
     const held = all.filter((e) => e.state === 'ready' && !e.pinned && !e.probe);
     if (held.length <= IMAGE_CACHE) return;
-    held.sort((a, b) => a.first - b.first || a.lastUsed - b.lastUsed);
-    for (const entry of held.slice(0, Math.ceil(held.length - IMAGE_CACHE * 0.8))) {
+    const loose = held.filter((e) => !shown.has(e));
+    loose.sort((a, b) => a.first - b.first || a.lastUsed - b.lastUsed);
+    for (const entry of loose.slice(0, Math.max(0, Math.ceil(held.length - IMAGE_CACHE * 0.8)))) {
       entry.img?.close?.(); // a decoded bitmap gives its memory back at once
       this.images.delete(entry.key);
     }
