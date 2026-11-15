@@ -486,7 +486,9 @@ export class TileGlobe {
         .catch(() => {})
         .then(next);
     };
-    for (let i = 0; i < 4; i++) next();
+    // Two at a time: this is in no hurry, and what the reader asks for
+    // should have the line.
+    for (let i = 0; i < 2; i++) next();
   }
 
   // Single images laid over a lat/lon box:
@@ -610,6 +612,7 @@ export class TileGlobe {
   // what is nearest to it is painted and downloaded first.
   update(camera, viewportHeight, moved, focus) {
     this.frame++;
+    let work = 0;
     if (focus) this.focus.copy(focus);
     this.recheck();
     this.warm();
@@ -622,6 +625,7 @@ export class TileGlobe {
         let tile = this.tiles.get(key);
         if (!tile) {
           tile = this.build(leaf, key);
+          work++;
           this.tiles.set(key, tile);
           // Its kept picture, if there is one, is a moment away: until
           // then it shows what is in memory and asks for nothing.
@@ -658,6 +662,7 @@ export class TileGlobe {
       if (!tile.mesh.visible) continue;
       if (tile.shapeDirty) {
         this.shape(tile);
+        work++;
         this.changed = true;
       }
       // (One whose kept picture is being unpacked waits for it.)
@@ -672,12 +677,16 @@ export class TileGlobe {
       const deadline = performance.now() + PAINT_MS;
       for (const tile of stale) {
         this.paint(tile);
+        work++;
         this.changed = true;
         if (--budget === 0 || performance.now() > deadline) break;
       }
     }
     this.pump();
     this.pumpElevation();
+    // Whether this frame built, shaped or painted anything: a frame that
+    // did not is the graphics card's alone (see `pace` in the globe).
+    this.worked = work > 0;
     const changed = this.changed;
     this.changed = false;
     return changed;

@@ -145,7 +145,9 @@ export class Globe {
     const w = this.el.clientWidth || 1;
     const h = this.el.clientHeight || 1;
     // Sharp enough on a phone at 1.5, and far fewer pixels to shade.
-    const ratio = Math.min(window.devicePixelRatio || 1, matchMedia('(pointer: coarse)').matches ? 1.5 : 2);
+    // `ease` is below 1 on a machine whose graphics card cannot keep up
+    // at the screen's full density (see `pace`).
+    const ratio = Math.min(window.devicePixelRatio || 1, matchMedia('(pointer: coarse)').matches ? 1.5 : 2) * (this.ease || 1);
     this.renderer.setPixelRatio(ratio);
     this.renderer.setSize(w, h);
     this.camera.aspect = this.skyCamera.aspect = w / h;
@@ -158,9 +160,35 @@ export class Globe {
     this.controls.apply();
   }
 
+  // Keeps the globe fluent on a machine whose graphics card is slower
+  // than its screen is dense (a laptop with a high-density display and
+  // built-in graphics). While frame follows frame and the map itself has
+  // nothing to paint, the time between frames is the graphics card's
+  // doing. If that stays above 30 ms (under about 33 frames a second) for
+  // 50 such frames, the globe is drawn with a quarter fewer pixels each
+  // way, down to three quarters of one screen pixel at most. It is not
+  // raised again during the visit: a picture that keeps changing
+  // sharpness is worse than a slightly softer one. The menu, the text
+  // and the map tiles themselves are not affected.
+  pace(gap, quiet) {
+    // Only frames that follow the one before directly count; after a
+    // pause the gap says nothing, and neither does a hidden tab.
+    if (!quiet || gap > 250 || document.hidden) return void (this.slow = 0);
+    this.slow = gap > 30 ? (this.slow || 0) + 1 : Math.max(0, (this.slow || 0) - 2);
+    if (this.slow < 50) return;
+    this.slow = 0;
+    const full = Math.min(window.devicePixelRatio || 1, 2);
+    const next = Math.max(0.75 / full, (this.ease || 1) * 0.75);
+    if (next >= (this.ease || 1)) return;
+    this.ease = next;
+    this.resize();
+    this.dirty = true;
+  }
+
   frame(now) {
     requestAnimationFrame((t) => this.frame(t));
-    const dt = Math.min(0.1, (now - this.last) / 1000);
+    const gap = now - this.last;
+    const dt = Math.min(0.1, gap / 1000);
     this.last = now;
     const seconds = (now - this.started) / 1000;
 
@@ -218,8 +246,11 @@ export class Globe {
       this.tiles.uniforms.uFocus.value.y = this.focus;
       this.dirty = true;
     }
-    if (!(moved || tilesChanged || animating || this.dirty)) return;
+    if (!(moved || tilesChanged || animating || this.dirty)) return void (this.drew = false);
     this.dirty = false;
+    // (The frame before was drawn too, and the tiles had nothing to do.)
+    this.pace(gap, this.drew && !this.tiles.worked);
+    this.drew = true;
 
     const alt = this.controls.alt;
     this.shared.uScale.value = 0.75 + 0.75 * Math.max(0, Math.min(1, 1 - Math.log10(alt / 0.12) / 1.5));
