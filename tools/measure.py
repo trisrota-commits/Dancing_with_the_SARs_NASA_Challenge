@@ -250,6 +250,52 @@ def plausible(db) -> bool:
     return db is not None and PLAUSIBLE_DB[0] <= db <= PLAUSIBLE_DB[1]
 
 
+def refused_passes() -> dict:
+    """Passes left out on an earlier run for an impossible value, by file
+    name, so that they are not fetched and read again on every run."""
+    try:
+        return json.loads((OUT_DIR / "refused.json").read_text())
+    except (OSError, ValueError):
+        return {}
+
+
+# With --grid: the window around a site is also written cell by cell, so
+# that what happened field by field can be studied (tools/forecast.py).
+# The size of a cell in metres, or None.
+GRID_M = None
+
+
+def cell_means_db(win: dict, pol: str, radius_m: float, cell_m: float):
+    """Mean backscatter of each square cell of the window, averaged in
+    linear power, in dB: rows from north to south, columns from west to
+    east. A cell with less than half its pixels valid is NaN."""
+    band = win.get(pol)
+    if band is None:
+        return None
+    n = int(2 * radius_m // cell_m)
+    ix = np.floor((np.asarray(win["x"]) - (win["cx"] - radius_m)) / cell_m).astype(int)
+    iy = np.floor(((win["cy"] + radius_m) - np.asarray(win["y"])) / cell_m).astype(int)
+    okx, oky = (ix >= 0) & (ix < n), (iy >= 0) & (iy < n)
+    part = band[np.ix_(oky, okx)]
+    rows, cols = np.meshgrid(iy[oky], ix[okx], indexing="ij")
+    valid = np.isfinite(part)
+    sums, counts, total = np.zeros((n, n)), np.zeros((n, n)), np.zeros((n, n))
+    np.add.at(sums, (rows[valid], cols[valid]), part[valid])
+    np.add.at(counts, (rows[valid], cols[valid]), 1)
+    np.add.at(total, (rows, cols), 1)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        out = to_db(sums / counts)
+    out[(total == 0) | (counts < 0.5 * total)] = np.nan
+    return out
+
+
+def as_list(grid) -> list | None:
+    """A grid of dB values as a flat list for JSON: two decimals, None for no data."""
+    if grid is None:
+        return None
+    return [None if not np.isfinite(v) else round(float(v), 2) for v in grid.ravel()]
+
+
 def to_db(linear):
     with np.errstate(divide="ignore", invalid="ignore"):
         return 10 * np.log10(linear)
@@ -361,6 +407,19 @@ def measure(site: dict, passes: list[dict], previous: dict | None = None) -> dic
     if previous and (previous.get("setup") != setup_of(site) or previous.get("track") != stack[0]["stack"]):
         previous = None
     known = {s["file"]: s for s in previous["series"] if plausible(s.get("hh"))} if previous else {}
+    # The cells written on an earlier run, if they were made the same way.
+    grid_file = OUT_DIR / f"{site['id']}_grid.json"
+    cells: dict[str, tuple] = {}
+    grid_known: dict[str, tuple] = {}
+    if GRID_M:
+        try:
+            g = json.loads(grid_file.read_text())
+            if g.get("setup") == setup_of(site) and g.get("cellM") == GRID_M and g.get("track") == stack[0]["stack"]:
+                grid_known = {name: (g["hh"][i], g["hv"][i] if g.get("hv") else None) for i, name in enumerate(g["files"])}
+        except (OSError, ValueError, KeyError):
+            grid_known = {}
+        # A pass counts as known only if its cells are at hand too.
+        known = {name: s for name, s in known.items() if name in grid_known}
     by_time = {int(p["time"].timestamp() * 1000): p for p in stack}
 
     def read(p: dict) -> dict | None:
@@ -374,11 +433,18 @@ def measure(site: dict, passes: list[dict], previous: dict | None = None) -> dic
             print(f"    {p['time']:%Y-%m-%d}: site outside the image")
         return win
 
+    refused = refused_passes()
+    newly_refused = False
     series, windows, reused = [], {}, 0
     for p in stack:
         when = int(p["time"].timestamp() * 1000)
+        if p["name"] in refused:
+            print(f"    {p['time']:%Y-%m-%d}: left out before ({refused[p['name']]}); not read again")
+            continue
         if p["name"] in known:
             series.append(known[p["name"]])
+            if GRID_M:
+                cells[p["name"]] = grid_known[p["name"]]
             reused += 1
             continue
         win = read(p)
@@ -391,19 +457,52 @@ def measure(site: dict, passes: list[dict], previous: dict | None = None) -> dic
             continue
         if not plausible(hh):
             print(f"    {p['time']:%Y-%m-%d}: {hh:.1f} dB is not a possible backscatter; this pass is left out")
+            refused[p["name"]] = f"{hh:.1f} dB is not a possible backscatter"
+            newly_refused = True
             continue
         if not plausible(hv):
             hv = None
         series.append({"time": when, "hh": round(hh, 2), "hv": None if hv is None else round(hv, 2), "pixels": n, "file": p["name"]})
+        if GRID_M:
+            cells[p["name"]] = (as_list(cell_means_db(win, "co", map_r, GRID_M)), as_list(cell_means_db(win, "cross", map_r, GRID_M)) if hv is not None else None)
         windows[when] = win
         co_l, cross_l = win["labels"]["co"], win["labels"].get("cross", "-")
         print(f"    {p['time']:%Y-%m-%d}: {co_l} {hh:6.2f} dB" + (f", {cross_l} {hv:6.2f} dB" if hv is not None else ""))
     if reused:
         print(f"    {reused} pass(es) kept from the earlier measurement, {len(windows)} new")
+    if newly_refused:
+        OUT_DIR.mkdir(parents=True, exist_ok=True)
+        (OUT_DIR / "refused.json").write_text(json.dumps(refused, indent=1, sort_keys=True) + "\n")
 
     if len(series) < 2:
         print("  fewer than two passes with data; nothing written")
         return None
+
+    if GRID_M:
+        rows = [s for s in series if s["file"] in cells]
+        side = int(2 * map_r // GRID_M)
+        OUT_DIR.mkdir(parents=True, exist_ok=True)
+        grid_file.write_text(
+            json.dumps(
+                {
+                    "id": site["id"],
+                    "name": site["name"],
+                    "track": stack[0]["stack"],
+                    "setup": setup_of(site),
+                    "cellM": GRID_M,
+                    "n": side,
+                    "radiusM": map_r,
+                    "what": f"Mean backscatter in dB (gamma-naught, averaged in linear power) of each {GRID_M:g} m cell of a square of {2 * map_r:g} m around the site, for every pass; rows north to south, columns west to east; null where under half a cell has data.",
+                    "times": [s["time"] for s in rows],
+                    "files": [s["file"] for s in rows],
+                    "hh": [cells[s["file"]][0] for s in rows],
+                    "hv": [cells[s["file"]][1] for s in rows] if all(cells[s["file"]][1] is not None for s in rows) else None,
+                },
+                separators=(",", ":"),
+            )
+            + "\n"
+        )
+        print(f"    cells of {GRID_M:g} m written for {len(rows)} pass(es): {side} × {side}")
 
     if windows:
         labels = next(iter(windows.values()))["labels"]
@@ -516,7 +615,8 @@ def measure(site: dict, passes: list[dict], previous: dict | None = None) -> dic
 def write_index() -> None:
     entries = []
     for path in sorted(OUT_DIR.glob("*.json")):
-        if path.name == "index.json":
+        # (Only the sites themselves: not the list, the cells or the forecasts.)
+        if path.name in ("index.json", "refused.json") or path.stem.endswith(("_grid", "_forecast")):
             continue
         d = json.loads(path.read_text())
         entries.append({"id": d["id"], "name": d["name"], "lat": d["lat"], "lon": d["lon"], "radiusKm": d["radiusKm"], "event": d.get("event"), "file": path.name})
@@ -557,10 +657,13 @@ def main() -> None:
     ap.add_argument("--event", metavar="YYYY-MM-DD", help="with --point: the change map compares the last pass before this date with the first after it")
     ap.add_argument("--save", action="store_true", help="with --point: also add it to the site list")
     ap.add_argument("--fresh", action="store_true", help="read every pass again instead of keeping earlier values")
+    ap.add_argument("--grid", type=float, metavar="METRES", help="also write each pass cell by cell (cells of this size) to <site>_grid.json, for tools/forecast.py")
     ap.add_argument("--budget", type=float, metavar="MINUTES", help="start no further site once this many minutes have passed; what is measured by then is kept, the rest waits for the next run")
     ap.add_argument("--start", default=NISAR_START)
     ap.add_argument("--end", default=datetime.now(timezone.utc).strftime("%Y-%m-%d"))
     args = ap.parse_args()
+    global GRID_M
+    GRID_M = args.grid
 
     if args.point:
         if args.sites:

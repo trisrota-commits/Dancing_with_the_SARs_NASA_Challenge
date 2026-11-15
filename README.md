@@ -157,12 +157,18 @@ this app's workload:
   on request, and keeps the sound one.
 - If the satellite basemap cannot be reached, NASA's Blue Marble takes its
   place and the menu says so; the globe is never left black.
-- NASA publishes NISAR's map layer a day at a time and has no mosaic of
-  it. `tools/mosaic.py` assembles one ahead of time, the newest pass on
-  top, into `data/mosaic/`; the app shows that from far away and at
-  continent distance, and NASA's own tiles close up. Every day flown
-  after the mosaic was made is drawn live on top of it, so it never has
-  to be rebuilt to stay right.
+- NASA publishes NISAR's map layer a day at a time. NASA's own viewer,
+  Worldview, can stack the last 12 days of it on a flat map ("rolling
+  12-day"), so a picture of the whole planet from NISAR is not new. What
+  this app adds: `tools/mosaic.py` assembles 48 days ahead of time, the
+  newest pass on top, into `data/mosaic/`, with every damaged tile
+  replaced; the app shows that on the globe from far away and at
+  continent distance, and NASA's own tiles close up. Because NASA
+  publishes passes up to two weeks late, the 12 days up to the newest
+  day cover only 42 % of what the 48 days cover (measured 15 November
+  2026); the 48-day picture is whole on any date. Every day flown after
+  the mosaic was made is drawn live on top of it, so it never has to be
+  rebuilt to stay right.
 - Every finished map tile is kept, compressed without loss, when it
   leaves the screen (up to a few hundred megabytes). Coming back to a
   place, at any zoom, shows it at once and asks no server. When NASA

@@ -115,6 +115,26 @@ def main() -> None:
         assert all(-50 <= s["hh"] <= 20 for s in carried["series"]), carried["series"]
         assert measure.plausible(-25.0) and not measure.plausible(-135.38) and not measure.plausible(None)
 
+        # With --grid the window is also written cell by cell.
+        measure.GRID_M = 500
+        gridded = measure.measure(site, measure.local_passes(tmp))
+        grid = json.loads((measure.OUT_DIR / "test_grid.json").read_text())
+        assert grid["n"] == 24 and len(grid["hh"]) == len(gridded["series"]) and len(grid["hh"][0]) == 24 * 24, (grid["n"], len(grid["hh"]))
+        centre = grid["hh"][0][12 * 24 + 12]
+        corner = grid["hh"][0][23 * 24 + 23]
+        assert abs(centre - gridded["series"][0]["hh"]) < 1.0, (centre, gridded["series"][0]["hh"])  # on the glacier
+        assert abs(corner + 9.0) < 1.0, corner  # off it
+        assert grid["hv"] and abs(grid["hv"][0][12 * 24 + 12] - (centre - 7.0)) < 1.0
+        # A second run reads nothing again, and the cells are kept.
+        opened.clear()
+        measure.open_pass = lambda p: (opened.append(p["name"]), real_open(p))[1]
+        measure.measure(site, measure.local_passes(tmp), gridded)
+        assert opened == [], opened
+        assert json.loads((measure.OUT_DIR / "test_grid.json").read_text())["hh"] == grid["hh"]
+        measure.open_pass = real_open
+        measure.GRID_M = None
+        (measure.OUT_DIR / "test_grid.json").unlink()
+
         measure.write_index()
         index = json.loads((measure.OUT_DIR / "index.json").read_text())
         assert index == [], index  # nothing was written to disk as a site file here

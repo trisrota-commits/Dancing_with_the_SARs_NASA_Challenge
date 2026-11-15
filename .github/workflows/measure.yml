@@ -120,7 +120,9 @@ jobs:
             python tools/measure.py "${args[@]}"
           else
             read -r -a ids <<< "$IN_SITES"
-            python tools/measure.py --budget 85 "${ids[@]}"
+            # --grid: every pass is also written cell by cell, which is
+            # what tools/forecast.py tests its predictions on.
+            python tools/measure.py --budget 85 --grid 500 "${ids[@]}"
           fi
 
       - name: Commit the results
