@@ -127,12 +127,18 @@ student or a journalist can open it alone and understand it.
 - A tool for calibrated measurements (`tools/measure.py`) reads a small
   window of NISAR's full-resolution GCOV products and computes
   backscatter in dB over time and between two passes. A scheduled job on
-  GitHub is set up to run it for the strongest recent events.
-  [Team: this job has not yet run on real NISAR files. If it has run by
-  the time you submit, say what it produced. If not, keep this sentence:
-  "It is built and tested on simulated files; it has not yet been run on
-  real products."]
-- 24 unit tests and a browser test against the live services guard the
+  GitHub runs it twice a day for the strongest recent events and a list
+  of places. Its first run on real NISAR products, on 15 November 2026,
+  measured twelve places and events from 2 to 12 passes each. The clearest
+  result is the rice fields of Bardhaman in West Bengal: over one crop
+  season the HH echo fell to -10.9 dB when the paddies were flooded in
+  July, rose to -3.7 dB by mid-October as the rice stood tall, and fell
+  again in November with the harvest; 66 % of the mapped area got at
+  least 3 dB stronger between June and October. The place's text in the
+  app, written before the data existed, says to expect exactly this. A
+  thirteenth site (Perito Moreno) gave values that cannot be backscatter
+  (-135 dB); the tool now refuses such values, and that site is not shown.
+- 38 unit tests and a browser test against the live services guard the
   rules above.
 
 ### Tools and languages

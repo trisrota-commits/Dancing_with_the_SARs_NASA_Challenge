@@ -203,8 +203,9 @@ say what it shows without us.
   with `tools/measure.py` and commits `data/measured/`. **It does nothing
   until a repository admin stores the secret `EARTHDATA_TOKEN`** (steps at
   the top of the workflow file). The picker was run against the live feeds
-  and archive and found events; the measuring step has never run on real
-  data, so the first run needs watching. A token lasts 60 days.
+  and archive and found events. The secret was added on 15 November and
+  the first run on real data worked (see "The first measurements from
+  real NISAR products"). A token lasts 60 days.
 
 ### First hands-on test by the lead (14 Nov, evening, Windows PC)
 
@@ -890,6 +891,37 @@ everywhere, or whether the list of sound kinds needs extending.
   the Pages source set to "GitHub Actions"; until then it stops early
   with a notice.
 - Not verified: the publishing job has not run with Pages switched on.
+
+### The first measurements from real NISAR products (15 Nov, midday)
+
+The team added the Earthdata token on 15 November and `measure.yml` ran
+on real GCOV files for the first time: 13 sites (7 listed places, 6
+picked events) in 20 minutes, committed by the job itself.
+
+- **It works.** Twelve results are plausible: backscatter between -25
+  and 0 dB, steady from pass to pass where nothing changed. The app shows
+  them ("Measured with NISAR · calibrated data", chart, change map).
+- **The clearest result: rice fields of Bardhaman, West Bengal**
+  (`#place=west-bengal`), 12 passes on one track, 20 June to 11 November
+  2026. HH: -8.8 dB in June, down to -10.9 dB in mid-July (flooded
+  paddies), up to -3.7 dB by 18 October (standing rice), -6.3 dB on 11
+  November (harvest). HV: -16.5 to -14.1 dB. 66 % of the mapped area got
+  at least 3 dB stronger from June to October. The place's hand-written
+  text predicted this pattern before any measurement existed.
+- **One result was wrong: Perito Moreno**, -135 dB HH and -145 dB HV on
+  all 11 passes, with a believable difference between the two channels.
+  The values in those files are scaled differently; the cause is not
+  found (it needs a look into one of the files, which takes the token).
+  `tools/measure.py` now leaves out any pass outside -50 to +20 dB
+  (`plausible`) and never carries such a value over from an earlier
+  result; the Perito Moreno files were taken out of `data/measured/`.
+- **The job could lose a whole run.** It committed only after the last
+  site, so a run that hit the two-hour limit would have kept nothing.
+  Now the script begins no further site after 85 minutes (`--budget`),
+  writes the app's list after every site, and the commit step runs even
+  when the measuring step failed or was cut off.
+- Not verified: the budget and the cut-off on GitHub; why Perito Moreno
+  reads as it does.
 
 ### Visual rules (lead, 14 Nov, night)
 
