@@ -15,6 +15,7 @@ import { loadFrames, spread, view, history, describeSeries, rankByCoverage, samp
 import { measuredIndex, measuredSummary, measuredById, measuredNear, measuredHtml, measuredChart, measuredLine, changeImageUrl, forecastFor, forecastHtml, detectFor, detectHtml, sensitivity, stoodImageUrl, stoodLine, share, stoodOut } from './measured.js';
 import { fetchElements, positionAt, groundTrack, swathEdges, elementsEpoch } from './orbit.js';
 import { SPECIES, MONTHS, POIS, loadSightings } from './wildlife.js';
+import { figurineIcon } from './engine/figurines.js';
 import { historyChart } from './chart.js';
 import { narrate, nisarLine, timeline, SOURCE_NOTES } from './narrative.js';
 import { Globe, loadPicture } from './globe.js';
@@ -826,7 +827,7 @@ function choose(found) {
             : f.kind === 'satellite'
               ? `<li tabindex="0" role="button" data-pick="${n}"><i class="dot" style="--c:${PALETTE.nisar}"></i><span>NISAR, live position</span><span class="km">satellite</span></li>`
               : f.kind === 'animal'
-                ? `<li tabindex="0" role="button" data-pick="${n}"><i class="dot" style="--c:${speciesOf(f.animal).color}"></i><span>${esc(f.animal.common)}</span><span class="km">${esc(f.animal.date || '')}</span></li>`
+                ? `<li tabindex="0" role="button" data-pick="${n}"><img class="figure" src="${figurineIcon(f.animal.species, speciesOf(f.animal).color, 22)}" alt=""><span>${esc(f.animal.common)}</span><span class="km">${esc(f.animal.date || '')}</span></li>`
                 : f.kind === 'poi'
                   ? `<li tabindex="0" role="button" data-pick="${n}"><i class="dot" style="--c:#f4e3b2"></i><span>${esc(f.poi.name)}</span><span class="km">landmark</span></li>`
                   : `<li tabindex="0" role="button" data-pick="${n}"><i class="dot" style="--c:${PALETTE.nisar};border-radius:2px"></i><span>NISAR pass, track ${esc(f.scene.track)} frame ${esc(f.scene.frame)}</span><span class="km">${ago(f.scene.time)}</span></li>`,
@@ -1936,7 +1937,7 @@ function selectAnimal(a) {
   globe.select({ lat: a.lat, lon: a.lon, related: [] });
   const basis = { HUMAN_OBSERVATION: 'Seen by a person', MACHINE_OBSERVATION: 'Recorded by an instrument or tag', PRESERVED_SPECIMEN: 'Museum specimen', OCCURRENCE: 'Occurrence record' }[a.basis] || 'Occurrence record';
   openPanel(`<span class="tag"><i class="dot" style="--c:${sp.color}"></i>Wildlife sighting</span>
-    <h3>${esc(sp.common)}</h3>
+    <h3><img class="figure big" src="${figurineIcon(sp.id, sp.color, 44)}" alt="">${esc(sp.common)}</h3>
     <p class="hint"><em>${esc(sp.sci)}</em></p>
     <dl>
       <dt>Seen</dt><dd>${esc(a.date || 'date not given')}</dd>
@@ -1968,7 +1969,7 @@ function renderSpeciesChips() {
   (live.sightings || []).forEach((s) => (counts[s.species] = (counts[s.species] || 0) + 1));
   $('species-chips').innerHTML = SPECIES.map(
     (sp) =>
-      `<button class="chip ${live.hiddenSpecies.has(sp.id) ? 'off' : ''}" data-species="${sp.id}" aria-pressed="${!live.hiddenSpecies.has(sp.id)}" style="--c:${sp.color}"><i></i>${esc(sp.common)} ${counts[sp.id] || 0}</button>`,
+      `<button class="chip ${live.hiddenSpecies.has(sp.id) ? 'off' : ''}" data-species="${sp.id}" aria-pressed="${!live.hiddenSpecies.has(sp.id)}" style="--c:${sp.color}"><img class="figure" src="${figurineIcon(sp.id, sp.color, 22)}" alt="">${esc(sp.common)} ${counts[sp.id] || 0}</button>`,
   ).join('');
 }
 
@@ -1982,7 +1983,8 @@ function showMonth(splash) {
       .filter((a) => a.month === m && !live.hiddenSpecies.has(a.species))
       .map((a) => {
         const sp = speciesOf(a);
-        return { animal: a, lat: a.lat, lon: a.lon, color: sp.color, size: 6, splash: splash && decor && sp.splash };
+        // Each month's figures drop onto the globe as it turns over.
+        return { animal: a, lat: a.lat, lon: a.lon, color: sp.color, drop: splash && decor };
       }),
   );
 }

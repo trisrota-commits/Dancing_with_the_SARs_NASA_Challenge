@@ -246,10 +246,11 @@ each one with radar imagery from the NASA-ISRO NISAR mission.
   where it actually is. Day and night are on from the start.
 - **Wildlife sightings** from GBIF, played by month of the year, so
   migrating whales, rays, sharks, turtles, terns, kob and wildebeest appear
-  and disappear where they were really seen. Wetland places explain how
+  and disappear where they were really seen. Each sighting is a small
+  painted figurine of its animal, standing where it was seen. Wetland places explain how
   animals follow the floods that NISAR maps.
-- **Decorations**, clearly labelled and switchable: shooting stars, splash
-  rings when whales appear, and three ocean landmarks (the Titanic wreck,
+- **Decorations**, clearly labelled and switchable: shooting stars, the
+  figurines dropping onto the globe as each month begins, and three ocean landmarks (the Titanic wreck,
   Challenger Deep, Point Nemo).
 - Event types include landslides, snow, dust and haze, extreme heat or cold,
   and human-made events from NASA EONET, as well as earthquakes, fires,
@@ -438,6 +439,7 @@ app in headless Chromium against the live services.
   - `tiles.js` – streams map tiles, shapes terrain, composites layers,
     animates flood water and cross-fades pictures
   - `marks.js` – event dots and beams, lines, storm spiral, atmosphere, stars
+  - `figurines.js` – the animal figurines, drawn in code, for sightings
   - `fire.js` – the wildfire particle system
   - `controls.js` – pan, zoom, tilt, turn and fly-to camera
   - `geo.js` – coordinate maths
