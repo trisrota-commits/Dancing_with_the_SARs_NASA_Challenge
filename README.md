@@ -418,6 +418,25 @@ that way.
   passes loaded at that moment, by fixed rules: highest, lowest and latest
   value of each channel with dates, and where the channels sit furthest apart.
 - Explanations of cause are marked as hypotheses.
+- **Preview brightness is relative, and the app says so wherever it is
+  compared.** NASA's QA software (nisarqa) makes each browse image on its
+  own: it clips each channel to that image's own 5th–95th percentiles,
+  applies a brightness curve and rescales the result to fill 1–255. The
+  limits are not stored in the picture. A brightness of 150 in July and 150
+  in August need not mean the same radar echo, and a change across a whole
+  scene, such as a glacier frame turning wet, can vanish. The previews are
+  therefore used to find *where* and *when* something changed within a
+  scene. *How much* comes only from the calibrated GCOV values in "Measured
+  with NISAR".
+- **The planet-wide change picture is a different case.** It is built from
+  NASA's map picture (GIBS), not from the per-scene previews. That picture
+  is on one fixed scale for every date: at two places and 20 passes its
+  green channel follows the calibrated HV values on a single line
+  (correlation 0.98 to 0.99), which matches the colour rule ASF publishes
+  (https://github.com/ASFHyP3/hyp3-lib/blob/develop/docs/rgb_decomposition.md).
+  So two dates can be compared. It is still not a decibel scale: brightness
+  goes with the square root of the echo power, red is capped for strong
+  echoes, and the colour rule switches where HV falls below −24 dB.
 
 - An event's timeline never draws anything between data points without
   saying so; the
