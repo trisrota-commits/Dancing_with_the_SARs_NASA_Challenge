@@ -13,9 +13,7 @@
 <h1 align="center">Dancing with the SARs</h1>
 
 <p align="center">
-  <b><a href="https://trisrota-commits.github.io/Dancing_with_the_SARs_NASA_Challenge/">Open the live app</a></b>
-  ·
-  <a href="https://trisrota-commits.github.io/Dancing_with_the_SARs_NASA_Challenge/demo/">the project in seven slides</a>
+  <b><a href="https://cloudpiercer.space/">Open the live app</a></b>
 </p>
 
 <p align="center">
@@ -429,8 +427,7 @@ app in headless Chromium against the live services.
   recorded from the running app
 - `tools/forecast.py` – tests how well NISAR's next pass over a measured
   place can be predicted, against simple baselines
-- `tools/slides.js`, `tools/slides_pptx.js` – the seven demo slides (`demo/`)
-  as a PDF, and as a PowerPoint file in which the animations play
+
 - `tools/change.py` – the planet-wide change picture: each pass against
   the same pass 48 days earlier, into `data/change/`
 - `docs/HANDOFF.md` – where the project stands and how to continue it
@@ -462,9 +459,8 @@ Three people built this during the NASA Space Apps Challenge 2026, on 14
 and 15 November. What each brought in is taken from the repository's pull
 requests and issues.
 
-- **[LucidPaths](https://github.com/LucidPaths)**, project lead. Set the
-  direction and the rules the app follows, decided what was built and what
-  was cut, and tested every version by hand. Brought in the globe engine,
+- **[LucidPaths](https://github.com/LucidPaths)**. Tested every version
+  by hand. Brought in the globe engine,
   the live events and their merging, the event timeline and animations,
   the NISAR time-lapse for any spot, the stories, the change view, the
   whole-planet picture, the visual rules and the speed work, and
