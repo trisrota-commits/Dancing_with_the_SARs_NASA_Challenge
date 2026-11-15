@@ -149,3 +149,18 @@ test('a drag that begins on the sky still pans', () => {
   c.move(at(20, 80));
   assert.notEqual(c.lat, before);
 });
+
+test('a press without a drag is a tap for either button; a drag is not', () => {
+  for (const button of [0, 2]) {
+    const c = rig();
+    const taps = [];
+    c.onTap = (e) => taps.push(e.button);
+    c.down(at(640, 360, { button }));
+    c.up(at(640, 360, { button }));
+    assert.deepEqual(taps, [button]);
+    c.down(at(640, 360, { button }));
+    c.move(at(700, 400, { button }));
+    c.up(at(700, 400, { button }));
+    assert.deepEqual(taps, [button], 'a drag does not count');
+  }
+});

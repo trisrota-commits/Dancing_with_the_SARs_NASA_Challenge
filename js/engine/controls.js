@@ -253,7 +253,9 @@ export class GlobeControls {
   up(e) {
     if (!this.pointers.delete(e.pointerId)) return;
     this.pinch = 0;
-    if (this.travel < 6 && this.pointers.size === 0 && this.onTap && e.button !== 2) {
+    // A press without a drag is a tap, whichever button: the page decides
+    // what a left and what a right one mean.
+    if (this.travel < 6 && this.pointers.size === 0 && this.onTap) {
       this.velocity.lat = this.velocity.lon = 0;
       this.onTap(e);
     }

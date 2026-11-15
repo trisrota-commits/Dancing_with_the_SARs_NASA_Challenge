@@ -3,7 +3,7 @@
 // Which version of the app this is. `tools/pack.sh` sets it; it shows at the
 // end of the credits line, so nobody has to wonder whether the browser is
 // still showing an older copy.
-const BUILD = '2026-11-15 20:30 UTC';
+const BUILD = '2026-11-15 21:05 UTC';
 
 import { CATEGORIES, FAMILIES, PALETTE, FEEDS, BASEMAPS, OVERLAYS, RADAR_NOTES, CHANGE_EXPLANATIONS, RELATED_KM, RELATED_DAYS, NISAR_LATEST_EVERY_MS, NISAR_LOOKBACK_DAYS, NISAR_START, RECENT_MS, OVERLAY_REACH_DAYS, NISAR_MOSAIC, NISAR_CHANGE, PREVIEW_STRETCH } from './config.js';
 import { fetchFeed, fetchArchive } from './feeds.js';
@@ -2855,10 +2855,11 @@ async function start() {
   $('here-x').onclick = hideHere;
   globe.el.addEventListener('pointerdown', hideHere);
   globe.el.addEventListener('wheel', hideHere, { passive: true });
-  globe.onPick((found, at, screen) => {
+  globe.onPick((found, at, screen, asked) => {
     hideHere();
     if (!found.length) {
-      if (at) offerHere(at, screen);
+      // (`asked`: a right-click, or a tap on a touch screen; see globe.tap.)
+      if (at && asked) offerHere(at, screen);
       return;
     }
     // Dots win over the footprints they sit on, unless several dots overlap.

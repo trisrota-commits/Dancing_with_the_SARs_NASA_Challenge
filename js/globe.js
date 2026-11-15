@@ -339,7 +339,12 @@ export class Globe {
         if (pointInPolygon(at.lat, at.lon, scene.ring)) found.push({ kind: 'scene', scene });
       }
     }
-    this.pick(found, at, { x, y });
+    // Asking about the bare ground takes a right-click (or Ctrl-click, the
+    // same thing on a Mac), or a tap on a touch screen. A left-click on the
+    // ground does nothing: it is what everyone drags the globe with, and a
+    // drag that did not move far enough kept popping the offer up.
+    const asked = e.button === 2 || e.ctrlKey || e.pointerType === 'touch';
+    this.pick(found, at, { x, y }, asked);
   }
 
   hover(e) {
