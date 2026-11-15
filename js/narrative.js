@@ -150,7 +150,10 @@ export function narrate(inc, { found, history, measured, sizeText }) {
     m += ` Three decibels is a halving or doubling of the echo's power. ${link('measured', 'See the measured series and map', 'sec-nisar')}.`;
     out.push(m);
   }
-  if (history) {
+  // (Not beside a calibrated measurement: the previews are a rougher
+  // reading of the same thing, often from other passes, and two sets of
+  // "before" and "after" dates in one text contradict each other.)
+  if (history && !step) {
     // The pass just before the event against the first one after it, when
     // this track has both; otherwise the range over all its passes.
     const pts = history.points;

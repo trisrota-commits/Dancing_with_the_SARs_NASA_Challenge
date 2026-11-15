@@ -170,11 +170,12 @@ export function forecastHtml(f) {
       const b = r[f.best] || {};
       const share = (v) => (v == null ? '–' : `${(v * 100).toFixed(0)} %`);
       const marked = f.event ? f.event.firstPassAfter === r.date : f.peerSurprise?.time === r.time;
-      return `<tr${marked ? ' class="best"' : ''}><td>${esc(r.date)}${f.event?.firstPassAfter === r.date ? ' <span class="tag">after the event</span>' : ''}${r.newVersion ? ` <span class="tag" title="NASA's processing changed from ${esc(r.newVersion.from)} to ${esc(r.newVersion.to)} with this pass; that alone can shift the values">new processing</span>` : ''}</td><td>${num(r.seenMean, 1)}</td><td>${num(b.predMean, 1)}</td>${f.short ? '' : `<td>${share(b.outside)}</td>`}<td>${share(r.peers?.outside)}</td></tr>`;
+      return `<tr${marked ? ' class="best"' : ''}><td>${esc(r.date)}${f.event?.firstPassAfter === r.date ? ' <span class="tag">after the event</span>' : ''}${r.newVersion ? ` <span class="tag" title="NASA's processing changed from ${esc(r.newVersion.from)} to ${esc(r.newVersion.to)} with this pass; that alone can shift the values">new processing</span>` : ''}</td><td>${num(r.seenMean, 1)}</td><td>${num(b.predMean, 1)}</td></tr>`;
     })
     .join('');
   return `<div class="card measured forecast">
     <div class="src">Computed from the measurements · a test of predictability, not a forecast</div>
+    <p class="hint">A different question from what stood out above: how well could the value of the next pass have been predicted from the passes before it?</p>
     <p>${esc(f.summary)}</p>
     <table class="forecast-table">
       <caption>Predicting the next pass in ${f.cells.toLocaleString('en')} cells of ${f.cellM} m, in dB. ${f.short ? 'Too few passes here for more than the simplest ways' : 'The first four are baselines: simple rules a model has to beat'}</caption>
@@ -191,13 +192,13 @@ export function forecastHtml(f) {
         : ''
     }
     <table class="forecast-table">
-      <caption>“Will this cell change by ${f.strongDb} dB or more by the next pass?” It did in ${happened == null ? '–' : (happened * 100).toFixed(1)} % of readings</caption>
+      <caption>“Will this cell change by ${f.strongDb} dB or more by the next pass?” It did in ${happened == null ? '–' : (happened * 100).toFixed(1)} % of readings. A dash: this way never said yes, so the figure cannot be given</caption>
       <tr><th scope="col">Way of predicting</th><th scope="col">Accuracy</th><th scope="col">Precision</th><th scope="col">Recall</th><th scope="col">F1</th></tr>
       ${f.ways.map(strong).join('')}
     </table>
     <table class="forecast-table passes">
-      <caption>Pass by pass: the mean over all cells in dB, measured and as expected from the earlier passes, and the share of cells further off than nine in ten had been before (about 10 % is ordinary)</caption>
-      <tr><th scope="col">Pass</th><th scope="col">Measured</th><th scope="col">Expected</th>${f.short ? '' : '<th scope="col" title="Cells outside the range expected from their own earlier passes">Off own past</th>'}<th scope="col" title="Cells whose step differed from their neighbours' step in the same pass">Off neigh&shy;bours</th></tr>
+      <caption>Pass by pass: the mean over all cells in dB, measured and as the best way of predicting expected it</caption>
+      <tr><th scope="col">Pass</th><th scope="col">Measured</th><th scope="col">Expected</th></tr>
       ${dates}
     </table>
     <p class="hint"><strong>Method.</strong> ${esc(f.method)}</p>
@@ -249,7 +250,7 @@ export function detectHtml(f, sens) {
     const lead = e ? `On NISAR's first pass after the event of ${esc(e.date)} (${esc(at.date)})` : `On the pass that stood out most (${esc(at.date)})`;
     head =
       `${lead}, ${share(at.stood)} of the ground stood out` +
-      (at.grade === 'both' ? ': it had left both what the place read on its two latest passes and its own usual reading.' : at.baseline === 1 ? ' against the pass before it.' : ' against the two passes before it.') +
+      (at.grade === 'both' ? ': it read differently both from the two passes just before and from its own longer history.' : at.baseline === 1 ? ' against the pass before it.' : ' against the two passes before it.') +
       (stoodOut(at.stood) ? '' : ` That is no more than these rules flag when nothing has happened${idle != null ? ` (${share(idle)} in our test)` : ''}: nothing stood out.`) +
       (f.rough?.[at.grade] ? ` ${esc(f.rough[at.grade])}` : '') +
       (at.stillNext != null && at.stood > 0 ? ` A pass later, ${share(at.stillNext)} of those cells still stood out.` : '') +
@@ -284,10 +285,10 @@ export function detectHtml(f, sens) {
     <p class="hint">Not a measurement: a patch of ${wide} by ${wide} cells in a real pass before any event was raised or lowered by a set amount, ${sens.trialsEach} times a pass, and the detector run on it. ${mine ? `This place counts as ${mine.group === 'quiet' ? 'quiet' : 'changing by itself'}.` : ''}</p>
     <table class="forecast-table">
       <caption>${esc(group.what)}: ${group.places.length} places, ${group.passes} passes. Recall: how much of the patch was found. Precision: how much of what was flagged lay in the patch</caption>
-      <tr><th scope="col">Change put in</th><th scope="col">Recall</th><th scope="col">Precision</th><th scope="col">F1</th><th scope="col" title="${esc(sens.names.long)}">F1, one key</th><th scope="col" title="${esc(sens.names.old)}">F1, first rule</th></tr>
+      <tr><th scope="col">Change put in</th><th scope="col">Recall</th><th scope="col">Precision</th><th scope="col">F1</th><th scope="col" title="${esc(sens.names.long)}">F1, one check</th><th scope="col" title="${esc(sens.names.old)}">F1, our first rule</th></tr>
       ${group.rows.filter((r) => r.cells === wide).map(line).join('')}
     </table>
-    <p class="hint">With nothing put in, the detector flags ${share(group.flaggedWithNothingPutIn.new)} of the cells in this group; the long key alone ${share(group.flaggedWithNothingPutIn.long)}, the rule we used first ${share(group.flaggedWithNothingPutIn.old)}.${three(other) ? ` In the other group (${esc(other.what.toLowerCase())}) a drop of 3 dB is found with recall ${num(three(other).new.recall)} at precision ${num(three(other).new.precision)}.` : ''} With few passes before an event it is rougher: for a drop of 3 dB in this group, recall ${num(three(group).recent.recall)} at precision ${num(three(group).recent.precision)} with two passes before, ${num(three(group).pair.recall)} at ${num(three(group).pair.precision)} with one. ${esc(sens.limits)}</p>
+    <p class="hint">F1 joins recall and precision in one figure (1 is perfect). With nothing put in, the detector flags ${share(group.flaggedWithNothingPutIn.new)} of the cells in this group; the history check alone ${share(group.flaggedWithNothingPutIn.long)}, the rule we used first ${share(group.flaggedWithNothingPutIn.old)}.${three(other) ? ` In the other group (${esc(other.what.toLowerCase())}) a drop of 3 dB is found with recall ${num(three(other).new.recall)} at precision ${num(three(other).new.precision)}.` : ''} With few passes before an event it is rougher: for a drop of 3 dB in this group, recall ${num(three(group).recent.recall)} at precision ${num(three(group).recent.precision)} with two passes before, ${num(three(group).pair.recall)} at ${num(three(group).pair.precision)} with one. ${esc(sens.limits)}</p>
     </details>`;
   }
   return `<div class="card measured forecast">
@@ -304,8 +305,8 @@ export function detectHtml(f, sens) {
     }
     ${kinds ? `<p class="hint"><strong>What kind of change?</strong> <span class="badge computed">Hypothesis</span> Of the cells that stood out, by how the two radar channels moved:</p><ul class="plain kinds">${kinds}</ul>` : ''}
     <table class="forecast-table passes">
-      <caption>Pass by pass: the share of cells that stood out (both keys), and each key alone: against the two latest passes, and against the cell's own history. Click a pass to see it on the globe</caption>
-      <tr><th scope="col">Pass</th><th scope="col">Stood out</th><th scope="col" title="Cells that left what the place read on its two latest passes">Latest two</th><th scope="col" title="Cells that left their own usual reading over the longer history">Own history</th></tr>
+      <caption>Pass by pass: the share of cells that stood out. A cell stands out when two checks agree; each check alone is beside it: against the two passes just before, and against the cell's own longer history. “New processing”: NASA changed its processing version with that pass. Click a pass to see it on the globe</caption>
+      <tr><th scope="col">Pass</th><th scope="col">Stood out</th><th scope="col">vs last two</th><th scope="col">vs own history</th></tr>
       ${rows}
     </table>
     ${trust}
@@ -325,6 +326,7 @@ export function measuredHtml(d, compare) {
     <div class="actions">
       <button class="primary" id="measured-map">Show the measured change map</button>
     </div>
+    <p class="hint">A different map from “where it stood out”: this one colours how much the echo changed between the two dates everywhere, ordinary change included.</p>
     <ul class="legend">
       <li><i style="--c: ${PALETTE.weaker}"></i>Blue: echo got weaker from ${day(c.before)} to ${day(c.after)} (${esc(c.pol)})</li>
       <li><i style="--c: ${PALETTE.stronger}"></i>Orange: echo got stronger. Full colour means 3 dB or more.</li>

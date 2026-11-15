@@ -411,21 +411,6 @@ def forecast(grid: dict, event: int | None = None) -> dict | None:
                 if model and gain is not None
                 else ""
             )
-            + (
-                f" Set against their neighbours, most cells stood out at the pass of {odd['date']}: {odd['peers']['outside']:.0%} did something of their own (about 10 % is ordinary)."
-                if odd
-                else ""
-            )
-            + (
-                f" At the first pass after the event of {day(event)} ({after['date']}), {hit:.0%} of the cells did something other than their neighbours."
-                if hit is not None
-                else ""
-            )
-            + (
-                f" The most surprising pass was that of {surprise['date']}: {surprise[best]['outside']:.0%} of the cells fell outside the range nine in ten had kept to before (±{surprise[best]['expected']} dB)."
-                if surprise
-                else ""
-            )
         ),
         "surprise": surprise and {"date": surprise["date"], "time": surprise["time"], "outside": surprise[best]["outside"], "expected": surprise[best]["expected"]},
         "method": (
