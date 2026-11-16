@@ -267,7 +267,7 @@
   "id": "event-usgs-us6000u1kv",
   "name": "M 6.2 - 86 km SSE of Panguna, Papua New Guinea",
   "cells": 572,
-  "passes": 5,
+  "passes": 6,
   "event": {
    "time": 1791676800000.0,
    "date": "2026-10-11",
@@ -281,11 +281,11 @@
    "grade": "both"
   },
   "most": {
-   "date": "2026-10-12",
-   "time": 1791832772000,
-   "stood": 0.0,
-   "recent": 0.007,
-   "long": 0.0
+   "date": "2026-11-05",
+   "time": 1793906373000,
+   "stood": 0.0052,
+   "recent": 0.0105,
+   "long": 0.0052
   },
   "water": 0.007
  },
@@ -336,31 +336,28 @@
  {
   "id": "event-usgs-us6000u2mq",
   "name": "M 6.9 - 72 km NE of Ozernovskiy, Russia",
-  "cells": 565,
-  "passes": 5,
+  "cells": 576,
+  "passes": 6,
   "event": {
    "time": 1792108800000.0,
    "date": "2026-10-16",
-   "firstPassAfter": "2026-10-23",
-   "stood": 0.1575,
-   "recent": 0.2584,
-   "long": 0.1575,
-   "stillNext": 0.056,
-   "newVersion": {
-    "from": "P05023",
-    "to": "P05036"
-   },
+   "firstPassAfter": "2026-10-21",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
    "baseline": 2,
    "grade": "both"
   },
   "most": {
-   "date": "2026-10-23",
-   "time": 1792745900000,
-   "stood": 0.1575,
-   "recent": 0.2584,
-   "long": 0.1575
+   "date": "2026-10-09",
+   "time": 1791570087000,
+   "stood": 0.2292,
+   "recent": 0.4913,
+   "long": 0.2292
   },
-  "water": 0.014
+  "water": 0.0
  },
  {
   "id": "event-usgs-us6000u2y1",

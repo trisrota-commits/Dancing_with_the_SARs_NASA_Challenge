@@ -4,7 +4,7 @@
  "lat": 52.0153,
  "lon": 157.133,
  "radiusKm": 25,
- "track": "161-D-062-DHDH",
+ "track": "138-A-028-DHDH",
  "setup": {
   "lat": 52.0153,
   "lon": 157.133,
@@ -19,44 +19,51 @@
  ],
  "series": [
   {
-   "time": 1788598700000,
-   "hh": -8.02,
-   "hv": -13.8,
+   "time": 1788459687000,
+   "hh": -7.5,
+   "hv": -12.93,
    "pixels": 1962,
-   "file": "NISAR_L2_PR_GCOV_029_161_D_062_2005_DHDH_A_20260905T085820_20260905T085856_P05023_N_F_J_001.h5"
+   "file": "NISAR_L2_PR_GCOV_029_138_A_028_2005_DHDH_A_20260903T182127_20260903T182202_P05023_N_F_J_001.h5"
   },
   {
-   "time": 1789635500000,
-   "hh": -7.81,
-   "hv": -13.86,
+   "time": 1789496487000,
+   "hh": -7.18,
+   "hv": -12.61,
    "pixels": 1962,
-   "file": "NISAR_L2_PR_GCOV_030_161_D_062_2005_DHDH_A_20260917T085820_20260917T085856_P05023_N_F_J_001.h5"
+   "file": "NISAR_L2_PR_GCOV_030_138_A_028_2005_DHDH_A_20260915T182127_20260915T182202_P05023_N_F_J_001.h5"
   },
   {
-   "time": 1790672300000,
-   "hh": -7.62,
-   "hv": -13.5,
+   "time": 1790533287000,
+   "hh": -7.37,
+   "hv": -12.81,
    "pixels": 1962,
-   "file": "NISAR_L2_PR_GCOV_031_161_D_062_2005_DHDH_A_20260929T085820_20260929T085856_P05023_N_F_J_001.h5"
+   "file": "NISAR_L2_PR_GCOV_031_138_A_028_2005_DHDH_A_20260927T182127_20260927T182202_P05023_N_F_J_001.h5"
   },
   {
-   "time": 1792745900000,
-   "hh": -9.1,
-   "hv": -15.79,
+   "time": 1791570087000,
+   "hh": -8.69,
+   "hv": -14.13,
    "pixels": 1962,
-   "file": "NISAR_L2_PR_GCOV_033_161_D_062_2005_DHDH_A_20261023T085820_20261023T085856_P05036_N_F_J_001.h5"
+   "file": "NISAR_L2_PR_GCOV_032_138_A_028_2005_DHDH_A_20261009T182127_20261009T182202_P05023_N_F_J_001.h5"
   },
   {
-   "time": 1793782701000,
-   "hh": -10.14,
-   "hv": -15.87,
+   "time": 1792606887000,
+   "hh": -7.63,
+   "hv": -13.18,
    "pixels": 1962,
-   "file": "NISAR_L2_PR_GCOV_034_161_D_062_2005_DHDH_A_20261104T085821_20261104T085856_P05036_N_F_J_001.h5"
+   "file": "NISAR_L2_PR_GCOV_033_138_A_028_2005_DHDH_A_20261021T182127_20261021T182202_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1793643687000,
+   "hh": -10.47,
+   "hv": -15.9,
+   "pixels": 1962,
+   "file": "NISAR_L2_PR_GCOV_034_138_A_028_2005_DHDH_A_20261102T182127_20261102T182203_P05036_N_F_J_001.h5"
   }
  ],
  "change": {
-  "before": 1790672300000,
-  "after": 1792745900000,
+  "before": 1791570087000,
+  "after": 1792606887000,
   "pol": "HH",
   "image": "event-usgs-us6000u2mq_change.png",
   "bounds": {
@@ -65,12 +72,12 @@
    "south": 51.96140132950054,
    "north": 52.06919867049947
   },
-  "weakerPct": 2.5,
+  "weakerPct": 0.1,
   "strongerPct": 1.1,
   "spansEvent": true
  },
  "firstDrop": null,
- "summary": "Across the event of 2026-10-16: between 2026-09-29 and 2026-10-23, HH backscatter here changed by -1.5 dB and HV by -2.3 dB (mean within 500 m). Across the mapped area, 2% got at least 3 dB weaker and 1% at least 3 dB stronger.",
- "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 5 passes on track 161-D-062-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-10-16, and 'before' the last pass before it.",
- "generated": "2026-11-15T20:30:06Z"
+ "summary": "Across the event of 2026-10-16: between 2026-10-09 and 2026-10-21, HH backscatter here changed by +1.1 dB and HV by +1.0 dB (mean within 500 m). Across the mapped area, 0% got at least 3 dB weaker and 1% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 6 passes on track 138-A-028-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-10-16, and 'before' the last pass before it.",
+ "generated": "2026-11-16T11:50:36Z"
 }
