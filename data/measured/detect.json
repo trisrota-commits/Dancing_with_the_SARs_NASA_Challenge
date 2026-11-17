@@ -41,6 +41,32 @@
   "water": 0.0
  },
  {
+  "id": "event-eonet-eonet-26258",
+  "name": "Wildfire FOOT CREEK, Johnson, Wyoming",
+  "cells": 576,
+  "passes": 5,
+  "event": {
+   "time": 1793836800000.0,
+   "date": "2026-11-05",
+   "firstPassAfter": "2026-11-11",
+   "stood": 0.0,
+   "recent": 0.0312,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-10-30",
+   "time": 1793361877000,
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0
+  },
+  "water": 0.0
+ },
+ {
   "id": "event-eonet-eonet-26260",
   "name": "Prescribed Fire Cold Springs RX, Wasatch, Utah",
   "cells": 576,
@@ -163,13 +189,13 @@
   "id": "event-gdacs-fl1104270",
   "name": "Flood in France",
   "cells": 576,
-  "passes": 4,
+  "passes": 5,
   "event": {
    "time": 1793750400000.0,
    "date": "2026-11-04",
-   "firstPassAfter": "2026-11-05",
+   "firstPassAfter": "2026-11-07",
    "stood": 0.0,
-   "recent": 0.0156,
+   "recent": 0.0,
    "long": 0.0,
    "stillNext": null,
    "newVersion": null,
@@ -177,10 +203,10 @@
    "grade": "both"
   },
   "most": {
-   "date": "2026-11-05",
-   "time": 1793853301000,
+   "date": "2026-10-26",
+   "time": 1793039698000,
    "stood": 0.0,
-   "recent": 0.0156,
+   "recent": 0.0903,
    "long": 0.0
   },
   "water": 0.0
@@ -208,32 +234,6 @@
    "stood": 0.0191,
    "recent": 0.151,
    "long": 0.0191
-  },
-  "water": 0.0
- },
- {
-  "id": "event-gdacs-vo1000152",
-  "name": "Eruption  Kanlaon",
-  "cells": 576,
-  "passes": 6,
-  "event": {
-   "time": 1791590400000.0,
-   "date": "2026-10-10",
-   "firstPassAfter": "2026-10-14",
-   "stood": 0.0,
-   "recent": 0.0,
-   "long": 0.0,
-   "stillNext": null,
-   "newVersion": null,
-   "baseline": 2,
-   "grade": "both"
-  },
-  "most": {
-   "date": "2026-10-02",
-   "time": 1790976065000,
-   "stood": 0.0,
-   "recent": 0.0122,
-   "long": 0.0
   },
   "water": 0.0
  },
@@ -322,7 +322,7 @@
   "id": "event-usgs-us6000u24c",
   "name": "M 6.0 - 128 km S of Kokopo, Papua New Guinea",
   "cells": 0,
-  "passes": 5,
+  "passes": 6,
   "event": {
    "time": 1791849600000.0,
    "date": "2026-10-13",
@@ -341,21 +341,24 @@
   "event": {
    "time": 1792108800000.0,
    "date": "2026-10-16",
-   "firstPassAfter": "2026-10-21",
+   "firstPassAfter": "2026-10-26",
    "stood": 0.0,
    "recent": 0.0,
    "long": 0.0,
    "stillNext": null,
-   "newVersion": null,
+   "newVersion": {
+    "from": "P05023",
+    "to": "P05036"
+   },
    "baseline": 2,
    "grade": "both"
   },
   "most": {
-   "date": "2026-10-09",
-   "time": 1791570087000,
-   "stood": 0.2292,
-   "recent": 0.4913,
-   "long": 0.2292
+   "date": "2026-11-07",
+   "time": 1794075185000,
+   "stood": 0.0156,
+   "recent": 0.0208,
+   "long": 0.0451
   },
   "water": 0.0
  },

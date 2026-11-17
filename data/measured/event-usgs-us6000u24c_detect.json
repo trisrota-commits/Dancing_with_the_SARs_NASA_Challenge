@@ -4,9 +4,9 @@
  "track": "037-A-175-DHDH",
  "cellM": 500.0,
  "cells": 0,
- "passes": 5,
+ "passes": 6,
  "from": "2026-09-08",
- "to": "2026-10-26",
+ "to": "2026-11-07",
  "water": 0.924,
  "event": {
   "time": 1791849600000.0,
@@ -21,7 +21,7 @@
  "summary": "Nearly all of the window around this point reads as open water (the cross-polarised echo is under -24 dB there). On water the echo follows the wind from pass to pass, so nothing can be said about change here.",
  "method": "",
  "limits": "",
- "generated": "2026-11-16T11:50:55Z",
+ "generated": "2026-11-17T00:39:55Z",
  "bounds": {
   "west": 152.0959523614413,
   "east": 152.2042476385587,

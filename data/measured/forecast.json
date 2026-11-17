@@ -62,6 +62,50 @@
   }
  },
  {
+  "id": "event-eonet-eonet-26258",
+  "name": "Wildfire FOOT CREEK, Johnson, Wyoming",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1793836800000.0,
+   "date": "2026-11-05",
+   "firstPassAfter": "2026-11-11",
+   "outside": 0.019,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-11",
+   "time": 1794398677000,
+   "outside": 0.019,
+   "expected": 0.55
+  },
+  "last": {
+   "rmse": 0.88,
+   "mae": 0.67,
+   "within90": 1.46,
+   "r2": 0.847,
+   "spearman": 0.84,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.36,
+   "mae": 1.22,
+   "within90": 1.94,
+   "r2": 0.638,
+   "spearman": 0.687,
+   "skill": -1.37
+  },
+  "peers": {
+   "rmse": 0.4,
+   "mae": 0.23,
+   "within90": 0.46,
+   "r2": 0.968,
+   "spearman": 0.981,
+   "skill": 0.79
+  }
+ },
+ {
   "id": "event-eonet-eonet-26260",
   "name": "Prescribed Fire Cold Springs RX, Wasatch, Utah",
   "cells": 576,
@@ -282,6 +326,50 @@
   }
  },
  {
+  "id": "event-gdacs-fl1104270",
+  "name": "Flood in France",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1793750400000.0,
+   "date": "2026-11-04",
+   "firstPassAfter": "2026-11-07",
+   "outside": 0.009,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-07",
+   "time": 1794076498000,
+   "outside": 0.009,
+   "expected": 0.81
+  },
+  "last": {
+   "rmse": 0.8,
+   "mae": 0.64,
+   "within90": 1.26,
+   "r2": 0.969,
+   "spearman": 0.927,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.34,
+   "mae": 1.14,
+   "within90": 2.03,
+   "r2": 0.913,
+   "spearman": 0.864,
+   "skill": -1.819
+  },
+  "peers": {
+   "rmse": 0.44,
+   "mae": 0.28,
+   "within90": 0.63,
+   "r2": 0.99,
+   "spearman": 0.986,
+   "skill": 0.691
+  }
+ },
+ {
   "id": "event-gdacs-vo1000151",
   "name": "Eruption  Taal",
   "cells": 576,
@@ -323,50 +411,6 @@
    "r2": 0.971,
    "spearman": 0.947,
    "skill": 0.318
-  }
- },
- {
-  "id": "event-gdacs-vo1000152",
-  "name": "Eruption  Kanlaon",
-  "cells": 576,
-  "passes": 6,
-  "best": "last",
-  "event": {
-   "time": 1791590400000.0,
-   "date": "2026-10-10",
-   "firstPassAfter": "2026-10-14",
-   "outside": 0.028,
-   "newVersion": null
-  },
-  "peerSurprise": {
-   "date": "2026-10-14",
-   "time": 1792012865000,
-   "outside": 0.028,
-   "expected": 0.57
-  },
-  "last": {
-   "rmse": 0.51,
-   "mae": 0.4,
-   "within90": 0.84,
-   "r2": 0.763,
-   "spearman": 0.85,
-   "skill": 0.0
-  },
-  "line": {
-   "rmse": 0.74,
-   "mae": 0.57,
-   "within90": 1.14,
-   "r2": 0.499,
-   "spearman": 0.764,
-   "skill": -1.117
-  },
-  "peers": {
-   "rmse": 0.31,
-   "mae": 0.21,
-   "within90": 0.46,
-   "r2": 0.913,
-   "spearman": 0.957,
-   "skill": 0.631
   }
  },
  {
@@ -508,7 +552,7 @@
   "id": "event-usgs-us6000u24c",
   "name": "M 6.0 - 128 km S of Kokopo, Papua New Guinea",
   "cells": 576,
-  "passes": 5,
+  "passes": 6,
   "best": "last",
   "event": {
    "time": 1791849600000.0,
@@ -518,34 +562,34 @@
    "newVersion": null
   },
   "peerSurprise": {
-   "date": "2026-10-26",
-   "time": 1793043408000,
-   "outside": 0.189,
-   "expected": 0.73
+   "date": "2026-11-07",
+   "time": 1794080209000,
+   "outside": 0.271,
+   "expected": 0.8
   },
   "last": {
-   "rmse": 1.01,
+   "rmse": 1.03,
    "mae": 0.78,
-   "within90": 1.67,
-   "r2": -0.511,
-   "spearman": 0.368,
+   "within90": 1.7,
+   "r2": -0.219,
+   "spearman": 0.464,
    "skill": 0.0
   },
   "line": {
    "rmse": 1.65,
-   "mae": 1.41,
-   "within90": 2.55,
-   "r2": -3.042,
-   "spearman": 0.387,
-   "skill": -1.676
+   "mae": 1.35,
+   "within90": 2.61,
+   "r2": -2.09,
+   "spearman": 0.331,
+   "skill": -1.535
   },
   "peers": {
-   "rmse": 0.51,
-   "mae": 0.37,
-   "within90": 0.8,
-   "r2": 0.613,
-   "spearman": 0.805,
-   "skill": 0.744
+   "rmse": 0.63,
+   "mae": 0.44,
+   "within90": 0.94,
+   "r2": 0.545,
+   "spearman": 0.763,
+   "skill": 0.627
   }
  },
  {
@@ -557,39 +601,42 @@
   "event": {
    "time": 1792108800000.0,
    "date": "2026-10-16",
-   "firstPassAfter": "2026-10-21",
-   "outside": 0.069,
-   "newVersion": null
+   "firstPassAfter": "2026-10-26",
+   "outside": 0.075,
+   "newVersion": {
+    "from": "P05023",
+    "to": "P05036"
+   }
   },
   "peerSurprise": {
-   "date": "2026-11-02",
-   "time": 1793643687000,
-   "outside": 0.135,
-   "expected": 1.02
+   "date": "2026-11-07",
+   "time": 1794075185000,
+   "outside": 0.139,
+   "expected": 0.65
   },
   "last": {
-   "rmse": 1.44,
-   "mae": 1.01,
-   "within90": 2.77,
-   "r2": 0.272,
-   "spearman": 0.456,
+   "rmse": 1.16,
+   "mae": 0.83,
+   "within90": 2.09,
+   "r2": 0.501,
+   "spearman": 0.626,
    "skill": 0.0
   },
   "line": {
-   "rmse": 1.79,
-   "mae": 1.39,
-   "within90": 3.05,
-   "r2": -0.126,
-   "spearman": 0.36,
-   "skill": -0.547
+   "rmse": 1.59,
+   "mae": 1.34,
+   "within90": 2.44,
+   "r2": 0.056,
+   "spearman": 0.65,
+   "skill": -0.891
   },
   "peers": {
-   "rmse": 0.69,
-   "mae": 0.46,
-   "within90": 1.06,
-   "r2": 0.835,
-   "spearman": 0.914,
-   "skill": 0.774
+   "rmse": 0.43,
+   "mae": 0.31,
+   "within90": 0.67,
+   "r2": 0.932,
+   "spearman": 0.945,
+   "skill": 0.864
   }
  },
  {
