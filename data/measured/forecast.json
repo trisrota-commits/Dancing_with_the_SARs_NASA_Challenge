@@ -62,6 +62,50 @@
   }
  },
  {
+  "id": "event-eonet-eonet-26057",
+  "name": "Wildfire Wild River, Coos, New Hampshire",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1793577600000.0,
+   "date": "2026-11-02",
+   "firstPassAfter": "2026-11-09",
+   "outside": 0.085,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-09",
+   "time": 1794268276000,
+   "outside": 0.085,
+   "expected": 0.5
+  },
+  "last": {
+   "rmse": 0.56,
+   "mae": 0.48,
+   "within90": 0.85,
+   "r2": 0.377,
+   "spearman": 0.695,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 0.81,
+   "mae": 0.64,
+   "within90": 1.35,
+   "r2": -0.308,
+   "spearman": 0.568,
+   "skill": -1.099
+  },
+  "peers": {
+   "rmse": 0.31,
+   "mae": 0.24,
+   "within90": 0.49,
+   "r2": 0.813,
+   "spearman": 0.919,
+   "skill": 0.7
+  }
+ },
+ {
   "id": "event-eonet-eonet-26258",
   "name": "Wildfire FOOT CREEK, Johnson, Wyoming",
   "cells": 576,
@@ -70,39 +114,39 @@
   "event": {
    "time": 1793836800000.0,
    "date": "2026-11-05",
-   "firstPassAfter": "2026-11-11",
-   "outside": 0.019,
+   "firstPassAfter": "2026-11-09",
+   "outside": 0.003,
    "newVersion": null
   },
   "peerSurprise": {
-   "date": "2026-11-11",
-   "time": 1794398677000,
-   "outside": 0.019,
-   "expected": 0.55
+   "date": "2026-11-09",
+   "time": 1794190367000,
+   "outside": 0.003,
+   "expected": 0.5
   },
   "last": {
-   "rmse": 0.88,
-   "mae": 0.67,
-   "within90": 1.46,
-   "r2": 0.847,
-   "spearman": 0.84,
+   "rmse": 0.72,
+   "mae": 0.54,
+   "within90": 1.24,
+   "r2": 0.907,
+   "spearman": 0.839,
    "skill": 0.0
   },
   "line": {
-   "rmse": 1.36,
-   "mae": 1.22,
-   "within90": 1.94,
-   "r2": 0.638,
-   "spearman": 0.687,
-   "skill": -1.37
+   "rmse": 1.44,
+   "mae": 1.36,
+   "within90": 1.96,
+   "r2": 0.627,
+   "spearman": 0.613,
+   "skill": -3.03
   },
   "peers": {
-   "rmse": 0.4,
-   "mae": 0.23,
-   "within90": 0.46,
-   "r2": 0.968,
+   "rmse": 0.27,
+   "mae": 0.19,
+   "within90": 0.43,
+   "r2": 0.987,
    "spearman": 0.981,
-   "skill": 0.79
+   "skill": 0.861
   }
  },
  {
@@ -326,6 +370,50 @@
   }
  },
  {
+  "id": "event-gdacs-fl1104259",
+  "name": "Flood in Peru",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1792972800000.0,
+   "date": "2026-10-26",
+   "firstPassAfter": "2026-11-05",
+   "outside": 0.351,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-05",
+   "time": 1793876473000,
+   "outside": 0.351,
+   "expected": 1.23
+  },
+  "last": {
+   "rmse": 1.61,
+   "mae": 1.12,
+   "within90": 2.85,
+   "r2": 0.926,
+   "spearman": 0.881,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.67,
+   "mae": 1.28,
+   "within90": 2.83,
+   "r2": 0.92,
+   "spearman": 0.89,
+   "skill": -0.082
+  },
+  "peers": {
+   "rmse": 0.95,
+   "mae": 0.69,
+   "within90": 1.59,
+   "r2": 0.975,
+   "spearman": 0.96,
+   "skill": 0.654
+  }
+ },
+ {
   "id": "event-gdacs-fl1104270",
   "name": "Flood in France",
   "cells": 576,
@@ -372,45 +460,89 @@
  {
   "id": "event-gdacs-vo1000151",
   "name": "Eruption  Taal",
-  "cells": 576,
-  "passes": 6,
+  "cells": 402,
+  "passes": 7,
   "best": "last",
   "event": {
    "time": 1791417600000.0,
    "date": "2026-10-08",
-   "firstPassAfter": "2026-10-09",
-   "outside": null,
+   "firstPassAfter": "2026-10-14",
+   "outside": 0.222,
    "newVersion": null
   },
   "peerSurprise": {
-   "date": "2026-10-21",
-   "time": 1792618232000,
-   "outside": 0.163,
-   "expected": 1.21
+   "date": "2026-10-14",
+   "time": 1791973438000,
+   "outside": 0.222,
+   "expected": 1.88
   },
   "last": {
-   "rmse": 0.95,
-   "mae": 0.7,
-   "within90": 1.64,
-   "r2": 0.958,
-   "spearman": 0.931,
+   "rmse": 1.65,
+   "mae": 1.26,
+   "within90": 2.96,
+   "r2": 0.878,
+   "spearman": 0.747,
    "skill": 0.0
   },
   "line": {
-   "rmse": 1.68,
-   "mae": 1.29,
-   "within90": 2.81,
-   "r2": 0.868,
-   "spearman": 0.883,
-   "skill": -2.15
+   "rmse": 2.91,
+   "mae": 2.2,
+   "within90": 5.02,
+   "r2": 0.622,
+   "spearman": 0.657,
+   "skill": -2.098
   },
   "peers": {
-   "rmse": 0.78,
-   "mae": 0.57,
-   "within90": 1.34,
-   "r2": 0.971,
-   "spearman": 0.947,
-   "skill": 0.318
+   "rmse": 1.15,
+   "mae": 0.9,
+   "within90": 1.89,
+   "r2": 0.941,
+   "spearman": 0.883,
+   "skill": 0.515
+  }
+ },
+ {
+  "id": "event-gdacs-vo1000152",
+  "name": "Eruption  Kanlaon",
+  "cells": 576,
+  "passes": 7,
+  "best": "last",
+  "event": {
+   "time": 1791590400000.0,
+   "date": "2026-10-10",
+   "firstPassAfter": "2026-10-14",
+   "outside": 0.028,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-07",
+   "time": 1794086466000,
+   "outside": 0.089,
+   "expected": 0.46
+  },
+  "last": {
+   "rmse": 0.51,
+   "mae": 0.4,
+   "within90": 0.83,
+   "r2": 0.778,
+   "spearman": 0.867,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 0.7,
+   "mae": 0.54,
+   "within90": 1.06,
+   "r2": 0.58,
+   "spearman": 0.808,
+   "skill": -0.892
+  },
+  "peers": {
+   "rmse": 0.31,
+   "mae": 0.21,
+   "within90": 0.45,
+   "r2": 0.919,
+   "spearman": 0.959,
+   "skill": 0.634
   }
  },
  {
@@ -934,69 +1066,69 @@
   "id": "jakobshavn",
   "name": "Sermeq Kujalleq (Jakobshavn)",
   "cells": 2304,
-  "passes": 11,
+  "passes": 12,
   "best": "last",
   "event": null,
   "peerSurprise": {
-   "date": "2026-09-29",
-   "time": 1790725921000,
-   "outside": 0.416,
-   "expected": 1.2
+   "date": "2026-09-22",
+   "time": 1790060151000,
+   "outside": 0.186,
+   "expected": 1.44
   },
   "last": {
-   "rmse": 0.87,
-   "mae": 0.64,
-   "within90": 1.39,
-   "r2": 0.927,
-   "spearman": 0.958,
+   "rmse": 0.96,
+   "mae": 0.7,
+   "within90": 1.5,
+   "r2": 0.906,
+   "spearman": 0.946,
    "skill": 0.0
   },
   "line": {
-   "rmse": 1.23,
-   "mae": 0.89,
-   "within90": 1.9,
-   "r2": 0.853,
-   "spearman": 0.93,
-   "skill": -1.0
+   "rmse": 1.41,
+   "mae": 0.99,
+   "within90": 2.27,
+   "r2": 0.799,
+   "spearman": 0.907,
+   "skill": -1.146
   },
   "peers": {
-   "rmse": 0.81,
-   "mae": 0.54,
-   "within90": 1.32,
-   "r2": 0.936,
-   "spearman": 0.964,
-   "skill": 0.132
+   "rmse": 0.87,
+   "mae": 0.59,
+   "within90": 1.39,
+   "r2": 0.923,
+   "spearman": 0.955,
+   "skill": 0.18
   },
   "mean": {
-   "rmse": 1.47,
-   "mae": 1.11,
+   "rmse": 1.48,
+   "mae": 1.14,
    "within90": 2.48,
-   "r2": 0.788,
-   "spearman": 0.921,
-   "skill": -1.889
+   "r2": 0.777,
+   "spearman": 0.908,
+   "skill": -1.383
   },
   "trend": {
-   "rmse": 1.07,
-   "mae": 0.82,
-   "within90": 1.75,
-   "r2": 0.887,
-   "spearman": 0.945,
-   "skill": -0.538
+   "rmse": 1.23,
+   "mae": 0.88,
+   "within90": 1.95,
+   "r2": 0.846,
+   "spearman": 0.922,
+   "skill": -0.647
   },
   "learnt": {
-   "rmse": 0.93,
-   "mae": 0.72,
-   "within90": 1.46,
-   "r2": 0.915,
-   "spearman": 0.952,
-   "skill": -0.158
+   "rmse": 1.1,
+   "mae": 0.84,
+   "within90": 1.71,
+   "r2": 0.876,
+   "spearman": 0.93,
+   "skill": -0.326
   }
  },
  {
   "id": "mekong",
   "name": "Mekong Delta",
   "cells": 1024,
-  "passes": 11,
+  "passes": 12,
   "best": "learnt",
   "event": null,
   "peerSurprise": {
@@ -1006,52 +1138,52 @@
    "expected": 0.62
   },
   "last": {
-   "rmse": 0.73,
-   "mae": 0.47,
-   "within90": 0.97,
-   "r2": 0.947,
-   "spearman": 0.966,
+   "rmse": 0.72,
+   "mae": 0.46,
+   "within90": 0.95,
+   "r2": 0.95,
+   "spearman": 0.967,
    "skill": 0.0
   },
   "line": {
-   "rmse": 1.14,
-   "mae": 0.75,
-   "within90": 1.51,
-   "r2": 0.87,
-   "spearman": 0.918,
-   "skill": -1.466
+   "rmse": 1.12,
+   "mae": 0.73,
+   "within90": 1.48,
+   "r2": 0.877,
+   "spearman": 0.924,
+   "skill": -1.453
   },
   "peers": {
    "rmse": 0.59,
    "mae": 0.3,
-   "within90": 0.64,
+   "within90": 0.65,
    "r2": 0.966,
    "spearman": 0.988,
-   "skill": 0.347
+   "skill": 0.325
   },
   "mean": {
-   "rmse": 0.77,
+   "rmse": 0.76,
    "mae": 0.53,
-   "within90": 1.13,
-   "r2": 0.941,
-   "spearman": 0.978,
-   "skill": -0.12
+   "within90": 1.12,
+   "r2": 0.944,
+   "spearman": 0.974,
+   "skill": -0.117
   },
   "trend": {
-   "rmse": 0.87,
-   "mae": 0.56,
-   "within90": 1.16,
-   "r2": 0.925,
-   "spearman": 0.953,
-   "skill": -0.428
+   "rmse": 0.86,
+   "mae": 0.55,
+   "within90": 1.14,
+   "r2": 0.927,
+   "spearman": 0.957,
+   "skill": -0.442
   },
   "learnt": {
-   "rmse": 0.7,
+   "rmse": 0.69,
    "mae": 0.44,
-   "within90": 0.96,
-   "r2": 0.951,
+   "within90": 0.94,
+   "r2": 0.953,
    "spearman": 0.972,
-   "skill": 0.077
+   "skill": 0.074
   }
  },
  {
@@ -1182,7 +1314,7 @@
   "id": "sacramento",
   "name": "Sacramento Valley rice",
   "cells": 1024,
-  "passes": 28,
+  "passes": 29,
   "best": "last",
   "event": null,
   "peerSurprise": {
@@ -1192,114 +1324,114 @@
    "expected": 1.93
   },
   "last": {
-   "rmse": 1.38,
-   "mae": 0.87,
+   "rmse": 1.39,
+   "mae": 0.86,
    "within90": 2.15,
-   "r2": 0.838,
-   "spearman": 0.925,
+   "r2": 0.837,
+   "spearman": 0.923,
    "skill": 0.0
   },
   "line": {
    "rmse": 1.95,
    "mae": 1.25,
    "within90": 3.06,
-   "r2": 0.681,
-   "spearman": 0.884,
-   "skill": -0.974
+   "r2": 0.68,
+   "spearman": 0.883,
+   "skill": -0.966
   },
   "peers": {
-   "rmse": 1.31,
+   "rmse": 1.32,
    "mae": 0.8,
-   "within90": 2.01,
-   "r2": 0.855,
-   "spearman": 0.933,
-   "skill": 0.104
+   "within90": 2.02,
+   "r2": 0.853,
+   "spearman": 0.932,
+   "skill": 0.099
   },
   "mean": {
-   "rmse": 2.0,
-   "mae": 1.39,
-   "within90": 3.33,
-   "r2": 0.663,
-   "spearman": 0.824,
-   "skill": -1.086
+   "rmse": 1.99,
+   "mae": 1.38,
+   "within90": 3.32,
+   "r2": 0.668,
+   "spearman": 0.825,
+   "skill": -1.041
   },
   "trend": {
-   "rmse": 1.73,
+   "rmse": 1.74,
    "mae": 1.15,
-   "within90": 2.74,
-   "r2": 0.747,
-   "spearman": 0.903,
-   "skill": -0.568
+   "within90": 2.75,
+   "r2": 0.744,
+   "spearman": 0.901,
+   "skill": -0.574
   },
   "learnt": {
-   "rmse": 1.39,
-   "mae": 0.91,
-   "within90": 2.14,
-   "r2": 0.837,
-   "spearman": 0.922,
-   "skill": -0.009
+   "rmse": 1.41,
+   "mae": 0.92,
+   "within90": 2.16,
+   "r2": 0.833,
+   "spearman": 0.919,
+   "skill": -0.029
   }
  },
  {
   "id": "west-bengal",
   "name": "Rice fields of Bardhaman",
   "cells": 1024,
-  "passes": 12,
+  "passes": 11,
   "best": "learnt",
   "event": null,
   "peerSurprise": {
-   "date": "2026-10-06",
-   "time": 1791329857000,
-   "outside": 0.146,
-   "expected": 2.07
+   "date": "2026-11-16",
+   "time": 1794871758000,
+   "outside": 0.081,
+   "expected": 1.73
   },
   "last": {
-   "rmse": 1.95,
-   "mae": 1.54,
-   "within90": 3.17,
-   "r2": 0.722,
-   "spearman": 0.879,
+   "rmse": 1.56,
+   "mae": 1.17,
+   "within90": 2.69,
+   "r2": 0.642,
+   "spearman": 0.779,
    "skill": 0.0
   },
   "line": {
-   "rmse": 1.79,
-   "mae": 1.32,
-   "within90": 2.87,
-   "r2": 0.764,
-   "spearman": 0.924,
-   "skill": 0.151
+   "rmse": 1.49,
+   "mae": 1.11,
+   "within90": 2.42,
+   "r2": 0.674,
+   "spearman": 0.832,
+   "skill": 0.09
   },
   "peers": {
-   "rmse": 1.28,
-   "mae": 0.95,
-   "within90": 1.95,
-   "r2": 0.879,
-   "spearman": 0.936,
-   "skill": 0.565
+   "rmse": 1.06,
+   "mae": 0.78,
+   "within90": 1.71,
+   "r2": 0.835,
+   "spearman": 0.891,
+   "skill": 0.54
   },
   "mean": {
-   "rmse": 4.5,
-   "mae": 3.64,
-   "within90": 7.54,
-   "r2": -0.485,
-   "spearman": 0.495,
-   "skill": -4.342
+   "rmse": 2.4,
+   "mae": 1.92,
+   "within90": 4.02,
+   "r2": 0.156,
+   "spearman": 0.299,
+   "skill": -1.356
   },
   "trend": {
-   "rmse": 2.7,
-   "mae": 2.13,
-   "within90": 4.25,
-   "r2": 0.465,
-   "spearman": 0.905,
-   "skill": -0.924
+   "rmse": 3.67,
+   "mae": 2.44,
+   "within90": 6.64,
+   "r2": -0.977,
+   "spearman": 0.783,
+   "skill": -4.519
   },
   "learnt": {
-   "rmse": 1.62,
-   "mae": 1.19,
-   "within90": 2.61,
-   "r2": 0.808,
-   "spearman": 0.918,
-   "skill": 0.31
+   "rmse": 1.19,
+   "mae": 0.9,
+   "within90": 1.98,
+   "r2": 0.792,
+   "spearman": 0.852,
+   "skill": 0.42
   }
  }
 ]

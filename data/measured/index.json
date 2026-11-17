@@ -72,6 +72,15 @@
   "file": "event-gdacs-fl1104253.json"
  },
  {
+  "id": "event-gdacs-fl1104259",
+  "name": "Flood in Peru",
+  "lat": -3.6306,
+  "lon": -80.5716,
+  "radiusKm": 25,
+  "event": 1792972800000.0,
+  "file": "event-gdacs-fl1104259.json"
+ },
+ {
   "id": "event-gdacs-fl1104270",
   "name": "Flood in France",
   "lat": 43.5439,
@@ -79,6 +88,15 @@
   "radiusKm": 25,
   "event": 1793750400000.0,
   "file": "event-gdacs-fl1104270.json"
+ },
+ {
+  "id": "event-gdacs-fl1104277",
+  "name": "Flood in Argentina",
+  "lat": -27.7759,
+  "lon": -67.1713,
+  "radiusKm": 25,
+  "event": 1794096000000.0,
+  "file": "event-gdacs-fl1104277.json"
  },
  {
   "id": "event-gdacs-vo1000151",

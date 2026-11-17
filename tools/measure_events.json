@@ -2,6 +2,18 @@
   "about": "Written by tools/pick_events.mjs, not by hand: the strongest recent events that NISAR has passed over on one track both before and after. tools/measure.py measures them across the event date. Edit tools/measure_sites.json for places chosen by people.",
   "sites": [
     {
+      "id": "event-gdacs-fl1104277",
+      "event_id": "gdacs:FL1104277",
+      "name": "Flood in Argentina",
+      "category": "flood",
+      "kind": "Flood",
+      "lat": -27.7759,
+      "lon": -67.1713,
+      "event": "2026-11-08",
+      "start": "2026-09-24",
+      "picked": "2026-11-17"
+    },
+    {
       "id": "event-eonet-eonet-26258",
       "event_id": "eonet:EONET_26258",
       "name": "Wildfire FOOT CREEK, Johnson, Wyoming",
@@ -72,6 +84,18 @@
       "event": "2026-10-29",
       "start": "2026-09-14",
       "picked": "2026-11-15"
+    },
+    {
+      "id": "event-gdacs-fl1104259",
+      "event_id": "gdacs:FL1104259",
+      "name": "Flood in Peru",
+      "category": "flood",
+      "kind": "Flood",
+      "lat": -3.6306,
+      "lon": -80.5716,
+      "event": "2026-10-26",
+      "start": "2026-09-11",
+      "picked": "2026-11-17"
     },
     {
       "id": "event-usgs-us6000u4rf",
@@ -194,18 +218,6 @@
       "picked": "2026-11-15"
     },
     {
-      "id": "event-gdacs-eq1570339",
-      "event_id": "gdacs:EQ1570339",
-      "name": "M 7.7 - 10 km WSW of Pitaloza Arriba, Panama",
-      "category": "earthquake",
-      "kind": "Earthquake",
-      "lat": 7.6069,
-      "lon": -80.7566,
-      "event": "2026-10-09",
-      "start": "2026-08-25",
-      "picked": "2026-11-15"
-    },
-    {
       "id": "event-usgs-us6000u19w",
       "event_id": "usgs:us6000u19w",
       "name": "M 6.6 - 13 km WSW of Río Grande, Panama",
@@ -218,15 +230,15 @@
       "picked": "2026-11-15"
     },
     {
-      "id": "event-gdacs-vo1000151",
-      "event_id": "gdacs:VO1000151",
-      "name": "Eruption  Taal",
-      "category": "volcano",
-      "kind": "Volcano",
-      "lat": 14.0106,
-      "lon": 120.9975,
-      "event": "2026-10-08",
-      "start": "2026-08-24",
+      "id": "event-gdacs-eq1570339",
+      "event_id": "gdacs:EQ1570339",
+      "name": "M 7.7 - 10 km WSW of Pitaloza Arriba, Panama",
+      "category": "earthquake",
+      "kind": "Earthquake",
+      "lat": 7.6069,
+      "lon": -80.7566,
+      "event": "2026-10-09",
+      "start": "2026-08-25",
       "picked": "2026-11-15"
     },
     {
@@ -237,6 +249,18 @@
       "kind": "Earthquake",
       "lat": -15.4332,
       "lon": 168.2783,
+      "event": "2026-10-08",
+      "start": "2026-08-24",
+      "picked": "2026-11-15"
+    },
+    {
+      "id": "event-gdacs-vo1000151",
+      "event_id": "gdacs:VO1000151",
+      "name": "Eruption  Taal",
+      "category": "volcano",
+      "kind": "Volcano",
+      "lat": 14.0106,
+      "lon": 120.9975,
       "event": "2026-10-08",
       "start": "2026-08-24",
       "picked": "2026-11-15"

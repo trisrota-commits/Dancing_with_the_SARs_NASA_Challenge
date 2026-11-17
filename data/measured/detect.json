@@ -18,24 +18,24 @@
   "id": "event-eonet-eonet-26057",
   "name": "Wildfire Wild River, Coos, New Hampshire",
   "cells": 576,
-  "passes": 4,
+  "passes": 5,
   "event": {
    "time": 1793577600000.0,
    "date": "2026-11-02",
-   "firstPassAfter": "2026-11-02",
+   "firstPassAfter": "2026-11-09",
    "stood": 0.0,
-   "recent": 0.0052,
-   "long": 0.0,
+   "recent": 0.0,
+   "long": 0.0122,
    "stillNext": null,
    "newVersion": null,
    "baseline": 2,
    "grade": "both"
   },
   "most": {
-   "date": "2026-11-02",
-   "time": 1793662976000,
+   "date": "2026-10-28",
+   "time": 1793231476000,
    "stood": 0.0,
-   "recent": 0.0052,
+   "recent": 0.0104,
    "long": 0.0
   },
   "water": 0.0
@@ -48,9 +48,9 @@
   "event": {
    "time": 1793836800000.0,
    "date": "2026-11-05",
-   "firstPassAfter": "2026-11-11",
+   "firstPassAfter": "2026-11-09",
    "stood": 0.0,
-   "recent": 0.0312,
+   "recent": 0.0,
    "long": 0.0,
    "stillNext": null,
    "newVersion": null,
@@ -58,10 +58,10 @@
    "grade": "both"
   },
   "most": {
-   "date": "2026-10-30",
-   "time": 1793361877000,
+   "date": "2026-10-28",
+   "time": 1793153566000,
    "stood": 0.0,
-   "recent": 0.0,
+   "recent": 0.0087,
    "long": 0.0
   },
   "water": 0.0
@@ -186,6 +186,32 @@
   "water": 0.0
  },
  {
+  "id": "event-gdacs-fl1104259",
+  "name": "Flood in Peru",
+  "cells": 576,
+  "passes": 5,
+  "event": {
+   "time": 1792972800000.0,
+   "date": "2026-10-26",
+   "firstPassAfter": "2026-11-05",
+   "stood": 0.2153,
+   "recent": 0.4826,
+   "long": 0.3889,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-05",
+   "time": 1793876473000,
+   "stood": 0.2153,
+   "recent": 0.4826,
+   "long": 0.3889
+  },
+  "water": 0.0
+ },
+ {
   "id": "event-gdacs-fl1104270",
   "name": "Flood in France",
   "cells": 576,
@@ -212,16 +238,16 @@
   "water": 0.0
  },
  {
-  "id": "event-gdacs-vo1000151",
-  "name": "Eruption  Taal",
+  "id": "event-gdacs-fl1104277",
+  "name": "Flood in Argentina",
   "cells": 576,
-  "passes": 6,
+  "passes": 4,
   "event": {
-   "time": 1791417600000.0,
-   "date": "2026-10-08",
-   "firstPassAfter": "2026-10-09",
+   "time": 1794096000000.0,
+   "date": "2026-11-08",
+   "firstPassAfter": "2026-11-08",
    "stood": 0.0,
-   "recent": 0.0087,
+   "recent": 0.0,
    "long": 0.0,
    "stillNext": null,
    "newVersion": null,
@@ -229,11 +255,63 @@
    "grade": "both"
   },
   "most": {
-   "date": "2026-11-02",
-   "time": 1793655032000,
-   "stood": 0.0191,
-   "recent": 0.151,
-   "long": 0.0191
+   "date": "2026-11-08",
+   "time": 1794133774000,
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0
+  },
+  "water": 0.0
+ },
+ {
+  "id": "event-gdacs-vo1000151",
+  "name": "Eruption  Taal",
+  "cells": 376,
+  "passes": 7,
+  "event": {
+   "time": 1791417600000.0,
+   "date": "2026-10-08",
+   "firstPassAfter": "2026-10-14",
+   "stood": 0.0,
+   "recent": 0.0106,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-07",
+   "time": 1794047038000,
+   "stood": 0.0639,
+   "recent": 0.156,
+   "long": 0.0639
+  },
+  "water": 0.073
+ },
+ {
+  "id": "event-gdacs-vo1000152",
+  "name": "Eruption  Kanlaon",
+  "cells": 576,
+  "passes": 7,
+  "event": {
+   "time": 1791590400000.0,
+   "date": "2026-10-10",
+   "firstPassAfter": "2026-10-14",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-10-02",
+   "time": 1790976065000,
+   "stood": 0.0,
+   "recent": 0.0122,
+   "long": 0.0
   },
   "water": 0.0
  },
@@ -510,14 +588,14 @@
   "id": "jakobshavn",
   "name": "Sermeq Kujalleq (Jakobshavn)",
   "cells": 2304,
-  "passes": 11,
+  "passes": 12,
   "event": null,
   "most": {
-   "date": "2026-09-17",
-   "time": 1789689121000,
-   "stood": 0.0286,
-   "recent": 0.056,
-   "long": 0.049
+   "date": "2026-09-22",
+   "time": 1790060151000,
+   "stood": 0.0356,
+   "recent": 0.0842,
+   "long": 0.0577
   },
   "water": 0.0
  },
@@ -525,7 +603,7 @@
   "id": "mekong",
   "name": "Mekong Delta",
   "cells": 1024,
-  "passes": 11,
+  "passes": 12,
   "event": null,
   "most": {
    "date": "2026-07-23",
@@ -570,7 +648,7 @@
   "id": "sacramento",
   "name": "Sacramento Valley rice",
   "cells": 1024,
-  "passes": 28,
+  "passes": 29,
   "event": null,
   "most": {
    "date": "2026-10-02",
@@ -584,16 +662,16 @@
  {
   "id": "west-bengal",
   "name": "Rice fields of Bardhaman",
-  "cells": 1017,
-  "passes": 12,
+  "cells": 1024,
+  "passes": 11,
   "event": null,
   "most": {
-   "date": "2026-10-06",
-   "time": 1791329857000,
-   "stood": 0.0728,
-   "recent": 0.645,
-   "long": 0.0737
+   "date": "2026-08-24",
+   "time": 1787614158000,
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0
   },
-  "water": 0.007
+  "water": 0.0
  }
 ]
