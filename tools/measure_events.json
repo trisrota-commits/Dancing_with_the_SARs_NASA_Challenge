@@ -2,6 +2,90 @@
   "about": "Written by tools/pick_events.mjs, not by hand: the strongest recent events that NISAR has passed over on one track both before and after. tools/measure.py measures them across the event date. Edit tools/measure_sites.json for places chosen by people.",
   "sites": [
     {
+      "id": "event-gdacs-wf1033904",
+      "event_id": "gdacs:WF1033904",
+      "name": "Forest fires in Nigeria",
+      "category": "wildfire",
+      "kind": "Wildfire",
+      "lat": 12.3318,
+      "lon": 5.2901,
+      "event": "2026-11-15",
+      "start": "2026-10-01",
+      "picked": "2026-11-18"
+    },
+    {
+      "id": "event-gdacs-wf1033877",
+      "event_id": "gdacs:WF1033877",
+      "name": "Forest fires in Sudan, South Sudan",
+      "category": "wildfire",
+      "kind": "Wildfire",
+      "lat": 9.5056,
+      "lon": 31.3787,
+      "event": "2026-11-14",
+      "start": "2026-09-30",
+      "picked": "2026-11-18"
+    },
+    {
+      "id": "event-gdacs-wf1033929",
+      "event_id": "gdacs:WF1033929",
+      "name": "Forest fires in South Sudan",
+      "category": "wildfire",
+      "kind": "Wildfire",
+      "lat": 8.7363,
+      "lon": 31.6143,
+      "event": "2026-11-13",
+      "start": "2026-09-29",
+      "picked": "2026-11-18"
+    },
+    {
+      "id": "event-gdacs-wf1033863",
+      "event_id": "gdacs:WF1033863",
+      "name": "Forest fires in Sudan, South Sudan",
+      "category": "wildfire",
+      "kind": "Wildfire",
+      "lat": 9.7825,
+      "lon": 31.434,
+      "event": "2026-11-13",
+      "start": "2026-09-29",
+      "picked": "2026-11-18"
+    },
+    {
+      "id": "event-eonet-eonet-26465",
+      "event_id": "eonet:EONET_26465",
+      "name": "Wildfire Range 47, Forrest, Mississippi",
+      "category": "wildfire",
+      "kind": "Wildfire",
+      "lat": 31.0998,
+      "lon": -89.1593,
+      "event": "2026-11-13",
+      "start": "2026-09-29",
+      "picked": "2026-11-18"
+    },
+    {
+      "id": "event-eonet-eonet-26464",
+      "event_id": "eonet:EONET_26464",
+      "name": "Wildfire 201W, Perry, Mississippi",
+      "category": "wildfire",
+      "kind": "Wildfire",
+      "lat": 31.1198,
+      "lon": -89.0798,
+      "event": "2026-11-13",
+      "start": "2026-09-29",
+      "picked": "2026-11-18"
+    },
+    {
+      "id": "event-eonet-eonet-26331",
+      "event_id": "eonet:EONET_26331",
+      "name": "Wildfire Red Hill, Perry, Mississippi",
+      "category": "wildfire",
+      "kind": "Wildfire",
+      "lat": 31.1301,
+      "lon": -89.0639,
+      "event": "2026-11-12",
+      "start": "2026-09-28",
+      "picked": "2026-11-18"
+    },
+    {
       "id": "event-gdacs-fl1104277",
       "event_id": "gdacs:FL1104277",
       "name": "Flood in Argentina",
@@ -12,6 +96,18 @@
       "event": "2026-11-08",
       "start": "2026-09-24",
       "picked": "2026-11-17"
+    },
+    {
+      "id": "event-gdacs-fl1104281",
+      "event_id": "gdacs:FL1104281",
+      "name": "Flood in Dominican Republic",
+      "category": "flood",
+      "kind": "Flood",
+      "lat": 19.3364,
+      "lon": -70.9521,
+      "event": "2026-11-06",
+      "start": "2026-09-22",
+      "picked": "2026-11-18"
     },
     {
       "id": "event-eonet-eonet-26258",
@@ -170,6 +266,18 @@
       "picked": "2026-11-15"
     },
     {
+      "id": "event-gdacs-fl1104239",
+      "event_id": "gdacs:FL1104239",
+      "name": "Flood in Malaysia",
+      "category": "flood",
+      "kind": "Flood",
+      "lat": 3.3315,
+      "lon": 101.2513,
+      "event": "2026-10-15",
+      "start": "2026-08-31",
+      "picked": "2026-11-18"
+    },
+    {
       "id": "event-usgs-us6000u24c",
       "event_id": "usgs:us6000u24c",
       "name": "M 6.0 - 128 km S of Kokopo, Papua New Guinea",
@@ -218,18 +326,6 @@
       "picked": "2026-11-15"
     },
     {
-      "id": "event-usgs-us6000u19w",
-      "event_id": "usgs:us6000u19w",
-      "name": "M 6.6 - 13 km WSW of Río Grande, Panama",
-      "category": "earthquake",
-      "kind": "Earthquake",
-      "lat": 7.676,
-      "lon": -81.4515,
-      "event": "2026-10-09",
-      "start": "2026-08-25",
-      "picked": "2026-11-15"
-    },
-    {
       "id": "event-gdacs-eq1570339",
       "event_id": "gdacs:EQ1570339",
       "name": "M 7.7 - 10 km WSW of Pitaloza Arriba, Panama",
@@ -242,15 +338,15 @@
       "picked": "2026-11-15"
     },
     {
-      "id": "event-gdacs-eq1570077",
-      "event_id": "gdacs:EQ1570077",
-      "name": "M 6.3 - 117 km NE of Norsup, Vanuatu",
+      "id": "event-usgs-us6000u19w",
+      "event_id": "usgs:us6000u19w",
+      "name": "M 6.6 - 13 km WSW of Río Grande, Panama",
       "category": "earthquake",
       "kind": "Earthquake",
-      "lat": -15.4332,
-      "lon": 168.2783,
-      "event": "2026-10-08",
-      "start": "2026-08-24",
+      "lat": 7.676,
+      "lon": -81.4515,
+      "event": "2026-10-09",
+      "start": "2026-08-25",
       "picked": "2026-11-15"
     },
     {
@@ -261,6 +357,18 @@
       "kind": "Volcano",
       "lat": 14.0106,
       "lon": 120.9975,
+      "event": "2026-10-08",
+      "start": "2026-08-24",
+      "picked": "2026-11-15"
+    },
+    {
+      "id": "event-gdacs-eq1570077",
+      "event_id": "gdacs:EQ1570077",
+      "name": "M 6.3 - 117 km NE of Norsup, Vanuatu",
+      "category": "earthquake",
+      "kind": "Earthquake",
+      "lat": -15.4332,
+      "lon": 168.2783,
       "event": "2026-10-08",
       "start": "2026-08-24",
       "picked": "2026-11-15"

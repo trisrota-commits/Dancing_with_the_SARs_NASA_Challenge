@@ -194,6 +194,138 @@
   }
  },
  {
+  "id": "event-eonet-eonet-26331",
+  "name": "Wildfire Red Hill, Perry, Mississippi",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1794441600000.0,
+   "date": "2026-11-12",
+   "firstPassAfter": "2026-11-16",
+   "outside": 0.036,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-16",
+   "time": 1794789910000,
+   "outside": 0.036,
+   "expected": 0.73
+  },
+  "last": {
+   "rmse": 0.61,
+   "mae": 0.49,
+   "within90": 1.03,
+   "r2": 0.789,
+   "spearman": 0.745,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.04,
+   "mae": 0.78,
+   "within90": 1.86,
+   "r2": 0.385,
+   "spearman": 0.469,
+   "skill": -1.917
+  },
+  "peers": {
+   "rmse": 0.39,
+   "mae": 0.29,
+   "within90": 0.66,
+   "r2": 0.914,
+   "spearman": 0.881,
+   "skill": 0.593
+  }
+ },
+ {
+  "id": "event-eonet-eonet-26464",
+  "name": "Wildfire 201W, Perry, Mississippi",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1794528000000.0,
+   "date": "2026-11-13",
+   "firstPassAfter": "2026-11-16",
+   "outside": 0.036,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-16",
+   "time": 1794789910000,
+   "outside": 0.036,
+   "expected": 0.73
+  },
+  "last": {
+   "rmse": 0.68,
+   "mae": 0.55,
+   "within90": 1.13,
+   "r2": 0.75,
+   "spearman": 0.679,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.16,
+   "mae": 0.89,
+   "within90": 2.07,
+   "r2": 0.262,
+   "spearman": 0.403,
+   "skill": -1.951
+  },
+  "peers": {
+   "rmse": 0.41,
+   "mae": 0.33,
+   "within90": 0.68,
+   "r2": 0.907,
+   "spearman": 0.86,
+   "skill": 0.626
+  }
+ },
+ {
+  "id": "event-eonet-eonet-26465",
+  "name": "Wildfire Range 47, Forrest, Mississippi",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1794528000000.0,
+   "date": "2026-11-13",
+   "firstPassAfter": "2026-11-16",
+   "outside": 0.052,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-16",
+   "time": 1794789910000,
+   "outside": 0.052,
+   "expected": 0.71
+  },
+  "last": {
+   "rmse": 0.67,
+   "mae": 0.57,
+   "within90": 1.12,
+   "r2": 0.848,
+   "spearman": 0.701,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.16,
+   "mae": 0.9,
+   "within90": 2.09,
+   "r2": 0.551,
+   "spearman": 0.419,
+   "skill": -1.953
+  },
+  "peers": {
+   "rmse": 0.38,
+   "mae": 0.28,
+   "within90": 0.67,
+   "r2": 0.951,
+   "spearman": 0.898,
+   "skill": 0.675
+  }
+ },
+ {
   "id": "event-gdacs-eq1570077",
   "name": "M 6.3 - 117 km NE of Norsup, Vanuatu",
   "cells": 576,
@@ -323,6 +455,50 @@
    "r2": 0.967,
    "spearman": 0.968,
    "skill": 0.775
+  }
+ },
+ {
+  "id": "event-gdacs-fl1104239",
+  "name": "Flood in Malaysia",
+  "cells": 576,
+  "passes": 6,
+  "best": "last",
+  "event": {
+   "time": 1792022400000.0,
+   "date": "2026-10-15",
+   "firstPassAfter": "2026-10-17",
+   "outside": null,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-10",
+   "time": 1794310934000,
+   "outside": 0.34,
+   "expected": 0.71
+  },
+  "last": {
+   "rmse": 0.61,
+   "mae": 0.43,
+   "within90": 1.12,
+   "r2": 0.987,
+   "spearman": 0.965,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 0.84,
+   "mae": 0.6,
+   "within90": 1.44,
+   "r2": 0.976,
+   "spearman": 0.957,
+   "skill": -0.873
+  },
+  "peers": {
+   "rmse": 0.55,
+   "mae": 0.38,
+   "within90": 0.99,
+   "r2": 0.99,
+   "spearman": 0.971,
+   "skill": 0.188
   }
  },
  {
@@ -458,6 +634,50 @@
   }
  },
  {
+  "id": "event-gdacs-fl1104281",
+  "name": "Flood in Dominican Republic",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1793923200000.0,
+   "date": "2026-11-06",
+   "firstPassAfter": "2026-11-16",
+   "outside": 0.007,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-16",
+   "time": 1794823749000,
+   "outside": 0.007,
+   "expected": 0.65
+  },
+  "last": {
+   "rmse": 0.5,
+   "mae": 0.34,
+   "within90": 0.77,
+   "r2": 0.755,
+   "spearman": 0.791,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.1,
+   "mae": 0.84,
+   "within90": 1.83,
+   "r2": -0.194,
+   "spearman": 0.448,
+   "skill": -3.884
+  },
+  "peers": {
+   "rmse": 0.38,
+   "mae": 0.27,
+   "within90": 0.57,
+   "r2": 0.854,
+   "spearman": 0.862,
+   "skill": 0.405
+  }
+ },
+ {
   "id": "event-gdacs-vo1000151",
   "name": "Eruption  Taal",
   "cells": 402,
@@ -543,6 +763,94 @@
    "r2": 0.919,
    "spearman": 0.959,
    "skill": 0.634
+  }
+ },
+ {
+  "id": "event-gdacs-wf1033863",
+  "name": "Forest fires in Sudan, South Sudan",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1794528000000.0,
+   "date": "2026-11-13",
+   "firstPassAfter": "2026-11-16",
+   "outside": 0.005,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-16",
+   "time": 1794799641000,
+   "outside": 0.005,
+   "expected": 1.57
+  },
+  "last": {
+   "rmse": 2.13,
+   "mae": 1.57,
+   "within90": 3.71,
+   "r2": 0.517,
+   "spearman": 0.866,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 3.65,
+   "mae": 2.55,
+   "within90": 6.14,
+   "r2": -0.419,
+   "spearman": 0.614,
+   "skill": -1.939
+  },
+  "peers": {
+   "rmse": 0.86,
+   "mae": 0.56,
+   "within90": 1.38,
+   "r2": 0.921,
+   "spearman": 0.959,
+   "skill": 0.836
+  }
+ },
+ {
+  "id": "event-gdacs-wf1033929",
+  "name": "Forest fires in South Sudan",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1794528000000.0,
+   "date": "2026-11-13",
+   "firstPassAfter": "2026-11-16",
+   "outside": 0.123,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-16",
+   "time": 1794799607000,
+   "outside": 0.123,
+   "expected": 1.85
+  },
+  "last": {
+   "rmse": 1.6,
+   "mae": 1.27,
+   "within90": 2.52,
+   "r2": 0.391,
+   "spearman": 0.769,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 2.4,
+   "mae": 1.93,
+   "within90": 3.86,
+   "r2": -0.379,
+   "spearman": 0.495,
+   "skill": -1.265
+  },
+  "peers": {
+   "rmse": 1.2,
+   "mae": 0.99,
+   "within90": 1.88,
+   "r2": 0.657,
+   "spearman": 0.811,
+   "skill": 0.438
   }
  },
  {
@@ -727,48 +1035,48 @@
  {
   "id": "event-usgs-us6000u2mq",
   "name": "M 6.9 - 72 km NE of Ozernovskiy, Russia",
-  "cells": 576,
+  "cells": 573,
   "passes": 6,
   "best": "last",
   "event": {
    "time": 1792108800000.0,
    "date": "2026-10-16",
-   "firstPassAfter": "2026-10-26",
-   "outside": 0.075,
+   "firstPassAfter": "2026-10-23",
+   "outside": null,
    "newVersion": {
     "from": "P05023",
     "to": "P05036"
    }
   },
   "peerSurprise": {
-   "date": "2026-11-07",
-   "time": 1794075185000,
-   "outside": 0.139,
-   "expected": 0.65
+   "date": "2026-11-04",
+   "time": 1793782701000,
+   "outside": 0.258,
+   "expected": 1.02
   },
   "last": {
-   "rmse": 1.16,
-   "mae": 0.83,
-   "within90": 2.09,
-   "r2": 0.501,
-   "spearman": 0.626,
+   "rmse": 1.26,
+   "mae": 0.85,
+   "within90": 2.48,
+   "r2": 0.845,
+   "spearman": 0.808,
    "skill": 0.0
   },
   "line": {
-   "rmse": 1.59,
-   "mae": 1.34,
-   "within90": 2.44,
-   "r2": 0.056,
-   "spearman": 0.65,
-   "skill": -0.891
+   "rmse": 1.81,
+   "mae": 1.29,
+   "within90": 3.11,
+   "r2": 0.678,
+   "spearman": 0.781,
+   "skill": -1.077
   },
   "peers": {
-   "rmse": 0.43,
-   "mae": 0.31,
-   "within90": 0.67,
-   "r2": 0.932,
-   "spearman": 0.945,
-   "skill": 0.864
+   "rmse": 0.73,
+   "mae": 0.48,
+   "within90": 1.09,
+   "r2": 0.947,
+   "spearman": 0.952,
+   "skill": 0.661
   }
  },
  {
@@ -1318,58 +1626,58 @@
   "best": "last",
   "event": null,
   "peerSurprise": {
-   "date": "2026-05-23",
-   "time": 1779541775000,
-   "outside": 0.217,
-   "expected": 1.93
+   "date": "2026-05-18",
+   "time": 1779110275000,
+   "outside": 0.241,
+   "expected": 1.98
   },
   "last": {
-   "rmse": 1.39,
-   "mae": 0.86,
-   "within90": 2.15,
-   "r2": 0.837,
-   "spearman": 0.923,
+   "rmse": 1.64,
+   "mae": 1.07,
+   "within90": 2.56,
+   "r2": 0.77,
+   "spearman": 0.889,
    "skill": 0.0
   },
   "line": {
-   "rmse": 1.95,
-   "mae": 1.25,
-   "within90": 3.06,
-   "r2": 0.68,
-   "spearman": 0.883,
-   "skill": -0.966
+   "rmse": 2.28,
+   "mae": 1.53,
+   "within90": 3.68,
+   "r2": 0.557,
+   "spearman": 0.84,
+   "skill": -0.928
   },
   "peers": {
-   "rmse": 1.32,
-   "mae": 0.8,
-   "within90": 2.02,
-   "r2": 0.853,
-   "spearman": 0.932,
-   "skill": 0.099
+   "rmse": 1.46,
+   "mae": 0.91,
+   "within90": 2.21,
+   "r2": 0.818,
+   "spearman": 0.916,
+   "skill": 0.208
   },
   "mean": {
-   "rmse": 1.99,
-   "mae": 1.38,
-   "within90": 3.32,
-   "r2": 0.668,
-   "spearman": 0.825,
-   "skill": -1.041
+   "rmse": 2.33,
+   "mae": 1.63,
+   "within90": 3.89,
+   "r2": 0.536,
+   "spearman": 0.762,
+   "skill": -1.017
   },
   "trend": {
-   "rmse": 1.74,
-   "mae": 1.15,
-   "within90": 2.75,
-   "r2": 0.744,
-   "spearman": 0.901,
-   "skill": -0.574
+   "rmse": 2.1,
+   "mae": 1.42,
+   "within90": 3.36,
+   "r2": 0.625,
+   "spearman": 0.855,
+   "skill": -0.631
   },
   "learnt": {
-   "rmse": 1.41,
-   "mae": 0.92,
-   "within90": 2.16,
-   "r2": 0.833,
-   "spearman": 0.919,
-   "skill": -0.029
+   "rmse": 1.73,
+   "mae": 1.15,
+   "within90": 2.69,
+   "r2": 0.745,
+   "spearman": 0.872,
+   "skill": -0.11
   }
  },
  {

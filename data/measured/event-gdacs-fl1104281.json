@@ -1,0 +1,76 @@
+{
+ "id": "event-gdacs-fl1104281",
+ "name": "Flood in Dominican Republic",
+ "lat": 19.3364,
+ "lon": -70.9521,
+ "radiusKm": 25,
+ "track": "162-A-011-DHDH",
+ "setup": {
+  "lat": 19.3364,
+  "lon": -70.9521,
+  "seriesRadiusM": 500,
+  "mapRadiusM": 6000,
+  "mapPol": "co"
+ },
+ "event": 1793923200000.0,
+ "pols": [
+  "HH",
+  "HV"
+ ],
+ "series": [
+  {
+   "time": 1790676548000,
+   "hh": -6.03,
+   "hv": -11.57,
+   "pixels": 7857,
+   "file": "NISAR_L2_PR_GCOV_031_162_A_011_4005_DHDH_A_20260929T100908_20260929T100940_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1791713348000,
+   "hh": -7.08,
+   "hv": -12.28,
+   "pixels": 7857,
+   "file": "NISAR_L2_PR_GCOV_032_162_A_011_4005_DHDH_A_20261011T100908_20261011T100940_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1792750148000,
+   "hh": -6.45,
+   "hv": -11.76,
+   "pixels": 7857,
+   "file": "NISAR_L2_PR_GCOV_033_162_A_011_4005_DHDH_A_20261023T100908_20261023T100940_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1793786949000,
+   "hh": -7.24,
+   "hv": -12.33,
+   "pixels": 7857,
+   "file": "NISAR_L2_PR_GCOV_034_162_A_011_4005_DHDH_A_20261104T100909_20261104T100941_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1794823749000,
+   "hh": -6.74,
+   "hv": -11.88,
+   "pixels": 7857,
+   "file": "NISAR_L2_PR_GCOV_035_162_A_011_4005_DHDH_A_20261116T100909_20261116T100941_P05036_N_F_J_001.h5"
+  }
+ ],
+ "change": {
+  "before": 1793786949000,
+  "after": 1794823749000,
+  "pol": "HH",
+  "image": "event-gdacs-fl1104281_change.png",
+  "bounds": {
+   "west": -71.00922081056096,
+   "east": -70.89497918943904,
+   "south": 19.28250132950054,
+   "north": 19.39029867049946
+  },
+  "weakerPct": 0.0,
+  "strongerPct": 0.1,
+  "spansEvent": true
+ },
+ "firstDrop": null,
+ "summary": "Across the event of 2026-11-06: between 2026-11-04 and 2026-11-16, HH backscatter here changed by +0.5 dB and HV by +0.4 dB (mean within 500 m). Across the mapped area, 0% got at least 3 dB weaker and 0% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 5 passes on track 162-A-011-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-11-06, and 'before' the last pass before it.",
+ "generated": "2026-11-18T12:24:20Z"
+}

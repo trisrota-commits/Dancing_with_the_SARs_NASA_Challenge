@@ -4,7 +4,7 @@
  "lat": 39.2,
  "lon": -122.0,
  "radiusKm": 25,
- "track": "034-A-021-DHDH",
+ "track": "135-A-021-DHDH",
  "setup": {
   "lat": 39.2,
   "lon": -122.0,
@@ -19,212 +19,212 @@
  ],
  "series": [
   {
-   "time": 1763989772000,
-   "hh": -4.36,
-   "hv": -11.8,
+   "time": 1763558271000,
+   "hh": -5.71,
+   "hv": -11.6,
    "pixels": 31413,
-   "file": "NISAR_L2_PR_GCOV_006_034_A_021_4005_DHDH_A_20251124T130932_20251124T131007_P05023_N_F_J_001.h5"
+   "file": "NISAR_L2_PR_GCOV_005_135_A_021_4005_DHDH_A_20251119T131751_20251119T131826_P05036_N_F_J_001.h5"
   },
   {
-   "time": 1765026572000,
-   "hh": -4.53,
-   "hv": -11.86,
+   "time": 1764595071000,
+   "hh": -6.34,
+   "hv": -11.9,
    "pixels": 31413,
-   "file": "NISAR_L2_PR_GCOV_007_034_A_021_4005_DHDH_A_20251206T130932_20251206T131007_P05023_N_F_J_001.h5"
+   "file": "NISAR_L2_PR_GCOV_006_135_A_021_4005_DHDH_A_20251201T131751_20251201T131826_P05036_N_F_J_001.h5"
   },
   {
-   "time": 1766063373000,
-   "hh": -4.83,
-   "hv": -12.0,
+   "time": 1765631872000,
+   "hh": -6.3,
+   "hv": -12.31,
    "pixels": 31413,
-   "file": "NISAR_L2_PR_GCOV_008_034_A_021_4005_DHDH_A_20251218T130933_20251218T131008_P05023_N_F_J_001.h5"
+   "file": "NISAR_L2_PR_GCOV_007_135_A_021_4005_DHDH_A_20251213T131752_20251213T131827_P05036_N_F_J_001.h5"
   },
   {
-   "time": 1767100174000,
-   "hh": -4.47,
-   "hv": -11.78,
+   "time": 1766668673000,
+   "hh": -4.99,
+   "hv": -11.44,
    "pixels": 31413,
-   "file": "NISAR_L2_PR_GCOV_009_034_A_021_4005_DHDH_A_20251230T130934_20251230T131008_P05023_N_F_J_001.h5"
+   "file": "NISAR_L2_PR_GCOV_008_135_A_021_4005_DHDH_A_20251225T131753_20251225T131827_P05036_N_F_J_001.h5"
   },
   {
-   "time": 1768136974000,
-   "hh": -4.43,
-   "hv": -11.73,
-   "pixels": 31413,
-   "file": "NISAR_L2_PR_GCOV_010_034_A_021_4005_DHDH_A_20260111T130934_20260111T131009_P05023_N_F_J_001.h5"
-  },
-  {
-   "time": 1769173775000,
-   "hh": -4.54,
-   "hv": -11.76,
-   "pixels": 31413,
-   "file": "NISAR_L2_PR_GCOV_011_034_A_021_4005_DHDH_A_20260123T130935_20260123T131010_P05023_N_F_J_001.h5"
-  },
-  {
-   "time": 1770210575000,
-   "hh": -4.78,
-   "hv": -11.81,
-   "pixels": 31413,
-   "file": "NISAR_L2_PR_GCOV_012_034_A_021_4005_DHDH_A_20260204T130935_20260204T131010_P05023_N_F_J_001.h5"
-  },
-  {
-   "time": 1771247376000,
-   "hh": -3.74,
-   "hv": -11.24,
-   "pixels": 31413,
-   "file": "NISAR_L2_PR_GCOV_013_034_A_021_4005_DHDH_A_20260216T130936_20260216T131011_P05023_N_F_J_001.h5"
-  },
-  {
-   "time": 1772284176000,
-   "hh": -4.5,
-   "hv": -11.66,
-   "pixels": 31413,
-   "file": "NISAR_L2_PR_GCOV_014_034_A_021_4005_DHDH_A_20260228T130936_20260228T131011_P05023_N_F_J_001.h5"
-  },
-  {
-   "time": 1773320977000,
-   "hh": -5.12,
-   "hv": -11.77,
-   "pixels": 31413,
-   "file": "NISAR_L2_PR_GCOV_015_034_A_021_4005_DHDH_A_20260312T130937_20260312T131011_P05023_N_F_J_001.h5"
-  },
-  {
-   "time": 1774357777000,
-   "hh": -5.41,
-   "hv": -11.8,
-   "pixels": 31413,
-   "file": "NISAR_L2_PR_GCOV_016_034_A_021_4005_DHDH_A_20260324T130937_20260324T131012_P05023_N_F_J_001.h5"
-  },
-  {
-   "time": 1775394577000,
-   "hh": -5.45,
-   "hv": -11.76,
-   "pixels": 31413,
-   "file": "NISAR_L2_PR_GCOV_017_034_A_021_4005_DHDH_A_20260405T130937_20260405T131012_P05023_N_F_J_001.h5"
-  },
-  {
-   "time": 1776431377000,
-   "hh": -5.21,
-   "hv": -11.69,
-   "pixels": 31413,
-   "file": "NISAR_L2_PR_GCOV_018_034_A_021_4005_DHDH_A_20260417T130937_20260417T131012_P05023_N_F_J_001.h5"
-  },
-  {
-   "time": 1777468176000,
-   "hh": -4.82,
-   "hv": -11.58,
-   "pixels": 31413,
-   "file": "NISAR_L2_PR_GCOV_019_034_A_021_4005_DHDH_A_20260429T130936_20260429T131011_P05023_N_F_J_001.h5"
-  },
-  {
-   "time": 1778504976000,
-   "hh": -5.24,
-   "hv": -11.87,
-   "pixels": 31413,
-   "file": "NISAR_L2_PR_GCOV_020_034_A_021_4005_DHDH_A_20260511T130936_20260511T131011_P05023_N_F_J_001.h5"
-  },
-  {
-   "time": 1779541775000,
-   "hh": -5.43,
-   "hv": -11.78,
-   "pixels": 31413,
-   "file": "NISAR_L2_PR_GCOV_021_034_A_021_4005_DHDH_A_20260523T130935_20260523T131010_P05023_N_F_J_001.h5"
-  },
-  {
-   "time": 1780578574000,
-   "hh": -5.25,
-   "hv": -11.75,
-   "pixels": 31413,
-   "file": "NISAR_L2_PR_GCOV_022_034_A_021_4005_DHDH_A_20260604T130934_20260604T131009_P05023_N_F_J_001.h5"
-  },
-  {
-   "time": 1781615374000,
-   "hh": -5.48,
-   "hv": -11.92,
-   "pixels": 31413,
-   "file": "NISAR_L2_PR_GCOV_023_034_A_021_4005_DHDH_A_20260616T130934_20260616T131008_P05023_N_F_J_001.h5"
-  },
-  {
-   "time": 1782652173000,
-   "hh": -5.42,
-   "hv": -11.83,
-   "pixels": 31413,
-   "file": "NISAR_L2_PR_GCOV_024_034_A_021_4005_DHDH_A_20260628T130933_20260628T131008_P05023_N_F_J_001.h5"
-  },
-  {
-   "time": 1783688972000,
-   "hh": -5.47,
-   "hv": -11.89,
-   "pixels": 31413,
-   "file": "NISAR_L2_PR_GCOV_025_034_A_021_4005_DHDH_A_20260710T130932_20260710T131007_P05023_N_F_J_001.h5"
-  },
-  {
-   "time": 1784725772000,
-   "hh": -5.42,
-   "hv": -11.81,
-   "pixels": 31413,
-   "file": "NISAR_L2_PR_GCOV_026_034_A_021_4005_DHDH_A_20260722T130932_20260722T131006_P05023_N_F_J_001.h5"
-  },
-  {
-   "time": 1786799370000,
-   "hh": -5.07,
-   "hv": -11.65,
-   "pixels": 31413,
-   "file": "NISAR_L2_PR_GCOV_028_034_A_021_4005_DHDH_A_20260815T130930_20260815T131005_P05023_N_F_J_001.h5"
-  },
-  {
-   "time": 1787836170000,
-   "hh": -5.04,
+   "time": 1767705473000,
+   "hh": -5.29,
    "hv": -11.55,
    "pixels": 31413,
-   "file": "NISAR_L2_PR_GCOV_029_034_A_021_4005_DHDH_A_20260827T130930_20260827T131005_P05023_N_F_J_001.h5"
+   "file": "NISAR_L2_PR_GCOV_009_135_A_021_4005_DHDH_A_20260106T131753_20260106T131828_P05036_P_F_J_001.h5"
   },
   {
-   "time": 1788872970000,
-   "hh": -5.08,
-   "hv": -11.63,
+   "time": 1768742274000,
+   "hh": -6.15,
+   "hv": -11.89,
    "pixels": 31413,
-   "file": "NISAR_L2_PR_GCOV_030_034_A_021_4005_DHDH_A_20260908T130930_20260908T131005_P05023_N_F_J_001.h5"
+   "file": "NISAR_L2_PR_GCOV_010_135_A_021_4005_DHDH_A_20260118T131754_20260118T131829_P05036_P_F_J_001.h5"
   },
   {
-   "time": 1789909770000,
-   "hh": -5.29,
-   "hv": -11.68,
+   "time": 1769779074000,
+   "hh": -5.68,
+   "hv": -11.94,
    "pixels": 31413,
-   "file": "NISAR_L2_PR_GCOV_031_034_A_021_4005_DHDH_A_20260920T130930_20260920T131005_P05023_N_F_J_001.h5"
+   "file": "NISAR_L2_PR_GCOV_011_135_A_021_4005_DHDH_A_20260130T131754_20260130T131829_P05036_P_F_J_001.h5"
   },
   {
-   "time": 1790946570000,
-   "hh": -5.76,
-   "hv": -16.83,
+   "time": 1770815875000,
+   "hh": -5.24,
+   "hv": -11.56,
    "pixels": 31413,
-   "file": "NISAR_L2_PR_GCOV_032_034_A_021_4005_DHDH_A_20261002T130930_20261002T131005_P05023_N_F_J_001.h5"
+   "file": "NISAR_L2_PR_GCOV_012_135_A_021_4005_DHDH_A_20260211T131755_20260211T131830_P05036_P_F_J_001.h5"
   },
   {
-   "time": 1791983370000,
-   "hh": -5.41,
-   "hv": -11.61,
+   "time": 1771852675000,
+   "hh": -5.59,
+   "hv": -11.8,
    "pixels": 31413,
-   "file": "NISAR_L2_PR_GCOV_033_034_A_021_4005_DHDH_A_20261014T130930_20261014T131005_P05023_N_F_J_001.h5"
+   "file": "NISAR_L2_PR_GCOV_013_135_A_021_4005_DHDH_A_20260223T131755_20260223T131830_P05036_P_F_J_001.h5"
   },
   {
-   "time": 1793020170000,
-   "hh": -5.25,
-   "hv": -11.88,
+   "time": 1772889476000,
+   "hh": -5.87,
+   "hv": -11.89,
    "pixels": 31413,
-   "file": "NISAR_L2_PR_GCOV_034_034_A_021_4005_DHDH_A_20261026T130930_20261026T131005_P05036_N_F_J_001.h5"
+   "file": "NISAR_L2_PR_GCOV_014_135_A_021_4005_DHDH_A_20260307T131756_20260307T131830_P05036_N_F_J_001.h5"
   },
   {
-   "time": 1794056971000,
-   "hh": -4.7,
-   "hv": -12.06,
+   "time": 1773926276000,
+   "hh": -6.34,
+   "hv": -12.1,
    "pixels": 31413,
-   "file": "NISAR_L2_PR_GCOV_035_034_A_021_4005_DHDH_A_20261107T130931_20261107T131006_P05036_N_F_J_001.h5"
+   "file": "NISAR_L2_PR_GCOV_015_135_A_021_4005_DHDH_A_20260319T131756_20260319T131831_P05036_P_F_J_001.h5"
+  },
+  {
+   "time": 1774963076000,
+   "hh": -6.68,
+   "hv": -12.32,
+   "pixels": 31413,
+   "file": "NISAR_L2_PR_GCOV_016_135_A_021_4005_DHDH_A_20260331T131756_20260331T131831_P05036_P_F_J_001.h5"
+  },
+  {
+   "time": 1775999876000,
+   "hh": -5.78,
+   "hv": -11.6,
+   "pixels": 31413,
+   "file": "NISAR_L2_PR_GCOV_017_135_A_021_4005_DHDH_A_20260412T131756_20260412T131831_P05036_P_F_J_001.h5"
+  },
+  {
+   "time": 1777036676000,
+   "hh": -5.85,
+   "hv": -12.03,
+   "pixels": 31413,
+   "file": "NISAR_L2_PR_GCOV_018_135_A_021_4005_DHDH_A_20260424T131756_20260424T131831_P05036_P_F_J_001.h5"
+  },
+  {
+   "time": 1778073476000,
+   "hh": -6.31,
+   "hv": -12.32,
+   "pixels": 31413,
+   "file": "NISAR_L2_PR_GCOV_019_135_A_021_4005_DHDH_A_20260506T131756_20260506T131831_P05036_P_F_J_001.h5"
+  },
+  {
+   "time": 1779110275000,
+   "hh": -6.96,
+   "hv": -12.58,
+   "pixels": 31413,
+   "file": "NISAR_L2_PR_GCOV_020_135_A_021_4005_DHDH_A_20260518T131755_20260518T131830_P05036_P_F_J_001.h5"
+  },
+  {
+   "time": 1780147074000,
+   "hh": -6.46,
+   "hv": -12.41,
+   "pixels": 31413,
+   "file": "NISAR_L2_PR_GCOV_021_135_A_021_4005_DHDH_A_20260530T131754_20260530T131829_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1781183874000,
+   "hh": -6.63,
+   "hv": -12.39,
+   "pixels": 31413,
+   "file": "NISAR_L2_PR_GCOV_022_135_A_021_4005_DHDH_A_20260611T131754_20260611T131829_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1782220673000,
+   "hh": -6.66,
+   "hv": -12.37,
+   "pixels": 31413,
+   "file": "NISAR_L2_PR_GCOV_023_135_A_021_4005_DHDH_A_20260623T131753_20260623T131828_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1783257472000,
+   "hh": -6.62,
+   "hv": -12.48,
+   "pixels": 31413,
+   "file": "NISAR_L2_PR_GCOV_024_135_A_021_4005_DHDH_A_20260705T131752_20260705T131827_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1784294272000,
+   "hh": -6.51,
+   "hv": -12.41,
+   "pixels": 31413,
+   "file": "NISAR_L2_PR_GCOV_025_135_A_021_4005_DHDH_A_20260717T131752_20260717T131827_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1786367870000,
+   "hh": -6.16,
+   "hv": -12.22,
+   "pixels": 31413,
+   "file": "NISAR_L2_PR_GCOV_027_135_A_021_4005_DHDH_A_20260810T131750_20260810T131825_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1787404670000,
+   "hh": -5.56,
+   "hv": -12.07,
+   "pixels": 31413,
+   "file": "NISAR_L2_PR_GCOV_028_135_A_021_4005_DHDH_A_20260822T131750_20260822T131825_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1788441470000,
+   "hh": -5.99,
+   "hv": -12.26,
+   "pixels": 31413,
+   "file": "NISAR_L2_PR_GCOV_029_135_A_021_4005_DHDH_A_20260903T131750_20260903T131824_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1789478269000,
+   "hh": -6.36,
+   "hv": -12.21,
+   "pixels": 31413,
+   "file": "NISAR_L2_PR_GCOV_030_135_A_021_4005_DHDH_A_20260915T131749_20260915T131824_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1790515069000,
+   "hh": -6.42,
+   "hv": -11.67,
+   "pixels": 31413,
+   "file": "NISAR_L2_PR_GCOV_031_135_A_021_4005_DHDH_A_20260927T131749_20260927T131824_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1791551870000,
+   "hh": -6.7,
+   "hv": -12.01,
+   "pixels": 31413,
+   "file": "NISAR_L2_PR_GCOV_032_135_A_021_4005_DHDH_A_20261009T131750_20261009T131824_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1792588670000,
+   "hh": -6.83,
+   "hv": -11.69,
+   "pixels": 31413,
+   "file": "NISAR_L2_PR_GCOV_033_135_A_021_4005_DHDH_A_20261021T131750_20261021T131824_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1793625470000,
+   "hh": -6.79,
+   "hv": -12.39,
+   "pixels": 31413,
+   "file": "NISAR_L2_PR_GCOV_034_135_A_021_4005_DHDH_A_20261102T131750_20261102T131825_P05036_N_F_J_001.h5"
   }
  ],
  "change": {
-  "before": 1763989772000,
-  "after": 1790946570000,
+  "before": 1763558271000,
+  "after": 1779110275000,
   "pol": "HH",
   "image": "sacramento_change.png",
   "bounds": {
@@ -233,12 +233,12 @@
    "south": 39.12813510600072,
    "north": 39.271864893999286
   },
-  "weakerPct": 17.2,
-  "strongerPct": 14.4,
+  "weakerPct": 32.3,
+  "strongerPct": 8.7,
   "spansEvent": false
  },
  "firstDrop": null,
- "summary": "Between 2025-11-24 and 2026-10-02, HH backscatter here changed by -1.4 dB and HV by -5.0 dB (mean within 1000 m). Across the mapped area, 17% got at least 3 dB weaker and 14% at least 3 dB stronger.",
- "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 29 passes on track 034-A-021-DHDH. Time series: mean linear power within 1000 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the pass that differs most from the first in HH.",
- "generated": "2026-11-17T23:05:35Z"
+ "summary": "Between 2025-11-19 and 2026-05-18, HH backscatter here changed by -1.2 dB and HV by -1.0 dB (mean within 1000 m). Across the mapped area, 32% got at least 3 dB weaker and 9% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 29 passes on track 135-A-021-DHDH. Time series: mean linear power within 1000 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the pass that differs most from the first in HH.",
+ "generated": "2026-11-18T12:14:00Z"
 }

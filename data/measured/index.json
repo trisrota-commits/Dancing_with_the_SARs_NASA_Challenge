@@ -36,6 +36,33 @@
   "file": "event-eonet-eonet-26260.json"
  },
  {
+  "id": "event-eonet-eonet-26331",
+  "name": "Wildfire Red Hill, Perry, Mississippi",
+  "lat": 31.1301,
+  "lon": -89.0639,
+  "radiusKm": 25,
+  "event": 1794441600000.0,
+  "file": "event-eonet-eonet-26331.json"
+ },
+ {
+  "id": "event-eonet-eonet-26464",
+  "name": "Wildfire 201W, Perry, Mississippi",
+  "lat": 31.1198,
+  "lon": -89.0798,
+  "radiusKm": 25,
+  "event": 1794528000000.0,
+  "file": "event-eonet-eonet-26464.json"
+ },
+ {
+  "id": "event-eonet-eonet-26465",
+  "name": "Wildfire Range 47, Forrest, Mississippi",
+  "lat": 31.0998,
+  "lon": -89.1593,
+  "radiusKm": 25,
+  "event": 1794528000000.0,
+  "file": "event-eonet-eonet-26465.json"
+ },
+ {
   "id": "event-gdacs-eq1570077",
   "name": "M 6.3 - 117 km NE of Norsup, Vanuatu",
   "lat": -15.4332,
@@ -61,6 +88,15 @@
   "radiusKm": 25,
   "event": 1791331200000.0,
   "file": "event-gdacs-fl1104220.json"
+ },
+ {
+  "id": "event-gdacs-fl1104239",
+  "name": "Flood in Malaysia",
+  "lat": 3.3315,
+  "lon": 101.2513,
+  "radiusKm": 25,
+  "event": 1792022400000.0,
+  "file": "event-gdacs-fl1104239.json"
  },
  {
   "id": "event-gdacs-fl1104253",
@@ -99,6 +135,15 @@
   "file": "event-gdacs-fl1104277.json"
  },
  {
+  "id": "event-gdacs-fl1104281",
+  "name": "Flood in Dominican Republic",
+  "lat": 19.3364,
+  "lon": -70.9521,
+  "radiusKm": 25,
+  "event": 1793923200000.0,
+  "file": "event-gdacs-fl1104281.json"
+ },
+ {
   "id": "event-gdacs-vo1000151",
   "name": "Eruption  Taal",
   "lat": 14.0106,
@@ -115,6 +160,42 @@
   "radiusKm": 25,
   "event": 1791590400000.0,
   "file": "event-gdacs-vo1000152.json"
+ },
+ {
+  "id": "event-gdacs-wf1033863",
+  "name": "Forest fires in Sudan, South Sudan",
+  "lat": 9.7825,
+  "lon": 31.434,
+  "radiusKm": 25,
+  "event": 1794528000000.0,
+  "file": "event-gdacs-wf1033863.json"
+ },
+ {
+  "id": "event-gdacs-wf1033877",
+  "name": "Forest fires in Sudan, South Sudan",
+  "lat": 9.5056,
+  "lon": 31.3787,
+  "radiusKm": 25,
+  "event": 1794614400000.0,
+  "file": "event-gdacs-wf1033877.json"
+ },
+ {
+  "id": "event-gdacs-wf1033904",
+  "name": "Forest fires in Nigeria",
+  "lat": 12.3318,
+  "lon": 5.2901,
+  "radiusKm": 25,
+  "event": 1794700800000.0,
+  "file": "event-gdacs-wf1033904.json"
+ },
+ {
+  "id": "event-gdacs-wf1033929",
+  "name": "Forest fires in South Sudan",
+  "lat": 8.7363,
+  "lon": 31.6143,
+  "radiusKm": 25,
+  "event": 1794528000000.0,
+  "file": "event-gdacs-wf1033929.json"
  },
  {
   "id": "event-usgs-us6000u19w",

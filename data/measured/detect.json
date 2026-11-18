@@ -93,6 +93,84 @@
   "water": 0.0
  },
  {
+  "id": "event-eonet-eonet-26331",
+  "name": "Wildfire Red Hill, Perry, Mississippi",
+  "cells": 576,
+  "passes": 5,
+  "event": {
+   "time": 1794441600000.0,
+   "date": "2026-11-12",
+   "firstPassAfter": "2026-11-16",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-04",
+   "time": 1793753109000,
+   "stood": 0.0,
+   "recent": 0.0017,
+   "long": 0.0
+  },
+  "water": 0.0
+ },
+ {
+  "id": "event-eonet-eonet-26464",
+  "name": "Wildfire 201W, Perry, Mississippi",
+  "cells": 576,
+  "passes": 5,
+  "event": {
+   "time": 1794528000000.0,
+   "date": "2026-11-13",
+   "firstPassAfter": "2026-11-16",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-04",
+   "time": 1793753109000,
+   "stood": 0.0,
+   "recent": 0.0087,
+   "long": 0.0
+  },
+  "water": 0.0
+ },
+ {
+  "id": "event-eonet-eonet-26465",
+  "name": "Wildfire Range 47, Forrest, Mississippi",
+  "cells": 576,
+  "passes": 5,
+  "event": {
+   "time": 1794528000000.0,
+   "date": "2026-11-13",
+   "firstPassAfter": "2026-11-16",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-04",
+   "time": 1793753109000,
+   "stood": 0.0,
+   "recent": 0.0017,
+   "long": 0.0156
+  },
+  "water": 0.0
+ },
+ {
   "id": "event-gdacs-eq1570077",
   "name": "M 6.3 - 117 km NE of Norsup, Vanuatu",
   "cells": 0,
@@ -156,6 +234,32 @@
    "stood": 0.0347,
    "recent": 0.0503,
    "long": 0.1181
+  },
+  "water": 0.0
+ },
+ {
+  "id": "event-gdacs-fl1104239",
+  "name": "Flood in Malaysia",
+  "cells": 576,
+  "passes": 6,
+  "event": {
+   "time": 1792022400000.0,
+   "date": "2026-10-15",
+   "firstPassAfter": "2026-10-17",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-10",
+   "time": 1794310934000,
+   "stood": 0.1372,
+   "recent": 0.1753,
+   "long": 0.1493
   },
   "water": 0.0
  },
@@ -264,6 +368,32 @@
   "water": 0.0
  },
  {
+  "id": "event-gdacs-fl1104281",
+  "name": "Flood in Dominican Republic",
+  "cells": 576,
+  "passes": 5,
+  "event": {
+   "time": 1793923200000.0,
+   "date": "2026-11-06",
+   "firstPassAfter": "2026-11-16",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-04",
+   "time": 1793786949000,
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0
+  },
+  "water": 0.0
+ },
+ {
   "id": "event-gdacs-vo1000151",
   "name": "Eruption  Taal",
   "cells": 376,
@@ -311,6 +441,110 @@
    "time": 1790976065000,
    "stood": 0.0,
    "recent": 0.0122,
+   "long": 0.0
+  },
+  "water": 0.0
+ },
+ {
+  "id": "event-gdacs-wf1033863",
+  "name": "Forest fires in Sudan, South Sudan",
+  "cells": 576,
+  "passes": 5,
+  "event": {
+   "time": 1794528000000.0,
+   "date": "2026-11-13",
+   "firstPassAfter": "2026-11-16",
+   "stood": 0.0,
+   "recent": 0.1354,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-04",
+   "time": 1793762840000,
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0
+  },
+  "water": 0.0
+ },
+ {
+  "id": "event-gdacs-wf1033877",
+  "name": "Forest fires in Sudan, South Sudan",
+  "cells": 576,
+  "passes": 4,
+  "event": {
+   "time": 1794614400000.0,
+   "date": "2026-11-14",
+   "firstPassAfter": "2026-11-16",
+   "stood": 0.0,
+   "recent": 0.0104,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-16",
+   "time": 1794799607000,
+   "stood": 0.0,
+   "recent": 0.0104,
+   "long": 0.0
+  },
+  "water": 0.0
+ },
+ {
+  "id": "event-gdacs-wf1033904",
+  "name": "Forest fires in Nigeria",
+  "cells": 576,
+  "passes": 4,
+  "event": {
+   "time": 1794700800000.0,
+   "date": "2026-11-15",
+   "firstPassAfter": "2026-11-16",
+   "stood": 0.0,
+   "recent": 0.0955,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-16",
+   "time": 1794805667000,
+   "stood": 0.0,
+   "recent": 0.0955,
+   "long": 0.0
+  },
+  "water": 0.0
+ },
+ {
+  "id": "event-gdacs-wf1033929",
+  "name": "Forest fires in South Sudan",
+  "cells": 576,
+  "passes": 5,
+  "event": {
+   "time": 1794528000000.0,
+   "date": "2026-11-13",
+   "firstPassAfter": "2026-11-16",
+   "stood": 0.0,
+   "recent": 0.026,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-04",
+   "time": 1793762807000,
+   "stood": 0.0,
+   "recent": 0.0,
    "long": 0.0
   },
   "water": 0.0
@@ -414,16 +648,16 @@
  {
   "id": "event-usgs-us6000u2mq",
   "name": "M 6.9 - 72 km NE of Ozernovskiy, Russia",
-  "cells": 576,
+  "cells": 565,
   "passes": 6,
   "event": {
    "time": 1792108800000.0,
    "date": "2026-10-16",
-   "firstPassAfter": "2026-10-26",
-   "stood": 0.0,
-   "recent": 0.0,
-   "long": 0.0,
-   "stillNext": null,
+   "firstPassAfter": "2026-10-23",
+   "stood": 0.1575,
+   "recent": 0.2584,
+   "long": 0.1575,
+   "stillNext": 0.056,
    "newVersion": {
     "from": "P05023",
     "to": "P05036"
@@ -432,13 +666,13 @@
    "grade": "both"
   },
   "most": {
-   "date": "2026-11-07",
-   "time": 1794075185000,
-   "stood": 0.0156,
-   "recent": 0.0208,
-   "long": 0.0451
+   "date": "2026-10-23",
+   "time": 1792745900000,
+   "stood": 0.1575,
+   "recent": 0.2584,
+   "long": 0.1575
   },
-  "water": 0.0
+  "water": 0.014
  },
  {
   "id": "event-usgs-us6000u2y1",
@@ -647,17 +881,17 @@
  {
   "id": "sacramento",
   "name": "Sacramento Valley rice",
-  "cells": 1024,
+  "cells": 1020,
   "passes": 29,
   "event": null,
   "most": {
-   "date": "2026-10-02",
-   "time": 1790946570000,
-   "stood": 0.3174,
-   "recent": 0.4961,
-   "long": 0.3896
+   "date": "2026-03-31",
+   "time": 1774963076000,
+   "stood": 0.0245,
+   "recent": 0.0382,
+   "long": 0.0569
   },
-  "water": 0.0
+  "water": 0.004
  },
  {
   "id": "west-bengal",

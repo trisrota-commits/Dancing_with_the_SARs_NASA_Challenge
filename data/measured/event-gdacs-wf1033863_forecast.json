@@ -1,0 +1,487 @@
+{
+ "stood": null,
+ "id": "event-gdacs-wf1033863",
+ "name": "Forest fires in Sudan, South Sudan",
+ "track": "158-A-007-DHDH",
+ "cellM": 500.0,
+ "cells": 576,
+ "passes": 5,
+ "from": "2026-09-29",
+ "to": "2026-11-16",
+ "channel": "co-polarised backscatter, dB",
+ "strongDb": 3.0,
+ "ways": [
+  {
+   "key": "last",
+   "name": "Same as last time",
+   "baseline": true,
+   "how": "Persistence, the naive forecast: the next pass is predicted to read what the last one read."
+  },
+  {
+   "key": "line",
+   "name": "Line through the last two",
+   "baseline": true,
+   "how": "The last value plus the last step."
+  },
+  {
+   "key": "peers",
+   "name": "Last pass plus what the neighbours did",
+   "baseline": false,
+   "needsNewPass": true,
+   "how": "The last value plus the median step of all the place's cells in the same pass. It uses the new pass itself, so it is no forecast: it removes what rain, season or the whole scene did to every cell alike, and shows which cells did something else."
+  }
+ ],
+ "short": true,
+ "peerSurprise": {
+  "date": "2026-11-16",
+  "time": 1794799641000,
+  "outside": 0.005,
+  "expected": 1.57
+ },
+ "event": {
+  "time": 1794528000000.0,
+  "date": "2026-11-13",
+  "firstPassAfter": "2026-11-16",
+  "outside": 0.005,
+  "newVersion": null
+ },
+ "overall": {
+  "last": {
+   "n": 1728,
+   "rmse": 2.13,
+   "mae": 1.57,
+   "within90": 3.71,
+   "r2": 0.517,
+   "spearman": 0.866,
+   "skill": 0.0,
+   "strong": {
+    "happened": 0.182,
+    "accuracy": 0.818,
+    "precision": null,
+    "recall": 0.0,
+    "f1": null,
+    "tp": 0,
+    "fp": 0,
+    "fn": 315,
+    "tn": 1413
+   },
+   "direction": {
+    "accuracy": 0.495,
+    "precision": 0.247,
+    "recall": 0.5,
+    "f1": 0.331,
+    "commonest": 0.505,
+    "shares": {
+     "down": 0.505,
+     "stay": 0.495,
+     "up": 0.0
+    }
+   }
+  },
+  "line": {
+   "n": 1728,
+   "rmse": 3.65,
+   "mae": 2.55,
+   "within90": 6.14,
+   "r2": -0.419,
+   "spearman": 0.614,
+   "skill": -1.939,
+   "strong": {
+    "happened": 0.182,
+    "accuracy": 0.69,
+    "precision": 0.23,
+    "recall": 0.298,
+    "f1": 0.26,
+    "tp": 94,
+    "fp": 315,
+    "fn": 221,
+    "tn": 1098
+   },
+   "direction": {
+    "accuracy": 0.376,
+    "precision": 0.512,
+    "recall": 0.377,
+    "f1": 0.432,
+    "commonest": 0.505,
+    "shares": {
+     "down": 0.505,
+     "stay": 0.495,
+     "up": 0.0
+    }
+   }
+  },
+  "peers": {
+   "n": 1728,
+   "rmse": 0.86,
+   "mae": 0.56,
+   "within90": 1.38,
+   "r2": 0.921,
+   "spearman": 0.959,
+   "skill": 0.836,
+   "strong": {
+    "happened": 0.182,
+    "accuracy": 0.849,
+    "precision": 0.547,
+    "recall": 1.0,
+    "f1": 0.707,
+    "tp": 315,
+    "fp": 261,
+    "fn": 0,
+    "tn": 1152
+   },
+   "direction": {
+    "accuracy": 0.827,
+    "precision": 0.87,
+    "recall": 0.829,
+    "f1": 0.822,
+    "commonest": 0.505,
+    "shares": {
+     "down": 0.505,
+     "stay": 0.495,
+     "up": 0.0
+    }
+   }
+  }
+ },
+ "best": "last",
+ "bestBaseline": "last",
+ "modelAgainstBestBaseline": null,
+ "directionDb": 1.0,
+ "byDate": [
+  {
+   "time": 1792726040000,
+   "date": "2026-10-23",
+   "seenMean": -10.33,
+   "lastMean": -7.13,
+   "newVersion": {
+    "from": "P05023",
+    "to": "P05036"
+   },
+   "last": {
+    "n": 576,
+    "rmse": 3.48,
+    "mae": 3.2,
+    "within90": 4.87,
+    "r2": -0.607,
+    "spearman": 0.868,
+    "skill": 0.0,
+    "strong": {
+     "happened": 0.547,
+     "accuracy": 0.453,
+     "precision": null,
+     "recall": 0.0,
+     "f1": null,
+     "tp": 0,
+     "fp": 0,
+     "fn": 315,
+     "tn": 261
+    },
+    "direction": {
+     "accuracy": 0.002,
+     "precision": 0.001,
+     "recall": 0.5,
+     "f1": 0.002,
+     "commonest": 0.998,
+     "shares": {
+      "down": 0.998,
+      "stay": 0.002,
+      "up": 0.0
+     }
+    },
+    "predMean": -7.13
+   },
+   "line": {
+    "n": 576,
+    "rmse": 5.71,
+    "mae": 5.01,
+    "within90": 8.34,
+    "r2": -3.335,
+    "spearman": 0.282,
+    "skill": -1.697,
+    "strong": {
+     "happened": 0.547,
+     "accuracy": 0.616,
+     "precision": 1.0,
+     "recall": 0.298,
+     "f1": 0.46,
+     "tp": 94,
+     "fp": 0,
+     "fn": 221,
+     "tn": 261
+    },
+    "direction": {
+     "accuracy": 0.002,
+     "precision": 0.003,
+     "recall": 0.5,
+     "f1": 0.006,
+     "commonest": 0.998,
+     "shares": {
+      "down": 0.998,
+      "stay": 0.002,
+      "up": 0.0
+     }
+    },
+    "predMean": -5.32
+   },
+   "peers": {
+    "n": 576,
+    "rmse": 1.36,
+    "mae": 1.03,
+    "within90": 1.98,
+    "r2": 0.753,
+    "spearman": 0.868,
+    "skill": 0.846,
+    "strong": {
+     "happened": 0.547,
+     "accuracy": 0.547,
+     "precision": 0.547,
+     "recall": 1.0,
+     "f1": 0.707,
+     "tp": 315,
+     "fp": 261,
+     "fn": 0,
+     "tn": 0
+    },
+    "direction": {
+     "accuracy": 0.998,
+     "precision": 0.499,
+     "recall": 0.5,
+     "f1": 0.5,
+     "commonest": 0.998,
+     "shares": {
+      "down": 0.998,
+      "stay": 0.002,
+      "up": 0.0
+     }
+    },
+    "predMean": -10.27
+   }
+  },
+  {
+   "time": 1793762840000,
+   "date": "2026-11-04",
+   "seenMean": -11.19,
+   "lastMean": -10.33,
+   "last": {
+    "n": 576,
+    "rmse": 0.96,
+    "mae": 0.86,
+    "within90": 1.44,
+    "r2": 0.897,
+    "spearman": 0.99,
+    "skill": 0.0,
+    "strong": {
+     "happened": 0.0,
+     "accuracy": 1.0,
+     "precision": null,
+     "recall": null,
+     "f1": null,
+     "tp": 0,
+     "fp": 0,
+     "fn": 0,
+     "tn": 576
+    },
+    "direction": {
+     "accuracy": 0.694,
+     "precision": 0.347,
+     "recall": 0.5,
+     "f1": 0.41,
+     "commonest": 0.694,
+     "shares": {
+      "down": 0.306,
+      "stay": 0.694,
+      "up": 0.0
+     }
+    },
+    "predMean": -10.33
+   },
+   "line": {
+    "n": 576,
+    "rmse": 2.68,
+    "mae": 2.34,
+    "within90": 3.88,
+    "r2": 0.193,
+    "spearman": 0.967,
+    "skill": -6.813,
+    "strong": {
+     "happened": 0.0,
+     "accuracy": 0.453,
+     "precision": 0.0,
+     "recall": null,
+     "f1": null,
+     "tp": 0,
+     "fp": 315,
+     "fn": 0,
+     "tn": 261
+    },
+    "direction": {
+     "accuracy": 0.307,
+     "precision": 0.653,
+     "recall": 0.501,
+     "f1": 0.237,
+     "commonest": 0.694,
+     "shares": {
+      "down": 0.306,
+      "stay": 0.694,
+      "up": 0.0
+     }
+    },
+    "predMean": -13.53
+   },
+   "peers": {
+    "n": 576,
+    "rmse": 0.43,
+    "mae": 0.32,
+    "within90": 0.66,
+    "r2": 0.979,
+    "spearman": 0.99,
+    "skill": 0.795,
+    "strong": {
+     "happened": 0.0,
+     "accuracy": 1.0,
+     "precision": null,
+     "recall": null,
+     "f1": null,
+     "tp": 0,
+     "fp": 0,
+     "fn": 0,
+     "tn": 576
+    },
+    "direction": {
+     "accuracy": 0.694,
+     "precision": 0.347,
+     "recall": 0.5,
+     "f1": 0.41,
+     "commonest": 0.694,
+     "shares": {
+      "down": 0.306,
+      "stay": 0.694,
+      "up": 0.0
+     }
+    },
+    "predMean": -11.12
+   }
+  },
+  {
+   "time": 1794799641000,
+   "date": "2026-11-16",
+   "seenMean": -11.82,
+   "lastMean": -11.19,
+   "last": {
+    "n": 576,
+    "rmse": 0.76,
+    "mae": 0.64,
+    "within90": 1.26,
+    "r2": 0.945,
+    "spearman": 0.991,
+    "skill": 0.0,
+    "strong": {
+     "happened": 0.0,
+     "accuracy": 1.0,
+     "precision": null,
+     "recall": null,
+     "f1": null,
+     "tp": 0,
+     "fp": 0,
+     "fn": 0,
+     "tn": 576
+    },
+    "direction": {
+     "accuracy": 0.788,
+     "precision": 0.394,
+     "recall": 0.5,
+     "f1": 0.441,
+     "commonest": 0.788,
+     "shares": {
+      "down": 0.212,
+      "stay": 0.788,
+      "up": 0.0
+     }
+    },
+    "predMean": -11.19,
+    "expected": 4.04,
+    "outside": 0.0
+   },
+   "line": {
+    "n": 576,
+    "rmse": 0.36,
+    "mae": 0.29,
+    "within90": 0.58,
+    "r2": 0.987,
+    "spearman": 0.995,
+    "skill": 0.771,
+    "strong": {
+     "happened": 0.0,
+     "accuracy": 1.0,
+     "precision": null,
+     "recall": null,
+     "f1": null,
+     "tp": 0,
+     "fp": 0,
+     "fn": 0,
+     "tn": 576
+    },
+    "direction": {
+     "accuracy": 0.819,
+     "precision": 0.744,
+     "recall": 0.811,
+     "f1": 0.765,
+     "commonest": 0.788,
+     "shares": {
+      "down": 0.212,
+      "stay": 0.788,
+      "up": 0.0
+     }
+    },
+    "predMean": -12.04,
+    "expected": 6.78,
+    "outside": 0.0
+   },
+   "peers": {
+    "n": 576,
+    "rmse": 0.43,
+    "mae": 0.33,
+    "within90": 0.72,
+    "r2": 0.983,
+    "spearman": 0.991,
+    "skill": 0.687,
+    "strong": {
+     "happened": 0.0,
+     "accuracy": 1.0,
+     "precision": null,
+     "recall": null,
+     "f1": null,
+     "tp": 0,
+     "fp": 0,
+     "fn": 0,
+     "tn": 576
+    },
+    "direction": {
+     "accuracy": 0.788,
+     "precision": 0.394,
+     "recall": 0.5,
+     "f1": 0.441,
+     "commonest": 0.788,
+     "shares": {
+      "down": 0.212,
+      "stay": 0.788,
+      "up": 0.0
+     }
+    },
+    "predMean": -11.73,
+    "expected": 1.57,
+    "outside": 0.005
+   }
+  }
+ ],
+ "summary": "Predicting the next pass one step ahead, 3 times over 1,728 cell readings: the best way here is \"same as last time\", off by 1.57 dB on average, and within 3.71 dB for nine cells in ten. It was furthest off for the pass of 2026-10-23 (3.48 dB).",
+ "surprise": {
+  "date": "2026-11-16",
+  "time": 1794799641000,
+  "outside": 0.0,
+  "expected": 4.04
+ },
+ "method": "Calibrated NISAR backscatter (GCOV, gamma-naught) in cells of 500 m on track 158-A-007-DHDH. Each pass from the 5th on is predicted from the passes before it only, and compared with what was measured. RMSE and MAE in dB; '9 in 10' is the error nine cells in ten stay under. 'Up or down' asks whether a cell's echo goes down or up by 1 dB or more by the next pass, or stays; precision, recall and F1 are averaged over the three answers. The yes/no question is whether a cell changes by 3 dB or more by the next pass. 'Outside the expected range' is the share of cells whose miss was larger than nine in ten misses on the passes predicted before; about 10 % is ordinary.",
+ "limits": "One season of data: no way of predicting has seen a harvest, a flood or a thaw here before it happened. Neighbouring cells change together, so they are fewer independent samples than their number. A pass made with a new version of NASA's processing can shift by itself; such passes are marked.",
+ "generated": "2026-11-18T12:31:47Z"
+}
