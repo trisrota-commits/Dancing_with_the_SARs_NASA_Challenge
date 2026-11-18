@@ -1,0 +1,76 @@
+{
+ "id": "event-usgs-us7000txqr",
+ "name": "M 5.4 - South Sandwich Islands region",
+ "lat": -59.0326,
+ "lon": -26.0288,
+ "radiusKm": 25,
+ "track": "160-A-148-DHDH",
+ "setup": {
+  "lat": -59.0326,
+  "lon": -26.0288,
+  "seriesRadiusM": 500,
+  "mapRadiusM": 6000,
+  "mapPol": "co"
+ },
+ "event": 1794441600000.0,
+ "pols": [
+  "HH",
+  "HV"
+ ],
+ "series": [
+  {
+   "time": 1790669248000,
+   "hh": -15.77,
+   "hv": -26.69,
+   "pixels": 1963,
+   "file": "NISAR_L2_PR_GCOV_031_160_A_148_2005_DHDH_A_20260929T080728_20260929T080753_P05023_N_P_J_001.h5"
+  },
+  {
+   "time": 1791706048000,
+   "hh": -14.82,
+   "hv": -24.88,
+   "pixels": 1963,
+   "file": "NISAR_L2_PR_GCOV_032_160_A_148_2005_DHDH_A_20261011T080728_20261011T080753_P05023_N_P_J_001.h5"
+  },
+  {
+   "time": 1792742848000,
+   "hh": -14.36,
+   "hv": -24.66,
+   "pixels": 1963,
+   "file": "NISAR_L2_PR_GCOV_033_160_A_148_2005_DHDH_A_20261023T080728_20261023T080753_P05036_N_P_J_001.h5"
+  },
+  {
+   "time": 1793779649000,
+   "hh": -14.6,
+   "hv": -25.27,
+   "pixels": 1963,
+   "file": "NISAR_L2_PR_GCOV_034_160_A_148_2005_DHDH_A_20261104T080729_20261104T080753_P05036_N_P_J_001.h5"
+  },
+  {
+   "time": 1794816449000,
+   "hh": -10.98,
+   "hv": -20.85,
+   "pixels": 1963,
+   "file": "NISAR_L2_PR_GCOV_035_160_A_148_2005_DHDH_A_20261116T080729_20261116T080753_P05036_N_P_J_001.h5"
+  }
+ ],
+ "change": {
+  "before": 1793779649000,
+  "after": 1794816449000,
+  "pol": "HH",
+  "image": "event-usgs-us7000txqr_change.png",
+  "bounds": {
+   "west": -26.133549083424963,
+   "east": -25.924050916575037,
+   "south": -59.086498670499466,
+   "north": -58.97870132950054
+  },
+  "weakerPct": 2.4,
+  "strongerPct": 32.0,
+  "spansEvent": true
+ },
+ "firstDrop": null,
+ "summary": "Across the event of 2026-11-12: between 2026-11-04 and 2026-11-16, HH backscatter here changed by +3.6 dB and HV by +4.4 dB (mean within 500 m). Across the mapped area, 2% got at least 3 dB weaker and 32% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 5 passes on track 160-A-148-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-11-12, and 'before' the last pass before it.",
+ "generated": "2026-11-18T22:45:58Z"
+}

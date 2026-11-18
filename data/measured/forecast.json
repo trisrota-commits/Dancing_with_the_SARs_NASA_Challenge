@@ -598,39 +598,83 @@
   "event": {
    "time": 1793750400000.0,
    "date": "2026-11-04",
-   "firstPassAfter": "2026-11-07",
-   "outside": 0.009,
+   "firstPassAfter": "2026-11-05",
+   "outside": null,
    "newVersion": null
   },
   "peerSurprise": {
-   "date": "2026-11-07",
-   "time": 1794076498000,
-   "outside": 0.009,
-   "expected": 0.81
+   "date": "2026-11-17",
+   "time": 1794890101000,
+   "outside": 0.031,
+   "expected": 1.9
   },
   "last": {
-   "rmse": 0.8,
-   "mae": 0.64,
-   "within90": 1.26,
-   "r2": 0.969,
-   "spearman": 0.927,
+   "rmse": 0.86,
+   "mae": 0.56,
+   "within90": 1.58,
+   "r2": 0.971,
+   "spearman": 0.969,
    "skill": 0.0
   },
   "line": {
-   "rmse": 1.34,
-   "mae": 1.14,
-   "within90": 2.03,
-   "r2": 0.913,
-   "spearman": 0.864,
-   "skill": -1.819
+   "rmse": 1.36,
+   "mae": 1.0,
+   "within90": 1.99,
+   "r2": 0.928,
+   "spearman": 0.917,
+   "skill": -1.513
   },
   "peers": {
-   "rmse": 0.44,
-   "mae": 0.28,
-   "within90": 0.63,
-   "r2": 0.99,
-   "spearman": 0.986,
-   "skill": 0.691
+   "rmse": 0.84,
+   "mae": 0.48,
+   "within90": 1.63,
+   "r2": 0.972,
+   "spearman": 0.985,
+   "skill": 0.034
+  }
+ },
+ {
+  "id": "event-gdacs-fl1104277",
+  "name": "Flood in Argentina",
+  "cells": 576,
+  "passes": 5,
+  "best": "line",
+  "event": {
+   "time": 1794096000000.0,
+   "date": "2026-11-08",
+   "firstPassAfter": "2026-11-16",
+   "outside": 0.722,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-16",
+   "time": 1794868791000,
+   "outside": 0.722,
+   "expected": 0.15
+  },
+  "last": {
+   "rmse": 1.25,
+   "mae": 0.83,
+   "within90": 2.36,
+   "r2": 0.719,
+   "spearman": 0.861,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.23,
+   "mae": 0.84,
+   "within90": 2.28,
+   "r2": 0.729,
+   "spearman": 0.903,
+   "skill": 0.036
+  },
+  "peers": {
+   "rmse": 0.29,
+   "mae": 0.17,
+   "within90": 0.44,
+   "r2": 0.985,
+   "spearman": 0.996,
+   "skill": 0.947
   }
  },
  {
@@ -766,6 +810,50 @@
   }
  },
  {
+  "id": "event-gdacs-wf1033825",
+  "name": "Forest fires in Australia",
+  "cells": 340,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1794528000000.0,
+   "date": "2026-11-13",
+   "firstPassAfter": "2026-11-16",
+   "outside": 0.368,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-16",
+   "time": 1794865096000,
+   "outside": 0.368,
+   "expected": 0.26
+  },
+  "last": {
+   "rmse": 0.64,
+   "mae": 0.49,
+   "within90": 0.92,
+   "r2": 0.988,
+   "spearman": 0.99,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 0.86,
+   "mae": 0.7,
+   "within90": 1.02,
+   "r2": 0.978,
+   "spearman": 0.984,
+   "skill": -0.791
+  },
+  "peers": {
+   "rmse": 0.35,
+   "mae": 0.19,
+   "within90": 0.45,
+   "r2": 0.996,
+   "spearman": 0.999,
+   "skill": 0.698
+  }
+ },
+ {
   "id": "event-gdacs-wf1033863",
   "name": "Forest fires in Sudan, South Sudan",
   "cells": 576,
@@ -810,6 +898,50 @@
   }
  },
  {
+  "id": "event-gdacs-wf1033910",
+  "name": "Forest fires in Australia",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1794528000000.0,
+   "date": "2026-11-13",
+   "firstPassAfter": "2026-11-16",
+   "outside": 0.224,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-16",
+   "time": 1794865096000,
+   "outside": 0.224,
+   "expected": 0.12
+  },
+  "last": {
+   "rmse": 0.28,
+   "mae": 0.21,
+   "within90": 0.48,
+   "r2": 0.942,
+   "spearman": 0.966,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 0.34,
+   "mae": 0.3,
+   "within90": 0.5,
+   "r2": 0.913,
+   "spearman": 0.914,
+   "skill": -0.508
+  },
+  "peers": {
+   "rmse": 0.11,
+   "mae": 0.07,
+   "within90": 0.14,
+   "r2": 0.991,
+   "spearman": 0.992,
+   "skill": 0.845
+  }
+ },
+ {
   "id": "event-gdacs-wf1033929",
   "name": "Forest fires in South Sudan",
   "cells": 576,
@@ -851,6 +983,50 @@
    "r2": 0.657,
    "spearman": 0.811,
    "skill": 0.438
+  }
+ },
+ {
+  "id": "event-gdacs-wf1033944",
+  "name": "Forest fires in India",
+  "cells": 441,
+  "passes": 5,
+  "best": "line",
+  "event": {
+   "time": 1794528000000.0,
+   "date": "2026-11-13",
+   "firstPassAfter": "2026-11-16",
+   "outside": 0.195,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-16",
+   "time": 1794787889000,
+   "outside": 0.195,
+   "expected": 1.39
+  },
+  "last": {
+   "rmse": 2.4,
+   "mae": 2.18,
+   "within90": 3.41,
+   "r2": 0.87,
+   "spearman": 0.968,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 2.1,
+   "mae": 1.68,
+   "within90": 3.5,
+   "r2": 0.9,
+   "spearman": 0.964,
+   "skill": 0.235
+  },
+  "peers": {
+   "rmse": 0.96,
+   "mae": 0.73,
+   "within90": 1.54,
+   "r2": 0.979,
+   "spearman": 0.977,
+   "skill": 0.84
   }
  },
  {
@@ -1309,6 +1485,50 @@
   }
  },
  {
+  "id": "event-usgs-us7000txqr",
+  "name": "M 5.4 - South Sandwich Islands region",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1794441600000.0,
+   "date": "2026-11-12",
+   "firstPassAfter": "2026-11-16",
+   "outside": 0.054,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-16",
+   "time": 1794816449000,
+   "outside": 0.054,
+   "expected": 2.78
+  },
+  "last": {
+   "rmse": 2.08,
+   "mae": 1.69,
+   "within90": 3.23,
+   "r2": -0.706,
+   "spearman": 0.122,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 3.43,
+   "mae": 2.69,
+   "within90": 5.64,
+   "r2": -3.657,
+   "spearman": 0.061,
+   "skill": -1.729
+  },
+  "peers": {
+   "rmse": 1.67,
+   "mae": 1.29,
+   "within90": 2.63,
+   "r2": -0.102,
+   "spearman": 0.549,
+   "skill": 0.354
+  }
+ },
+ {
   "id": "gerd",
   "name": "Grand Ethiopian Renaissance Dam reservoir",
   "cells": 3600,
@@ -1378,58 +1598,58 @@
   "best": "last",
   "event": null,
   "peerSurprise": {
-   "date": "2026-09-22",
-   "time": 1790060151000,
-   "outside": 0.186,
-   "expected": 1.44
+   "date": "2026-09-29",
+   "time": 1790725921000,
+   "outside": 0.416,
+   "expected": 1.2
   },
   "last": {
-   "rmse": 0.96,
-   "mae": 0.7,
-   "within90": 1.5,
-   "r2": 0.906,
-   "spearman": 0.946,
+   "rmse": 0.84,
+   "mae": 0.61,
+   "within90": 1.33,
+   "r2": 0.936,
+   "spearman": 0.964,
    "skill": 0.0
   },
   "line": {
-   "rmse": 1.41,
-   "mae": 0.99,
-   "within90": 2.27,
-   "r2": 0.799,
-   "spearman": 0.907,
-   "skill": -1.146
+   "rmse": 1.19,
+   "mae": 0.86,
+   "within90": 1.83,
+   "r2": 0.87,
+   "spearman": 0.937,
+   "skill": -1.021
   },
   "peers": {
-   "rmse": 0.87,
-   "mae": 0.59,
-   "within90": 1.39,
-   "r2": 0.923,
-   "spearman": 0.955,
-   "skill": 0.18
+   "rmse": 0.78,
+   "mae": 0.52,
+   "within90": 1.27,
+   "r2": 0.944,
+   "spearman": 0.969,
+   "skill": 0.132
   },
   "mean": {
-   "rmse": 1.48,
-   "mae": 1.14,
+   "rmse": 1.5,
+   "mae": 1.15,
    "within90": 2.48,
-   "r2": 0.777,
-   "spearman": 0.908,
-   "skill": -1.383
+   "r2": 0.793,
+   "spearman": 0.925,
+   "skill": -2.209
   },
   "trend": {
-   "rmse": 1.23,
-   "mae": 0.88,
-   "within90": 1.95,
-   "r2": 0.846,
-   "spearman": 0.922,
-   "skill": -0.647
+   "rmse": 1.03,
+   "mae": 0.77,
+   "within90": 1.69,
+   "r2": 0.902,
+   "spearman": 0.952,
+   "skill": -0.518
   },
   "learnt": {
-   "rmse": 1.1,
-   "mae": 0.84,
-   "within90": 1.71,
-   "r2": 0.876,
-   "spearman": 0.93,
-   "skill": -0.326
+   "rmse": 0.89,
+   "mae": 0.68,
+   "within90": 1.41,
+   "r2": 0.926,
+   "spearman": 0.96,
+   "skill": -0.142
   }
  },
  {
@@ -1632,52 +1852,52 @@
    "expected": 1.98
   },
   "last": {
-   "rmse": 1.64,
-   "mae": 1.07,
-   "within90": 2.56,
-   "r2": 0.77,
-   "spearman": 0.889,
+   "rmse": 1.61,
+   "mae": 1.04,
+   "within90": 2.49,
+   "r2": 0.78,
+   "spearman": 0.894,
    "skill": 0.0
   },
   "line": {
-   "rmse": 2.28,
-   "mae": 1.53,
-   "within90": 3.68,
-   "r2": 0.557,
-   "spearman": 0.84,
-   "skill": -0.928
+   "rmse": 2.25,
+   "mae": 1.5,
+   "within90": 3.63,
+   "r2": 0.569,
+   "spearman": 0.845,
+   "skill": -0.954
   },
   "peers": {
-   "rmse": 1.46,
-   "mae": 0.91,
-   "within90": 2.21,
-   "r2": 0.818,
-   "spearman": 0.916,
-   "skill": 0.208
+   "rmse": 1.45,
+   "mae": 0.89,
+   "within90": 2.16,
+   "r2": 0.823,
+   "spearman": 0.918,
+   "skill": 0.195
   },
   "mean": {
-   "rmse": 2.33,
-   "mae": 1.63,
-   "within90": 3.89,
-   "r2": 0.536,
-   "spearman": 0.762,
-   "skill": -1.017
+   "rmse": 2.32,
+   "mae": 1.64,
+   "within90": 3.8,
+   "r2": 0.542,
+   "spearman": 0.767,
+   "skill": -1.078
   },
   "trend": {
-   "rmse": 2.1,
-   "mae": 1.42,
-   "within90": 3.36,
-   "r2": 0.625,
-   "spearman": 0.855,
-   "skill": -0.631
+   "rmse": 2.06,
+   "mae": 1.36,
+   "within90": 3.27,
+   "r2": 0.64,
+   "spearman": 0.86,
+   "skill": -0.635
   },
   "learnt": {
-   "rmse": 1.73,
-   "mae": 1.15,
-   "within90": 2.69,
-   "r2": 0.745,
-   "spearman": 0.872,
-   "skill": -0.11
+   "rmse": 1.71,
+   "mae": 1.12,
+   "within90": 2.63,
+   "r2": 0.753,
+   "spearman": 0.876,
+   "skill": -0.123
   }
  },
  {
@@ -1690,56 +1910,56 @@
   "peerSurprise": {
    "date": "2026-11-16",
    "time": 1794871758000,
-   "outside": 0.081,
+   "outside": 0.061,
    "expected": 1.73
   },
   "last": {
    "rmse": 1.56,
-   "mae": 1.17,
-   "within90": 2.69,
-   "r2": 0.642,
-   "spearman": 0.779,
+   "mae": 1.16,
+   "within90": 2.67,
+   "r2": 0.644,
+   "spearman": 0.782,
    "skill": 0.0
   },
   "line": {
    "rmse": 1.49,
    "mae": 1.11,
-   "within90": 2.42,
-   "r2": 0.674,
-   "spearman": 0.832,
-   "skill": 0.09
+   "within90": 2.4,
+   "r2": 0.676,
+   "spearman": 0.834,
+   "skill": 0.091
   },
   "peers": {
    "rmse": 1.06,
    "mae": 0.78,
-   "within90": 1.71,
-   "r2": 0.835,
-   "spearman": 0.891,
-   "skill": 0.54
+   "within90": 1.69,
+   "r2": 0.836,
+   "spearman": 0.892,
+   "skill": 0.541
   },
   "mean": {
    "rmse": 2.4,
    "mae": 1.92,
-   "within90": 4.02,
+   "within90": 4.01,
    "r2": 0.156,
    "spearman": 0.299,
-   "skill": -1.356
+   "skill": -1.37
   },
   "trend": {
    "rmse": 3.67,
-   "mae": 2.44,
-   "within90": 6.64,
-   "r2": -0.977,
-   "spearman": 0.783,
-   "skill": -4.519
+   "mae": 2.43,
+   "within90": 6.66,
+   "r2": -0.976,
+   "spearman": 0.784,
+   "skill": -4.55
   },
   "learnt": {
-   "rmse": 1.19,
+   "rmse": 1.18,
    "mae": 0.9,
-   "within90": 1.98,
-   "r2": 0.792,
-   "spearman": 0.852,
-   "skill": 0.42
+   "within90": 1.95,
+   "r2": 0.795,
+   "spearman": 0.854,
+   "skill": 0.423
   }
  }
 ]

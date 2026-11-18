@@ -1,0 +1,31 @@
+{
+ "id": "event-usgs-us7000txqr",
+ "name": "M 5.4 - South Sandwich Islands region",
+ "track": "160-A-148-DHDH",
+ "cellM": 500.0,
+ "cells": 0,
+ "passes": 5,
+ "from": "2026-09-29",
+ "to": "2026-11-16",
+ "water": 0.884,
+ "event": {
+  "time": 1794441600000.0,
+  "date": "2026-11-12",
+  "firstPassAfter": null,
+  "stood": null,
+  "openWater": true
+ },
+ "most": null,
+ "picture": null,
+ "byDate": [],
+ "summary": "88% of the window around this point reads as open water (the cross-polarised echo is under -24 dB there). On water the echo follows the wind from pass to pass, so nothing can be said about change here.",
+ "method": "",
+ "limits": "",
+ "generated": "2026-11-18T22:47:34Z",
+ "bounds": {
+  "west": -26.133549083424963,
+  "east": -25.924050916575037,
+  "south": -59.086498670499466,
+  "north": -58.97870132950054
+ }
+}

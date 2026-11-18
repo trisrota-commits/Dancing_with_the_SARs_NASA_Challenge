@@ -1,0 +1,76 @@
+{
+ "id": "event-gdacs-wf1033910",
+ "name": "Forest fires in Australia",
+ "lat": -17.467,
+ "lon": 123.7627,
+ "radiusKm": 25,
+ "track": "168-A-169-DHDH",
+ "setup": {
+  "lat": -17.467,
+  "lon": 123.7627,
+  "seriesRadiusM": 500,
+  "mapRadiusM": 6000,
+  "mapPol": "co"
+ },
+ "event": 1794528000000.0,
+ "pols": [
+  "HH",
+  "HV"
+ ],
+ "series": [
+  {
+   "time": 1790717895000,
+   "hh": -9.98,
+   "hv": -16.33,
+   "pixels": 1970,
+   "file": "NISAR_L2_PR_GCOV_031_168_A_169_2005_DHDH_A_20260929T213815_20260929T213849_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1791754695000,
+   "hh": -10.01,
+   "hv": -16.31,
+   "pixels": 1970,
+   "file": "NISAR_L2_PR_GCOV_032_168_A_169_2005_DHDH_A_20261011T213815_20261011T213849_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1792791495000,
+   "hh": -10.4,
+   "hv": -16.31,
+   "pixels": 1970,
+   "file": "NISAR_L2_PR_GCOV_033_168_A_169_2005_DHDH_A_20261023T213815_20261023T213853_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1793828295000,
+   "hh": -10.42,
+   "hv": -16.28,
+   "pixels": 1970,
+   "file": "NISAR_L2_PR_GCOV_034_168_A_169_2005_DHDH_A_20261104T213815_20261104T213850_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1794865096000,
+   "hh": -10.47,
+   "hv": -16.47,
+   "pixels": 1970,
+   "file": "NISAR_L2_PR_GCOV_035_168_A_169_2005_DHDH_A_20261116T213816_20261116T213850_P05036_N_F_J_001.h5"
+  }
+ ],
+ "change": {
+  "before": 1793828295000,
+  "after": 1794865096000,
+  "pol": "HH",
+  "image": "event-gdacs-wf1033910_change.png",
+  "bounds": {
+   "west": 123.70619592588945,
+   "east": 123.81920407411054,
+   "south": -17.52089867049946,
+   "north": -17.413101329500538
+  },
+  "weakerPct": 0.0,
+  "strongerPct": 0.0,
+  "spansEvent": true
+ },
+ "firstDrop": null,
+ "summary": "Across the event of 2026-11-13: between 2026-11-04 and 2026-11-16, HH backscatter here changed by -0.1 dB and HV by -0.2 dB (mean within 500 m). Across the mapped area, 0% got at least 3 dB weaker and 0% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 5 passes on track 168-A-169-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-11-13, and 'before' the last pass before it.",
+ "generated": "2026-11-18T22:44:40Z"
+}

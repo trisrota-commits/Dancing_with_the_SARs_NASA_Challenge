@@ -323,9 +323,9 @@
   "event": {
    "time": 1793750400000.0,
    "date": "2026-11-04",
-   "firstPassAfter": "2026-11-07",
+   "firstPassAfter": "2026-11-05",
    "stood": 0.0,
-   "recent": 0.0,
+   "recent": 0.0156,
    "long": 0.0,
    "stillNext": null,
    "newVersion": null,
@@ -333,10 +333,10 @@
    "grade": "both"
   },
   "most": {
-   "date": "2026-10-26",
-   "time": 1793039698000,
+   "date": "2026-11-05",
+   "time": 1793853301000,
    "stood": 0.0,
-   "recent": 0.0903,
+   "recent": 0.0156,
    "long": 0.0
   },
   "water": 0.0
@@ -345,25 +345,25 @@
   "id": "event-gdacs-fl1104277",
   "name": "Flood in Argentina",
   "cells": 576,
-  "passes": 4,
+  "passes": 5,
   "event": {
    "time": 1794096000000.0,
    "date": "2026-11-08",
-   "firstPassAfter": "2026-11-08",
-   "stood": 0.0,
-   "recent": 0.0,
-   "long": 0.0,
+   "firstPassAfter": "2026-11-16",
+   "stood": 0.1094,
+   "recent": 0.1372,
+   "long": 0.3108,
    "stillNext": null,
    "newVersion": null,
    "baseline": 2,
    "grade": "both"
   },
   "most": {
-   "date": "2026-11-08",
-   "time": 1794133774000,
-   "stood": 0.0,
-   "recent": 0.0,
-   "long": 0.0
+   "date": "2026-11-16",
+   "time": 1794868791000,
+   "stood": 0.1094,
+   "recent": 0.1372,
+   "long": 0.3108
   },
   "water": 0.0
  },
@@ -446,6 +446,58 @@
   "water": 0.0
  },
  {
+  "id": "event-gdacs-wf1033825",
+  "name": "Forest fires in Australia",
+  "cells": 164,
+  "passes": 5,
+  "event": {
+   "time": 1794528000000.0,
+   "date": "2026-11-13",
+   "firstPassAfter": "2026-11-16",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.1361,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-04",
+   "time": 1793828295000,
+   "stood": 0.0,
+   "recent": 0.0122,
+   "long": 0.0
+  },
+  "water": 0.51
+ },
+ {
+  "id": "event-gdacs-wf1033859",
+  "name": "Forest fires in Australia",
+  "cells": 574,
+  "passes": 4,
+  "event": {
+   "time": 1794614400000.0,
+   "date": "2026-11-14",
+   "firstPassAfter": "2026-11-16",
+   "stood": 0.5592,
+   "recent": 0.6829,
+   "long": 0.5923,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-16",
+   "time": 1794865062000,
+   "stood": 0.5592,
+   "recent": 0.6829,
+   "long": 0.5923
+  },
+  "water": 0.003
+ },
+ {
   "id": "event-gdacs-wf1033863",
   "name": "Forest fires in Sudan, South Sudan",
   "cells": 576,
@@ -498,6 +550,32 @@
   "water": 0.0
  },
  {
+  "id": "event-gdacs-wf1033884",
+  "name": "Forest fires in Australia",
+  "cells": 488,
+  "passes": 4,
+  "event": {
+   "time": 1794700800000.0,
+   "date": "2026-11-15",
+   "firstPassAfter": "2026-11-16",
+   "stood": 0.7869,
+   "recent": 0.832,
+   "long": 0.793,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-16",
+   "time": 1794865062000,
+   "stood": 0.7869,
+   "recent": 0.832,
+   "long": 0.793
+  },
+  "water": 0.153
+ },
+ {
   "id": "event-gdacs-wf1033904",
   "name": "Forest fires in Nigeria",
   "cells": 576,
@@ -524,6 +602,58 @@
   "water": 0.0
  },
  {
+  "id": "event-gdacs-wf1033906",
+  "name": "Forest fires in Australia",
+  "cells": 232,
+  "passes": 4,
+  "event": {
+   "time": 1794787200000.0,
+   "date": "2026-11-16",
+   "firstPassAfter": "2026-11-16",
+   "stood": 0.1034,
+   "recent": 0.125,
+   "long": 0.1034,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-16",
+   "time": 1794865062000,
+   "stood": 0.1034,
+   "recent": 0.125,
+   "long": 0.1034
+  },
+  "water": 0.597
+ },
+ {
+  "id": "event-gdacs-wf1033910",
+  "name": "Forest fires in Australia",
+  "cells": 572,
+  "passes": 5,
+  "event": {
+   "time": 1794528000000.0,
+   "date": "2026-11-13",
+   "firstPassAfter": "2026-11-16",
+   "stood": 0.0594,
+   "recent": 0.1259,
+   "long": 0.0682,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-16",
+   "time": 1794865096000,
+   "stood": 0.0594,
+   "recent": 0.1259,
+   "long": 0.0682
+  },
+  "water": 0.007
+ },
+ {
   "id": "event-gdacs-wf1033929",
   "name": "Forest fires in South Sudan",
   "cells": 576,
@@ -548,6 +678,84 @@
    "long": 0.0
   },
   "water": 0.0
+ },
+ {
+  "id": "event-gdacs-wf1033944",
+  "name": "Forest fires in India",
+  "cells": 342,
+  "passes": 5,
+  "event": {
+   "time": 1794528000000.0,
+   "date": "2026-11-13",
+   "firstPassAfter": "2026-11-16",
+   "stood": 0.0118,
+   "recent": 0.1124,
+   "long": 0.0118,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-16",
+   "time": 1794787889000,
+   "stood": 0.0118,
+   "recent": 0.1124,
+   "long": 0.0118
+  },
+  "water": 0.221
+ },
+ {
+  "id": "event-gdacs-wf1033947",
+  "name": "Forest fires in Nigeria",
+  "cells": 576,
+  "passes": 4,
+  "event": {
+   "time": 1794700800000.0,
+   "date": "2026-11-15",
+   "firstPassAfter": "2026-11-16",
+   "stood": 0.0,
+   "recent": 0.0069,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-16",
+   "time": 1794805667000,
+   "stood": 0.0,
+   "recent": 0.0069,
+   "long": 0.0
+  },
+  "water": 0.0
+ },
+ {
+  "id": "event-gdacs-wf1033948",
+  "name": "Forest fires in Sudan",
+  "cells": 534,
+  "passes": 4,
+  "event": {
+   "time": 1794700800000.0,
+   "date": "2026-11-15",
+   "firstPassAfter": "2026-11-16",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-16",
+   "time": 1794799674000,
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0
+  },
+  "water": 0.073
  },
  {
   "id": "event-usgs-us6000u19w",
@@ -804,6 +1012,21 @@
   "water": 0.0
  },
  {
+  "id": "event-usgs-us7000txqr",
+  "name": "M 5.4 - South Sandwich Islands region",
+  "cells": 0,
+  "passes": 5,
+  "event": {
+   "time": 1794441600000.0,
+   "date": "2026-11-12",
+   "firstPassAfter": null,
+   "stood": null,
+   "openWater": true
+  },
+  "most": null,
+  "water": 0.884
+ },
+ {
   "id": "gerd",
   "name": "Grand Ethiopian Renaissance Dam reservoir",
   "cells": 3472,
@@ -825,11 +1048,11 @@
   "passes": 12,
   "event": null,
   "most": {
-   "date": "2026-09-22",
-   "time": 1790060151000,
-   "stood": 0.0356,
-   "recent": 0.0842,
-   "long": 0.0577
+   "date": "2026-09-17",
+   "time": 1789689121000,
+   "stood": 0.0286,
+   "recent": 0.056,
+   "long": 0.049
   },
   "water": 0.0
  },
