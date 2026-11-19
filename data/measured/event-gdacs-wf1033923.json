@@ -1,0 +1,62 @@
+{
+ "id": "event-gdacs-wf1033923",
+ "name": "Forest fires in Togo, Benin, Burkina Faso",
+ "lat": 11.2211,
+ "lon": 1.0807,
+ "radiusKm": 25,
+ "track": "008-D-083-DHDH",
+ "setup": {
+  "lat": 11.2211,
+  "lon": 1.0807,
+  "seriesRadiusM": 500,
+  "mapRadiusM": 6000,
+  "mapPol": "co"
+ },
+ "event": 1794614400000.0,
+ "pols": [
+  "HH",
+  "HV"
+ ],
+ "series": [
+  {
+   "time": 1790792871000,
+   "hh": -9.04,
+   "hv": -17.26,
+   "pixels": 1962,
+   "file": "NISAR_L2_PR_GCOV_032_008_D_083_2005_DHDH_A_20260930T182751_20260930T182825_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1792866471000,
+   "hh": -12.75,
+   "hv": -18.83,
+   "pixels": 1962,
+   "file": "NISAR_L2_PR_GCOV_034_008_D_083_2005_DHDH_A_20261024T182751_20261024T182826_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1794940072000,
+   "hh": -13.56,
+   "hv": -18.71,
+   "pixels": 1962,
+   "file": "NISAR_L2_PR_GCOV_036_008_D_083_2005_DHDH_A_20261117T182752_20261117T182827_P05036_N_F_J_001.h5"
+  }
+ ],
+ "change": {
+  "before": 1792866471000,
+  "after": 1794940072000,
+  "pol": "HH",
+  "image": "event-gdacs-wf1033923_change.png",
+  "bounds": {
+   "west": 1.025750898251155,
+   "east": 1.135649101748845,
+   "south": 11.16720132950054,
+   "north": 11.27499867049946
+  },
+  "weakerPct": 3.1,
+  "strongerPct": 0.0,
+  "spansEvent": true
+ },
+ "firstDrop": 1792866471000,
+ "summary": "Across the event of 2026-11-14: between 2026-10-24 and 2026-11-17, HH backscatter here changed by -0.8 dB and HV by +0.1 dB (mean within 500 m). Across the mapped area, 3% got at least 3 dB weaker and 0% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 3 passes on track 008-D-083-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-11-14, and 'before' the last pass before it.",
+ "generated": "2026-11-19T22:43:06Z"
+}

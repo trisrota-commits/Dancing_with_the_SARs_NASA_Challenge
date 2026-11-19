@@ -293,25 +293,25 @@
   "id": "event-gdacs-fl1104239",
   "name": "Flood in Malaysia",
   "cells": 576,
-  "passes": 6,
+  "passes": 7,
   "event": {
    "time": 1792022400000.0,
    "date": "2026-10-15",
-   "firstPassAfter": "2026-10-17",
-   "stood": 0.0,
-   "recent": 0.0,
-   "long": 0.0,
-   "stillNext": null,
+   "firstPassAfter": "2026-10-19",
+   "stood": 0.0087,
+   "recent": 0.0503,
+   "long": 0.0087,
+   "stillNext": 0.0,
    "newVersion": null,
    "baseline": 2,
    "grade": "both"
   },
   "most": {
-   "date": "2026-11-10",
-   "time": 1794310934000,
-   "stood": 0.1372,
-   "recent": 0.1753,
-   "long": 0.1493
+   "date": "2026-11-12",
+   "time": 1794523826000,
+   "stood": 0.2361,
+   "recent": 0.5017,
+   "long": 0.3611
   },
   "water": 0.0
  },
@@ -709,6 +709,32 @@
   "water": 0.007
  },
  {
+  "id": "event-gdacs-wf1033923",
+  "name": "Forest fires in Togo, Benin, Burkina Faso",
+  "cells": 576,
+  "passes": 3,
+  "event": {
+   "time": 1794614400000.0,
+   "date": "2026-11-14",
+   "firstPassAfter": "2026-11-17",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": null,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "two"
+  },
+  "most": {
+   "date": "2026-11-17",
+   "time": 1794940072000,
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": null
+  },
+  "water": 0.0
+ },
+ {
   "id": "event-gdacs-wf1033929",
   "name": "Forest fires in South Sudan",
   "cells": 576,
@@ -837,6 +863,84 @@
    "long": 0.0
   },
   "water": 0.073
+ },
+ {
+  "id": "event-gdacs-wf1033967",
+  "name": "Forest fires in South Sudan",
+  "cells": 576,
+  "passes": 4,
+  "event": {
+   "time": 1794528000000.0,
+   "date": "2026-11-13",
+   "firstPassAfter": "2026-11-13",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-13",
+   "time": 1794541872000,
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0
+  },
+  "water": 0.0
+ },
+ {
+  "id": "event-gdacs-wf1033968",
+  "name": "Forest fires in Burkina Faso",
+  "cells": 576,
+  "passes": 4,
+  "event": {
+   "time": 1794528000000.0,
+   "date": "2026-11-13",
+   "firstPassAfter": "2026-11-13",
+   "stood": 0.0,
+   "recent": 0.0122,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-13",
+   "time": 1794547932000,
+   "stood": 0.0,
+   "recent": 0.0122,
+   "long": 0.0
+  },
+  "water": 0.0
+ },
+ {
+  "id": "event-gdacs-wf1033969",
+  "name": "Forest fires in Sudan",
+  "cells": 576,
+  "passes": 3,
+  "event": {
+   "time": 1794528000000.0,
+   "date": "2026-11-13",
+   "firstPassAfter": "2026-11-17",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": null,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "two"
+  },
+  "most": {
+   "date": "2026-11-17",
+   "time": 1794934079000,
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": null
+  },
+  "water": 0.0
  },
  {
   "id": "event-usgs-us6000u19w",

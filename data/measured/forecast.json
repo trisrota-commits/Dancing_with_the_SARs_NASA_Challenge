@@ -549,44 +549,44 @@
   "id": "event-gdacs-fl1104239",
   "name": "Flood in Malaysia",
   "cells": 576,
-  "passes": 6,
+  "passes": 7,
   "best": "last",
   "event": {
    "time": 1792022400000.0,
    "date": "2026-10-15",
-   "firstPassAfter": "2026-10-17",
-   "outside": null,
+   "firstPassAfter": "2026-10-19",
+   "outside": 0.158,
    "newVersion": null
   },
   "peerSurprise": {
-   "date": "2026-11-10",
-   "time": 1794310934000,
-   "outside": 0.34,
-   "expected": 0.71
+   "date": "2026-11-12",
+   "time": 1794523826000,
+   "outside": 0.189,
+   "expected": 0.81
   },
   "last": {
-   "rmse": 0.61,
-   "mae": 0.43,
-   "within90": 1.12,
-   "r2": 0.987,
-   "spearman": 0.965,
+   "rmse": 0.78,
+   "mae": 0.56,
+   "within90": 1.33,
+   "r2": 0.98,
+   "spearman": 0.938,
    "skill": 0.0
   },
   "line": {
-   "rmse": 0.84,
-   "mae": 0.6,
-   "within90": 1.44,
-   "r2": 0.976,
-   "spearman": 0.957,
-   "skill": -0.873
+   "rmse": 1.02,
+   "mae": 0.77,
+   "within90": 1.72,
+   "r2": 0.966,
+   "spearman": 0.909,
+   "skill": -0.692
   },
   "peers": {
-   "rmse": 0.55,
-   "mae": 0.38,
-   "within90": 0.99,
-   "r2": 0.99,
-   "spearman": 0.971,
-   "skill": 0.188
+   "rmse": 0.49,
+   "mae": 0.35,
+   "within90": 0.88,
+   "r2": 0.992,
+   "spearman": 0.981,
+   "skill": 0.605
   }
  },
  {
