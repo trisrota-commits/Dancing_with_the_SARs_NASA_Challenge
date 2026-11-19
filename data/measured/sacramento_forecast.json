@@ -60,65 +60,65 @@
  "overall": {
   "last": {
    "n": 25600,
-   "rmse": 1.61,
-   "mae": 1.04,
-   "within90": 2.49,
-   "r2": 0.78,
+   "rmse": 1.62,
+   "mae": 1.05,
+   "within90": 2.5,
+   "r2": 0.779,
    "spearman": 0.894,
    "skill": 0.0,
    "strong": {
-    "happened": 0.068,
-    "accuracy": 0.932,
+    "happened": 0.069,
+    "accuracy": 0.931,
     "precision": null,
     "recall": 0.0,
     "f1": null,
     "tp": 0,
     "fp": 0,
-    "fn": 1750,
-    "tn": 23850
+    "fn": 1777,
+    "tn": 23823
    },
    "direction": {
-    "accuracy": 0.661,
-    "precision": 0.22,
+    "accuracy": 0.657,
+    "precision": 0.219,
     "recall": 0.333,
-    "f1": 0.265,
-    "commonest": 0.661,
+    "f1": 0.264,
+    "commonest": 0.657,
     "shares": {
-     "down": 0.174,
-     "stay": 0.661,
-     "up": 0.165
+     "down": 0.176,
+     "stay": 0.657,
+     "up": 0.167
     }
    }
   },
   "line": {
    "n": 25600,
-   "rmse": 2.25,
+   "rmse": 2.26,
    "mae": 1.5,
-   "within90": 3.63,
-   "r2": 0.569,
-   "spearman": 0.845,
-   "skill": -0.954,
+   "within90": 3.64,
+   "r2": 0.57,
+   "spearman": 0.846,
+   "skill": -0.943,
    "strong": {
-    "happened": 0.068,
-    "accuracy": 0.884,
-    "precision": 0.152,
-    "recall": 0.151,
-    "f1": 0.152,
-    "tp": 265,
-    "fp": 1483,
-    "fn": 1485,
-    "tn": 22367
+    "happened": 0.069,
+    "accuracy": 0.883,
+    "precision": 0.154,
+    "recall": 0.154,
+    "f1": 0.154,
+    "tp": 273,
+    "fp": 1498,
+    "fn": 1504,
+    "tn": 22325
    },
    "direction": {
-    "accuracy": 0.575,
-    "precision": 0.425,
-    "recall": 0.426,
-    "f1": 0.425,
-    "commonest": 0.661,
+    "accuracy": 0.573,
+    "precision": 0.426,
+    "recall": 0.427,
+    "f1": 0.426,
+    "commonest": 0.657,
     "shares": {
-     "down": 0.174,
-     "stay": 0.661,
-     "up": 0.165
+     "down": 0.176,
+     "stay": 0.657,
+     "up": 0.167
     }
    }
   },
@@ -128,132 +128,132 @@
    "mae": 0.89,
    "within90": 2.16,
    "r2": 0.823,
-   "spearman": 0.918,
-   "skill": 0.195,
+   "spearman": 0.919,
+   "skill": 0.201,
    "strong": {
-    "happened": 0.068,
-    "accuracy": 0.932,
+    "happened": 0.069,
+    "accuracy": 0.931,
     "precision": null,
     "recall": 0.0,
     "f1": null,
     "tp": 0,
     "fp": 0,
-    "fn": 1750,
-    "tn": 23850
+    "fn": 1777,
+    "tn": 23823
    },
    "direction": {
-    "accuracy": 0.686,
-    "precision": 0.665,
-    "recall": 0.423,
-    "f1": 0.434,
-    "commonest": 0.661,
+    "accuracy": 0.683,
+    "precision": 0.664,
+    "recall": 0.421,
+    "f1": 0.431,
+    "commonest": 0.657,
     "shares": {
-     "down": 0.174,
-     "stay": 0.661,
-     "up": 0.165
+     "down": 0.176,
+     "stay": 0.657,
+     "up": 0.167
     }
    }
   },
   "mean": {
    "n": 25600,
-   "rmse": 2.32,
-   "mae": 1.64,
-   "within90": 3.8,
-   "r2": 0.542,
-   "spearman": 0.767,
-   "skill": -1.078,
+   "rmse": 2.33,
+   "mae": 1.66,
+   "within90": 3.82,
+   "r2": 0.539,
+   "spearman": 0.766,
+   "skill": -1.081,
    "strong": {
-    "happened": 0.068,
-    "accuracy": 0.841,
+    "happened": 0.069,
+    "accuracy": 0.839,
     "precision": 0.167,
-    "recall": 0.334,
-    "f1": 0.223,
-    "tp": 585,
-    "fp": 2912,
-    "fn": 1165,
-    "tn": 20938
+    "recall": 0.331,
+    "f1": 0.222,
+    "tp": 589,
+    "fp": 2937,
+    "fn": 1188,
+    "tn": 20886
    },
    "direction": {
-    "accuracy": 0.516,
-    "precision": 0.461,
-    "recall": 0.488,
-    "f1": 0.457,
-    "commonest": 0.661,
+    "accuracy": 0.51,
+    "precision": 0.46,
+    "recall": 0.487,
+    "f1": 0.455,
+    "commonest": 0.657,
     "shares": {
-     "down": 0.174,
-     "stay": 0.661,
-     "up": 0.165
+     "down": 0.176,
+     "stay": 0.657,
+     "up": 0.167
     }
    }
   },
   "trend": {
    "n": 25600,
-   "rmse": 2.06,
-   "mae": 1.36,
-   "within90": 3.27,
-   "r2": 0.64,
-   "spearman": 0.86,
-   "skill": -0.635,
+   "rmse": 2.07,
+   "mae": 1.38,
+   "within90": 3.3,
+   "r2": 0.636,
+   "spearman": 0.859,
+   "skill": -0.643,
    "strong": {
-    "happened": 0.068,
-    "accuracy": 0.913,
-    "precision": 0.224,
-    "recall": 0.11,
-    "f1": 0.148,
+    "happened": 0.069,
+    "accuracy": 0.912,
+    "precision": 0.222,
+    "recall": 0.109,
+    "f1": 0.146,
     "tp": 193,
-    "fp": 669,
-    "fn": 1557,
-    "tn": 23181
+    "fp": 675,
+    "fn": 1584,
+    "tn": 23148
    },
    "direction": {
-    "accuracy": 0.607,
-    "precision": 0.4,
-    "recall": 0.394,
-    "f1": 0.393,
-    "commonest": 0.661,
+    "accuracy": 0.604,
+    "precision": 0.398,
+    "recall": 0.392,
+    "f1": 0.391,
+    "commonest": 0.657,
     "shares": {
-     "down": 0.174,
-     "stay": 0.661,
-     "up": 0.165
+     "down": 0.176,
+     "stay": 0.657,
+     "up": 0.167
     }
    }
   },
   "learnt": {
    "n": 25600,
    "rmse": 1.71,
-   "mae": 1.12,
-   "within90": 2.63,
-   "r2": 0.753,
+   "mae": 1.13,
+   "within90": 2.65,
+   "r2": 0.752,
    "spearman": 0.876,
-   "skill": -0.123,
+   "skill": -0.12,
    "strong": {
-    "happened": 0.068,
-    "accuracy": 0.931,
+    "happened": 0.069,
+    "accuracy": 0.93,
     "precision": 0.056,
     "recall": 0.001,
     "f1": 0.001,
     "tp": 1,
     "fp": 17,
-    "fn": 1749,
-    "tn": 23833
+    "fn": 1776,
+    "tn": 23806
    },
    "direction": {
-    "accuracy": 0.632,
-    "precision": 0.393,
-    "recall": 0.346,
-    "f1": 0.316,
-    "commonest": 0.661,
+    "accuracy": 0.628,
+    "precision": 0.392,
+    "recall": 0.345,
+    "f1": 0.315,
+    "commonest": 0.657,
     "shares": {
-     "down": 0.174,
-     "stay": 0.661,
-     "up": 0.165
+     "down": 0.176,
+     "stay": 0.657,
+     "up": 0.167
     }
    }
   }
  },
  "best": "last",
  "bestBaseline": "last",
- "modelAgainstBestBaseline": -0.128,
+ "modelAgainstBestBaseline": -0.114,
  "directionDb": 1.0,
  "byDate": [
   {
@@ -4987,235 +4987,231 @@
   {
    "time": 1791551870000,
    "date": "2026-10-09",
-   "seenMean": -10.68,
+   "seenMean": -11.1,
    "lastMean": -10.45,
-   "newVersion": {
-    "from": "P05036",
-    "to": "P05023"
-   },
    "last": {
     "n": 1024,
-    "rmse": 1.23,
-    "mae": 0.82,
-    "within90": 2.16,
-    "r2": 0.809,
+    "rmse": 1.36,
+    "mae": 0.92,
+    "within90": 2.47,
+    "r2": 0.763,
     "spearman": 0.89,
     "skill": 0.0,
     "strong": {
-     "happened": 0.038,
-     "accuracy": 0.962,
+     "happened": 0.061,
+     "accuracy": 0.939,
      "precision": null,
      "recall": 0.0,
      "f1": null,
      "tp": 0,
      "fp": 0,
-     "fn": 39,
-     "tn": 985
+     "fn": 62,
+     "tn": 962
     },
     "direction": {
-     "accuracy": 0.723,
-     "precision": 0.241,
+     "accuracy": 0.691,
+     "precision": 0.23,
      "recall": 0.333,
-     "f1": 0.28,
-     "commonest": 0.723,
+     "f1": 0.273,
+     "commonest": 0.691,
      "shares": {
-      "down": 0.202,
-      "stay": 0.723,
-      "up": 0.075
+      "down": 0.267,
+      "stay": 0.691,
+      "up": 0.042
      }
     },
     "predMean": -10.45,
     "expected": 2.53,
-    "outside": 0.069
+    "outside": 0.093
    },
    "line": {
     "n": 1024,
-    "rmse": 1.75,
-    "mae": 1.2,
-    "within90": 3.12,
-    "r2": 0.611,
+    "rmse": 1.69,
+    "mae": 1.09,
+    "within90": 3.01,
+    "r2": 0.636,
     "spearman": 0.856,
-    "skill": -1.038,
+    "skill": -0.537,
     "strong": {
-     "happened": 0.038,
-     "accuracy": 0.896,
-     "precision": 0.053,
-     "recall": 0.103,
-     "f1": 0.07,
-     "tp": 4,
-     "fp": 71,
-     "fn": 35,
-     "tn": 914
+     "happened": 0.061,
+     "accuracy": 0.882,
+     "precision": 0.107,
+     "recall": 0.129,
+     "f1": 0.117,
+     "tp": 8,
+     "fp": 67,
+     "fn": 54,
+     "tn": 895
     },
     "direction": {
-     "accuracy": 0.657,
-     "precision": 0.425,
-     "recall": 0.453,
-     "f1": 0.43,
-     "commonest": 0.723,
+     "accuracy": 0.698,
+     "precision": 0.463,
+     "recall": 0.471,
+     "f1": 0.465,
+     "commonest": 0.691,
      "shares": {
-      "down": 0.202,
-      "stay": 0.723,
-      "up": 0.075
+      "down": 0.267,
+      "stay": 0.691,
+      "up": 0.042
      }
     },
     "predMean": -11.15,
     "expected": 3.69,
-    "outside": 0.066
+    "outside": 0.056
    },
    "peers": {
     "n": 1024,
     "rmse": 1.24,
     "mae": 0.82,
     "within90": 2.18,
-    "r2": 0.804,
+    "r2": 0.805,
     "spearman": 0.89,
-    "skill": -0.025,
+    "skill": 0.177,
     "strong": {
-     "happened": 0.038,
-     "accuracy": 0.962,
+     "happened": 0.061,
+     "accuracy": 0.939,
      "precision": null,
      "recall": 0.0,
      "f1": null,
      "tp": 0,
      "fp": 0,
-     "fn": 39,
-     "tn": 985
+     "fn": 62,
+     "tn": 962
     },
     "direction": {
-     "accuracy": 0.723,
-     "precision": 0.241,
+     "accuracy": 0.691,
+     "precision": 0.23,
      "recall": 0.333,
-     "f1": 0.28,
-     "commonest": 0.723,
+     "f1": 0.273,
+     "commonest": 0.691,
      "shares": {
-      "down": 0.202,
-      "stay": 0.723,
-      "up": 0.075
+      "down": 0.267,
+      "stay": 0.691,
+      "up": 0.042
      }
     },
-    "predMean": -10.38,
+    "predMean": -10.8,
     "expected": 2.16,
     "outside": 0.103
    },
    "mean": {
     "n": 1024,
-    "rmse": 1.69,
-    "mae": 1.31,
-    "within90": 2.77,
-    "r2": 0.636,
-    "spearman": 0.8,
-    "skill": -0.905,
+    "rmse": 1.86,
+    "mae": 1.51,
+    "within90": 2.9,
+    "r2": 0.562,
+    "spearman": 0.799,
+    "skill": -0.849,
     "strong": {
-     "happened": 0.038,
-     "accuracy": 0.906,
-     "precision": 0.18,
-     "recall": 0.41,
-     "f1": 0.25,
-     "tp": 16,
-     "fp": 73,
-     "fn": 23,
-     "tn": 912
+     "happened": 0.061,
+     "accuracy": 0.905,
+     "precision": 0.303,
+     "recall": 0.435,
+     "f1": 0.358,
+     "tp": 27,
+     "fp": 62,
+     "fn": 35,
+     "tn": 900
     },
     "direction": {
-     "accuracy": 0.48,
-     "precision": 0.49,
-     "recall": 0.504,
-     "f1": 0.44,
-     "commonest": 0.723,
+     "accuracy": 0.438,
+     "precision": 0.465,
+     "recall": 0.425,
+     "f1": 0.385,
+     "commonest": 0.691,
      "shares": {
-      "down": 0.202,
-      "stay": 0.723,
-      "up": 0.075
+      "down": 0.267,
+      "stay": 0.691,
+      "up": 0.042
      }
     },
     "predMean": -10.21,
     "expected": 3.94,
-    "outside": 0.017
+    "outside": 0.031
    },
    "trend": {
     "n": 1024,
-    "rmse": 1.65,
-    "mae": 1.13,
-    "within90": 3.01,
-    "r2": 0.654,
+    "rmse": 1.79,
+    "mae": 1.21,
+    "within90": 3.29,
+    "r2": 0.592,
     "spearman": 0.823,
-    "skill": -0.814,
+    "skill": -0.724,
     "strong": {
-     "happened": 0.038,
-     "accuracy": 0.959,
+     "happened": 0.061,
+     "accuracy": 0.937,
      "precision": 0.0,
      "recall": 0.0,
      "f1": null,
      "tp": 0,
      "fp": 3,
-     "fn": 39,
-     "tn": 982
+     "fn": 62,
+     "tn": 959
     },
     "direction": {
-     "accuracy": 0.647,
-     "precision": 0.312,
-     "recall": 0.329,
-     "f1": 0.309,
-     "commonest": 0.723,
+     "accuracy": 0.633,
+     "precision": 0.345,
+     "recall": 0.344,
+     "f1": 0.313,
+     "commonest": 0.691,
      "shares": {
-      "down": 0.202,
-      "stay": 0.723,
-      "up": 0.075
+      "down": 0.267,
+      "stay": 0.691,
+      "up": 0.042
      }
     },
     "predMean": -10.3,
     "expected": 3.33,
-    "outside": 0.067
+    "outside": 0.099
    },
    "learnt": {
     "n": 1024,
-    "rmse": 1.14,
-    "mae": 0.8,
-    "within90": 1.9,
-    "r2": 0.836,
-    "spearman": 0.904,
-    "skill": 0.144,
+    "rmse": 1.24,
+    "mae": 0.86,
+    "within90": 2.16,
+    "r2": 0.803,
+    "spearman": 0.905,
+    "skill": 0.168,
     "strong": {
-     "happened": 0.038,
-     "accuracy": 0.962,
+     "happened": 0.061,
+     "accuracy": 0.939,
      "precision": null,
      "recall": 0.0,
      "f1": null,
      "tp": 0,
      "fp": 0,
-     "fn": 39,
-     "tn": 985
+     "fn": 62,
+     "tn": 962
     },
     "direction": {
-     "accuracy": 0.722,
-     "precision": 0.374,
-     "recall": 0.335,
-     "f1": 0.286,
-     "commonest": 0.723,
+     "accuracy": 0.69,
+     "precision": 0.364,
+     "recall": 0.334,
+     "f1": 0.277,
+     "commonest": 0.691,
      "shares": {
-      "down": 0.202,
-      "stay": 0.723,
-      "up": 0.075
+      "down": 0.267,
+      "stay": 0.691,
+      "up": 0.042
      }
     },
     "predMean": -10.57,
     "expected": 2.71,
-    "outside": 0.029
+    "outside": 0.052
    }
   },
   {
    "time": 1792588670000,
    "date": "2026-10-21",
-   "seenMean": -10.98,
-   "lastMean": -10.68,
+   "seenMean": -11.39,
+   "lastMean": -11.1,
    "last": {
     "n": 1024,
     "rmse": 1.29,
     "mae": 0.76,
     "within90": 2.03,
-    "r2": 0.819,
-    "spearman": 0.905,
+    "r2": 0.818,
+    "spearman": 0.904,
     "skill": 0.0,
     "strong": {
      "happened": 0.05,
@@ -5229,55 +5225,55 @@
      "tn": 973
     },
     "direction": {
-     "accuracy": 0.771,
+     "accuracy": 0.77,
      "precision": 0.257,
      "recall": 0.333,
      "f1": 0.29,
-     "commonest": 0.771,
+     "commonest": 0.77,
      "shares": {
       "down": 0.158,
-      "stay": 0.771,
-      "up": 0.07
+      "stay": 0.77,
+      "up": 0.072
      }
     },
-    "predMean": -10.68,
-    "expected": 2.51,
+    "predMean": -11.1,
+    "expected": 2.52,
     "outside": 0.068
    },
    "line": {
     "n": 1024,
-    "rmse": 1.77,
-    "mae": 1.1,
-    "within90": 2.76,
-    "r2": 0.658,
-    "spearman": 0.855,
-    "skill": -0.884,
+    "rmse": 1.81,
+    "mae": 1.09,
+    "within90": 2.88,
+    "r2": 0.645,
+    "spearman": 0.854,
+    "skill": -0.953,
     "strong": {
      "happened": 0.05,
-     "accuracy": 0.93,
-     "precision": 0.231,
-     "recall": 0.176,
-     "f1": 0.2,
-     "tp": 9,
-     "fp": 30,
-     "fn": 42,
-     "tn": 943
+     "accuracy": 0.915,
+     "precision": 0.21,
+     "recall": 0.255,
+     "f1": 0.23,
+     "tp": 13,
+     "fp": 49,
+     "fn": 38,
+     "tn": 924
     },
     "direction": {
-     "accuracy": 0.708,
-     "precision": 0.42,
-     "recall": 0.436,
-     "f1": 0.426,
-     "commonest": 0.771,
+     "accuracy": 0.695,
+     "precision": 0.401,
+     "recall": 0.445,
+     "f1": 0.413,
+     "commonest": 0.77,
      "shares": {
       "down": 0.158,
-      "stay": 0.771,
-      "up": 0.07
+      "stay": 0.77,
+      "up": 0.072
      }
     },
-    "predMean": -10.92,
-    "expected": 3.67,
-    "outside": 0.057
+    "predMean": -11.74,
+    "expected": 3.66,
+    "outside": 0.065
    },
    "peers": {
     "n": 1024,
@@ -5285,7 +5281,7 @@
     "mae": 0.73,
     "within90": 1.92,
     "r2": 0.826,
-    "spearman": 0.905,
+    "spearman": 0.904,
     "skill": 0.041,
     "strong": {
      "happened": 0.05,
@@ -5299,55 +5295,55 @@
      "tn": 973
     },
     "direction": {
-     "accuracy": 0.771,
+     "accuracy": 0.77,
      "precision": 0.257,
      "recall": 0.333,
      "f1": 0.29,
-     "commonest": 0.771,
+     "commonest": 0.77,
      "shares": {
       "down": 0.158,
-      "stay": 0.771,
-      "up": 0.07
+      "stay": 0.77,
+      "up": 0.072
      }
     },
-    "predMean": -10.84,
+    "predMean": -11.26,
     "expected": 2.16,
     "outside": 0.088
    },
    "mean": {
     "n": 1024,
-    "rmse": 1.82,
-    "mae": 1.44,
-    "within90": 2.97,
-    "r2": 0.642,
-    "spearman": 0.819,
-    "skill": -0.975,
+    "rmse": 2.02,
+    "mae": 1.67,
+    "within90": 3.17,
+    "r2": 0.558,
+    "spearman": 0.818,
+    "skill": -1.432,
     "strong": {
      "happened": 0.05,
-     "accuracy": 0.923,
-     "precision": 0.306,
-     "recall": 0.431,
-     "f1": 0.358,
-     "tp": 22,
-     "fp": 50,
-     "fn": 29,
-     "tn": 923
+     "accuracy": 0.898,
+     "precision": 0.181,
+     "recall": 0.294,
+     "f1": 0.224,
+     "tp": 15,
+     "fp": 68,
+     "fn": 36,
+     "tn": 905
     },
     "direction": {
-     "accuracy": 0.462,
-     "precision": 0.423,
-     "recall": 0.431,
-     "f1": 0.369,
-     "commonest": 0.771,
+     "accuracy": 0.36,
+     "precision": 0.418,
+     "recall": 0.4,
+     "f1": 0.321,
+     "commonest": 0.77,
      "shares": {
       "down": 0.158,
-      "stay": 0.771,
-      "up": 0.07
+      "stay": 0.77,
+      "up": 0.072
      }
     },
-    "predMean": -10.22,
-    "expected": 3.87,
-    "outside": 0.042
+    "predMean": -10.24,
+    "expected": 3.89,
+    "outside": 0.054
    },
    "trend": {
     "n": 1024,
@@ -5356,7 +5352,7 @@
     "within90": 2.39,
     "r2": 0.728,
     "spearman": 0.868,
-    "skill": -0.497,
+    "skill": -0.498,
     "strong": {
      "happened": 0.05,
      "accuracy": 0.946,
@@ -5369,29 +5365,29 @@
      "tn": 964
     },
     "direction": {
-     "accuracy": 0.685,
+     "accuracy": 0.684,
      "precision": 0.4,
      "recall": 0.416,
      "f1": 0.401,
-     "commonest": 0.771,
+     "commonest": 0.77,
      "shares": {
       "down": 0.158,
-      "stay": 0.771,
-      "up": 0.07
+      "stay": 0.77,
+      "up": 0.072
      }
     },
-    "predMean": -11.24,
-    "expected": 3.31,
+    "predMean": -11.65,
+    "expected": 3.33,
     "outside": 0.056
    },
    "learnt": {
     "n": 1024,
     "rmse": 1.3,
     "mae": 0.81,
-    "within90": 1.97,
-    "r2": 0.817,
-    "spearman": 0.905,
-    "skill": -0.008,
+    "within90": 1.95,
+    "r2": 0.816,
+    "spearman": 0.904,
+    "skill": -0.011,
     "strong": {
      "happened": 0.05,
      "accuracy": 0.95,
@@ -5404,19 +5400,19 @@
      "tn": 973
     },
     "direction": {
-     "accuracy": 0.766,
-     "precision": 0.257,
+     "accuracy": 0.764,
+     "precision": 0.256,
      "recall": 0.331,
      "f1": 0.289,
-     "commonest": 0.771,
+     "commonest": 0.77,
      "shares": {
       "down": 0.158,
-      "stay": 0.771,
-      "up": 0.07
+      "stay": 0.77,
+      "up": 0.072
      }
     },
-    "predMean": -10.74,
-    "expected": 2.66,
+    "predMean": -11.15,
+    "expected": 2.68,
     "outside": 0.061
    }
   },
@@ -5424,78 +5420,74 @@
    "time": 1793625470000,
    "date": "2026-11-02",
    "seenMean": -10.99,
-   "lastMean": -10.98,
-   "newVersion": {
-    "from": "P05023",
-    "to": "P05036"
-   },
+   "lastMean": -11.39,
    "last": {
     "n": 1024,
-    "rmse": 1.69,
-    "mae": 0.93,
-    "within90": 2.42,
-    "r2": 0.73,
+    "rmse": 1.74,
+    "mae": 1.06,
+    "within90": 2.38,
+    "r2": 0.714,
     "spearman": 0.859,
     "skill": 0.0,
     "strong": {
-     "happened": 0.071,
-     "accuracy": 0.929,
+     "happened": 0.075,
+     "accuracy": 0.925,
      "precision": null,
      "recall": 0.0,
      "f1": null,
      "tp": 0,
      "fp": 0,
-     "fn": 73,
-     "tn": 951
+     "fn": 77,
+     "tn": 947
     },
     "direction": {
-     "accuracy": 0.771,
-     "precision": 0.257,
+     "accuracy": 0.708,
+     "precision": 0.236,
      "recall": 0.333,
-     "f1": 0.29,
-     "commonest": 0.771,
+     "f1": 0.276,
+     "commonest": 0.708,
      "shares": {
-      "down": 0.111,
-      "stay": 0.771,
-      "up": 0.118
+      "down": 0.08,
+      "stay": 0.708,
+      "up": 0.212
      }
     },
-    "predMean": -10.98,
-    "expected": 2.49,
-    "outside": 0.095
+    "predMean": -11.39,
+    "expected": 2.51,
+    "outside": 0.096
    },
    "line": {
     "n": 1024,
-    "rmse": 2.28,
-    "mae": 1.38,
-    "within90": 3.67,
-    "r2": 0.512,
-    "spearman": 0.803,
-    "skill": -0.807,
+    "rmse": 2.36,
+    "mae": 1.55,
+    "within90": 3.68,
+    "r2": 0.474,
+    "spearman": 0.802,
+    "skill": -0.841,
     "strong": {
-     "happened": 0.071,
-     "accuracy": 0.896,
+     "happened": 0.075,
+     "accuracy": 0.893,
      "precision": 0.176,
-     "recall": 0.123,
-     "f1": 0.145,
+     "recall": 0.117,
+     "f1": 0.141,
      "tp": 9,
      "fp": 42,
-     "fn": 64,
-     "tn": 909
+     "fn": 68,
+     "tn": 905
     },
     "direction": {
-     "accuracy": 0.688,
-     "precision": 0.381,
-     "recall": 0.401,
-     "f1": 0.387,
-     "commonest": 0.771,
+     "accuracy": 0.618,
+     "precision": 0.343,
+     "recall": 0.393,
+     "f1": 0.353,
+     "commonest": 0.708,
      "shares": {
-      "down": 0.111,
-      "stay": 0.771,
-      "up": 0.118
+      "down": 0.08,
+      "stay": 0.708,
+      "up": 0.212
      }
     },
-    "predMean": -11.27,
+    "predMean": -11.69,
     "expected": 3.63,
     "outside": 0.104
    },
@@ -5503,145 +5495,145 @@
     "n": 1024,
     "rmse": 1.7,
     "mae": 0.92,
-    "within90": 2.42,
+    "within90": 2.4,
     "r2": 0.729,
     "spearman": 0.859,
-    "skill": -0.002,
+    "skill": 0.051,
     "strong": {
-     "happened": 0.071,
-     "accuracy": 0.929,
+     "happened": 0.075,
+     "accuracy": 0.925,
      "precision": null,
      "recall": 0.0,
      "f1": null,
      "tp": 0,
      "fp": 0,
-     "fn": 73,
-     "tn": 951
+     "fn": 77,
+     "tn": 947
     },
     "direction": {
-     "accuracy": 0.771,
-     "precision": 0.257,
+     "accuracy": 0.708,
+     "precision": 0.236,
      "recall": 0.333,
-     "f1": 0.29,
-     "commonest": 0.771,
+     "f1": 0.276,
+     "commonest": 0.708,
      "shares": {
-      "down": 0.111,
-      "stay": 0.771,
-      "up": 0.118
+      "down": 0.08,
+      "stay": 0.708,
+      "up": 0.212
      }
     },
-    "predMean": -10.91,
+    "predMean": -10.9,
     "expected": 2.16,
-    "outside": 0.11
+    "outside": 0.112
    },
    "mean": {
     "n": 1024,
-    "rmse": 1.77,
-    "mae": 1.36,
-    "within90": 2.89,
-    "r2": 0.704,
+    "rmse": 1.76,
+    "mae": 1.34,
+    "within90": 2.87,
+    "r2": 0.708,
     "spearman": 0.861,
-    "skill": -0.097,
+    "skill": -0.023,
     "strong": {
-     "happened": 0.071,
-     "accuracy": 0.9,
-     "precision": 0.337,
-     "recall": 0.411,
-     "f1": 0.37,
+     "happened": 0.075,
+     "accuracy": 0.879,
+     "precision": 0.28,
+     "recall": 0.39,
+     "f1": 0.326,
      "tp": 30,
-     "fp": 59,
-     "fn": 43,
-     "tn": 892
+     "fp": 77,
+     "fn": 47,
+     "tn": 870
     },
     "direction": {
-     "accuracy": 0.465,
-     "precision": 0.469,
-     "recall": 0.509,
-     "f1": 0.426,
-     "commonest": 0.771,
+     "accuracy": 0.455,
+     "precision": 0.493,
+     "recall": 0.543,
+     "f1": 0.452,
+     "commonest": 0.708,
      "shares": {
-      "down": 0.111,
-      "stay": 0.771,
-      "up": 0.118
+      "down": 0.08,
+      "stay": 0.708,
+      "up": 0.212
      }
     },
-    "predMean": -10.25,
-    "expected": 3.83,
-    "outside": 0.048
+    "predMean": -10.28,
+    "expected": 3.85,
+    "outside": 0.047
    },
    "trend": {
     "n": 1024,
-    "rmse": 2.07,
-    "mae": 1.26,
-    "within90": 3.19,
-    "r2": 0.598,
+    "rmse": 2.28,
+    "mae": 1.55,
+    "within90": 3.56,
+    "r2": 0.51,
     "spearman": 0.828,
-    "skill": -0.487,
+    "skill": -0.715,
     "strong": {
-     "happened": 0.071,
-     "accuracy": 0.926,
-     "precision": 0.385,
-     "recall": 0.068,
-     "f1": 0.116,
+     "happened": 0.075,
+     "accuracy": 0.916,
+     "precision": 0.263,
+     "recall": 0.065,
+     "f1": 0.104,
      "tp": 5,
-     "fp": 8,
-     "fn": 68,
-     "tn": 943
+     "fp": 14,
+     "fn": 72,
+     "tn": 933
     },
     "direction": {
-     "accuracy": 0.686,
-     "precision": 0.365,
-     "recall": 0.444,
-     "f1": 0.385,
-     "commonest": 0.771,
+     "accuracy": 0.606,
+     "precision": 0.367,
+     "recall": 0.446,
+     "f1": 0.35,
+     "commonest": 0.708,
      "shares": {
-      "down": 0.111,
-      "stay": 0.771,
-      "up": 0.118
+      "down": 0.08,
+      "stay": 0.708,
+      "up": 0.212
      }
     },
-    "predMean": -11.44,
-    "expected": 3.27,
-    "outside": 0.099
+    "predMean": -12.06,
+    "expected": 3.3,
+    "outside": 0.111
    },
    "learnt": {
     "n": 1024,
-    "rmse": 1.69,
-    "mae": 0.97,
-    "within90": 2.42,
-    "r2": 0.732,
-    "spearman": 0.858,
-    "skill": 0.007,
+    "rmse": 1.73,
+    "mae": 1.07,
+    "within90": 2.47,
+    "r2": 0.719,
+    "spearman": 0.857,
+    "skill": 0.016,
     "strong": {
-     "happened": 0.071,
-     "accuracy": 0.929,
+     "happened": 0.075,
+     "accuracy": 0.925,
      "precision": null,
      "recall": 0.0,
      "f1": null,
      "tp": 0,
      "fp": 0,
-     "fn": 73,
-     "tn": 951
+     "fn": 77,
+     "tn": 947
     },
     "direction": {
-     "accuracy": 0.76,
-     "precision": 0.256,
-     "recall": 0.329,
-     "f1": 0.288,
-     "commonest": 0.771,
+     "accuracy": 0.698,
+     "precision": 0.272,
+     "recall": 0.33,
+     "f1": 0.277,
+     "commonest": 0.708,
      "shares": {
-      "down": 0.111,
-      "stay": 0.771,
-      "up": 0.118
+      "down": 0.08,
+      "stay": 0.708,
+      "up": 0.212
      }
     },
-    "predMean": -10.96,
-    "expected": 2.64,
-    "outside": 0.086
+    "predMean": -11.33,
+    "expected": 2.65,
+    "outside": 0.093
    }
   }
  ],
- "summary": "Predicting the next pass one step ahead, 25 times over 25,600 cell readings: the best way here is \"same as last time\", off by 1.04 dB on average, and within 2.49 dB for nine cells in ten. It was furthest off for the pass of 2026-05-18 (3.21 dB). The model does not beat the best simple rule (\"same as last time\", RMSE 1.61 dB) with RMSE 1.71 dB.",
+ "summary": "Predicting the next pass one step ahead, 25 times over 25,600 cell readings: the best way here is \"same as last time\", off by 1.05 dB on average, and within 2.5 dB for nine cells in ten. It was furthest off for the pass of 2026-05-18 (3.21 dB). The model does not beat the best simple rule (\"same as last time\", RMSE 1.62 dB) with RMSE 1.71 dB.",
  "surprise": {
   "date": "2026-04-12",
   "time": 1775999876000,
@@ -5650,5 +5642,5 @@
  },
  "method": "Calibrated NISAR backscatter (GCOV, gamma-naught) in cells of 500 m on track 135-A-021-DHDH. Each pass from the 5th on is predicted from the passes before it only, and compared with what was measured. RMSE and MAE in dB; '9 in 10' is the error nine cells in ten stay under. 'Up or down' asks whether a cell's echo goes down or up by 1 dB or more by the next pass, or stays; precision, recall and F1 are averaged over the three answers. The yes/no question is whether a cell changes by 3 dB or more by the next pass. 'Outside the expected range' is the share of cells whose miss was larger than nine in ten misses on the passes predicted before; about 10 % is ordinary.",
  "limits": "One season of data: no way of predicting has seen a harvest, a flood or a thaw here before it happened. Neighbouring cells change together, so they are fewer independent samples than their number. A pass made with a new version of NASA's processing can shift by itself; such passes are marked.",
- "generated": "2026-11-18T22:47:37Z"
+ "generated": "2026-11-19T12:02:51Z"
 }

@@ -45,6 +45,15 @@
   "file": "event-eonet-eonet-26331.json"
  },
  {
+  "id": "event-eonet-eonet-26332",
+  "name": "Prescribed Fire Bienville CPT 29 Sub 2 RX, Scott, Mississippi",
+  "lat": 32.425,
+  "lon": -89.5974,
+  "radiusKm": 25,
+  "event": 1794355200000.0,
+  "file": "event-eonet-eonet-26332.json"
+ },
+ {
   "id": "event-eonet-eonet-26464",
   "name": "Wildfire 201W, Perry, Mississippi",
   "lat": 31.1198,
@@ -61,6 +70,15 @@
   "radiusKm": 25,
   "event": 1794528000000.0,
   "file": "event-eonet-eonet-26465.json"
+ },
+ {
+  "id": "event-eonet-eonet-26468",
+  "name": "Prescribed Fire Holly Springs 119-1 &amp; 84-2 RX, Lafayette, Mississippi",
+  "lat": 34.4933,
+  "lon": -89.4212,
+  "radiusKm": 25,
+  "event": 1794441600000.0,
+  "file": "event-eonet-eonet-26468.json"
  },
  {
   "id": "event-gdacs-eq1570077",
@@ -250,6 +268,15 @@
   "radiusKm": 25,
   "event": 1794528000000.0,
   "file": "event-gdacs-wf1033944.json"
+ },
+ {
+  "id": "event-gdacs-wf1033946",
+  "name": "Forest fires in Botswana",
+  "lat": -20.4698,
+  "lon": 22.6059,
+  "radiusKm": 25,
+  "event": 1794873600000.0,
+  "file": "event-gdacs-wf1033946.json"
  },
  {
   "id": "event-gdacs-wf1033947",

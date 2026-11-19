@@ -4,9 +4,9 @@
  "track": "003-A-176-DHDH",
  "cellM": 500.0,
  "cells": 576,
- "passes": 5,
+ "passes": 6,
  "from": "2026-09-18",
- "to": "2026-11-05",
+ "to": "2026-11-17",
  "falseAlarm": 0.01,
  "water": 0.0,
  "event": {
@@ -16,7 +16,7 @@
   "stood": 0.2153,
   "recent": 0.4826,
   "long": 0.3889,
-  "stillNext": null,
+  "stillNext": 0.0,
   "newVersion": null,
   "baseline": 2,
   "grade": "both"
@@ -93,13 +93,30 @@
     "other": 0.0
    },
    "afterEvent": true,
+   "stillNext": 0.0,
    "image": "event-gdacs-fl1104259_stood_2026-11-05.png"
+  },
+  {
+   "time": 1794913273000,
+   "date": "2026-11-17",
+   "baseline": 2,
+   "history": 4,
+   "grade": "both",
+   "channels": 2,
+   "threshold": 3.46,
+   "over": 0.0816,
+   "stood": 0.0,
+   "recent": 0.066,
+   "long": 0.0069,
+   "rose": 0.0,
+   "fell": 0.0,
+   "afterEvent": true
   }
  ],
- "summary": "On NISAR's first pass after the event of 2026-10-26 (2026-11-05), 22 % of the cells stood out: they read differently both from the two passes just before and from their own history over 4 passes.",
+ "summary": "On NISAR's first pass after the event of 2026-10-26 (2026-11-05), 22 % of the cells stood out: they read differently both from the two passes just before and from their own history over 4 passes. A pass later, 0.0 % of the flagged cells were still changed.",
  "method": "NISAR L2 GCOV backscatter in cells of 500 m. From each pass the middle of all cells is taken away, so that what moved the whole area alike drops out. A cell stands out if two checks agree. One: its step from the mean of the 2 latest passes before (at an event: before the event) is beyond the spread such steps had over the area. Two: it lies beyond its own usual value and spread over the whole baseline (at most 10 passes). Both in HH and, where recorded, HV. Each threshold is the score that 1% of the cells exceeded when the baseline passes were judged against each other, and a cell counts only if at least 2 of its eight neighbours are over it too. Open water (cells whose cross-polarised echo is usually under -24 dB) is left out.",
  "limits": "It says that the ground changed and where, not why. A baseline of a few passes knows nothing of the season: a crop growing or ground freezing stands out as well. Over open water the echo follows the wind from pass to pass. Cells next to each other share speckle and weather, so a cluster is weaker evidence than its size suggests.",
- "generated": "2026-11-18T22:47:34Z",
+ "generated": "2026-11-19T12:02:47Z",
  "bounds": {
   "west": -80.62560705988645,
   "east": -80.51759294011356,

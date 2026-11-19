@@ -52,6 +52,13 @@
    "hv": -11.12,
    "pixels": 7850,
    "file": "NISAR_L2_PR_GCOV_035_003_A_176_4005_DHDH_A_20261105T110113_20261105T110149_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1794913273000,
+   "hh": -6.44,
+   "hv": -12.73,
+   "pixels": 7850,
+   "file": "NISAR_L2_PR_GCOV_036_003_A_176_4005_DHDH_A_20261117T110113_20261117T110150_P05036_N_F_J_001.h5"
   }
  ],
  "change": {
@@ -71,6 +78,6 @@
  },
  "firstDrop": null,
  "summary": "Across the event of 2026-10-26: between 2026-10-24 and 2026-11-05, HH backscatter here changed by +1.8 dB and HV by +1.8 dB (mean within 500 m). Across the mapped area, 0% got at least 3 dB weaker and 31% at least 3 dB stronger.",
- "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 5 passes on track 003-A-176-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-10-26, and 'before' the last pass before it.",
- "generated": "2026-11-18T22:47:06Z"
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 6 passes on track 003-A-176-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-10-26, and 'before' the last pass before it.",
+ "generated": "2026-11-19T11:59:58Z"
 }

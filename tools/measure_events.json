@@ -2,6 +2,18 @@
   "about": "Written by tools/pick_events.mjs, not by hand: the strongest recent events that NISAR has passed over on one track both before and after. tools/measure.py measures them across the event date. Edit tools/measure_sites.json for places chosen by people.",
   "sites": [
     {
+      "id": "event-gdacs-wf1033946",
+      "event_id": "gdacs:WF1033946",
+      "name": "Forest fires in Botswana",
+      "category": "wildfire",
+      "kind": "Wildfire",
+      "lat": -20.4698,
+      "lon": 22.6059,
+      "event": "2026-11-17",
+      "start": "2026-10-03",
+      "picked": "2026-11-19"
+    },
+    {
       "id": "event-gdacs-wf1033906",
       "event_id": "gdacs:WF1033906",
       "name": "Forest fires in Australia",
@@ -14,25 +26,13 @@
       "picked": "2026-11-18"
     },
     {
-      "id": "event-gdacs-wf1033884",
-      "event_id": "gdacs:WF1033884",
-      "name": "Forest fires in Australia",
-      "category": "wildfire",
-      "kind": "Wildfire",
-      "lat": -19.1565,
-      "lon": 124.1909,
-      "event": "2026-11-15",
-      "start": "2026-10-01",
-      "picked": "2026-11-18"
-    },
-    {
-      "id": "event-gdacs-wf1033947",
-      "event_id": "gdacs:WF1033947",
+      "id": "event-gdacs-wf1033904",
+      "event_id": "gdacs:WF1033904",
       "name": "Forest fires in Nigeria",
       "category": "wildfire",
       "kind": "Wildfire",
-      "lat": 12.4972,
-      "lon": 7.0516,
+      "lat": 12.3318,
+      "lon": 5.2901,
       "event": "2026-11-15",
       "start": "2026-10-01",
       "picked": "2026-11-18"
@@ -50,27 +50,27 @@
       "picked": "2026-11-18"
     },
     {
-      "id": "event-gdacs-wf1033904",
-      "event_id": "gdacs:WF1033904",
+      "id": "event-gdacs-wf1033947",
+      "event_id": "gdacs:WF1033947",
       "name": "Forest fires in Nigeria",
       "category": "wildfire",
       "kind": "Wildfire",
-      "lat": 12.3318,
-      "lon": 5.2901,
+      "lat": 12.4972,
+      "lon": 7.0516,
       "event": "2026-11-15",
       "start": "2026-10-01",
       "picked": "2026-11-18"
     },
     {
-      "id": "event-gdacs-wf1033859",
-      "event_id": "gdacs:WF1033859",
+      "id": "event-gdacs-wf1033884",
+      "event_id": "gdacs:WF1033884",
       "name": "Forest fires in Australia",
       "category": "wildfire",
       "kind": "Wildfire",
-      "lat": -19.0895,
-      "lon": 122.2435,
-      "event": "2026-11-14",
-      "start": "2026-09-30",
+      "lat": -19.1565,
+      "lon": 124.1909,
+      "event": "2026-11-15",
+      "start": "2026-10-01",
       "picked": "2026-11-18"
     },
     {
@@ -86,61 +86,25 @@
       "picked": "2026-11-18"
     },
     {
-      "id": "event-gdacs-wf1033825",
-      "event_id": "gdacs:WF1033825",
+      "id": "event-gdacs-wf1033859",
+      "event_id": "gdacs:WF1033859",
       "name": "Forest fires in Australia",
       "category": "wildfire",
       "kind": "Wildfire",
-      "lat": -17.2341,
-      "lon": 124.1885,
-      "event": "2026-11-13",
-      "start": "2026-09-29",
+      "lat": -19.0895,
+      "lon": 122.2435,
+      "event": "2026-11-14",
+      "start": "2026-09-30",
       "picked": "2026-11-18"
     },
     {
-      "id": "event-gdacs-wf1033910",
-      "event_id": "gdacs:WF1033910",
-      "name": "Forest fires in Australia",
+      "id": "event-gdacs-wf1033929",
+      "event_id": "gdacs:WF1033929",
+      "name": "Forest fires in South Sudan",
       "category": "wildfire",
       "kind": "Wildfire",
-      "lat": -17.467,
-      "lon": 123.7627,
-      "event": "2026-11-13",
-      "start": "2026-09-29",
-      "picked": "2026-11-18"
-    },
-    {
-      "id": "event-gdacs-wf1033944",
-      "event_id": "gdacs:WF1033944",
-      "name": "Forest fires in India",
-      "category": "wildfire",
-      "kind": "Wildfire",
-      "lat": 25.7293,
-      "lon": 78.901,
-      "event": "2026-11-13",
-      "start": "2026-09-29",
-      "picked": "2026-11-18"
-    },
-    {
-      "id": "event-eonet-eonet-26464",
-      "event_id": "eonet:EONET_26464",
-      "name": "Wildfire 201W, Perry, Mississippi",
-      "category": "wildfire",
-      "kind": "Wildfire",
-      "lat": 31.1198,
-      "lon": -89.0798,
-      "event": "2026-11-13",
-      "start": "2026-09-29",
-      "picked": "2026-11-18"
-    },
-    {
-      "id": "event-eonet-eonet-26465",
-      "event_id": "eonet:EONET_26465",
-      "name": "Wildfire Range 47, Forrest, Mississippi",
-      "category": "wildfire",
-      "kind": "Wildfire",
-      "lat": 31.0998,
-      "lon": -89.1593,
+      "lat": 8.7363,
+      "lon": 31.6143,
       "event": "2026-11-13",
       "start": "2026-09-29",
       "picked": "2026-11-18"
@@ -158,15 +122,87 @@
       "picked": "2026-11-18"
     },
     {
-      "id": "event-gdacs-wf1033929",
-      "event_id": "gdacs:WF1033929",
-      "name": "Forest fires in South Sudan",
+      "id": "event-eonet-eonet-26465",
+      "event_id": "eonet:EONET_26465",
+      "name": "Wildfire Range 47, Forrest, Mississippi",
       "category": "wildfire",
       "kind": "Wildfire",
-      "lat": 8.7363,
-      "lon": 31.6143,
+      "lat": 31.0998,
+      "lon": -89.1593,
       "event": "2026-11-13",
       "start": "2026-09-29",
+      "picked": "2026-11-18"
+    },
+    {
+      "id": "event-eonet-eonet-26464",
+      "event_id": "eonet:EONET_26464",
+      "name": "Wildfire 201W, Perry, Mississippi",
+      "category": "wildfire",
+      "kind": "Wildfire",
+      "lat": 31.1198,
+      "lon": -89.0798,
+      "event": "2026-11-13",
+      "start": "2026-09-29",
+      "picked": "2026-11-18"
+    },
+    {
+      "id": "event-gdacs-wf1033944",
+      "event_id": "gdacs:WF1033944",
+      "name": "Forest fires in India",
+      "category": "wildfire",
+      "kind": "Wildfire",
+      "lat": 25.7293,
+      "lon": 78.901,
+      "event": "2026-11-13",
+      "start": "2026-09-29",
+      "picked": "2026-11-18"
+    },
+    {
+      "id": "event-gdacs-wf1033910",
+      "event_id": "gdacs:WF1033910",
+      "name": "Forest fires in Australia",
+      "category": "wildfire",
+      "kind": "Wildfire",
+      "lat": -17.467,
+      "lon": 123.7627,
+      "event": "2026-11-13",
+      "start": "2026-09-29",
+      "picked": "2026-11-18"
+    },
+    {
+      "id": "event-gdacs-wf1033825",
+      "event_id": "gdacs:WF1033825",
+      "name": "Forest fires in Australia",
+      "category": "wildfire",
+      "kind": "Wildfire",
+      "lat": -17.2341,
+      "lon": 124.1885,
+      "event": "2026-11-13",
+      "start": "2026-09-29",
+      "picked": "2026-11-18"
+    },
+    {
+      "id": "event-eonet-eonet-26468",
+      "event_id": "eonet:EONET_26468",
+      "name": "Prescribed Fire Holly Springs 119-1 &amp; 84-2 RX, Lafayette, Mississippi",
+      "category": "wildfire",
+      "kind": "Wildfire",
+      "lat": 34.4933,
+      "lon": -89.4212,
+      "event": "2026-11-12",
+      "start": "2026-09-28",
+      "picked": "2026-11-19"
+    },
+    {
+      "id": "event-eonet-eonet-26331",
+      "event_id": "eonet:EONET_26331",
+      "name": "Wildfire Red Hill, Perry, Mississippi",
+      "category": "wildfire",
+      "kind": "Wildfire",
+      "lat": 31.1301,
+      "lon": -89.0639,
+      "event": "2026-11-12",
+      "start": "2026-09-28",
       "picked": "2026-11-18"
     },
     {
@@ -182,16 +218,16 @@
       "picked": "2026-11-18"
     },
     {
-      "id": "event-eonet-eonet-26331",
-      "event_id": "eonet:EONET_26331",
-      "name": "Wildfire Red Hill, Perry, Mississippi",
+      "id": "event-eonet-eonet-26332",
+      "event_id": "eonet:EONET_26332",
+      "name": "Prescribed Fire Bienville CPT 29 Sub 2 RX, Scott, Mississippi",
       "category": "wildfire",
       "kind": "Wildfire",
-      "lat": 31.1301,
-      "lon": -89.0639,
-      "event": "2026-11-12",
-      "start": "2026-09-28",
-      "picked": "2026-11-18"
+      "lat": 32.425,
+      "lon": -89.5974,
+      "event": "2026-11-11",
+      "start": "2026-09-27",
+      "picked": "2026-11-19"
     },
     {
       "id": "event-gdacs-fl1104277",
@@ -434,18 +470,6 @@
       "picked": "2026-11-15"
     },
     {
-      "id": "event-usgs-us6000u19w",
-      "event_id": "usgs:us6000u19w",
-      "name": "M 6.6 - 13 km WSW of Río Grande, Panama",
-      "category": "earthquake",
-      "kind": "Earthquake",
-      "lat": 7.676,
-      "lon": -81.4515,
-      "event": "2026-10-09",
-      "start": "2026-08-25",
-      "picked": "2026-11-15"
-    },
-    {
       "id": "event-gdacs-eq1570339",
       "event_id": "gdacs:EQ1570339",
       "name": "M 7.7 - 10 km WSW of Pitaloza Arriba, Panama",
@@ -455,30 +479,6 @@
       "lon": -80.7566,
       "event": "2026-10-09",
       "start": "2026-08-25",
-      "picked": "2026-11-15"
-    },
-    {
-      "id": "event-gdacs-eq1570077",
-      "event_id": "gdacs:EQ1570077",
-      "name": "M 6.3 - 117 km NE of Norsup, Vanuatu",
-      "category": "earthquake",
-      "kind": "Earthquake",
-      "lat": -15.4332,
-      "lon": 168.2783,
-      "event": "2026-10-08",
-      "start": "2026-08-24",
-      "picked": "2026-11-15"
-    },
-    {
-      "id": "event-gdacs-vo1000151",
-      "event_id": "gdacs:VO1000151",
-      "name": "Eruption  Taal",
-      "category": "volcano",
-      "kind": "Volcano",
-      "lat": 14.0106,
-      "lon": 120.9975,
-      "event": "2026-10-08",
-      "start": "2026-08-24",
       "picked": "2026-11-15"
     }
   ]

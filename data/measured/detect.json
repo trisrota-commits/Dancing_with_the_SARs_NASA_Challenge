@@ -119,6 +119,32 @@
   "water": 0.0
  },
  {
+  "id": "event-eonet-eonet-26332",
+  "name": "Prescribed Fire Bienville CPT 29 Sub 2 RX, Scott, Mississippi",
+  "cells": 576,
+  "passes": 5,
+  "event": {
+   "time": 1794355200000.0,
+   "date": "2026-11-11",
+   "firstPassAfter": "2026-11-17",
+   "stood": 0.0,
+   "recent": 0.0035,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-05",
+   "time": 1793877078000,
+   "stood": 0.0052,
+   "recent": 0.0104,
+   "long": 0.0069
+  },
+  "water": 0.0
+ },
+ {
   "id": "event-eonet-eonet-26464",
   "name": "Wildfire 201W, Perry, Mississippi",
   "cells": 576,
@@ -167,6 +193,32 @@
    "stood": 0.0,
    "recent": 0.0017,
    "long": 0.0156
+  },
+  "water": 0.0
+ },
+ {
+  "id": "event-eonet-eonet-26468",
+  "name": "Prescribed Fire Holly Springs 119-1 &amp; 84-2 RX, Lafayette, Mississippi",
+  "cells": 576,
+  "passes": 5,
+  "event": {
+   "time": 1794441600000.0,
+   "date": "2026-11-12",
+   "firstPassAfter": "2026-11-17",
+   "stood": 0.0069,
+   "recent": 0.0226,
+   "long": 0.0069,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-05",
+   "time": 1793877111000,
+   "stood": 0.059,
+   "recent": 0.1458,
+   "long": 0.0625
   },
   "water": 0.0
  },
@@ -267,22 +319,25 @@
   "id": "event-gdacs-fl1104253",
   "name": "Flood in Indonesia",
   "cells": 576,
-  "passes": 5,
+  "passes": 6,
   "event": {
    "time": 1792800000000.0,
    "date": "2026-10-24",
-   "firstPassAfter": "2026-11-02",
+   "firstPassAfter": "2026-10-31",
    "stood": 0.0,
    "recent": 0.0,
    "long": 0.0,
    "stillNext": null,
-   "newVersion": null,
+   "newVersion": {
+    "from": "P05023",
+    "to": "P05036"
+   },
    "baseline": 2,
    "grade": "both"
   },
   "most": {
-   "date": "2026-10-21",
-   "time": 1792624057000,
+   "date": "2026-10-19",
+   "time": 1792411100000,
    "stood": 0.0,
    "recent": 0.0,
    "long": 0.0
@@ -293,7 +348,7 @@
   "id": "event-gdacs-fl1104259",
   "name": "Flood in Peru",
   "cells": 576,
-  "passes": 5,
+  "passes": 6,
   "event": {
    "time": 1792972800000.0,
    "date": "2026-10-26",
@@ -301,7 +356,7 @@
    "stood": 0.2153,
    "recent": 0.4826,
    "long": 0.3889,
-   "stillNext": null,
+   "stillNext": 0.0,
    "newVersion": null,
    "baseline": 2,
    "grade": "both"
@@ -706,6 +761,32 @@
   "water": 0.221
  },
  {
+  "id": "event-gdacs-wf1033946",
+  "name": "Forest fires in Botswana",
+  "cells": 576,
+  "passes": 4,
+  "event": {
+   "time": 1794873600000.0,
+   "date": "2026-11-17",
+   "firstPassAfter": "2026-11-17",
+   "stood": 0.3125,
+   "recent": 0.4097,
+   "long": 0.6701,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-17",
+   "time": 1794889001000,
+   "stood": 0.3125,
+   "recent": 0.4097,
+   "long": 0.6701
+  },
+  "water": 0.0
+ },
+ {
   "id": "event-gdacs-wf1033947",
   "name": "Forest fires in Nigeria",
   "cells": 576,
@@ -812,31 +893,28 @@
  {
   "id": "event-usgs-us6000u1wn",
   "name": "M 6.1 - 15 km W of R\u00edo Grande, Panama",
-  "cells": 576,
-  "passes": 6,
+  "cells": 473,
+  "passes": 7,
   "event": {
    "time": 1791763200000.0,
    "date": "2026-10-12",
-   "firstPassAfter": "2026-10-21",
+   "firstPassAfter": "2026-10-12",
    "stood": 0.0,
    "recent": 0.0,
    "long": 0.0,
    "stillNext": null,
-   "newVersion": {
-    "from": "P05023",
-    "to": "P05036"
-   },
+   "newVersion": null,
    "baseline": 2,
    "grade": "both"
   },
   "most": {
-   "date": "2026-10-09",
-   "time": 1791590015000,
+   "date": "2026-10-12",
+   "time": 1791803060000,
    "stood": 0.0,
-   "recent": 0.0295,
+   "recent": 0.0,
    "long": 0.0
   },
-  "water": 0.0
+  "water": 0.179
  },
  {
   "id": "event-usgs-us6000u24c",
@@ -1075,7 +1153,7 @@
   "id": "okavango",
   "name": "Okavango Delta",
   "cells": 3600,
-  "passes": 11,
+  "passes": 12,
   "event": null,
   "most": {
    "date": "2026-10-12",
