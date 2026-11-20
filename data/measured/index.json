@@ -81,6 +81,15 @@
   "file": "event-eonet-eonet-26468.json"
  },
  {
+  "id": "event-eonet-eonet-26576",
+  "name": "Prescribed Fire TSK Compartment 6 RX, Macon, Alabama",
+  "lat": 32.447,
+  "lon": -85.6532,
+  "radiusKm": 25,
+  "event": 1794355200000.0,
+  "file": "event-eonet-eonet-26576.json"
+ },
+ {
   "id": "event-gdacs-eq1570077",
   "name": "M 6.3 - 117 km NE of Norsup, Vanuatu",
   "lat": -15.4332,
@@ -333,6 +342,15 @@
   "file": "event-gdacs-wf1033948.json"
  },
  {
+  "id": "event-gdacs-wf1033953",
+  "name": "Forest fires in Australia",
+  "lat": -15.5215,
+  "lon": 142.8129,
+  "radiusKm": 25,
+  "event": 1794960000000.0,
+  "file": "event-gdacs-wf1033953.json"
+ },
+ {
   "id": "event-gdacs-wf1033965",
   "name": "Forest fires in Benin, Burkina Faso",
   "lat": 11.4136,
@@ -376,6 +394,15 @@
   "radiusKm": 25,
   "event": 1794873600000.0,
   "file": "event-gdacs-wf1033972.json"
+ },
+ {
+  "id": "event-gdacs-wf1033981",
+  "name": "Forest fires in Madagascar",
+  "lat": -15.2667,
+  "lon": 48.2839,
+  "radiusKm": 25,
+  "event": 1794787200000.0,
+  "file": "event-gdacs-wf1033981.json"
  },
  {
   "id": "event-usgs-us6000u19w",

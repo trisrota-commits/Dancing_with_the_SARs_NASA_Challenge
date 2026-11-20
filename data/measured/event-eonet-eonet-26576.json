@@ -1,0 +1,76 @@
+{
+ "id": "event-eonet-eonet-26576",
+ "name": "Prescribed Fire TSK Compartment 6 RX, Macon, Alabama",
+ "lat": 32.447,
+ "lon": -85.6532,
+ "radiusKm": 25,
+ "track": "127-D-072-DHDH",
+ "setup": {
+  "lat": 32.447,
+  "lon": -85.6532,
+  "seriesRadiusM": 500,
+  "mapRadiusM": 6000,
+  "mapPol": "co"
+ },
+ "event": 1794355200000.0,
+ "pols": [
+  "HH",
+  "HV"
+ ],
+ "series": [
+  {
+   "time": 1790468876000,
+   "hh": -3.65,
+   "hv": -9.42,
+   "pixels": 7860,
+   "file": "NISAR_L2_PR_GCOV_031_127_D_072_4005_DHDH_A_20260927T002756_20260927T002831_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1791505676000,
+   "hh": -3.7,
+   "hv": -9.4,
+   "pixels": 7860,
+   "file": "NISAR_L2_PR_GCOV_032_127_D_072_4005_DHDH_A_20261009T002756_20261009T002831_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1792542476000,
+   "hh": -3.76,
+   "hv": -9.65,
+   "pixels": 7860,
+   "file": "NISAR_L2_PR_GCOV_033_127_D_072_4005_DHDH_A_20261021T002756_20261021T002831_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1793579277000,
+   "hh": -4.16,
+   "hv": -9.64,
+   "pixels": 7860,
+   "file": "NISAR_L2_PR_GCOV_034_127_D_072_4005_DHDH_A_20261102T002757_20261102T002831_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1794616077000,
+   "hh": -4.53,
+   "hv": -9.73,
+   "pixels": 7860,
+   "file": "NISAR_L2_PR_GCOV_035_127_D_072_4005_DHDH_A_20261114T002757_20261114T002832_P05036_N_F_J_001.h5"
+  }
+ ],
+ "change": {
+  "before": 1793579277000,
+  "after": 1794616077000,
+  "pol": "HH",
+  "image": "event-eonet-eonet-26576_change.png",
+  "bounds": {
+   "west": -85.7170694519876,
+   "east": -85.5893305480124,
+   "south": 32.39310132950054,
+   "north": 32.50089867049947
+  },
+  "weakerPct": 0.1,
+  "strongerPct": 0.1,
+  "spansEvent": true
+ },
+ "firstDrop": null,
+ "summary": "Across the event of 2026-11-11: between 2026-11-02 and 2026-11-14, HH backscatter here changed by -0.4 dB and HV by -0.1 dB (mean within 500 m). Across the mapped area, 0% got at least 3 dB weaker and 0% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 5 passes on track 127-D-072-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-11-11, and 'before' the last pass before it.",
+ "generated": "2026-11-20T22:19:45Z"
+}
