@@ -69,7 +69,7 @@
  "summary": "On NISAR's first pass after the event of 2026-11-14 (2026-11-16), 0.0 % of the cells stood out: they read differently both from the two passes just before and from their own history over 3 passes.",
  "method": "NISAR L2 GCOV backscatter in cells of 500 m. From each pass the middle of all cells is taken away, so that what moved the whole area alike drops out. A cell stands out if two checks agree. One: its step from the mean of the 2 latest passes before (at an event: before the event) is beyond the spread such steps had over the area. Two: it lies beyond its own usual value and spread over the whole baseline (at most 10 passes). Both in HH and, where recorded, HV. Each threshold is the score that 1% of the cells exceeded when the baseline passes were judged against each other, and a cell counts only if at least 2 of its eight neighbours are over it too. Open water (cells whose cross-polarised echo is usually under -24 dB) is left out.",
  "limits": "It says that the ground changed and where, not why. A baseline of a few passes knows nothing of the season: a crop growing or ground freezing stands out as well. Over open water the echo follows the wind from pass to pass. Cells next to each other share speckle and weather, so a cluster is weaker evidence than its size suggests.",
- "generated": "2026-11-19T22:47:21Z",
+ "generated": "2026-11-20T12:08:15Z",
  "bounds": {
   "west": 31.32405096908697,
   "east": 31.43334903091303,

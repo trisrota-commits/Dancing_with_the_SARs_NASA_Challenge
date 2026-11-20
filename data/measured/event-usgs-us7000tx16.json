@@ -1,0 +1,62 @@
+{
+ "id": "event-usgs-us7000tx16",
+ "name": "M 6.4 - 30 km WSW of Lata, Solomon Islands",
+ "lat": -10.8669,
+ "lon": 165.5616,
+ "radiusKm": 25,
+ "track": "123-A-172-DHDH",
+ "setup": {
+  "lat": -10.8669,
+  "lon": 165.5616,
+  "seriesRadiusM": 500,
+  "mapRadiusM": 6000,
+  "mapPol": "co"
+ },
+ "event": 1794182400000.0,
+ "pols": [
+  "HH",
+  "HV"
+ ],
+ "series": [
+  {
+   "time": 1792521916000,
+   "hh": -17.07,
+   "hv": -25.75,
+   "pixels": 1973,
+   "file": "NISAR_L2_PR_GCOV_033_123_A_172_2005_DHDH_A_20261020T184516_20261020T184541_P05023_N_P_J_001.h5"
+  },
+  {
+   "time": 1793558724000,
+   "hh": -17.97,
+   "hv": -25.96,
+   "pixels": 1973,
+   "file": "NISAR_L2_PR_GCOV_034_123_A_172_2005_DHDH_A_20261101T184524_20261101T184541_P05036_N_P_J_001.h5"
+  },
+  {
+   "time": 1794595525000,
+   "hh": -18.39,
+   "hv": -26.07,
+   "pixels": 1973,
+   "file": "NISAR_L2_PR_GCOV_035_123_A_172_2005_DHDH_A_20261113T184525_20261113T184542_P05036_N_P_J_001.h5"
+  }
+ ],
+ "change": {
+  "before": 1793558724000,
+  "after": 1794595525000,
+  "pol": "HH",
+  "image": "event-usgs-us7000tx16_change.png",
+  "bounds": {
+   "west": 165.5067171588691,
+   "east": 165.6164828411309,
+   "south": -10.92079867049946,
+   "north": -10.813001329500539
+  },
+  "weakerPct": 0.0,
+  "strongerPct": 0.0,
+  "spansEvent": true
+ },
+ "firstDrop": null,
+ "summary": "Across the event of 2026-11-09: between 2026-11-01 and 2026-11-13, HH backscatter here changed by -0.4 dB and HV by -0.1 dB (mean within 500 m). Across the mapped area, 0% got at least 3 dB weaker and 0% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 3 passes on track 123-A-172-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-11-09, and 'before' the last pass before it.",
+ "generated": "2026-11-20T12:05:57Z"
+}

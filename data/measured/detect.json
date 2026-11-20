@@ -48,9 +48,9 @@
   "event": {
    "time": 1793836800000.0,
    "date": "2026-11-05",
-   "firstPassAfter": "2026-11-09",
+   "firstPassAfter": "2026-11-06",
    "stood": 0.0,
-   "recent": 0.0,
+   "recent": 0.0017,
    "long": 0.0,
    "stillNext": null,
    "newVersion": null,
@@ -58,10 +58,10 @@
    "grade": "both"
   },
   "most": {
-   "date": "2026-10-28",
-   "time": 1793153566000,
+   "date": "2026-11-06",
+   "time": 1793967177000,
    "stood": 0.0,
-   "recent": 0.0087,
+   "recent": 0.0017,
    "long": 0.0
   },
   "water": 0.0
@@ -735,6 +735,58 @@
   "water": 0.0
  },
  {
+  "id": "event-gdacs-wf1033925",
+  "name": "Forest fires in Benin",
+  "cells": 576,
+  "passes": 5,
+  "event": {
+   "time": 1794614400000.0,
+   "date": "2026-11-14",
+   "firstPassAfter": "2026-11-18",
+   "stood": 0.0,
+   "recent": 0.0017,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-06",
+   "time": 1793942633000,
+   "stood": 0.1545,
+   "recent": 0.2899,
+   "long": 0.1545
+  },
+  "water": 0.0
+ },
+ {
+  "id": "event-gdacs-wf1033927",
+  "name": "Forest fires in Benin, Niger, Burkina Faso",
+  "cells": 576,
+  "passes": 10,
+  "event": {
+   "time": 1794528000000.0,
+   "date": "2026-11-13",
+   "firstPassAfter": "2026-11-18",
+   "stood": 0.0,
+   "recent": 0.2865,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-10-25",
+   "time": 1792905832000,
+   "stood": 0.3924,
+   "recent": 0.7344,
+   "long": 0.3941
+  },
+  "water": 0.0
+ },
+ {
   "id": "event-gdacs-wf1033929",
   "name": "Forest fires in South Sudan",
   "cells": 576,
@@ -757,6 +809,32 @@
    "stood": 0.0,
    "recent": 0.0,
    "long": 0.0
+  },
+  "water": 0.0
+ },
+ {
+  "id": "event-gdacs-wf1033940",
+  "name": "Forest fires in Benin, Burkina Faso",
+  "cells": 320,
+  "passes": 8,
+  "event": {
+   "time": 1794614400000.0,
+   "date": "2026-11-14",
+   "firstPassAfter": "2026-11-18",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-06",
+   "time": 1793942633000,
+   "stood": 0.4167,
+   "recent": 0.5017,
+   "long": 0.4514
   },
   "water": 0.0
  },
@@ -865,6 +943,32 @@
   "water": 0.073
  },
  {
+  "id": "event-gdacs-wf1033965",
+  "name": "Forest fires in Benin, Burkina Faso",
+  "cells": 428,
+  "passes": 8,
+  "event": {
+   "time": 1794873600000.0,
+   "date": "2026-11-17",
+   "firstPassAfter": "2026-11-18",
+   "stood": 0.0052,
+   "recent": 0.6285,
+   "long": 0.0052,
+   "stillNext": 1.0,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-18",
+   "time": 1794979461000,
+   "stood": 0.021,
+   "recent": 0.6643,
+   "long": 0.021
+  },
+  "water": 0.0
+ },
+ {
   "id": "event-gdacs-wf1033967",
   "name": "Forest fires in South Sudan",
   "cells": 576,
@@ -919,26 +1023,52 @@
  {
   "id": "event-gdacs-wf1033969",
   "name": "Forest fires in Sudan",
-  "cells": 576,
-  "passes": 3,
+  "cells": 376,
+  "passes": 4,
   "event": {
    "time": 1794528000000.0,
    "date": "2026-11-13",
-   "firstPassAfter": "2026-11-17",
+   "firstPassAfter": "2026-11-13",
    "stood": 0.0,
    "recent": 0.0,
-   "long": null,
+   "long": 0.0,
    "stillNext": null,
    "newVersion": null,
    "baseline": 2,
-   "grade": "two"
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-13",
+   "time": 1794541939000,
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0
+  },
+  "water": 0.0
+ },
+ {
+  "id": "event-gdacs-wf1033972",
+  "name": "Forest fires in Botswana",
+  "cells": 576,
+  "passes": 4,
+  "event": {
+   "time": 1794873600000.0,
+   "date": "2026-11-17",
+   "firstPassAfter": "2026-11-17",
+   "stood": 0.0868,
+   "recent": 0.3837,
+   "long": 0.0868,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
   },
   "most": {
    "date": "2026-11-17",
-   "time": 1794934079000,
-   "stood": 0.0,
-   "recent": 0.0,
-   "long": null
+   "time": 1794889001000,
+   "stood": 0.0868,
+   "recent": 0.3837,
+   "long": 0.0868
   },
   "water": 0.0
  },
@@ -1156,7 +1286,7 @@
   "id": "event-usgs-us7000tu4f",
   "name": "M 6.2 - 43 km ESE of Port-Olry, Vanuatu",
   "cells": 0,
-  "passes": 5,
+  "passes": 6,
   "event": {
    "time": 1793232000000.0,
    "date": "2026-10-29",
@@ -1165,7 +1295,7 @@
    "openWater": true
   },
   "most": null,
-  "water": 1.0
+  "water": 0.952
  },
  {
   "id": "event-usgs-us7000tuku",
@@ -1194,6 +1324,21 @@
   "water": 0.0
  },
  {
+  "id": "event-usgs-us7000tx16",
+  "name": "M 6.4 - 30 km WSW of Lata, Solomon Islands",
+  "cells": 0,
+  "passes": 3,
+  "event": {
+   "time": 1794182400000.0,
+   "date": "2026-11-09",
+   "firstPassAfter": null,
+   "stood": null,
+   "openWater": true
+  },
+  "most": null,
+  "water": 1.0
+ },
+ {
   "id": "event-usgs-us7000txqr",
   "name": "M 5.4 - South Sandwich Islands region",
   "cells": 0,
@@ -1211,17 +1356,17 @@
  {
   "id": "gerd",
   "name": "Grand Ethiopian Renaissance Dam reservoir",
-  "cells": 3472,
-  "passes": 11,
+  "cells": 3492,
+  "passes": 12,
   "event": null,
   "most": {
    "date": "2026-10-09",
    "time": 1791515441000,
-   "stood": 0.0141,
-   "recent": 0.0271,
-   "long": 0.1302
+   "stood": 0.0132,
+   "recent": 0.0266,
+   "long": 0.1166
   },
-  "water": 0.036
+  "water": 0.03
  },
  {
   "id": "jakobshavn",
