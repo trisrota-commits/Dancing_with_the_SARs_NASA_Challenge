@@ -3,7 +3,7 @@
   "id": "aletsch",
   "name": "Aletsch Glacier (Konkordiaplatz)",
   "cells": 1020,
-  "passes": 11,
+  "passes": 12,
   "event": null,
   "most": {
    "date": "2026-10-22",
@@ -633,28 +633,28 @@
  {
   "id": "event-gdacs-wf1033859",
   "name": "Forest fires in Australia",
-  "cells": 574,
+  "cells": 536,
   "passes": 4,
   "event": {
    "time": 1794614400000.0,
    "date": "2026-11-14",
-   "firstPassAfter": "2026-11-16",
-   "stood": 0.5592,
-   "recent": 0.6829,
-   "long": 0.5923,
+   "firstPassAfter": "2026-11-15",
+   "stood": 0.5,
+   "recent": 0.6474,
+   "long": 0.6586,
    "stillNext": null,
    "newVersion": null,
    "baseline": 2,
    "grade": "both"
   },
   "most": {
-   "date": "2026-11-16",
-   "time": 1794865062000,
-   "stood": 0.5592,
-   "recent": 0.6829,
-   "long": 0.5923
+   "date": "2026-11-15",
+   "time": 1794736810000,
+   "stood": 0.5,
+   "recent": 0.6474,
+   "long": 0.6586
   },
-  "water": 0.003
+  "water": 0.069
  },
  {
   "id": "event-gdacs-wf1033863",
