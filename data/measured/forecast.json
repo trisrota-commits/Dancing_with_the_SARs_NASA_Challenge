@@ -370,6 +370,50 @@
   }
  },
  {
+  "id": "event-eonet-eonet-26467",
+  "name": "Prescribed Fire 3R RX - KRUMM MP, Stevens, Washington",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1794441600000.0,
+   "date": "2026-11-12",
+   "firstPassAfter": "2026-11-15",
+   "outside": 0.344,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-15",
+   "time": 1794746343000,
+   "outside": 0.344,
+   "expected": 0.59
+  },
+  "last": {
+   "rmse": 0.8,
+   "mae": 0.63,
+   "within90": 1.4,
+   "r2": 0.285,
+   "spearman": 0.56,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 0.99,
+   "mae": 0.64,
+   "within90": 1.78,
+   "r2": -0.085,
+   "spearman": 0.608,
+   "skill": -0.518
+  },
+  "peers": {
+   "rmse": 0.48,
+   "mae": 0.33,
+   "within90": 0.75,
+   "r2": 0.743,
+   "spearman": 0.869,
+   "skill": 0.64
+  }
+ },
+ {
   "id": "event-eonet-eonet-26468",
   "name": "Prescribed Fire Holly Springs 119-1 &amp; 84-2 RX, Lafayette, Mississippi",
   "cells": 576,
@@ -455,6 +499,50 @@
    "r2": 0.984,
    "spearman": 0.98,
    "skill": 0.782
+  }
+ },
+ {
+  "id": "event-eonet-eonet-26577",
+  "name": "Prescribed Fire Strawberry RX, Wasatch, Utah",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1794268800000.0,
+   "date": "2026-11-10",
+   "firstPassAfter": "2026-11-20",
+   "outside": 0.215,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-20",
+   "time": 1795177708000,
+   "outside": 0.215,
+   "expected": 1.1
+  },
+  "last": {
+   "rmse": 1.34,
+   "mae": 1.01,
+   "within90": 2.38,
+   "r2": 0.636,
+   "spearman": 0.792,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.68,
+   "mae": 1.24,
+   "within90": 2.75,
+   "r2": 0.429,
+   "spearman": 0.693,
+   "skill": -0.57
+  },
+  "peers": {
+   "rmse": 0.87,
+   "mae": 0.55,
+   "within90": 1.27,
+   "r2": 0.849,
+   "spearman": 0.958,
+   "skill": 0.584
   }
  },
  {
@@ -2225,7 +2313,7 @@
   "id": "sacramento",
   "name": "Sacramento Valley rice",
   "cells": 1024,
-  "passes": 29,
+  "passes": 30,
   "best": "last",
   "event": null,
   "peerSurprise": {
@@ -2235,52 +2323,52 @@
    "expected": 1.98
   },
   "last": {
-   "rmse": 1.62,
-   "mae": 1.05,
-   "within90": 2.5,
-   "r2": 0.779,
-   "spearman": 0.894,
+   "rmse": 1.64,
+   "mae": 1.07,
+   "within90": 2.55,
+   "r2": 0.773,
+   "spearman": 0.89,
    "skill": 0.0
   },
   "line": {
    "rmse": 2.26,
-   "mae": 1.5,
-   "within90": 3.64,
-   "r2": 0.57,
-   "spearman": 0.846,
-   "skill": -0.943
+   "mae": 1.51,
+   "within90": 3.63,
+   "r2": 0.566,
+   "spearman": 0.845,
+   "skill": -0.914
   },
   "peers": {
    "rmse": 1.45,
    "mae": 0.89,
    "within90": 2.16,
-   "r2": 0.823,
-   "spearman": 0.919,
-   "skill": 0.201
+   "r2": 0.822,
+   "spearman": 0.918,
+   "skill": 0.216
   },
   "mean": {
-   "rmse": 2.33,
-   "mae": 1.66,
-   "within90": 3.82,
-   "r2": 0.539,
+   "rmse": 2.32,
+   "mae": 1.65,
+   "within90": 3.79,
+   "r2": 0.544,
    "spearman": 0.766,
-   "skill": -1.081
+   "skill": -1.012
   },
   "trend": {
-   "rmse": 2.07,
-   "mae": 1.38,
-   "within90": 3.3,
-   "r2": 0.636,
-   "spearman": 0.859,
-   "skill": -0.643
+   "rmse": 2.1,
+   "mae": 1.41,
+   "within90": 3.36,
+   "r2": 0.628,
+   "spearman": 0.854,
+   "skill": -0.641
   },
   "learnt": {
-   "rmse": 1.71,
-   "mae": 1.13,
-   "within90": 2.65,
-   "r2": 0.752,
-   "spearman": 0.876,
-   "skill": -0.12
+   "rmse": 1.72,
+   "mae": 1.15,
+   "within90": 2.67,
+   "r2": 0.749,
+   "spearman": 0.872,
+   "skill": -0.108
   }
  },
  {

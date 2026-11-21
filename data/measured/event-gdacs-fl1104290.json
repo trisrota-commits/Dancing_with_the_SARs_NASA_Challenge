@@ -1,0 +1,69 @@
+{
+ "id": "event-gdacs-fl1104290",
+ "name": "Flood in United States",
+ "lat": 33.9927,
+ "lon": -117.7601,
+ "radiusKm": 25,
+ "track": "013-D-071-DHDH",
+ "setup": {
+  "lat": 33.9927,
+  "lon": -117.7601,
+  "seriesRadiusM": 500,
+  "mapRadiusM": 6000,
+  "mapPol": "co"
+ },
+ "event": 1794873600000.0,
+ "pols": [
+  "HH",
+  "HV"
+ ],
+ "series": [
+  {
+   "time": 1791859233000,
+   "hh": -2.27,
+   "hv": -11.13,
+   "pixels": 7854,
+   "file": "NISAR_L2_PR_GCOV_033_013_D_071_4005_DHDH_A_20261013T024033_20261013T024111_P05036_P_F_J_001.h5"
+  },
+  {
+   "time": 1792896034000,
+   "hh": -2.37,
+   "hv": -11.14,
+   "pixels": 7854,
+   "file": "NISAR_L2_PR_GCOV_034_013_D_071_4005_DHDH_A_20261025T024034_20261025T024111_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1793932834000,
+   "hh": -2.52,
+   "hv": -11.18,
+   "pixels": 7854,
+   "file": "NISAR_L2_PR_GCOV_035_013_D_071_4005_DHDH_A_20261106T024034_20261106T024112_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1794969635000,
+   "hh": -2.51,
+   "hv": -11.16,
+   "pixels": 7854,
+   "file": "NISAR_L2_PR_GCOV_036_013_D_071_4005_DHDH_A_20261118T024035_20261118T024113_P05036_N_F_J_001.h5"
+  }
+ ],
+ "change": {
+  "before": 1793932834000,
+  "after": 1794969635000,
+  "pol": "HH",
+  "image": "event-gdacs-fl1104290_change.png",
+  "bounds": {
+   "west": -117.82510795759957,
+   "east": -117.69509204240042,
+   "south": 33.938801329500535,
+   "north": 34.04659867049946
+  },
+  "weakerPct": 0.3,
+  "strongerPct": 0.3,
+  "spansEvent": true
+ },
+ "firstDrop": null,
+ "summary": "Across the event of 2026-11-17: between 2026-11-06 and 2026-11-18, HH backscatter here changed by +0.0 dB and HV by +0.0 dB (mean within 500 m). Across the mapped area, 0% got at least 3 dB weaker and 0% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 4 passes on track 013-D-071-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-11-17, and 'before' the last pass before it.",
+ "generated": "2026-11-21T11:31:19Z"
+}

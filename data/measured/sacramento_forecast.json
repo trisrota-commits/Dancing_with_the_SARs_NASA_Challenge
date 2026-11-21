@@ -5,9 +5,9 @@
  "track": "135-A-021-DHDH",
  "cellM": 500.0,
  "cells": 1024,
- "passes": 29,
+ "passes": 30,
  "from": "2025-11-19",
- "to": "2026-11-02",
+ "to": "2026-11-14",
  "channel": "co-polarised backscatter, dB",
  "strongDb": 3.0,
  "ways": [
@@ -59,201 +59,201 @@
  "event": null,
  "overall": {
   "last": {
-   "n": 25600,
-   "rmse": 1.62,
-   "mae": 1.05,
-   "within90": 2.5,
-   "r2": 0.779,
-   "spearman": 0.894,
+   "n": 26624,
+   "rmse": 1.64,
+   "mae": 1.07,
+   "within90": 2.55,
+   "r2": 0.773,
+   "spearman": 0.89,
    "skill": 0.0,
    "strong": {
-    "happened": 0.069,
-    "accuracy": 0.931,
+    "happened": 0.071,
+    "accuracy": 0.929,
     "precision": null,
     "recall": 0.0,
     "f1": null,
     "tp": 0,
     "fp": 0,
-    "fn": 1777,
-    "tn": 23823
+    "fn": 1897,
+    "tn": 24727
    },
    "direction": {
-    "accuracy": 0.657,
-    "precision": 0.219,
+    "accuracy": 0.644,
+    "precision": 0.215,
     "recall": 0.333,
-    "f1": 0.264,
-    "commonest": 0.657,
+    "f1": 0.261,
+    "commonest": 0.644,
     "shares": {
-     "down": 0.176,
-     "stay": 0.657,
-     "up": 0.167
+     "down": 0.17,
+     "stay": 0.644,
+     "up": 0.186
     }
    }
   },
   "line": {
-   "n": 25600,
+   "n": 26624,
    "rmse": 2.26,
-   "mae": 1.5,
-   "within90": 3.64,
-   "r2": 0.57,
-   "spearman": 0.846,
-   "skill": -0.943,
+   "mae": 1.51,
+   "within90": 3.63,
+   "r2": 0.566,
+   "spearman": 0.845,
+   "skill": -0.914,
    "strong": {
-    "happened": 0.069,
-    "accuracy": 0.883,
-    "precision": 0.154,
-    "recall": 0.154,
-    "f1": 0.154,
-    "tp": 273,
-    "fp": 1498,
-    "fn": 1504,
-    "tn": 22325
+    "happened": 0.071,
+    "accuracy": 0.881,
+    "precision": 0.155,
+    "recall": 0.151,
+    "f1": 0.153,
+    "tp": 286,
+    "fp": 1562,
+    "fn": 1611,
+    "tn": 23165
    },
    "direction": {
-    "accuracy": 0.573,
+    "accuracy": 0.566,
     "precision": 0.426,
-    "recall": 0.427,
+    "recall": 0.426,
     "f1": 0.426,
-    "commonest": 0.657,
+    "commonest": 0.644,
     "shares": {
-     "down": 0.176,
-     "stay": 0.657,
-     "up": 0.167
+     "down": 0.17,
+     "stay": 0.644,
+     "up": 0.186
     }
    }
   },
   "peers": {
-   "n": 25600,
+   "n": 26624,
    "rmse": 1.45,
    "mae": 0.89,
    "within90": 2.16,
-   "r2": 0.823,
-   "spearman": 0.919,
-   "skill": 0.201,
+   "r2": 0.822,
+   "spearman": 0.918,
+   "skill": 0.216,
    "strong": {
-    "happened": 0.069,
-    "accuracy": 0.931,
+    "happened": 0.071,
+    "accuracy": 0.929,
     "precision": null,
     "recall": 0.0,
     "f1": null,
     "tp": 0,
     "fp": 0,
-    "fn": 1777,
-    "tn": 23823
+    "fn": 1897,
+    "tn": 24727
    },
    "direction": {
-    "accuracy": 0.683,
-    "precision": 0.664,
-    "recall": 0.421,
-    "f1": 0.431,
-    "commonest": 0.657,
+    "accuracy": 0.681,
+    "precision": 0.659,
+    "recall": 0.452,
+    "f1": 0.471,
+    "commonest": 0.644,
     "shares": {
-     "down": 0.176,
-     "stay": 0.657,
-     "up": 0.167
+     "down": 0.17,
+     "stay": 0.644,
+     "up": 0.186
     }
    }
   },
   "mean": {
-   "n": 25600,
-   "rmse": 2.33,
-   "mae": 1.66,
-   "within90": 3.82,
-   "r2": 0.539,
+   "n": 26624,
+   "rmse": 2.32,
+   "mae": 1.65,
+   "within90": 3.79,
+   "r2": 0.544,
    "spearman": 0.766,
-   "skill": -1.081,
+   "skill": -1.012,
    "strong": {
-    "happened": 0.069,
+    "happened": 0.071,
     "accuracy": 0.839,
     "precision": 0.167,
-    "recall": 0.331,
-    "f1": 0.222,
-    "tp": 589,
-    "fp": 2937,
-    "fn": 1188,
-    "tn": 20886
+    "recall": 0.317,
+    "f1": 0.219,
+    "tp": 602,
+    "fp": 3002,
+    "fn": 1295,
+    "tn": 21725
    },
    "direction": {
     "accuracy": 0.51,
-    "precision": 0.46,
+    "precision": 0.462,
     "recall": 0.487,
-    "f1": 0.455,
-    "commonest": 0.657,
+    "f1": 0.459,
+    "commonest": 0.644,
     "shares": {
-     "down": 0.176,
-     "stay": 0.657,
-     "up": 0.167
+     "down": 0.17,
+     "stay": 0.644,
+     "up": 0.186
     }
    }
   },
   "trend": {
-   "n": 25600,
-   "rmse": 2.07,
-   "mae": 1.38,
-   "within90": 3.3,
-   "r2": 0.636,
-   "spearman": 0.859,
-   "skill": -0.643,
+   "n": 26624,
+   "rmse": 2.1,
+   "mae": 1.41,
+   "within90": 3.36,
+   "r2": 0.628,
+   "spearman": 0.854,
+   "skill": -0.641,
    "strong": {
-    "happened": 0.069,
-    "accuracy": 0.912,
-    "precision": 0.222,
-    "recall": 0.109,
-    "f1": 0.146,
-    "tp": 193,
-    "fp": 675,
-    "fn": 1584,
-    "tn": 23148
+    "happened": 0.071,
+    "accuracy": 0.91,
+    "precision": 0.224,
+    "recall": 0.104,
+    "f1": 0.142,
+    "tp": 198,
+    "fp": 687,
+    "fn": 1699,
+    "tn": 24040
    },
    "direction": {
-    "accuracy": 0.604,
-    "precision": 0.398,
-    "recall": 0.392,
-    "f1": 0.391,
-    "commonest": 0.657,
+    "accuracy": 0.591,
+    "precision": 0.39,
+    "recall": 0.383,
+    "f1": 0.381,
+    "commonest": 0.644,
     "shares": {
-     "down": 0.176,
-     "stay": 0.657,
-     "up": 0.167
+     "down": 0.17,
+     "stay": 0.644,
+     "up": 0.186
     }
    }
   },
   "learnt": {
-   "n": 25600,
-   "rmse": 1.71,
-   "mae": 1.13,
-   "within90": 2.65,
-   "r2": 0.752,
-   "spearman": 0.876,
-   "skill": -0.12,
+   "n": 26624,
+   "rmse": 1.72,
+   "mae": 1.15,
+   "within90": 2.67,
+   "r2": 0.749,
+   "spearman": 0.872,
+   "skill": -0.108,
    "strong": {
-    "happened": 0.069,
-    "accuracy": 0.93,
+    "happened": 0.071,
+    "accuracy": 0.928,
     "precision": 0.056,
     "recall": 0.001,
     "f1": 0.001,
     "tp": 1,
     "fp": 17,
-    "fn": 1776,
-    "tn": 23806
+    "fn": 1896,
+    "tn": 24710
    },
    "direction": {
-    "accuracy": 0.628,
-    "precision": 0.392,
-    "recall": 0.345,
-    "f1": 0.315,
-    "commonest": 0.657,
+    "accuracy": 0.616,
+    "precision": 0.387,
+    "recall": 0.343,
+    "f1": 0.309,
+    "commonest": 0.644,
     "shares": {
-     "down": 0.176,
-     "stay": 0.657,
-     "up": 0.167
+     "down": 0.17,
+     "stay": 0.644,
+     "up": 0.186
     }
    }
   }
  },
  "best": "last",
  "bestBaseline": "last",
- "modelAgainstBestBaseline": -0.114,
+ "modelAgainstBestBaseline": -0.1,
  "directionDb": 1.0,
  "byDate": [
   {
@@ -5631,9 +5631,225 @@
     "expected": 2.65,
     "outside": 0.093
    }
+  },
+  {
+   "time": 1794662270000,
+   "date": "2026-11-14",
+   "seenMean": -9.63,
+   "lastMean": -10.99,
+   "last": {
+    "n": 1024,
+    "rmse": 2.02,
+    "mae": 1.65,
+    "within90": 3.17,
+    "r2": 0.618,
+    "spearman": 0.899,
+    "skill": 0.0,
+    "strong": {
+     "happened": 0.117,
+     "accuracy": 0.883,
+     "precision": null,
+     "recall": 0.0,
+     "f1": null,
+     "tp": 0,
+     "fp": 0,
+     "fn": 120,
+     "tn": 904
+    },
+    "direction": {
+     "accuracy": 0.313,
+     "precision": 0.104,
+     "recall": 0.333,
+     "f1": 0.159,
+     "commonest": 0.645,
+     "shares": {
+      "down": 0.042,
+      "stay": 0.313,
+      "up": 0.645
+     }
+    },
+    "predMean": -10.99,
+    "expected": 2.5,
+    "outside": 0.199
+   },
+   "line": {
+    "n": 1024,
+    "rmse": 2.42,
+    "mae": 1.67,
+    "within90": 3.52,
+    "r2": 0.45,
+    "spearman": 0.864,
+    "skill": -0.439,
+    "strong": {
+     "happened": 0.117,
+     "accuracy": 0.833,
+     "precision": 0.169,
+     "recall": 0.108,
+     "f1": 0.132,
+     "tp": 13,
+     "fp": 64,
+     "fn": 107,
+     "tn": 840
+    },
+    "direction": {
+     "accuracy": 0.385,
+     "precision": 0.378,
+     "recall": 0.405,
+     "f1": 0.321,
+     "commonest": 0.645,
+     "shares": {
+      "down": 0.042,
+      "stay": 0.313,
+      "up": 0.645
+     }
+    },
+    "predMean": -10.59,
+    "expected": 3.64,
+    "outside": 0.093
+   },
+   "peers": {
+    "n": 1024,
+    "rmse": 1.49,
+    "mae": 0.99,
+    "within90": 2.12,
+    "r2": 0.792,
+    "spearman": 0.899,
+    "skill": 0.455,
+    "strong": {
+     "happened": 0.117,
+     "accuracy": 0.883,
+     "precision": null,
+     "recall": 0.0,
+     "f1": null,
+     "tp": 0,
+     "fp": 0,
+     "fn": 120,
+     "tn": 904
+    },
+    "direction": {
+     "accuracy": 0.645,
+     "precision": 0.215,
+     "recall": 0.333,
+     "f1": 0.261,
+     "commonest": 0.645,
+     "shares": {
+      "down": 0.042,
+      "stay": 0.313,
+      "up": 0.645
+     }
+    },
+    "predMean": -9.67,
+    "expected": 2.16,
+    "outside": 0.097
+   },
+   "mean": {
+    "n": 1024,
+    "rmse": 1.91,
+    "mae": 1.39,
+    "within90": 3.34,
+    "r2": 0.658,
+    "spearman": 0.855,
+    "skill": 0.105,
+    "strong": {
+     "happened": 0.117,
+     "accuracy": 0.832,
+     "precision": 0.167,
+     "recall": 0.108,
+     "f1": 0.131,
+     "tp": 13,
+     "fp": 65,
+     "fn": 107,
+     "tn": 839
+    },
+    "direction": {
+     "accuracy": 0.522,
+     "precision": 0.451,
+     "recall": 0.516,
+     "f1": 0.439,
+     "commonest": 0.645,
+     "shares": {
+      "down": 0.042,
+      "stay": 0.313,
+      "up": 0.645
+     }
+    },
+    "predMean": -10.31,
+    "expected": 3.82,
+    "outside": 0.067
+   },
+   "trend": {
+    "n": 1024,
+    "rmse": 2.56,
+    "mae": 2.1,
+    "within90": 4.02,
+    "r2": 0.385,
+    "spearman": 0.872,
+    "skill": -0.61,
+    "strong": {
+     "happened": 0.117,
+     "accuracy": 0.876,
+     "precision": 0.294,
+     "recall": 0.042,
+     "f1": 0.073,
+     "tp": 5,
+     "fp": 12,
+     "fn": 115,
+     "tn": 892
+    },
+    "direction": {
+     "accuracy": 0.27,
+     "precision": 0.336,
+     "recall": 0.367,
+     "f1": 0.196,
+     "commonest": 0.645,
+     "shares": {
+      "down": 0.042,
+      "stay": 0.313,
+      "up": 0.645
+     }
+    },
+    "predMean": -11.46,
+    "expected": 3.3,
+    "outside": 0.186
+   },
+   "learnt": {
+    "n": 1024,
+    "rmse": 1.93,
+    "mae": 1.6,
+    "within90": 2.94,
+    "r2": 0.648,
+    "spearman": 0.898,
+    "skill": 0.079,
+    "strong": {
+     "happened": 0.117,
+     "accuracy": 0.883,
+     "precision": null,
+     "recall": 0.0,
+     "f1": null,
+     "tp": 0,
+     "fp": 0,
+     "fn": 120,
+     "tn": 904
+    },
+    "direction": {
+     "accuracy": 0.309,
+     "precision": 0.251,
+     "recall": 0.324,
+     "f1": 0.163,
+     "commonest": 0.645,
+     "shares": {
+      "down": 0.042,
+      "stay": 0.313,
+      "up": 0.645
+     }
+    },
+    "predMean": -10.91,
+    "expected": 2.65,
+    "outside": 0.146
+   }
   }
  ],
- "summary": "Predicting the next pass one step ahead, 25 times over 25,600 cell readings: the best way here is \"same as last time\", off by 1.05 dB on average, and within 2.5 dB for nine cells in ten. It was furthest off for the pass of 2026-05-18 (3.21 dB). The model does not beat the best simple rule (\"same as last time\", RMSE 1.62 dB) with RMSE 1.71 dB.",
+ "summary": "Predicting the next pass one step ahead, 26 times over 26,624 cell readings: the best way here is \"same as last time\", off by 1.07 dB on average, and within 2.55 dB for nine cells in ten. It was furthest off for the pass of 2026-05-18 (3.21 dB). The model does not beat the best simple rule (\"same as last time\", RMSE 1.64 dB) with RMSE 1.72 dB.",
  "surprise": {
   "date": "2026-04-12",
   "time": 1775999876000,
@@ -5642,5 +5858,5 @@
  },
  "method": "Calibrated NISAR backscatter (GCOV, gamma-naught) in cells of 500 m on track 135-A-021-DHDH. Each pass from the 5th on is predicted from the passes before it only, and compared with what was measured. RMSE and MAE in dB; '9 in 10' is the error nine cells in ten stay under. 'Up or down' asks whether a cell's echo goes down or up by 1 dB or more by the next pass, or stays; precision, recall and F1 are averaged over the three answers. The yes/no question is whether a cell changes by 3 dB or more by the next pass. 'Outside the expected range' is the share of cells whose miss was larger than nine in ten misses on the passes predicted before; about 10 % is ordinary.",
  "limits": "One season of data: no way of predicting has seen a harvest, a flood or a thaw here before it happened. Neighbouring cells change together, so they are fewer independent samples than their number. A pass made with a new version of NASA's processing can shift by itself; such passes are marked.",
- "generated": "2026-11-20T22:20:03Z"
+ "generated": "2026-11-21T11:34:40Z"
 }

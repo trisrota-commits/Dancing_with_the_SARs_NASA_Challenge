@@ -197,6 +197,32 @@
   "water": 0.0
  },
  {
+  "id": "event-eonet-eonet-26467",
+  "name": "Prescribed Fire 3R RX - KRUMM MP, Stevens, Washington",
+  "cells": 576,
+  "passes": 5,
+  "event": {
+   "time": 1794441600000.0,
+   "date": "2026-11-12",
+   "firstPassAfter": "2026-11-15",
+   "stood": 0.0,
+   "recent": 0.0035,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-03",
+   "time": 1793709543000,
+   "stood": 0.0434,
+   "recent": 0.434,
+   "long": 0.0434
+  },
+  "water": 0.0
+ },
+ {
   "id": "event-eonet-eonet-26468",
   "name": "Prescribed Fire Holly Springs 119-1 &amp; 84-2 RX, Lafayette, Mississippi",
   "cells": 576,
@@ -244,6 +270,32 @@
    "time": 1793579277000,
    "stood": 0.0,
    "recent": 0.0174,
+   "long": 0.0
+  },
+  "water": 0.0
+ },
+ {
+  "id": "event-eonet-eonet-26577",
+  "name": "Prescribed Fire Strawberry RX, Wasatch, Utah",
+  "cells": 576,
+  "passes": 5,
+  "event": {
+   "time": 1794268800000.0,
+   "date": "2026-11-10",
+   "firstPassAfter": "2026-11-20",
+   "stood": 0.0,
+   "recent": 0.1354,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-08",
+   "time": 1794140908000,
+   "stood": 0.0,
+   "recent": 0.0677,
    "long": 0.0
   },
   "water": 0.0
@@ -468,6 +520,32 @@
   "most": {
    "date": "2026-11-04",
    "time": 1793786949000,
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0
+  },
+  "water": 0.0
+ },
+ {
+  "id": "event-gdacs-fl1104290",
+  "name": "Flood in United States",
+  "cells": 576,
+  "passes": 4,
+  "event": {
+   "time": 1794873600000.0,
+   "date": "2026-11-17",
+   "firstPassAfter": "2026-11-18",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-18",
+   "time": 1794969635000,
    "stood": 0.0,
    "recent": 0.0,
    "long": 0.0
@@ -1151,6 +1229,32 @@
   "water": 0.0
  },
  {
+  "id": "event-gdacs-wf1033991",
+  "name": "Forest fires in Australia",
+  "cells": 262,
+  "passes": 4,
+  "event": {
+   "time": 1794873600000.0,
+   "date": "2026-11-17",
+   "firstPassAfter": "2026-11-18",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-18",
+   "time": 1794994478000,
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0
+  },
+  "water": 0.198
+ },
+ {
   "id": "event-usgs-us6000u19w",
   "name": "M 6.6 - 13 km WSW of R\u00edo Grande, Panama",
   "cells": 360,
@@ -1510,7 +1614,7 @@
   "id": "sacramento",
   "name": "Sacramento Valley rice",
   "cells": 1020,
-  "passes": 29,
+  "passes": 30,
   "event": null,
   "most": {
    "date": "2026-03-31",
