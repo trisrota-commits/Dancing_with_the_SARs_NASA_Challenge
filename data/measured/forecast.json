@@ -458,6 +458,50 @@
   }
  },
  {
+  "id": "event-eonet-eonet-26573",
+  "name": "Prescribed Fire STEELY MILL RX, El Dorado, California",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1794787200000.0,
+   "date": "2026-11-16",
+   "firstPassAfter": "2026-11-19",
+   "outside": 0.155,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-19",
+   "time": 1795093772000,
+   "outside": 0.155,
+   "expected": 1.16
+  },
+  "last": {
+   "rmse": 1.55,
+   "mae": 1.28,
+   "within90": 2.56,
+   "r2": 0.055,
+   "spearman": 0.86,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.64,
+   "mae": 1.36,
+   "within90": 2.63,
+   "r2": -0.052,
+   "spearman": 0.715,
+   "skill": -0.113
+  },
+  "peers": {
+   "rmse": 0.67,
+   "mae": 0.51,
+   "within90": 1.21,
+   "r2": 0.822,
+   "spearman": 0.944,
+   "skill": 0.812
+  }
+ },
+ {
   "id": "event-eonet-eonet-26576",
   "name": "Prescribed Fire TSK Compartment 6 RX, Macon, Alabama",
   "cells": 576,
@@ -1501,6 +1545,50 @@
   }
  },
  {
+  "id": "event-gdacs-wf1034014",
+  "name": "Forest fires in Benin, Burkina Faso",
+  "cells": 364,
+  "passes": 7,
+  "best": "last",
+  "event": {
+   "time": 1794960000000.0,
+   "date": "2026-11-18",
+   "firstPassAfter": "2026-11-18",
+   "outside": 0.014,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-06",
+   "time": 1793942633000,
+   "outside": 0.224,
+   "expected": 0.55
+  },
+  "last": {
+   "rmse": 0.77,
+   "mae": 0.5,
+   "within90": 1.51,
+   "r2": 0.79,
+   "spearman": 0.919,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.15,
+   "mae": 0.95,
+   "within90": 1.88,
+   "r2": 0.52,
+   "spearman": 0.812,
+   "skill": -1.087
+  },
+  "peers": {
+   "rmse": 0.34,
+   "mae": 0.25,
+   "within90": 0.57,
+   "r2": 0.959,
+   "spearman": 0.981,
+   "skill": 0.803
+  }
+ },
+ {
   "id": "event-usgs-us6000u19w",
   "name": "M 6.6 - 13 km WSW of R\u00edo Grande, Panama",
   "cells": 576,
@@ -2245,6 +2333,68 @@
    "r2": 0.913,
    "spearman": 0.961,
    "skill": -0.111
+  }
+ },
+ {
+  "id": "perito-moreno",
+  "name": "Perito Moreno Glacier",
+  "cells": 1014,
+  "passes": 12,
+  "best": "learnt",
+  "event": null,
+  "peerSurprise": {
+   "date": "2026-10-02",
+   "time": 1790939063000,
+   "outside": 0.286,
+   "expected": 0.92
+  },
+  "last": {
+   "rmse": 0.91,
+   "mae": 0.59,
+   "within90": 1.39,
+   "r2": 0.94,
+   "spearman": 0.953,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.36,
+   "mae": 0.88,
+   "within90": 2.09,
+   "r2": 0.863,
+   "spearman": 0.922,
+   "skill": -1.254
+  },
+  "peers": {
+   "rmse": 0.88,
+   "mae": 0.57,
+   "within90": 1.34,
+   "r2": 0.943,
+   "spearman": 0.957,
+   "skill": 0.059
+  },
+  "mean": {
+   "rmse": 1.27,
+   "mae": 0.89,
+   "within90": 1.84,
+   "r2": 0.883,
+   "spearman": 0.891,
+   "skill": -0.947
+  },
+  "trend": {
+   "rmse": 1.09,
+   "mae": 0.78,
+   "within90": 1.72,
+   "r2": 0.913,
+   "spearman": 0.938,
+   "skill": -0.439
+  },
+  "learnt": {
+   "rmse": 0.87,
+   "mae": 0.6,
+   "within90": 1.34,
+   "r2": 0.944,
+   "spearman": 0.958,
+   "skill": 0.078
   }
  },
  {
