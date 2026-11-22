@@ -1,12 +1,12 @@
 {
  "id": "event-usgs-us7000tx16",
  "name": "M 6.4 - 30 km WSW of Lata, Solomon Islands",
- "track": "123-A-172-DHDH",
+ "track": "030-D-094-DHDH",
  "cellM": 500.0,
  "cells": 0,
  "passes": 3,
- "from": "2026-10-20",
- "to": "2026-11-13",
+ "from": "2026-10-02",
+ "to": "2026-11-19",
  "water": 1.0,
  "event": {
   "time": 1794182400000.0,
@@ -21,7 +21,7 @@
  "summary": "Nearly all of the window around this point reads as open water (the cross-polarised echo is under -24 dB there). On water the echo follows the wind from pass to pass, so nothing can be said about change here.",
  "method": "",
  "limits": "",
- "generated": "2026-11-21T21:00:01Z",
+ "generated": "2026-11-22T11:50:15Z",
  "bounds": {
   "west": 165.5067171588691,
   "east": 165.6164828411309,

@@ -35,110 +35,110 @@
  "peerSurprise": {
   "date": "2026-11-16",
   "time": 1794787889000,
-  "outside": 0.195,
+  "outside": 0.202,
   "expected": 1.39
  },
  "event": {
   "time": 1794528000000.0,
   "date": "2026-11-13",
   "firstPassAfter": "2026-11-16",
-  "outside": 0.195,
+  "outside": 0.202,
   "newVersion": null
  },
  "overall": {
   "last": {
    "n": 1329,
-   "rmse": 2.4,
-   "mae": 2.18,
-   "within90": 3.41,
-   "r2": 0.87,
+   "rmse": 2.37,
+   "mae": 2.15,
+   "within90": 3.4,
+   "r2": 0.871,
    "spearman": 0.968,
    "skill": 0.0,
    "strong": {
-    "happened": 0.226,
-    "accuracy": 0.774,
+    "happened": 0.217,
+    "accuracy": 0.783,
     "precision": null,
     "recall": 0.0,
     "f1": null,
     "tp": 0,
     "fp": 0,
-    "fn": 300,
-    "tn": 1029
+    "fn": 289,
+    "tn": 1040
    },
    "direction": {
-    "accuracy": 0.137,
-    "precision": 0.046,
+    "accuracy": 0.145,
+    "precision": 0.048,
     "recall": 0.333,
-    "f1": 0.08,
-    "commonest": 0.854,
+    "f1": 0.085,
+    "commonest": 0.845,
     "shares": {
-     "down": 0.854,
-     "stay": 0.137,
-     "up": 0.009
+     "down": 0.845,
+     "stay": 0.145,
+     "up": 0.01
     }
    }
   },
   "line": {
    "n": 1329,
-   "rmse": 2.1,
-   "mae": 1.68,
+   "rmse": 2.11,
+   "mae": 1.69,
    "within90": 3.5,
-   "r2": 0.9,
-   "spearman": 0.964,
-   "skill": 0.235,
+   "r2": 0.898,
+   "spearman": 0.963,
+   "skill": 0.208,
    "strong": {
-    "happened": 0.226,
-    "accuracy": 0.744,
-    "precision": 0.388,
-    "recall": 0.23,
-    "f1": 0.289,
-    "tp": 69,
-    "fp": 109,
-    "fn": 231,
-    "tn": 920
+    "happened": 0.217,
+    "accuracy": 0.745,
+    "precision": 0.36,
+    "recall": 0.221,
+    "f1": 0.274,
+    "tp": 64,
+    "fp": 114,
+    "fn": 225,
+    "tn": 926
    },
    "direction": {
-    "accuracy": 0.56,
-    "precision": 0.369,
-    "recall": 0.402,
-    "f1": 0.322,
-    "commonest": 0.854,
+    "accuracy": 0.551,
+    "precision": 0.364,
+    "recall": 0.387,
+    "f1": 0.317,
+    "commonest": 0.845,
     "shares": {
-     "down": 0.854,
-     "stay": 0.137,
-     "up": 0.009
+     "down": 0.845,
+     "stay": 0.145,
+     "up": 0.01
     }
    }
   },
   "peers": {
    "n": 1329,
-   "rmse": 0.96,
-   "mae": 0.73,
-   "within90": 1.54,
-   "r2": 0.979,
+   "rmse": 0.97,
+   "mae": 0.74,
+   "within90": 1.56,
+   "r2": 0.978,
    "spearman": 0.977,
-   "skill": 0.84,
+   "skill": 0.833,
    "strong": {
-    "happened": 0.226,
-    "accuracy": 0.774,
+    "happened": 0.217,
+    "accuracy": 0.783,
     "precision": null,
     "recall": 0.0,
     "f1": null,
     "tp": 0,
     "fp": 0,
-    "fn": 300,
-    "tn": 1029
+    "fn": 289,
+    "tn": 1040
    },
    "direction": {
-    "accuracy": 0.854,
-    "precision": 0.285,
+    "accuracy": 0.845,
+    "precision": 0.282,
     "recall": 0.333,
-    "f1": 0.307,
-    "commonest": 0.854,
+    "f1": 0.305,
+    "commonest": 0.845,
     "shares": {
-     "down": 0.854,
-     "stay": 0.137,
-     "up": 0.009
+     "down": 0.845,
+     "stay": 0.145,
+     "up": 0.01
     }
    }
   }
@@ -365,123 +365,123 @@
   {
    "time": 1794787889000,
    "date": "2026-11-16",
-   "seenMean": -15.73,
+   "seenMean": -15.63,
    "lastMean": -13.46,
    "last": {
     "n": 441,
-    "rmse": 2.58,
-    "mae": 2.37,
-    "within90": 3.51,
-    "r2": 0.816,
-    "spearman": 0.924,
+    "rmse": 2.51,
+    "mae": 2.29,
+    "within90": 3.5,
+    "r2": 0.822,
+    "spearman": 0.923,
     "skill": 0.0,
     "strong": {
-     "happened": 0.29,
-     "accuracy": 0.71,
+     "happened": 0.265,
+     "accuracy": 0.735,
      "precision": null,
      "recall": 0.0,
      "f1": null,
      "tp": 0,
      "fp": 0,
-     "fn": 128,
-     "tn": 313
+     "fn": 117,
+     "tn": 324
     },
     "direction": {
-     "accuracy": 0.113,
-     "precision": 0.038,
+     "accuracy": 0.138,
+     "precision": 0.046,
      "recall": 0.333,
-     "f1": 0.068,
-     "commonest": 0.878,
+     "f1": 0.081,
+     "commonest": 0.85,
      "shares": {
-      "down": 0.878,
-      "stay": 0.113,
-      "up": 0.009
+      "down": 0.85,
+      "stay": 0.138,
+      "up": 0.011
      }
     },
     "predMean": -13.46,
     "expected": 3.33,
-    "outside": 0.159
+    "outside": 0.129
    },
    "line": {
     "n": 441,
-    "rmse": 1.32,
-    "mae": 0.94,
-    "within90": 2.14,
-    "r2": 0.952,
+    "rmse": 1.38,
+    "mae": 0.97,
+    "within90": 2.21,
+    "r2": 0.946,
     "spearman": 0.93,
-    "skill": 0.738,
+    "skill": 0.697,
     "strong": {
-     "happened": 0.29,
-     "accuracy": 0.603,
-     "precision": 0.34,
-     "recall": 0.391,
-     "f1": 0.364,
-     "tp": 50,
-     "fp": 97,
-     "fn": 78,
-     "tn": 216
+     "happened": 0.265,
+     "accuracy": 0.605,
+     "precision": 0.306,
+     "recall": 0.385,
+     "f1": 0.341,
+     "tp": 45,
+     "fp": 102,
+     "fn": 72,
+     "tn": 222
     },
     "direction": {
-     "accuracy": 0.889,
-     "precision": 0.582,
-     "recall": 0.372,
-     "f1": 0.384,
-     "commonest": 0.878,
+     "accuracy": 0.862,
+     "precision": 0.573,
+     "recall": 0.365,
+     "f1": 0.367,
+     "commonest": 0.85,
      "shares": {
-      "down": 0.878,
-      "stay": 0.113,
-      "up": 0.009
+      "down": 0.85,
+      "stay": 0.138,
+      "up": 0.011
      }
     },
     "predMean": -16.11,
     "expected": 3.71,
-    "outside": 0.025
+    "outside": 0.032
    },
    "peers": {
     "n": 441,
-    "rmse": 1.13,
-    "mae": 0.87,
-    "within90": 1.89,
-    "r2": 0.965,
-    "spearman": 0.924,
-    "skill": 0.808,
+    "rmse": 1.16,
+    "mae": 0.89,
+    "within90": 1.9,
+    "r2": 0.962,
+    "spearman": 0.923,
+    "skill": 0.786,
     "strong": {
-     "happened": 0.29,
-     "accuracy": 0.71,
+     "happened": 0.265,
+     "accuracy": 0.735,
      "precision": null,
      "recall": 0.0,
      "f1": null,
      "tp": 0,
      "fp": 0,
-     "fn": 128,
-     "tn": 313
+     "fn": 117,
+     "tn": 324
     },
     "direction": {
-     "accuracy": 0.878,
-     "precision": 0.293,
+     "accuracy": 0.85,
+     "precision": 0.283,
      "recall": 0.333,
-     "f1": 0.312,
-     "commonest": 0.878,
+     "f1": 0.306,
+     "commonest": 0.85,
      "shares": {
-      "down": 0.878,
-      "stay": 0.113,
-      "up": 0.009
+      "down": 0.85,
+      "stay": 0.138,
+      "up": 0.011
      }
     },
-    "predMean": -15.95,
+    "predMean": -15.87,
     "expected": 1.39,
-    "outside": 0.195
+    "outside": 0.202
    }
   }
  ],
- "summary": "Predicting the next pass one step ahead, 3 times over 1,329 cell readings: the best way here is \"line through the last two\", off by 1.68 dB on average, and within 3.5 dB for nine cells in ten. It was furthest off for the pass of 2026-10-23 (2.98 dB).",
+ "summary": "Predicting the next pass one step ahead, 3 times over 1,329 cell readings: the best way here is \"line through the last two\", off by 1.69 dB on average, and within 3.5 dB for nine cells in ten. It was furthest off for the pass of 2026-10-23 (2.98 dB).",
  "surprise": {
   "date": "2026-11-16",
   "time": 1794787889000,
-  "outside": 0.025,
+  "outside": 0.032,
   "expected": 3.71
  },
  "method": "Calibrated NISAR backscatter (GCOV, gamma-naught) in cells of 500 m on track 156-A-014-DHDH. Each pass from the 5th on is predicted from the passes before it only, and compared with what was measured. RMSE and MAE in dB; '9 in 10' is the error nine cells in ten stay under. 'Up or down' asks whether a cell's echo goes down or up by 1 dB or more by the next pass, or stays; precision, recall and F1 are averaged over the three answers. The yes/no question is whether a cell changes by 3 dB or more by the next pass. 'Outside the expected range' is the share of cells whose miss was larger than nine in ten misses on the passes predicted before; about 10 % is ordinary.",
  "limits": "One season of data: no way of predicting has seen a harvest, a flood or a thaw here before it happened. Neighbouring cells change together, so they are fewer independent samples than their number. A pass made with a new version of NASA's processing can shift by itself; such passes are marked.",
- "generated": "2026-11-21T21:00:04Z"
+ "generated": "2026-11-22T11:50:19Z"
 }

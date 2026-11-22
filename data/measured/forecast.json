@@ -246,39 +246,39 @@
   "event": {
    "time": 1794355200000.0,
    "date": "2026-11-11",
-   "firstPassAfter": "2026-11-17",
-   "outside": 0.151,
+   "firstPassAfter": "2026-11-16",
+   "outside": 0.005,
    "newVersion": null
   },
   "peerSurprise": {
-   "date": "2026-11-17",
-   "time": 1794913878000,
-   "outside": 0.151,
-   "expected": 0.36
+   "date": "2026-11-16",
+   "time": 1794789876000,
+   "outside": 0.005,
+   "expected": 0.41
   },
   "last": {
-   "rmse": 0.52,
-   "mae": 0.46,
-   "within90": 0.78,
-   "r2": 0.865,
-   "spearman": 0.907,
+   "rmse": 0.25,
+   "mae": 0.2,
+   "within90": 0.36,
+   "r2": 0.966,
+   "spearman": 0.971,
    "skill": 0.0
   },
   "line": {
-   "rmse": 0.63,
-   "mae": 0.51,
-   "within90": 1.07,
-   "r2": 0.798,
-   "spearman": 0.855,
-   "skill": -0.496
+   "rmse": 0.46,
+   "mae": 0.33,
+   "within90": 0.77,
+   "r2": 0.887,
+   "spearman": 0.892,
+   "skill": -2.319
   },
   "peers": {
-   "rmse": 0.25,
-   "mae": 0.18,
-   "within90": 0.38,
-   "r2": 0.97,
+   "rmse": 0.21,
+   "mae": 0.14,
+   "within90": 0.33,
+   "r2": 0.976,
    "spearman": 0.975,
-   "skill": 0.775
+   "skill": 0.31
   }
  },
  {
@@ -422,39 +422,39 @@
   "event": {
    "time": 1794441600000.0,
    "date": "2026-11-12",
-   "firstPassAfter": "2026-11-17",
-   "outside": 0.128,
+   "firstPassAfter": "2026-11-16",
+   "outside": 0.062,
    "newVersion": null
   },
   "peerSurprise": {
-   "date": "2026-11-17",
-   "time": 1794913912000,
-   "outside": 0.128,
-   "expected": 0.68
+   "date": "2026-11-16",
+   "time": 1794789842000,
+   "outside": 0.062,
+   "expected": 0.69
   },
   "last": {
-   "rmse": 0.81,
-   "mae": 0.66,
-   "within90": 1.27,
-   "r2": 0.765,
-   "spearman": 0.646,
+   "rmse": 0.64,
+   "mae": 0.47,
+   "within90": 1.04,
+   "r2": 0.845,
+   "spearman": 0.795,
    "skill": 0.0
   },
   "line": {
-   "rmse": 1.4,
-   "mae": 1.12,
-   "within90": 2.23,
-   "r2": 0.304,
-   "spearman": 0.414,
-   "skill": -1.961
+   "rmse": 1.12,
+   "mae": 0.86,
+   "within90": 1.75,
+   "r2": 0.532,
+   "spearman": 0.653,
+   "skill": -2.016
   },
   "peers": {
    "rmse": 0.43,
-   "mae": 0.29,
-   "within90": 0.71,
-   "r2": 0.934,
-   "spearman": 0.937,
-   "skill": 0.717
+   "mae": 0.3,
+   "within90": 0.66,
+   "r2": 0.932,
+   "spearman": 0.931,
+   "skill": 0.561
   }
  },
  {
@@ -510,39 +510,39 @@
   "event": {
    "time": 1794268800000.0,
    "date": "2026-11-10",
-   "firstPassAfter": "2026-11-20",
-   "outside": 0.215,
+   "firstPassAfter": "2026-11-16",
+   "outside": 0.047,
    "newVersion": null
   },
   "peerSurprise": {
-   "date": "2026-11-20",
-   "time": 1795177708000,
-   "outside": 0.215,
-   "expected": 1.1
+   "date": "2026-11-16",
+   "time": 1794795734000,
+   "outside": 0.047,
+   "expected": 0.76
   },
   "last": {
-   "rmse": 1.34,
-   "mae": 1.01,
-   "within90": 2.38,
-   "r2": 0.636,
-   "spearman": 0.792,
+   "rmse": 0.76,
+   "mae": 0.57,
+   "within90": 1.1,
+   "r2": 0.827,
+   "spearman": 0.813,
    "skill": 0.0
   },
   "line": {
-   "rmse": 1.68,
-   "mae": 1.24,
-   "within90": 2.75,
-   "r2": 0.429,
-   "spearman": 0.693,
-   "skill": -0.57
+   "rmse": 1.45,
+   "mae": 1.0,
+   "within90": 1.92,
+   "r2": 0.366,
+   "spearman": 0.672,
+   "skill": -2.663
   },
   "peers": {
-   "rmse": 0.87,
-   "mae": 0.55,
-   "within90": 1.27,
-   "r2": 0.849,
-   "spearman": 0.958,
-   "skill": 0.584
+   "rmse": 0.52,
+   "mae": 0.34,
+   "within90": 0.68,
+   "r2": 0.919,
+   "spearman": 0.935,
+   "skill": 0.531
   }
  },
  {
@@ -1398,38 +1398,38 @@
    "time": 1794528000000.0,
    "date": "2026-11-13",
    "firstPassAfter": "2026-11-16",
-   "outside": 0.195,
+   "outside": 0.202,
    "newVersion": null
   },
   "peerSurprise": {
    "date": "2026-11-16",
    "time": 1794787889000,
-   "outside": 0.195,
+   "outside": 0.202,
    "expected": 1.39
   },
   "last": {
-   "rmse": 2.4,
-   "mae": 2.18,
-   "within90": 3.41,
-   "r2": 0.87,
+   "rmse": 2.37,
+   "mae": 2.15,
+   "within90": 3.4,
+   "r2": 0.871,
    "spearman": 0.968,
    "skill": 0.0
   },
   "line": {
-   "rmse": 2.1,
-   "mae": 1.68,
+   "rmse": 2.11,
+   "mae": 1.69,
    "within90": 3.5,
-   "r2": 0.9,
-   "spearman": 0.964,
-   "skill": 0.235
+   "r2": 0.898,
+   "spearman": 0.963,
+   "skill": 0.208
   },
   "peers": {
-   "rmse": 0.96,
-   "mae": 0.73,
-   "within90": 1.54,
-   "r2": 0.979,
+   "rmse": 0.97,
+   "mae": 0.74,
+   "within90": 1.56,
+   "r2": 0.978,
    "spearman": 0.977,
-   "skill": 0.84
+   "skill": 0.833
   }
  },
  {
