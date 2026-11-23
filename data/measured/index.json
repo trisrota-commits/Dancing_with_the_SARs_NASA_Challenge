@@ -90,6 +90,33 @@
   "file": "event-eonet-eonet-26468.json"
  },
  {
+  "id": "event-eonet-eonet-26469",
+  "name": "Prescribed Fire rx-Northern Scuppernong, Waukesha, Wisconsin",
+  "lat": 42.9242,
+  "lon": -88.4829,
+  "radiusKm": 25,
+  "event": 1794528000000.0,
+  "file": "event-eonet-eonet-26469.json"
+ },
+ {
+  "id": "event-eonet-eonet-26568",
+  "name": "Wildfire Greene - Caney Creek Lane, Greene, Tennessee",
+  "lat": 36.363,
+  "lon": -82.7985,
+  "radiusKm": 25,
+  "event": 1794960000000.0,
+  "file": "event-eonet-eonet-26568.json"
+ },
+ {
+  "id": "event-eonet-eonet-26572",
+  "name": "Prescribed Fire rx-Lapham Good Oak 2026, Waukesha, Wisconsin",
+  "lat": 43.0404,
+  "lon": -88.3992,
+  "radiusKm": 25,
+  "event": 1794960000000.0,
+  "file": "event-eonet-eonet-26572.json"
+ },
+ {
   "id": "event-eonet-eonet-26573",
   "name": "Prescribed Fire STEELY MILL RX, El Dorado, California",
   "lat": 38.6194,
@@ -450,6 +477,24 @@
   "file": "event-gdacs-wf1033991.json"
  },
  {
+  "id": "event-gdacs-wf1033996",
+  "name": "Forest fires in South Sudan, Sudan",
+  "lat": 8.9047,
+  "lon": 24.8037,
+  "radiusKm": 25,
+  "event": 1794873600000.0,
+  "file": "event-gdacs-wf1033996.json"
+ },
+ {
+  "id": "event-gdacs-wf1033997",
+  "name": "Forest fires in South Sudan, Central African Republic",
+  "lat": 8.2654,
+  "lon": 25.1022,
+  "radiusKm": 25,
+  "event": 1794787200000.0,
+  "file": "event-gdacs-wf1033997.json"
+ },
+ {
   "id": "event-gdacs-wf1034005",
   "name": "Forest fires in Australia",
   "lat": -14.9591,
@@ -466,6 +511,15 @@
   "radiusKm": 25,
   "event": 1794787200000.0,
   "file": "event-gdacs-wf1034011.json"
+ },
+ {
+  "id": "event-gdacs-wf1034013",
+  "name": "Forest fires in Ghana, Burkina Faso",
+  "lat": 11.0683,
+  "lon": -1.3535,
+  "radiusKm": 25,
+  "event": 1795046400000.0,
+  "file": "event-gdacs-wf1034013.json"
  },
  {
   "id": "event-gdacs-wf1034014",

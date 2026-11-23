@@ -458,6 +458,50 @@
   }
  },
  {
+  "id": "event-eonet-eonet-26469",
+  "name": "Prescribed Fire rx-Northern Scuppernong, Waukesha, Wisconsin",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1794528000000.0,
+   "date": "2026-11-13",
+   "firstPassAfter": "2026-11-20",
+   "outside": 0.094,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-20",
+   "time": 1795171749000,
+   "outside": 0.094,
+   "expected": 5.73
+  },
+  "last": {
+   "rmse": 6.07,
+   "mae": 2.31,
+   "within90": 5.72,
+   "r2": -0.944,
+   "spearman": 0.82,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 12.18,
+   "mae": 4.53,
+   "within90": 11.55,
+   "r2": -6.837,
+   "spearman": 0.585,
+   "skill": -3.032
+  },
+  "peers": {
+   "rmse": 6.03,
+   "mae": 2.25,
+   "within90": 5.62,
+   "r2": -0.919,
+   "spearman": 0.833,
+   "skill": 0.013
+  }
+ },
+ {
   "id": "event-eonet-eonet-26573",
   "name": "Prescribed Fire STEELY MILL RX, El Dorado, California",
   "cells": 576,
@@ -1165,6 +1209,50 @@
   }
  },
  {
+  "id": "event-gdacs-wf1033884",
+  "name": "Forest fires in Australia",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1794700800000.0,
+   "date": "2026-11-15",
+   "firstPassAfter": "2026-11-20",
+   "outside": 0.807,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-20",
+   "time": 1795168311000,
+   "outside": 0.807,
+   "expected": 0.17
+  },
+  "last": {
+   "rmse": 0.53,
+   "mae": 0.35,
+   "within90": 1.04,
+   "r2": 0.667,
+   "spearman": 0.866,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 0.57,
+   "mae": 0.4,
+   "within90": 1.07,
+   "r2": 0.618,
+   "spearman": 0.81,
+   "skill": -0.146
+  },
+  "peers": {
+   "rmse": 0.26,
+   "mae": 0.18,
+   "within90": 0.47,
+   "r2": 0.922,
+   "spearman": 0.961,
+   "skill": 0.765
+  }
+ },
+ {
   "id": "event-gdacs-wf1033910",
   "name": "Forest fires in Australia",
   "cells": 576,
@@ -1542,6 +1630,182 @@
    "r2": 0.964,
    "spearman": 0.98,
    "skill": 0.296
+  }
+ },
+ {
+  "id": "event-gdacs-wf1033969",
+  "name": "Forest fires in Sudan",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1794528000000.0,
+   "date": "2026-11-13",
+   "firstPassAfter": "2026-11-20",
+   "outside": 0.016,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-20",
+   "time": 1795147239000,
+   "outside": 0.016,
+   "expected": 0.3
+  },
+  "last": {
+   "rmse": 0.54,
+   "mae": 0.36,
+   "within90": 0.92,
+   "r2": 0.739,
+   "spearman": 0.917,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.2,
+   "mae": 0.92,
+   "within90": 2.09,
+   "r2": -0.289,
+   "spearman": 0.764,
+   "skill": -3.946
+  },
+  "peers": {
+   "rmse": 0.19,
+   "mae": 0.12,
+   "within90": 0.25,
+   "r2": 0.968,
+   "spearman": 0.984,
+   "skill": 0.879
+  }
+ },
+ {
+  "id": "event-gdacs-wf1033972",
+  "name": "Forest fires in Botswana",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1794873600000.0,
+   "date": "2026-11-17",
+   "firstPassAfter": "2026-11-20",
+   "outside": 0.307,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-20",
+   "time": 1795192317000,
+   "outside": 0.307,
+   "expected": 0.32
+  },
+  "last": {
+   "rmse": 0.67,
+   "mae": 0.51,
+   "within90": 0.92,
+   "r2": 0.636,
+   "spearman": 0.812,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.01,
+   "mae": 0.72,
+   "within90": 1.37,
+   "r2": 0.168,
+   "spearman": 0.637,
+   "skill": -1.284
+  },
+  "peers": {
+   "rmse": 0.39,
+   "mae": 0.22,
+   "within90": 0.41,
+   "r2": 0.873,
+   "spearman": 0.945,
+   "skill": 0.652
+  }
+ },
+ {
+  "id": "event-gdacs-wf1033996",
+  "name": "Forest fires in South Sudan, Sudan",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1794873600000.0,
+   "date": "2026-11-17",
+   "firstPassAfter": "2026-11-20",
+   "outside": 0.005,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-20",
+   "time": 1795147206000,
+   "outside": 0.005,
+   "expected": 0.43
+  },
+  "last": {
+   "rmse": 0.95,
+   "mae": 0.6,
+   "within90": 1.77,
+   "r2": -0.77,
+   "spearman": 0.662,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 0.99,
+   "mae": 0.74,
+   "within90": 1.73,
+   "r2": -0.918,
+   "spearman": 0.671,
+   "skill": -0.084
+  },
+  "peers": {
+   "rmse": 0.21,
+   "mae": 0.15,
+   "within90": 0.36,
+   "r2": 0.912,
+   "spearman": 0.957,
+   "skill": 0.95
+  }
+ },
+ {
+  "id": "event-gdacs-wf1033997",
+  "name": "Forest fires in South Sudan, Central African Republic",
+  "cells": 308,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1794787200000.0,
+   "date": "2026-11-16",
+   "firstPassAfter": "2026-11-20",
+   "outside": 0.042,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-20",
+   "time": 1795147206000,
+   "outside": 0.042,
+   "expected": 0.41
+  },
+  "last": {
+   "rmse": 1.39,
+   "mae": 0.95,
+   "within90": 2.45,
+   "r2": 0.878,
+   "spearman": 0.93,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.82,
+   "mae": 1.56,
+   "within90": 2.65,
+   "r2": 0.783,
+   "spearman": 0.846,
+   "skill": -0.706
+  },
+  "peers": {
+   "rmse": 0.23,
+   "mae": 0.17,
+   "within90": 0.36,
+   "r2": 0.996,
+   "spearman": 0.997,
+   "skill": 0.971
   }
  },
  {
@@ -2215,7 +2479,7 @@
   "id": "mekong",
   "name": "Mekong Delta",
   "cells": 1024,
-  "passes": 12,
+  "passes": 13,
   "best": "learnt",
   "event": null,
   "peerSurprise": {
@@ -2225,52 +2489,52 @@
    "expected": 0.62
   },
   "last": {
-   "rmse": 0.72,
-   "mae": 0.46,
-   "within90": 0.95,
-   "r2": 0.95,
-   "spearman": 0.967,
+   "rmse": 0.7,
+   "mae": 0.44,
+   "within90": 0.93,
+   "r2": 0.953,
+   "spearman": 0.97,
    "skill": 0.0
   },
   "line": {
-   "rmse": 1.12,
-   "mae": 0.73,
-   "within90": 1.48,
-   "r2": 0.877,
-   "spearman": 0.924,
-   "skill": -1.453
+   "rmse": 1.1,
+   "mae": 0.7,
+   "within90": 1.44,
+   "r2": 0.883,
+   "spearman": 0.93,
+   "skill": -1.475
   },
   "peers": {
-   "rmse": 0.59,
+   "rmse": 0.58,
    "mae": 0.3,
-   "within90": 0.65,
-   "r2": 0.966,
+   "within90": 0.64,
+   "r2": 0.967,
    "spearman": 0.988,
-   "skill": 0.325
+   "skill": 0.306
   },
   "mean": {
-   "rmse": 0.76,
+   "rmse": 0.75,
    "mae": 0.53,
    "within90": 1.12,
-   "r2": 0.944,
-   "spearman": 0.974,
-   "skill": -0.117
+   "r2": 0.945,
+   "spearman": 0.971,
+   "skill": -0.161
   },
   "trend": {
-   "rmse": 0.86,
-   "mae": 0.55,
-   "within90": 1.14,
-   "r2": 0.927,
-   "spearman": 0.957,
-   "skill": -0.442
+   "rmse": 0.84,
+   "mae": 0.53,
+   "within90": 1.12,
+   "r2": 0.932,
+   "spearman": 0.96,
+   "skill": -0.445
   },
   "learnt": {
-   "rmse": 0.69,
-   "mae": 0.44,
-   "within90": 0.94,
-   "r2": 0.953,
-   "spearman": 0.972,
-   "skill": 0.074
+   "rmse": 0.67,
+   "mae": 0.42,
+   "within90": 0.91,
+   "r2": 0.956,
+   "spearman": 0.974,
+   "skill": 0.075
   }
  },
  {

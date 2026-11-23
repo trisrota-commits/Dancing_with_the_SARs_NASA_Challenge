@@ -1,0 +1,76 @@
+{
+ "id": "event-eonet-eonet-26469",
+ "name": "Prescribed Fire rx-Northern Scuppernong, Waukesha, Wisconsin",
+ "lat": 42.9242,
+ "lon": -88.4829,
+ "radiusKm": 25,
+ "track": "047-A-023-QPDH",
+ "setup": {
+  "lat": 42.9242,
+  "lon": -88.4829,
+  "seriesRadiusM": 500,
+  "mapRadiusM": 6000,
+  "mapPol": "co"
+ },
+ "event": 1794528000000.0,
+ "pols": [
+  "HH",
+  "HV"
+ ],
+ "series": [
+  {
+   "time": 1791024548000,
+   "hh": -4.78,
+   "hv": -10.98,
+   "pixels": 1967,
+   "file": "NISAR_L2_PR_GCOV_032_047_A_023_2005_QPDH_A_20261003T104908_20261003T104943_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1792061348000,
+   "hh": -4.71,
+   "hv": -10.91,
+   "pixels": 1967,
+   "file": "NISAR_L2_PR_GCOV_033_047_A_023_2005_QPDH_A_20261015T104908_20261015T104943_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1793098148000,
+   "hh": -4.91,
+   "hv": -11.16,
+   "pixels": 1967,
+   "file": "NISAR_L2_PR_GCOV_034_047_A_023_2005_QPDH_A_20261027T104908_20261027T104943_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1794134948000,
+   "hh": -5.11,
+   "hv": -11.21,
+   "pixels": 1967,
+   "file": "NISAR_L2_PR_GCOV_035_047_A_023_2005_QPDH_A_20261108T104908_20261108T104943_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1795171749000,
+   "hh": -4.89,
+   "hv": -11.38,
+   "pixels": 1967,
+   "file": "NISAR_L2_PR_GCOV_036_047_A_023_2005_QPDH_A_20261120T104909_20261120T104944_P05036_N_F_J_001.h5"
+  }
+ ],
+ "change": {
+  "before": 1794134948000,
+  "after": 1795171749000,
+  "pol": "HH",
+  "image": "event-eonet-eonet-26469_change.png",
+  "bounds": {
+   "west": -88.55650639001728,
+   "east": -88.40929360998273,
+   "south": 42.870301329500535,
+   "north": 42.97809867049946
+  },
+  "weakerPct": 2.0,
+  "strongerPct": 14.3,
+  "spansEvent": true
+ },
+ "firstDrop": null,
+ "summary": "Across the event of 2026-11-13: between 2026-11-08 and 2026-11-20, HH backscatter here changed by +0.2 dB and HV by -0.2 dB (mean within 500 m). Across the mapped area, 2% got at least 3 dB weaker and 14% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 5 passes on track 047-A-023-QPDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-11-13, and 'before' the last pass before it.",
+ "generated": "2026-11-23T13:24:35Z"
+}

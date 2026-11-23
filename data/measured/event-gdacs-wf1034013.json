@@ -1,0 +1,69 @@
+{
+ "id": "event-gdacs-wf1034013",
+ "name": "Forest fires in Ghana, Burkina Faso",
+ "lat": 11.0683,
+ "lon": -1.3535,
+ "radiusKm": 25,
+ "track": "044-A-007-DHDH",
+ "setup": {
+  "lat": 11.0683,
+  "lon": -1.3535,
+  "seriesRadiusM": 500,
+  "mapRadiusM": 6000,
+  "mapPol": "co"
+ },
+ "event": 1795046400000.0,
+ "pols": [
+  "HH",
+  "HV"
+ ],
+ "series": [
+  {
+   "time": 1792042831000,
+   "hh": -7.24,
+   "hv": -14.41,
+   "pixels": 1963,
+   "file": "NISAR_L2_PR_GCOV_033_044_A_007_2005_DHDH_M_20261015T054031_20261015T054105_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1793079631000,
+   "hh": -8.96,
+   "hv": -14.95,
+   "pixels": 1963,
+   "file": "NISAR_L2_PR_GCOV_034_044_A_007_2005_DHDH_M_20261027T054031_20261027T054105_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1794116431000,
+   "hh": -8.93,
+   "hv": -14.94,
+   "pixels": 1963,
+   "file": "NISAR_L2_PR_GCOV_035_044_A_007_2005_DHDH_M_20261108T054031_20261108T054106_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1795153232000,
+   "hh": -8.95,
+   "hv": -14.88,
+   "pixels": 1963,
+   "file": "NISAR_L2_PR_GCOV_036_044_A_007_2005_DHDH_M_20261120T054032_20261120T054107_P05036_N_F_J_001.h5"
+  }
+ ],
+ "change": {
+  "before": 1794116431000,
+  "after": 1795153232000,
+  "pol": "HH",
+  "image": "event-gdacs-wf1034013_change.png",
+  "bounds": {
+   "west": -1.4084202402235437,
+   "east": -1.2985797597764561,
+   "south": 11.01440132950054,
+   "north": 11.122198670499461
+  },
+  "weakerPct": 0.0,
+  "strongerPct": 0.0,
+  "spansEvent": true
+ },
+ "firstDrop": null,
+ "summary": "Across the event of 2026-11-19: between 2026-11-08 and 2026-11-20, HH backscatter here changed by -0.0 dB and HV by +0.1 dB (mean within 500 m). Across the mapped area, 0% got at least 3 dB weaker and 0% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 4 passes on track 044-A-007-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-11-19, and 'before' the last pass before it.",
+ "generated": "2026-11-23T13:20:19Z"
+}
