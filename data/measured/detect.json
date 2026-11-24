@@ -301,6 +301,32 @@
   "water": 0.0
  },
  {
+  "id": "event-eonet-eonet-26571",
+  "name": "Prescribed Fire OAK Compartment 29 RX, Bibb, Alabama",
+  "cells": 576,
+  "passes": 5,
+  "event": {
+   "time": 1794960000000.0,
+   "date": "2026-11-18",
+   "firstPassAfter": "2026-11-21",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-09",
+   "time": 1794184577000,
+   "stood": 0.0,
+   "recent": 0.0677,
+   "long": 0.0
+  },
+  "water": 0.0
+ },
+ {
   "id": "event-eonet-eonet-26572",
   "name": "Prescribed Fire rx-Lapham Good Oak 2026, Waukesha, Wisconsin",
   "cells": 576,
@@ -308,21 +334,21 @@
   "event": {
    "time": 1794960000000.0,
    "date": "2026-11-18",
-   "firstPassAfter": "2026-11-20",
-   "stood": 0.0017,
-   "recent": 0.0104,
-   "long": 0.0017,
+   "firstPassAfter": "2026-11-18",
+   "stood": 0.0,
+   "recent": 0.0052,
+   "long": 0.0,
    "stillNext": null,
    "newVersion": null,
    "baseline": 2,
    "grade": "both"
   },
   "most": {
-   "date": "2026-11-20",
-   "time": 1795171749000,
-   "stood": 0.0017,
-   "recent": 0.0104,
-   "long": 0.0017
+   "date": "2026-11-18",
+   "time": 1794963506000,
+   "stood": 0.0,
+   "recent": 0.0052,
+   "long": 0.0
   },
   "water": 0.0
  },
@@ -348,6 +374,32 @@
    "time": 1794056971000,
    "stood": 0.0,
    "recent": 0.0,
+   "long": 0.0
+  },
+  "water": 0.0
+ },
+ {
+  "id": "event-eonet-eonet-26575",
+  "name": "Prescribed Fire Elk/Clark Piles RX, Coconino, Arizona",
+  "cells": 576,
+  "passes": 5,
+  "event": {
+   "time": 1794787200000.0,
+   "date": "2026-11-16",
+   "firstPassAfter": "2026-11-21",
+   "stood": 0.0,
+   "recent": 0.0087,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-09",
+   "time": 1794190536000,
+   "stood": 0.0,
+   "recent": 0.0052,
    "long": 0.0
   },
   "water": 0.0
@@ -1333,6 +1385,32 @@
   "water": 0.0
  },
  {
+  "id": "event-gdacs-wf1033985",
+  "name": "Forest fires in South Africa",
+  "cells": 525,
+  "passes": 4,
+  "event": {
+   "time": 1794960000000.0,
+   "date": "2026-11-18",
+   "firstPassAfter": "2026-11-20",
+   "stood": 0.0134,
+   "recent": 0.0134,
+   "long": 0.0153,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-20",
+   "time": 1795192552000,
+   "stood": 0.0134,
+   "recent": 0.0134,
+   "long": 0.0153
+  },
+  "water": 0.089
+ },
+ {
   "id": "event-gdacs-wf1033991",
   "name": "Forest fires in Australia",
   "cells": 262,
@@ -1814,14 +1892,14 @@
   "id": "jakobshavn",
   "name": "Sermeq Kujalleq (Jakobshavn)",
   "cells": 2304,
-  "passes": 12,
+  "passes": 13,
   "event": null,
   "most": {
-   "date": "2026-09-17",
-   "time": 1789689121000,
-   "stood": 0.0286,
-   "recent": 0.056,
-   "long": 0.049
+   "date": "2026-09-22",
+   "time": 1790060151000,
+   "stood": 0.0356,
+   "recent": 0.0842,
+   "long": 0.0577
   },
   "water": 0.0
  },

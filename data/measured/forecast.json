@@ -502,6 +502,50 @@
   }
  },
  {
+  "id": "event-eonet-eonet-26571",
+  "name": "Prescribed Fire OAK Compartment 29 RX, Bibb, Alabama",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1794960000000.0,
+   "date": "2026-11-18",
+   "firstPassAfter": "2026-11-21",
+   "outside": 0.212,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-21",
+   "time": 1795221377000,
+   "outside": 0.212,
+   "expected": 0.5
+  },
+  "last": {
+   "rmse": 0.74,
+   "mae": 0.65,
+   "within90": 1.13,
+   "r2": -0.415,
+   "spearman": 0.052,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.56,
+   "mae": 1.42,
+   "within90": 2.31,
+   "r2": -5.32,
+   "spearman": -0.265,
+   "skill": -3.465
+  },
+  "peers": {
+   "rmse": 0.33,
+   "mae": 0.26,
+   "within90": 0.55,
+   "r2": 0.714,
+   "spearman": 0.768,
+   "skill": 0.798
+  }
+ },
+ {
   "id": "event-eonet-eonet-26573",
   "name": "Prescribed Fire STEELY MILL RX, El Dorado, California",
   "cells": 576,
@@ -543,6 +587,50 @@
    "r2": 0.822,
    "spearman": 0.944,
    "skill": 0.812
+  }
+ },
+ {
+  "id": "event-eonet-eonet-26575",
+  "name": "Prescribed Fire Elk/Clark Piles RX, Coconino, Arizona",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1794787200000.0,
+   "date": "2026-11-16",
+   "firstPassAfter": "2026-11-21",
+   "outside": 0.16,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-21",
+   "time": 1795227337000,
+   "outside": 0.16,
+   "expected": 0.15
+  },
+  "last": {
+   "rmse": 0.14,
+   "mae": 0.11,
+   "within90": 0.22,
+   "r2": 0.993,
+   "spearman": 0.991,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 0.31,
+   "mae": 0.21,
+   "within90": 0.44,
+   "r2": 0.965,
+   "spearman": 0.985,
+   "skill": -3.711
+  },
+  "peers": {
+   "rmse": 0.12,
+   "mae": 0.08,
+   "within90": 0.16,
+   "r2": 0.995,
+   "spearman": 0.996,
+   "skill": 0.309
   }
  },
  {
@@ -2417,62 +2505,62 @@
   "id": "jakobshavn",
   "name": "Sermeq Kujalleq (Jakobshavn)",
   "cells": 2304,
-  "passes": 12,
+  "passes": 13,
   "best": "last",
   "event": null,
   "peerSurprise": {
-   "date": "2026-09-29",
-   "time": 1790725921000,
-   "outside": 0.416,
-   "expected": 1.2
+   "date": "2026-09-22",
+   "time": 1790060151000,
+   "outside": 0.186,
+   "expected": 1.44
   },
   "last": {
-   "rmse": 0.84,
-   "mae": 0.61,
-   "within90": 1.33,
-   "r2": 0.936,
-   "spearman": 0.964,
+   "rmse": 0.93,
+   "mae": 0.66,
+   "within90": 1.46,
+   "r2": 0.917,
+   "spearman": 0.952,
    "skill": 0.0
   },
   "line": {
-   "rmse": 1.19,
-   "mae": 0.86,
-   "within90": 1.83,
-   "r2": 0.87,
-   "spearman": 0.937,
-   "skill": -1.021
+   "rmse": 1.38,
+   "mae": 0.97,
+   "within90": 2.22,
+   "r2": 0.816,
+   "spearman": 0.915,
+   "skill": -1.21
   },
   "peers": {
-   "rmse": 0.78,
-   "mae": 0.52,
-   "within90": 1.27,
-   "r2": 0.944,
-   "spearman": 0.969,
-   "skill": 0.132
+   "rmse": 0.85,
+   "mae": 0.57,
+   "within90": 1.35,
+   "r2": 0.931,
+   "spearman": 0.96,
+   "skill": 0.171
   },
   "mean": {
-   "rmse": 1.5,
-   "mae": 1.15,
-   "within90": 2.48,
-   "r2": 0.793,
-   "spearman": 0.925,
-   "skill": -2.209
+   "rmse": 1.51,
+   "mae": 1.19,
+   "within90": 2.47,
+   "r2": 0.781,
+   "spearman": 0.91,
+   "skill": -1.63
   },
   "trend": {
-   "rmse": 1.03,
-   "mae": 0.77,
-   "within90": 1.69,
-   "r2": 0.902,
-   "spearman": 0.952,
-   "skill": -0.518
+   "rmse": 1.2,
+   "mae": 0.86,
+   "within90": 1.89,
+   "r2": 0.861,
+   "spearman": 0.931,
+   "skill": -0.668
   },
   "learnt": {
-   "rmse": 0.89,
-   "mae": 0.68,
-   "within90": 1.41,
-   "r2": 0.926,
-   "spearman": 0.96,
-   "skill": -0.142
+   "rmse": 1.07,
+   "mae": 0.8,
+   "within90": 1.66,
+   "r2": 0.89,
+   "spearman": 0.939,
+   "skill": -0.315
   }
  },
  {

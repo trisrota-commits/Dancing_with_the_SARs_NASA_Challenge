@@ -65,5 +65,5 @@
  "firstDrop": 1793511132000,
  "summary": "Across the event of 2026-11-13: between 2026-11-01 and 2026-11-13, HH backscatter here changed by -0.6 dB and HV by -0.3 dB (mean within 500 m). Across the mapped area, 0% got at least 3 dB weaker and 0% at least 3 dB stronger.",
  "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 4 passes on track 116-A-007-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-11-13, and 'before' the last pass before it.",
- "generated": "2026-11-23T13:25:15Z"
+ "generated": "2026-11-24T02:31:51Z"
 }

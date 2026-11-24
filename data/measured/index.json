@@ -108,6 +108,15 @@
   "file": "event-eonet-eonet-26568.json"
  },
  {
+  "id": "event-eonet-eonet-26571",
+  "name": "Prescribed Fire OAK Compartment 29 RX, Bibb, Alabama",
+  "lat": 32.9459,
+  "lon": -87.3471,
+  "radiusKm": 25,
+  "event": 1794960000000.0,
+  "file": "event-eonet-eonet-26571.json"
+ },
+ {
   "id": "event-eonet-eonet-26572",
   "name": "Prescribed Fire rx-Lapham Good Oak 2026, Waukesha, Wisconsin",
   "lat": 43.0404,
@@ -124,6 +133,15 @@
   "radiusKm": 25,
   "event": 1794787200000.0,
   "file": "event-eonet-eonet-26573.json"
+ },
+ {
+  "id": "event-eonet-eonet-26575",
+  "name": "Prescribed Fire Elk/Clark Piles RX, Coconino, Arizona",
+  "lat": 35.0504,
+  "lon": -111.5781,
+  "radiusKm": 25,
+  "event": 1794787200000.0,
+  "file": "event-eonet-eonet-26575.json"
  },
  {
   "id": "event-eonet-eonet-26576",
@@ -466,6 +484,15 @@
   "radiusKm": 25,
   "event": 1794787200000.0,
   "file": "event-gdacs-wf1033981.json"
+ },
+ {
+  "id": "event-gdacs-wf1033985",
+  "name": "Forest fires in South Africa",
+  "lat": -34.4139,
+  "lon": 20.5685,
+  "radiusKm": 25,
+  "event": 1794960000000.0,
+  "file": "event-gdacs-wf1033985.json"
  },
  {
   "id": "event-gdacs-wf1033991",
