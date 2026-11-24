@@ -1,20 +1,20 @@
 {
- "id": "event-gdacs-wf1033972",
- "name": "Forest fires in Botswana",
- "track": "050-D-099-DHDH",
+ "id": "event-gdacs-fl1104298",
+ "name": "Flood in Portugal",
+ "track": "052-D-068-DHDH",
  "cellM": 500.0,
  "cells": 576,
- "passes": 5,
- "from": "2026-10-03",
+ "passes": 4,
+ "from": "2026-10-15",
  "to": "2026-11-20",
  "falseAlarm": 0.01,
  "water": 0.0,
  "event": {
-  "time": 1794873600000.0,
-  "date": "2026-11-17",
+  "time": 1795132800000.0,
+  "date": "2026-11-20",
   "firstPassAfter": "2026-11-20",
   "stood": 0.0,
-  "recent": 0.0,
+  "recent": 0.0069,
   "long": 0.0,
   "stillNext": null,
   "newVersion": null,
@@ -22,16 +22,16 @@
   "grade": "both"
  },
  "most": {
-  "date": "2026-11-08",
-  "time": 1794155525000,
-  "stood": 0.0417,
-  "recent": 0.1198,
-  "long": 0.0417
+  "date": "2026-11-20",
+  "time": 1795203263000,
+  "stood": 0.0,
+  "recent": 0.0069,
+  "long": 0.0
  },
  "picture": {
   "date": "2026-11-20",
-  "time": 1795192317000,
-  "baselineFrom": "2026-10-03",
+  "time": 1795203263000,
+  "baselineFrom": "2026-10-15",
   "baselineTo": "2026-11-08",
   "n": 24
  },
@@ -50,57 +50,30 @@
  },
  "byDate": [
   {
-   "time": 1794155525000,
-   "date": "2026-11-08",
+   "time": 1795203263000,
+   "date": "2026-11-20",
    "baseline": 2,
    "history": 3,
    "grade": "both",
    "channels": 2,
-   "threshold": 3.36,
-   "over": 0.1389,
-   "stood": 0.0417,
-   "recent": 0.1198,
-   "long": 0.0417,
-   "rose": 0.0417,
-   "fell": 0.0,
-   "kinds": {
-    "bothFell": 0.0,
-    "bothRose": 0.875,
-    "hhRose": 0.125,
-    "hhFell": 0.0,
-    "hvRose": 0.0,
-    "hvFell": 0.0,
-    "other": 0.0
-   },
-   "afterEvent": false,
-   "stillNext": 0.125,
-   "image": "event-gdacs-wf1033972_stood_2026-11-08.png"
-  },
-  {
-   "time": 1795192317000,
-   "date": "2026-11-20",
-   "baseline": 2,
-   "history": 4,
-   "grade": "both",
-   "channels": 2,
-   "threshold": 15.55,
-   "over": 0.0,
+   "threshold": 5.27,
+   "over": 0.0104,
    "stood": 0.0,
-   "recent": 0.0,
+   "recent": 0.0069,
    "long": 0.0,
    "rose": 0.0,
    "fell": 0.0,
    "afterEvent": true
   }
  ],
- "summary": "On NISAR's first pass after the event of 2026-11-17 (2026-11-20), 0.0 % of the cells stood out: they read differently both from the two passes just before and from their own history over 4 passes.",
+ "summary": "On NISAR's first pass after the event of 2026-11-20 (2026-11-20), 0.0 % of the cells stood out: they read differently both from the two passes just before and from their own history over 3 passes.",
  "method": "NISAR L2 GCOV backscatter in cells of 500 m. From each pass the middle of all cells is taken away, so that what moved the whole area alike drops out. A cell stands out if two checks agree. One: its step from the mean of the 2 latest passes before (at an event: before the event) is beyond the spread such steps had over the area. Two: it lies beyond its own usual value and spread over the whole baseline (at most 10 passes). Both in HH and, where recorded, HV. Each threshold is the score that 1% of the cells exceeded when the baseline passes were judged against each other, and a cell counts only if at least 2 of its eight neighbours are over it too. Open water (cells whose cross-polarised echo is usually under -24 dB) is left out.",
  "limits": "It says that the ground changed and where, not why. A baseline of a few passes knows nothing of the season: a crop growing or ground freezing stands out as well. Over open water the echo follows the wind from pass to pass. Cells next to each other share speckle and weather, so a cluster is weaker evidence than its size suggests.",
- "generated": "2026-11-24T02:32:04Z",
+ "generated": "2026-11-24T14:17:19Z",
  "bounds": {
-  "west": 24.405825204246604,
-  "east": 24.521974795753394,
-  "south": -21.91479867049946,
-  "north": -21.80700132950054
+  "west": -8.484955384536057,
+  "east": -8.34504461546394,
+  "south": 39.54980132950054,
+  "north": 39.65759867049947
  }
 }

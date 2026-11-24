@@ -1,0 +1,76 @@
+{
+ "id": "event-eonet-eonet-26665",
+ "name": "Prescribed Fire RX D7 Second Skinny Landings, Mineral, Montana",
+ "lat": 47.1227,
+ "lon": -114.752,
+ "radiusKm": 25,
+ "track": "042-D-064-DHDH",
+ "setup": {
+  "lat": 47.1227,
+  "lon": -114.752,
+  "seriesRadiusM": 500,
+  "mapRadiusM": 6000,
+  "mapPol": "co"
+ },
+ "event": 1794787200000.0,
+ "pols": [
+  "HH",
+  "HV"
+ ],
+ "series": [
+  {
+   "time": 1790995995000,
+   "hh": -6.02,
+   "hv": -12.09,
+   "pixels": 7859,
+   "file": "NISAR_L2_PR_GCOV_032_042_D_064_4005_DHDH_A_20261003T025315_20261003T025350_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1792032795000,
+   "hh": -5.86,
+   "hv": -12.03,
+   "pixels": 7859,
+   "file": "NISAR_L2_PR_GCOV_033_042_D_064_4005_DHDH_A_20261015T025315_20261015T025350_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1793069595000,
+   "hh": -5.63,
+   "hv": -11.48,
+   "pixels": 7859,
+   "file": "NISAR_L2_PR_GCOV_034_042_D_064_4005_DHDH_A_20261027T025315_20261027T025350_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1794106395000,
+   "hh": -5.59,
+   "hv": -11.43,
+   "pixels": 7859,
+   "file": "NISAR_L2_PR_GCOV_035_042_D_064_4005_DHDH_A_20261108T025315_20261108T025351_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1795143196000,
+   "hh": -4.86,
+   "hv": -10.6,
+   "pixels": 7859,
+   "file": "NISAR_L2_PR_GCOV_036_042_D_064_4005_DHDH_A_20261120T025316_20261120T025351_P05036_N_F_J_001.h5"
+  }
+ ],
+ "change": {
+  "before": 1794106395000,
+  "after": 1795143196000,
+  "pol": "HH",
+  "image": "event-eonet-eonet-26665_change.png",
+  "bounds": {
+   "west": -114.83121259174175,
+   "east": -114.67278740825824,
+   "south": 47.06880132950054,
+   "north": 47.176598670499466
+  },
+  "weakerPct": 1.0,
+  "strongerPct": 0.1,
+  "spansEvent": true
+ },
+ "firstDrop": null,
+ "summary": "Across the event of 2026-11-16: between 2026-11-08 and 2026-11-20, HH backscatter here changed by +0.7 dB and HV by +0.8 dB (mean within 500 m). Across the mapped area, 1% got at least 3 dB weaker and 0% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 5 passes on track 042-D-064-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-11-16, and 'before' the last pass before it.",
+ "generated": "2026-11-24T14:13:01Z"
+}

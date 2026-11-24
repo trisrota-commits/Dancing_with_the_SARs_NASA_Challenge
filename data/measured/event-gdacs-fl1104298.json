@@ -1,0 +1,69 @@
+{
+ "id": "event-gdacs-fl1104298",
+ "name": "Flood in Portugal",
+ "lat": 39.6037,
+ "lon": -8.415,
+ "radiusKm": 25,
+ "track": "052-D-068-DHDH",
+ "setup": {
+  "lat": 39.6037,
+  "lon": -8.415,
+  "seriesRadiusM": 500,
+  "mapRadiusM": 6000,
+  "mapPol": "co"
+ },
+ "event": 1795132800000.0,
+ "pols": [
+  "HH",
+  "HV"
+ ],
+ "series": [
+  {
+   "time": 1792092861000,
+   "hh": 0.56,
+   "hv": -9.01,
+   "pixels": 1966,
+   "file": "NISAR_L2_PR_GCOV_033_052_D_068_2005_DHDH_A_20261015T193421_20261015T193456_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1793129662000,
+   "hh": 0.25,
+   "hv": -9.57,
+   "pixels": 1966,
+   "file": "NISAR_L2_PR_GCOV_034_052_D_068_2005_DHDH_A_20261027T193422_20261027T193456_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1794166462000,
+   "hh": 1.01,
+   "hv": -9.06,
+   "pixels": 1966,
+   "file": "NISAR_L2_PR_GCOV_035_052_D_068_2005_DHDH_A_20261108T193422_20261108T193457_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1795203263000,
+   "hh": 0.58,
+   "hv": -8.7,
+   "pixels": 1966,
+   "file": "NISAR_L2_PR_GCOV_036_052_D_068_2005_DHDH_A_20261120T193423_20261120T193458_P05036_N_F_J_001.h5"
+  }
+ ],
+ "change": {
+  "before": 1794166462000,
+  "after": 1795203263000,
+  "pol": "HH",
+  "image": "event-gdacs-fl1104298_change.png",
+  "bounds": {
+   "west": -8.484955384536057,
+   "east": -8.34504461546394,
+   "south": 39.54980132950054,
+   "north": 39.65759867049947
+  },
+  "weakerPct": 0.1,
+  "strongerPct": 0.2,
+  "spansEvent": true
+ },
+ "firstDrop": null,
+ "summary": "Across the event of 2026-11-20: between 2026-11-08 and 2026-11-20, HH backscatter here changed by -0.4 dB and HV by +0.4 dB (mean within 500 m). Across the mapped area, 0% got at least 3 dB weaker and 0% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 4 passes on track 052-D-068-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-11-20, and 'before' the last pass before it.",
+ "generated": "2026-11-24T14:08:49Z"
+}

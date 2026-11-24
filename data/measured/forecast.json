@@ -282,50 +282,6 @@
   }
  },
  {
-  "id": "event-eonet-eonet-26464",
-  "name": "Wildfire 201W, Perry, Mississippi",
-  "cells": 576,
-  "passes": 5,
-  "best": "last",
-  "event": {
-   "time": 1794528000000.0,
-   "date": "2026-11-13",
-   "firstPassAfter": "2026-11-16",
-   "outside": 0.036,
-   "newVersion": null
-  },
-  "peerSurprise": {
-   "date": "2026-11-16",
-   "time": 1794789910000,
-   "outside": 0.036,
-   "expected": 0.73
-  },
-  "last": {
-   "rmse": 0.68,
-   "mae": 0.55,
-   "within90": 1.13,
-   "r2": 0.75,
-   "spearman": 0.679,
-   "skill": 0.0
-  },
-  "line": {
-   "rmse": 1.16,
-   "mae": 0.89,
-   "within90": 2.07,
-   "r2": 0.262,
-   "spearman": 0.403,
-   "skill": -1.951
-  },
-  "peers": {
-   "rmse": 0.41,
-   "mae": 0.33,
-   "within90": 0.68,
-   "r2": 0.907,
-   "spearman": 0.86,
-   "skill": 0.626
-  }
- },
- {
   "id": "event-eonet-eonet-26465",
   "name": "Wildfire Range 47, Forrest, Mississippi",
   "cells": 576,
@@ -466,83 +422,39 @@
   "event": {
    "time": 1794528000000.0,
    "date": "2026-11-13",
-   "firstPassAfter": "2026-11-20",
-   "outside": 0.094,
+   "firstPassAfter": "2026-11-18",
+   "outside": 0.179,
    "newVersion": null
   },
   "peerSurprise": {
-   "date": "2026-11-20",
-   "time": 1795171749000,
-   "outside": 0.094,
-   "expected": 5.73
-  },
-  "last": {
-   "rmse": 6.07,
-   "mae": 2.31,
-   "within90": 5.72,
-   "r2": -0.944,
-   "spearman": 0.82,
-   "skill": 0.0
-  },
-  "line": {
-   "rmse": 12.18,
-   "mae": 4.53,
-   "within90": 11.55,
-   "r2": -6.837,
-   "spearman": 0.585,
-   "skill": -3.032
-  },
-  "peers": {
-   "rmse": 6.03,
-   "mae": 2.25,
-   "within90": 5.62,
-   "r2": -0.919,
-   "spearman": 0.833,
-   "skill": 0.013
-  }
- },
- {
-  "id": "event-eonet-eonet-26571",
-  "name": "Prescribed Fire OAK Compartment 29 RX, Bibb, Alabama",
-  "cells": 576,
-  "passes": 5,
-  "best": "last",
-  "event": {
-   "time": 1794960000000.0,
    "date": "2026-11-18",
-   "firstPassAfter": "2026-11-21",
-   "outside": 0.212,
-   "newVersion": null
-  },
-  "peerSurprise": {
-   "date": "2026-11-21",
-   "time": 1795221377000,
-   "outside": 0.212,
-   "expected": 0.5
+   "time": 1794963506000,
+   "outside": 0.179,
+   "expected": 0.86
   },
   "last": {
-   "rmse": 0.74,
-   "mae": 0.65,
-   "within90": 1.13,
-   "r2": -0.415,
-   "spearman": 0.052,
+   "rmse": 0.93,
+   "mae": 0.6,
+   "within90": 1.04,
+   "r2": 0.82,
+   "spearman": 0.938,
    "skill": 0.0
   },
   "line": {
-   "rmse": 1.56,
-   "mae": 1.42,
-   "within90": 2.31,
-   "r2": -5.32,
-   "spearman": -0.265,
-   "skill": -3.465
+   "rmse": 1.49,
+   "mae": 0.85,
+   "within90": 1.79,
+   "r2": 0.539,
+   "spearman": 0.876,
+   "skill": -1.559
   },
   "peers": {
-   "rmse": 0.33,
-   "mae": 0.26,
-   "within90": 0.55,
-   "r2": 0.714,
-   "spearman": 0.768,
-   "skill": 0.798
+   "rmse": 0.89,
+   "mae": 0.46,
+   "within90": 1.06,
+   "r2": 0.835,
+   "spearman": 0.956,
+   "skill": 0.084
   }
  },
  {
@@ -719,6 +631,50 @@
    "r2": 0.919,
    "spearman": 0.935,
    "skill": 0.531
+  }
+ },
+ {
+  "id": "event-eonet-eonet-26665",
+  "name": "Prescribed Fire RX D7 Second Skinny Landings, Mineral, Montana",
+  "cells": 555,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1794787200000.0,
+   "date": "2026-11-16",
+   "firstPassAfter": "2026-11-20",
+   "outside": 0.479,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-20",
+   "time": 1795143196000,
+   "outside": 0.479,
+   "expected": 0.37
+  },
+  "last": {
+   "rmse": 0.52,
+   "mae": 0.38,
+   "within90": 0.79,
+   "r2": 0.575,
+   "spearman": 0.732,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 0.75,
+   "mae": 0.58,
+   "within90": 1.18,
+   "r2": 0.112,
+   "spearman": 0.532,
+   "skill": -1.051
+  },
+  "peers": {
+   "rmse": 0.5,
+   "mae": 0.3,
+   "within90": 0.78,
+   "r2": 0.616,
+   "spearman": 0.762,
+   "skill": 0.097
   }
  },
  {
@@ -1253,50 +1209,6 @@
   }
  },
  {
-  "id": "event-gdacs-wf1033863",
-  "name": "Forest fires in Sudan, South Sudan",
-  "cells": 576,
-  "passes": 5,
-  "best": "last",
-  "event": {
-   "time": 1794528000000.0,
-   "date": "2026-11-13",
-   "firstPassAfter": "2026-11-16",
-   "outside": 0.005,
-   "newVersion": null
-  },
-  "peerSurprise": {
-   "date": "2026-11-16",
-   "time": 1794799641000,
-   "outside": 0.005,
-   "expected": 1.57
-  },
-  "last": {
-   "rmse": 2.13,
-   "mae": 1.57,
-   "within90": 3.71,
-   "r2": 0.517,
-   "spearman": 0.866,
-   "skill": 0.0
-  },
-  "line": {
-   "rmse": 3.65,
-   "mae": 2.55,
-   "within90": 6.14,
-   "r2": -0.419,
-   "spearman": 0.614,
-   "skill": -1.939
-  },
-  "peers": {
-   "rmse": 0.86,
-   "mae": 0.56,
-   "within90": 1.38,
-   "r2": 0.921,
-   "spearman": 0.959,
-   "skill": 0.836
-  }
- },
- {
   "id": "event-gdacs-wf1033884",
   "name": "Forest fires in Australia",
   "cells": 576,
@@ -1382,50 +1294,6 @@
    "r2": 0.991,
    "spearman": 0.992,
    "skill": 0.845
-  }
- },
- {
-  "id": "event-gdacs-wf1033925",
-  "name": "Forest fires in Benin",
-  "cells": 576,
-  "passes": 5,
-  "best": "last",
-  "event": {
-   "time": 1794614400000.0,
-   "date": "2026-11-14",
-   "firstPassAfter": "2026-11-18",
-   "outside": 0.009,
-   "newVersion": null
-  },
-  "peerSurprise": {
-   "date": "2026-11-18",
-   "time": 1794979433000,
-   "outside": 0.009,
-   "expected": 0.74
-  },
-  "last": {
-   "rmse": 0.83,
-   "mae": 0.58,
-   "within90": 1.5,
-   "r2": 0.32,
-   "spearman": 0.705,
-   "skill": 0.0
-  },
-  "line": {
-   "rmse": 0.86,
-   "mae": 0.7,
-   "within90": 1.4,
-   "r2": 0.273,
-   "spearman": 0.727,
-   "skill": -0.07
-  },
-  "peers": {
-   "rmse": 0.37,
-   "mae": 0.26,
-   "within90": 0.65,
-   "r2": 0.866,
-   "spearman": 0.93,
-   "skill": 0.803
   }
  },
  {
@@ -1653,74 +1521,6 @@
   }
  },
  {
-  "id": "event-gdacs-wf1033965",
-  "name": "Forest fires in Benin, Burkina Faso",
-  "cells": 428,
-  "passes": 8,
-  "best": "learnt",
-  "event": {
-   "time": 1794873600000.0,
-   "date": "2026-11-17",
-   "firstPassAfter": "2026-11-18",
-   "outside": 0.056,
-   "newVersion": null
-  },
-  "peerSurprise": {
-   "date": "2026-11-18",
-   "time": 1794979461000,
-   "outside": 0.108,
-   "expected": 0.29
-  },
-  "last": {
-   "rmse": 0.3,
-   "mae": 0.24,
-   "within90": 0.48,
-   "r2": 0.952,
-   "spearman": 0.98,
-   "skill": 0.0
-  },
-  "line": {
-   "rmse": 0.51,
-   "mae": 0.44,
-   "within90": 0.77,
-   "r2": 0.854,
-   "spearman": 0.935,
-   "skill": -1.726
-  },
-  "peers": {
-   "rmse": 0.19,
-   "mae": 0.13,
-   "within90": 0.29,
-   "r2": 0.982,
-   "spearman": 0.994,
-   "skill": 0.621
-  },
-  "mean": {
-   "rmse": 1.03,
-   "mae": 0.89,
-   "within90": 1.58,
-   "r2": 0.451,
-   "spearman": 0.943,
-   "skill": -10.512
-  },
-  "trend": {
-   "rmse": 1.02,
-   "mae": 0.75,
-   "within90": 1.9,
-   "r2": 0.405,
-   "spearman": 0.91,
-   "skill": -10.734
-  },
-  "learnt": {
-   "rmse": 0.25,
-   "mae": 0.2,
-   "within90": 0.44,
-   "r2": 0.964,
-   "spearman": 0.98,
-   "skill": 0.296
-  }
- },
- {
   "id": "event-gdacs-wf1033969",
   "name": "Forest fires in Sudan",
   "cells": 576,
@@ -1765,50 +1565,6 @@
   }
  },
  {
-  "id": "event-gdacs-wf1033972",
-  "name": "Forest fires in Botswana",
-  "cells": 576,
-  "passes": 5,
-  "best": "last",
-  "event": {
-   "time": 1794873600000.0,
-   "date": "2026-11-17",
-   "firstPassAfter": "2026-11-20",
-   "outside": 0.307,
-   "newVersion": null
-  },
-  "peerSurprise": {
-   "date": "2026-11-20",
-   "time": 1795192317000,
-   "outside": 0.307,
-   "expected": 0.32
-  },
-  "last": {
-   "rmse": 0.67,
-   "mae": 0.51,
-   "within90": 0.92,
-   "r2": 0.636,
-   "spearman": 0.812,
-   "skill": 0.0
-  },
-  "line": {
-   "rmse": 1.01,
-   "mae": 0.72,
-   "within90": 1.37,
-   "r2": 0.168,
-   "spearman": 0.637,
-   "skill": -1.284
-  },
-  "peers": {
-   "rmse": 0.39,
-   "mae": 0.22,
-   "within90": 0.41,
-   "r2": 0.873,
-   "spearman": 0.945,
-   "skill": 0.652
-  }
- },
- {
   "id": "event-gdacs-wf1033996",
   "name": "Forest fires in South Sudan, Sudan",
   "cells": 576,
@@ -1850,94 +1606,6 @@
    "r2": 0.912,
    "spearman": 0.957,
    "skill": 0.95
-  }
- },
- {
-  "id": "event-gdacs-wf1033997",
-  "name": "Forest fires in South Sudan, Central African Republic",
-  "cells": 308,
-  "passes": 5,
-  "best": "last",
-  "event": {
-   "time": 1794787200000.0,
-   "date": "2026-11-16",
-   "firstPassAfter": "2026-11-20",
-   "outside": 0.042,
-   "newVersion": null
-  },
-  "peerSurprise": {
-   "date": "2026-11-20",
-   "time": 1795147206000,
-   "outside": 0.042,
-   "expected": 0.41
-  },
-  "last": {
-   "rmse": 1.39,
-   "mae": 0.95,
-   "within90": 2.45,
-   "r2": 0.878,
-   "spearman": 0.93,
-   "skill": 0.0
-  },
-  "line": {
-   "rmse": 1.82,
-   "mae": 1.56,
-   "within90": 2.65,
-   "r2": 0.783,
-   "spearman": 0.846,
-   "skill": -0.706
-  },
-  "peers": {
-   "rmse": 0.23,
-   "mae": 0.17,
-   "within90": 0.36,
-   "r2": 0.996,
-   "spearman": 0.997,
-   "skill": 0.971
-  }
- },
- {
-  "id": "event-gdacs-wf1034014",
-  "name": "Forest fires in Benin, Burkina Faso",
-  "cells": 364,
-  "passes": 7,
-  "best": "last",
-  "event": {
-   "time": 1794960000000.0,
-   "date": "2026-11-18",
-   "firstPassAfter": "2026-11-18",
-   "outside": 0.014,
-   "newVersion": null
-  },
-  "peerSurprise": {
-   "date": "2026-11-06",
-   "time": 1793942633000,
-   "outside": 0.224,
-   "expected": 0.55
-  },
-  "last": {
-   "rmse": 0.77,
-   "mae": 0.5,
-   "within90": 1.51,
-   "r2": 0.79,
-   "spearman": 0.919,
-   "skill": 0.0
-  },
-  "line": {
-   "rmse": 1.15,
-   "mae": 0.95,
-   "within90": 1.88,
-   "r2": 0.52,
-   "spearman": 0.812,
-   "skill": -1.087
-  },
-  "peers": {
-   "rmse": 0.34,
-   "mae": 0.25,
-   "within90": 0.57,
-   "r2": 0.959,
-   "spearman": 0.981,
-   "skill": 0.803
   }
  },
  {
@@ -2629,8 +2297,8 @@
   "id": "okavango",
   "name": "Okavango Delta",
   "cells": 3600,
-  "passes": 12,
-  "best": "last",
+  "passes": 9,
+  "best": "trend",
   "event": null,
   "peerSurprise": {
    "date": "2026-10-12",
@@ -2639,52 +2307,52 @@
    "expected": 0.66
   },
   "last": {
-   "rmse": 0.56,
-   "mae": 0.4,
-   "within90": 0.94,
-   "r2": 0.921,
-   "spearman": 0.966,
+   "rmse": 0.53,
+   "mae": 0.36,
+   "within90": 0.87,
+   "r2": 0.937,
+   "spearman": 0.98,
    "skill": 0.0
   },
   "line": {
-   "rmse": 0.62,
-   "mae": 0.46,
-   "within90": 0.99,
-   "r2": 0.904,
-   "spearman": 0.953,
-   "skill": -0.221
+   "rmse": 0.57,
+   "mae": 0.42,
+   "within90": 0.9,
+   "r2": 0.924,
+   "spearman": 0.965,
+   "skill": -0.198
   },
   "peers": {
    "rmse": 0.48,
    "mae": 0.34,
    "within90": 0.78,
-   "r2": 0.942,
-   "spearman": 0.974,
-   "skill": 0.263
+   "r2": 0.946,
+   "spearman": 0.981,
+   "skill": 0.152
   },
   "mean": {
-   "rmse": 1.48,
-   "mae": 1.1,
-   "within90": 2.5,
-   "r2": 0.456,
-   "spearman": 0.864,
-   "skill": -5.915
+   "rmse": 1.46,
+   "mae": 1.05,
+   "within90": 2.55,
+   "r2": 0.507,
+   "spearman": 0.936,
+   "skill": -6.776
   },
   "trend": {
-   "rmse": 0.6,
-   "mae": 0.43,
-   "within90": 0.96,
-   "r2": 0.912,
-   "spearman": 0.96,
-   "skill": -0.123
+   "rmse": 0.5,
+   "mae": 0.35,
+   "within90": 0.8,
+   "r2": 0.943,
+   "spearman": 0.976,
+   "skill": 0.098
   },
   "learnt": {
-   "rmse": 0.59,
-   "mae": 0.44,
-   "within90": 0.97,
-   "r2": 0.913,
-   "spearman": 0.961,
-   "skill": -0.111
+   "rmse": 0.58,
+   "mae": 0.43,
+   "within90": 0.95,
+   "r2": 0.922,
+   "spearman": 0.967,
+   "skill": -0.223
   }
  },
  {
@@ -2815,62 +2483,62 @@
   "id": "sacramento",
   "name": "Sacramento Valley rice",
   "cells": 1024,
-  "passes": 30,
+  "passes": 27,
   "best": "last",
   "event": null,
   "peerSurprise": {
-   "date": "2026-05-18",
-   "time": 1779110275000,
-   "outside": 0.241,
-   "expected": 1.98
+   "date": "2026-04-12",
+   "time": 1775999876000,
+   "outside": 0.305,
+   "expected": 1.87
   },
   "last": {
-   "rmse": 1.64,
-   "mae": 1.07,
-   "within90": 2.55,
-   "r2": 0.773,
-   "spearman": 0.89,
+   "rmse": 1.66,
+   "mae": 1.08,
+   "within90": 2.57,
+   "r2": 0.766,
+   "spearman": 0.887,
    "skill": 0.0
   },
   "line": {
-   "rmse": 2.26,
-   "mae": 1.51,
-   "within90": 3.63,
-   "r2": 0.566,
-   "spearman": 0.845,
-   "skill": -0.914
+   "rmse": 2.32,
+   "mae": 1.57,
+   "within90": 3.71,
+   "r2": 0.539,
+   "spearman": 0.836,
+   "skill": -0.967
   },
   "peers": {
-   "rmse": 1.45,
-   "mae": 0.89,
-   "within90": 2.16,
-   "r2": 0.822,
-   "spearman": 0.918,
-   "skill": 0.216
+   "rmse": 1.46,
+   "mae": 0.92,
+   "within90": 2.24,
+   "r2": 0.817,
+   "spearman": 0.914,
+   "skill": 0.219
   },
   "mean": {
    "rmse": 2.32,
-   "mae": 1.65,
-   "within90": 3.79,
-   "r2": 0.544,
-   "spearman": 0.766,
-   "skill": -1.012
+   "mae": 1.64,
+   "within90": 3.87,
+   "r2": 0.541,
+   "spearman": 0.754,
+   "skill": -0.957
   },
   "trend": {
-   "rmse": 2.1,
-   "mae": 1.41,
-   "within90": 3.36,
-   "r2": 0.628,
-   "spearman": 0.854,
-   "skill": -0.641
+   "rmse": 2.18,
+   "mae": 1.46,
+   "within90": 3.47,
+   "r2": 0.595,
+   "spearman": 0.847,
+   "skill": -0.726
   },
   "learnt": {
-   "rmse": 1.72,
-   "mae": 1.15,
-   "within90": 2.67,
-   "r2": 0.749,
-   "spearman": 0.872,
-   "skill": -0.108
+   "rmse": 1.66,
+   "mae": 1.13,
+   "within90": 2.54,
+   "r2": 0.764,
+   "spearman": 0.88,
+   "skill": -0.007
   }
  },
  {

@@ -162,6 +162,15 @@
   "file": "event-eonet-eonet-26577.json"
  },
  {
+  "id": "event-eonet-eonet-26665",
+  "name": "Prescribed Fire RX D7 Second Skinny Landings, Mineral, Montana",
+  "lat": 47.1227,
+  "lon": -114.752,
+  "radiusKm": 25,
+  "event": 1794787200000.0,
+  "file": "event-eonet-eonet-26665.json"
+ },
+ {
   "id": "event-gdacs-eq1570077",
   "name": "M 6.3 - 117 km NE of Norsup, Vanuatu",
   "lat": -15.4332,
@@ -250,6 +259,15 @@
   "radiusKm": 25,
   "event": 1794873600000.0,
   "file": "event-gdacs-fl1104290.json"
+ },
+ {
+  "id": "event-gdacs-fl1104298",
+  "name": "Flood in Portugal",
+  "lat": 39.6037,
+  "lon": -8.415,
+  "radiusKm": 25,
+  "event": 1795132800000.0,
+  "file": "event-gdacs-fl1104298.json"
  },
  {
   "id": "event-gdacs-vo1000151",

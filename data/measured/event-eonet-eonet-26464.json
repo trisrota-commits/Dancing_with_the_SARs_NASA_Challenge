@@ -31,32 +31,11 @@
    "hv": -11.51,
    "pixels": 7848,
    "file": "NISAR_L2_PR_GCOV_032_156_D_073_4005_DHDH_A_20261011T004509_20261011T004543_P05023_N_F_J_001.h5"
-  },
-  {
-   "time": 1792716309000,
-   "hh": -6.42,
-   "hv": -12.48,
-   "pixels": 7848,
-   "file": "NISAR_L2_PR_GCOV_033_156_D_073_4005_DHDH_A_20261023T004509_20261023T004544_P05036_N_F_J_001.h5"
-  },
-  {
-   "time": 1793753109000,
-   "hh": -5.95,
-   "hv": -12.15,
-   "pixels": 7848,
-   "file": "NISAR_L2_PR_GCOV_034_156_D_073_4005_DHDH_A_20261104T004509_20261104T004544_P05036_N_F_J_001.h5"
-  },
-  {
-   "time": 1794789910000,
-   "hh": -6.57,
-   "hv": -12.64,
-   "pixels": 7848,
-   "file": "NISAR_L2_PR_GCOV_035_156_D_073_4005_DHDH_A_20261116T004510_20261116T004544_P05036_N_F_J_001.h5"
   }
  ],
  "change": {
-  "before": 1793753109000,
-  "after": 1794789910000,
+  "before": 1790642709000,
+  "after": 1791679509000,
   "pol": "HH",
   "image": "event-eonet-eonet-26464_change.png",
   "bounds": {
@@ -65,12 +44,12 @@
    "south": 31.06590132950054,
    "north": 31.173698670499462
   },
-  "weakerPct": 0.1,
+  "weakerPct": 0.0,
   "strongerPct": 0.0,
-  "spansEvent": true
+  "spansEvent": false
  },
  "firstDrop": null,
- "summary": "Across the event of 2026-11-13: between 2026-11-04 and 2026-11-16, HH backscatter here changed by -0.6 dB and HV by -0.5 dB (mean within 500 m). Across the mapped area, 0% got at least 3 dB weaker and 0% at least 3 dB stronger.",
- "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 5 passes on track 156-D-073-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-11-13, and 'before' the last pass before it.",
- "generated": "2026-11-24T02:31:57Z"
+ "summary": "Between 2026-09-29 and 2026-10-11, HH backscatter here changed by -0.1 dB and HV by +0.2 dB (mean within 500 m). Across the mapped area, 0% got at least 3 dB weaker and 0% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 2 passes on track 156-D-073-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the pass that differs most from the first in HH (this track does not have a pass on both sides of the event of 2026-11-13 yet).",
+ "generated": "2026-11-24T14:17:15Z"
 }
