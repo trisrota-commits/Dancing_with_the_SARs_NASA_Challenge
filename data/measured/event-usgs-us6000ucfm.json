@@ -1,0 +1,69 @@
+{
+ "id": "event-usgs-us6000ucfm",
+ "name": "M 6.7 - 7 km ENE of Carhuamayo, Peru",
+ "lat": -10.8889,
+ "lon": -75.966,
+ "radiusKm": 25,
+ "track": "075-A-172-DHDH",
+ "setup": {
+  "lat": -10.8889,
+  "lon": -75.966,
+  "seriesRadiusM": 500,
+  "mapRadiusM": 6000,
+  "mapPol": "co"
+ },
+ "event": 1795219200000.0,
+ "pols": [
+  "HH",
+  "HV"
+ ],
+ "series": [
+  {
+   "time": 1792234241000,
+   "hh": -13.48,
+   "hv": -22.08,
+   "pixels": 1963,
+   "file": "NISAR_L2_PR_GCOV_033_075_A_172_2005_DHDH_M_20261017T105041_20261017T105115_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1793271041000,
+   "hh": -12.13,
+   "hv": -20.69,
+   "pixels": 1963,
+   "file": "NISAR_L2_PR_GCOV_034_075_A_172_2005_DHDH_M_20261029T105041_20261029T105115_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1794307841000,
+   "hh": -11.33,
+   "hv": -20.42,
+   "pixels": 1963,
+   "file": "NISAR_L2_PR_GCOV_035_075_A_172_2005_DHDH_M_20261110T105041_20261110T105116_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1795344642000,
+   "hh": -13.42,
+   "hv": -21.92,
+   "pixels": 1963,
+   "file": "NISAR_L2_PR_GCOV_036_075_A_172_2005_DHDH_M_20261122T105042_20261122T105116_P05036_N_F_J_001.h5"
+  }
+ ],
+ "change": {
+  "before": 1794307841000,
+  "after": 1795344642000,
+  "pol": "HH",
+  "image": "event-usgs-us6000ucfm_change.png",
+  "bounds": {
+   "west": -76.02088689096723,
+   "east": -75.91111310903275,
+   "south": -10.94279867049946,
+   "north": -10.835001329500539
+  },
+  "weakerPct": 9.6,
+  "strongerPct": 0.0,
+  "spansEvent": true
+ },
+ "firstDrop": null,
+ "summary": "Across the event of 2026-11-21: between 2026-11-10 and 2026-11-22, HH backscatter here changed by -2.1 dB and HV by -1.5 dB (mean within 500 m). Across the mapped area, 10% got at least 3 dB weaker and 0% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 4 passes on track 075-A-172-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-11-21, and 'before' the last pass before it.",
+ "generated": "2026-11-25T00:25:05Z"
+}

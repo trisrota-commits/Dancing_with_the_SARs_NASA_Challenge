@@ -1,0 +1,69 @@
+{
+ "id": "event-gdacs-wf1034038",
+ "name": "Forest fires in Australia",
+ "lat": -20.3665,
+ "lon": 145.3419,
+ "radiusKm": 25,
+ "track": "074-D-099-DHDH",
+ "setup": {
+  "lat": -20.3665,
+  "lon": 145.3419,
+  "seriesRadiusM": 500,
+  "mapRadiusM": 6000,
+  "mapPol": "co"
+ },
+ "event": 1795219200000.0,
+ "pols": [
+  "HH",
+  "HV"
+ ],
+ "series": [
+  {
+   "time": 1792225749000,
+   "hh": -6.87,
+   "hv": -13.73,
+   "pixels": 1957,
+   "file": "NISAR_L2_PR_GCOV_033_074_D_099_2005_DHDH_A_20261017T082909_20261017T082943_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1793262549000,
+   "hh": -6.56,
+   "hv": -13.63,
+   "pixels": 1957,
+   "file": "NISAR_L2_PR_GCOV_034_074_D_099_2005_DHDH_A_20261029T082909_20261029T082944_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1794299349000,
+   "hh": -7.8,
+   "hv": -13.78,
+   "pixels": 1957,
+   "file": "NISAR_L2_PR_GCOV_035_074_D_099_2005_DHDH_A_20261110T082909_20261110T082944_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1795336150000,
+   "hh": -7.68,
+   "hv": -13.69,
+   "pixels": 1957,
+   "file": "NISAR_L2_PR_GCOV_036_074_D_099_2005_DHDH_A_20261122T082910_20261122T082945_P05036_N_F_J_001.h5"
+  }
+ ],
+ "change": {
+  "before": 1794299349000,
+  "after": 1795336150000,
+  "pol": "HH",
+  "image": "event-gdacs-wf1034038_change.png",
+  "bounds": {
+   "west": 145.28440720381005,
+   "east": 145.39939279618997,
+   "south": -20.42039867049946,
+   "north": -20.312601329500538
+  },
+  "weakerPct": 0.0,
+  "strongerPct": 0.0,
+  "spansEvent": true
+ },
+ "firstDrop": null,
+ "summary": "Across the event of 2026-11-21: between 2026-11-10 and 2026-11-22, HH backscatter here changed by +0.1 dB and HV by +0.1 dB (mean within 500 m). Across the mapped area, 0% got at least 3 dB weaker and 0% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 4 passes on track 074-D-099-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-11-21, and 'before' the last pass before it.",
+ "generated": "2026-11-25T00:23:36Z"
+}

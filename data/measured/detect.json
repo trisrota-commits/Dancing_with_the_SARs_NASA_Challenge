@@ -249,6 +249,84 @@
   "water": 0.0
  },
  {
+  "id": "event-eonet-eonet-26568",
+  "name": "Wildfire Greene - Caney Creek Lane, Greene, Tennessee",
+  "cells": 576,
+  "passes": 4,
+  "event": {
+   "time": 1794960000000.0,
+   "date": "2026-11-18",
+   "firstPassAfter": "2026-11-19",
+   "stood": 0.0,
+   "recent": 0.0069,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-19",
+   "time": 1795047511000,
+   "stood": 0.0,
+   "recent": 0.0069,
+   "long": 0.0
+  },
+  "water": 0.0
+ },
+ {
+  "id": "event-eonet-eonet-26571",
+  "name": "Prescribed Fire OAK Compartment 29 RX, Bibb, Alabama",
+  "cells": 576,
+  "passes": 5,
+  "event": {
+   "time": 1794960000000.0,
+   "date": "2026-11-18",
+   "firstPassAfter": "2026-11-21",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-09",
+   "time": 1794184577000,
+   "stood": 0.0,
+   "recent": 0.0677,
+   "long": 0.0
+  },
+  "water": 0.0
+ },
+ {
+  "id": "event-eonet-eonet-26572",
+  "name": "Prescribed Fire rx-Lapham Good Oak 2026, Waukesha, Wisconsin",
+  "cells": 576,
+  "passes": 4,
+  "event": {
+   "time": 1794960000000.0,
+   "date": "2026-11-18",
+   "firstPassAfter": "2026-11-18",
+   "stood": 0.0,
+   "recent": 0.0052,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-18",
+   "time": 1794963506000,
+   "stood": 0.0,
+   "recent": 0.0052,
+   "long": 0.0
+  },
+  "water": 0.0
+ },
+ {
   "id": "event-eonet-eonet-26573",
   "name": "Prescribed Fire STEELY MILL RX, El Dorado, California",
   "cells": 576,
@@ -735,6 +813,32 @@
   "water": 0.51
  },
  {
+  "id": "event-gdacs-wf1033859",
+  "name": "Forest fires in Australia",
+  "cells": 536,
+  "passes": 4,
+  "event": {
+   "time": 1794614400000.0,
+   "date": "2026-11-14",
+   "firstPassAfter": "2026-11-15",
+   "stood": 0.5,
+   "recent": 0.6474,
+   "long": 0.6586,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-15",
+   "time": 1794736810000,
+   "stood": 0.5,
+   "recent": 0.6474,
+   "long": 0.6586
+  },
+  "water": 0.069
+ },
+ {
   "id": "event-gdacs-wf1033863",
   "name": "Forest fires in Sudan, South Sudan",
   "cells": 576,
@@ -920,25 +1024,25 @@
   "id": "event-gdacs-wf1033925",
   "name": "Forest fires in Benin",
   "cells": 576,
-  "passes": 3,
+  "passes": 5,
   "event": {
    "time": 1794614400000.0,
    "date": "2026-11-14",
    "firstPassAfter": "2026-11-18",
-   "stood": 0.0017,
+   "stood": 0.0,
    "recent": 0.0017,
-   "long": null,
+   "long": 0.0,
    "stillNext": null,
    "newVersion": null,
    "baseline": 2,
-   "grade": "two"
+   "grade": "both"
   },
   "most": {
-   "date": "2026-11-18",
-   "time": 1794979433000,
-   "stood": 0.0017,
-   "recent": 0.0017,
-   "long": null
+   "date": "2026-11-06",
+   "time": 1793942633000,
+   "stood": 0.1545,
+   "recent": 0.2899,
+   "long": 0.1545
   },
   "water": 0.0
  },
@@ -1047,6 +1151,32 @@
   "water": 0.221
  },
  {
+  "id": "event-gdacs-wf1033946",
+  "name": "Forest fires in Botswana",
+  "cells": 576,
+  "passes": 4,
+  "event": {
+   "time": 1794873600000.0,
+   "date": "2026-11-17",
+   "firstPassAfter": "2026-11-17",
+   "stood": 0.3125,
+   "recent": 0.4097,
+   "long": 0.6701,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-17",
+   "time": 1794889001000,
+   "stood": 0.3125,
+   "recent": 0.4097,
+   "long": 0.6701
+  },
+  "water": 0.0
+ },
+ {
   "id": "event-gdacs-wf1033947",
   "name": "Forest fires in Nigeria",
   "cells": 576,
@@ -1075,17 +1205,54 @@
  {
   "id": "event-gdacs-wf1033948",
   "name": "Forest fires in Sudan",
-  "cells": 0,
-  "passes": 2,
+  "cells": 534,
+  "passes": 4,
   "event": {
    "time": 1794700800000.0,
    "date": "2026-11-15",
-   "firstPassAfter": null,
-   "stood": null,
-   "openWater": true
+   "firstPassAfter": "2026-11-16",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
   },
-  "most": null,
-  "water": 0.865
+  "most": {
+   "date": "2026-11-16",
+   "time": 1794799674000,
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0
+  },
+  "water": 0.073
+ },
+ {
+  "id": "event-gdacs-wf1033965",
+  "name": "Forest fires in Benin, Burkina Faso",
+  "cells": 428,
+  "passes": 8,
+  "event": {
+   "time": 1794873600000.0,
+   "date": "2026-11-17",
+   "firstPassAfter": "2026-11-18",
+   "stood": 0.0052,
+   "recent": 0.6285,
+   "long": 0.0052,
+   "stillNext": 1.0,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-18",
+   "time": 1794979461000,
+   "stood": 0.021,
+   "recent": 0.6643,
+   "long": 0.021
+  },
+  "water": 0.0
  },
  {
   "id": "event-gdacs-wf1033967",
@@ -1166,6 +1333,32 @@
   "water": 0.0
  },
  {
+  "id": "event-gdacs-wf1033972",
+  "name": "Forest fires in Botswana",
+  "cells": 576,
+  "passes": 5,
+  "event": {
+   "time": 1794873600000.0,
+   "date": "2026-11-17",
+   "firstPassAfter": "2026-11-20",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-08",
+   "time": 1794155525000,
+   "stood": 0.0417,
+   "recent": 0.1198,
+   "long": 0.0417
+  },
+  "water": 0.0
+ },
+ {
   "id": "event-gdacs-wf1033981",
   "name": "Forest fires in Madagascar",
   "cells": 576,
@@ -1194,28 +1387,28 @@
  {
   "id": "event-gdacs-wf1033985",
   "name": "Forest fires in South Africa",
-  "cells": 525,
-  "passes": 4,
+  "cells": 526,
+  "passes": 3,
   "event": {
    "time": 1794960000000.0,
    "date": "2026-11-18",
    "firstPassAfter": "2026-11-20",
    "stood": 0.0134,
    "recent": 0.0134,
-   "long": 0.0153,
+   "long": null,
    "stillNext": null,
    "newVersion": null,
    "baseline": 2,
-   "grade": "both"
+   "grade": "two"
   },
   "most": {
    "date": "2026-11-20",
    "time": 1795192552000,
    "stood": 0.0134,
    "recent": 0.0134,
-   "long": 0.0153
+   "long": null
   },
-  "water": 0.089
+  "water": 0.087
  },
  {
   "id": "event-gdacs-wf1033991",
@@ -1270,6 +1463,32 @@
   "water": 0.0
  },
  {
+  "id": "event-gdacs-wf1033997",
+  "name": "Forest fires in South Sudan, Central African Republic",
+  "cells": 294,
+  "passes": 5,
+  "event": {
+   "time": 1794787200000.0,
+   "date": "2026-11-16",
+   "firstPassAfter": "2026-11-20",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-08",
+   "time": 1794110405000,
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0
+  },
+  "water": 0.064
+ },
+ {
   "id": "event-gdacs-wf1034005",
   "name": "Forest fires in Australia",
   "cells": 576,
@@ -1296,27 +1515,157 @@
   "water": 0.0
  },
  {
+  "id": "event-gdacs-wf1034011",
+  "name": "Forest fires in Sudan, South Sudan",
+  "cells": 572,
+  "passes": 4,
+  "event": {
+   "time": 1794787200000.0,
+   "date": "2026-11-16",
+   "firstPassAfter": "2026-11-16",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-16",
+   "time": 1794799607000,
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0
+  },
+  "water": 0.007
+ },
+ {
   "id": "event-gdacs-wf1034013",
   "name": "Forest fires in Ghana, Burkina Faso",
   "cells": 576,
-  "passes": 3,
+  "passes": 4,
   "event": {
    "time": 1795046400000.0,
    "date": "2026-11-19",
    "firstPassAfter": "2026-11-20",
    "stood": 0.0,
    "recent": 0.0,
-   "long": null,
+   "long": 0.0,
    "stillNext": null,
    "newVersion": null,
    "baseline": 2,
-   "grade": "two"
+   "grade": "both"
   },
   "most": {
    "date": "2026-11-20",
    "time": 1795153232000,
    "stood": 0.0,
    "recent": 0.0,
+   "long": 0.0
+  },
+  "water": 0.0
+ },
+ {
+  "id": "event-gdacs-wf1034014",
+  "name": "Forest fires in Benin, Burkina Faso",
+  "cells": 364,
+  "passes": 7,
+  "event": {
+   "time": 1794960000000.0,
+   "date": "2026-11-18",
+   "firstPassAfter": "2026-11-18",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-06",
+   "time": 1793942633000,
+   "stood": 0.1198,
+   "recent": 0.4792,
+   "long": 0.1198
+  },
+  "water": 0.0
+ },
+ {
+  "id": "event-gdacs-wf1034038",
+  "name": "Forest fires in Australia",
+  "cells": 576,
+  "passes": 4,
+  "event": {
+   "time": 1795219200000.0,
+   "date": "2026-11-21",
+   "firstPassAfter": "2026-11-22",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-22",
+   "time": 1795336150000,
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0
+  },
+  "water": 0.0
+ },
+ {
+  "id": "event-gdacs-wf1034048",
+  "name": "Forest fires in Australia",
+  "cells": 576,
+  "passes": 4,
+  "event": {
+   "time": 1795132800000.0,
+   "date": "2026-11-20",
+   "firstPassAfter": "2026-11-22",
+   "stood": 0.0,
+   "recent": 0.0312,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-22",
+   "time": 1795336150000,
+   "stood": 0.0,
+   "recent": 0.0312,
+   "long": 0.0
+  },
+  "water": 0.0
+ },
+ {
+  "id": "event-gdacs-wf1034056",
+  "name": "Forest fires in Mozambique",
+  "cells": 576,
+  "passes": 2,
+  "event": {
+   "time": 1795132800000.0,
+   "date": "2026-11-20",
+   "firstPassAfter": "2026-11-21",
+   "stood": 0.0174,
+   "recent": 0.0174,
+   "long": null,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 1,
+   "grade": "pair"
+  },
+  "most": {
+   "date": "2026-11-21",
+   "time": 1795276152000,
+   "stood": 0.0174,
+   "recent": 0.0174,
    "long": null
   },
   "water": 0.0
@@ -1532,6 +1881,32 @@
   "water": 1.0
  },
  {
+  "id": "event-usgs-us6000ucfm",
+  "name": "M 6.7 - 7 km ENE of Carhuamayo, Peru",
+  "cells": 570,
+  "passes": 4,
+  "event": {
+   "time": 1795219200000.0,
+   "date": "2026-11-21",
+   "firstPassAfter": "2026-11-22",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-22",
+   "time": 1795344642000,
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0
+  },
+  "water": 0.01
+ },
+ {
   "id": "event-usgs-us7000tu4f",
   "name": "M 6.2 - 43 km ESE of Port-Olry, Vanuatu",
   "cells": 0,
@@ -1650,15 +2025,15 @@
  {
   "id": "okavango",
   "name": "Okavango Delta",
-  "cells": 3599,
-  "passes": 9,
+  "cells": 3600,
+  "passes": 12,
   "event": null,
   "most": {
    "date": "2026-10-12",
    "time": 1791778634000,
-   "stood": 0.0742,
-   "recent": 0.1567,
-   "long": 0.0992
+   "stood": 0.0728,
+   "recent": 0.1525,
+   "long": 0.0981
   },
   "water": 0.0
  },
@@ -1695,31 +2070,31 @@
  {
   "id": "sacramento",
   "name": "Sacramento Valley rice",
-  "cells": 1021,
-  "passes": 27,
+  "cells": 1020,
+  "passes": 30,
   "event": null,
   "most": {
-   "date": "2026-05-18",
-   "time": 1779110275000,
-   "stood": 0.0088,
-   "recent": 0.0304,
-   "long": 0.0284
+   "date": "2026-03-31",
+   "time": 1774963076000,
+   "stood": 0.0245,
+   "recent": 0.0382,
+   "long": 0.0569
   },
-  "water": 0.003
+  "water": 0.004
  },
  {
   "id": "west-bengal",
   "name": "Rice fields of Bardhaman",
-  "cells": 1024,
-  "passes": 11,
+  "cells": 1018,
+  "passes": 13,
   "event": null,
   "most": {
-   "date": "2026-08-24",
-   "time": 1787614158000,
-   "stood": 0.0,
-   "recent": 0.0,
-   "long": 0.0
+   "date": "2026-10-06",
+   "time": 1791329857000,
+   "stood": 0.0727,
+   "recent": 0.6444,
+   "long": 0.0737
   },
-  "water": 0.0
+  "water": 0.006
  }
 ]

@@ -1,0 +1,55 @@
+{
+ "id": "event-gdacs-wf1034056",
+ "name": "Forest fires in Mozambique",
+ "lat": -17.8286,
+ "lon": 36.5999,
+ "radiusKm": 25,
+ "track": "064-D-097-DHDH",
+ "setup": {
+  "lat": -17.8286,
+  "lon": 36.5999,
+  "seriesRadiusM": 500,
+  "mapRadiusM": 6000,
+  "mapPol": "co"
+ },
+ "event": 1795132800000.0,
+ "pols": [
+  "HH",
+  "HV"
+ ],
+ "series": [
+  {
+   "time": 1793202551000,
+   "hh": -7.55,
+   "hv": -13.95,
+   "pixels": 1963,
+   "file": "NISAR_L2_PR_GCOV_034_064_D_097_2005_DHDH_M_20261028T154911_20261028T154943_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1795276152000,
+   "hh": -6.74,
+   "hv": -12.24,
+   "pixels": 1963,
+   "file": "NISAR_L2_PR_GCOV_036_064_D_097_2005_DHDH_M_20261121T154912_20261121T154946_P05036_N_F_J_001.h5"
+  }
+ ],
+ "change": {
+  "before": 1793202551000,
+  "after": 1795276152000,
+  "pol": "HH",
+  "image": "event-gdacs-wf1034056_change.png",
+  "bounds": {
+   "west": 36.54328236269936,
+   "east": 36.65651763730064,
+   "south": -17.882498670499462,
+   "north": -17.77470132950054
+  },
+  "weakerPct": 4.2,
+  "strongerPct": 0.1,
+  "spansEvent": true
+ },
+ "firstDrop": null,
+ "summary": "Across the event of 2026-11-20: between 2026-10-28 and 2026-11-21, HH backscatter here changed by +0.8 dB and HV by +1.7 dB (mean within 500 m). Across the mapped area, 4% got at least 3 dB weaker and 0% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 2 passes on track 064-D-097-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-11-20, and 'before' the last pass before it.",
+ "generated": "2026-11-25T00:25:28Z"
+}
