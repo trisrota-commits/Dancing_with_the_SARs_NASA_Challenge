@@ -457,6 +457,58 @@
   "water": 0.0
  },
  {
+  "id": "event-eonet-eonet-26661",
+  "name": "Wildfire Little Ridge, Highland, Virginia",
+  "cells": 576,
+  "passes": 4,
+  "event": {
+   "time": 1795219200000.0,
+   "date": "2026-11-21",
+   "firstPassAfter": "2026-11-23",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-23",
+   "time": 1795429383000,
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0
+  },
+  "water": 0.0
+ },
+ {
+  "id": "event-eonet-eonet-26662",
+  "name": "Wildfire White Oak Flat, Alleghany, Virginia",
+  "cells": 576,
+  "passes": 5,
+  "event": {
+   "time": 1795132800000.0,
+   "date": "2026-11-20",
+   "firstPassAfter": "2026-11-23",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0069,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-11",
+   "time": 1794392582000,
+   "stood": 0.0,
+   "recent": 0.0087,
+   "long": 0.0
+  },
+  "water": 0.0
+ },
+ {
   "id": "event-eonet-eonet-26665",
   "name": "Prescribed Fire RX D7 Second Skinny Landings, Mineral, Montana",
   "cells": 555,
@@ -867,28 +919,28 @@
  {
   "id": "event-gdacs-wf1033859",
   "name": "Forest fires in Australia",
-  "cells": 536,
-  "passes": 4,
+  "cells": 478,
+  "passes": 5,
   "event": {
    "time": 1794614400000.0,
    "date": "2026-11-14",
-   "firstPassAfter": "2026-11-15",
-   "stood": 0.5,
-   "recent": 0.6474,
-   "long": 0.6586,
+   "firstPassAfter": "2026-11-23",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
    "stillNext": null,
    "newVersion": null,
    "baseline": 2,
    "grade": "both"
   },
   "most": {
-   "date": "2026-11-15",
-   "time": 1794736810000,
-   "stood": 0.5,
-   "recent": 0.6474,
-   "long": 0.6586
+   "date": "2026-11-11",
+   "time": 1794433562000,
+   "stood": 0.636,
+   "recent": 0.7866,
+   "long": 0.6841
   },
-  "water": 0.069
+  "water": 0.17
  },
  {
   "id": "event-gdacs-wf1033863",
@@ -1752,13 +1804,13 @@
   "id": "event-gdacs-wf1034048",
   "name": "Forest fires in Australia",
   "cells": 576,
-  "passes": 4,
+  "passes": 5,
   "event": {
    "time": 1795132800000.0,
    "date": "2026-11-20",
-   "firstPassAfter": "2026-11-22",
+   "firstPassAfter": "2026-11-23",
    "stood": 0.0,
-   "recent": 0.0312,
+   "recent": 0.0,
    "long": 0.0,
    "stillNext": null,
    "newVersion": null,
@@ -1766,10 +1818,10 @@
    "grade": "both"
   },
   "most": {
-   "date": "2026-11-22",
-   "time": 1795336150000,
+   "date": "2026-11-11",
+   "time": 1794427535000,
    "stood": 0.0,
-   "recent": 0.0312,
+   "recent": 0.0,
    "long": 0.0
   },
   "water": 0.0

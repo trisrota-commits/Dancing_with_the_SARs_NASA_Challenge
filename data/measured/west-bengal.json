@@ -104,10 +104,10 @@
   },
   {
    "time": 1795477058000,
-   "hh": -6.0,
-   "hv": -13.5,
+   "hh": -5.98,
+   "hv": -13.49,
    "pixels": 31411,
-   "file": "NISAR_L2_UR_GCOV_036_098_A_013_4005_DHDH_A_20261123T233738_20261123T233813_P05036_F_F_J_001.h5"
+   "file": "NISAR_L2_PR_GCOV_036_098_A_013_4005_DHDH_A_20261123T233738_20261123T233813_P05036_N_F_J_001.h5"
   }
  ],
  "change": {
@@ -128,5 +128,5 @@
  "firstDrop": null,
  "summary": "Between 2026-06-20 and 2026-10-18, HH backscatter here changed by +5.1 dB and HV by +1.6 dB (mean within 1000 m). Across the mapped area, 1% got at least 3 dB weaker and 66% at least 3 dB stronger.",
  "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 13 passes on track 098-A-013-DHDH. Time series: mean linear power within 1000 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the pass that differs most from the first in HH.",
- "generated": "2026-11-25T13:15:25Z"
+ "generated": "2026-11-25T23:42:27Z"
 }

@@ -171,6 +171,24 @@
   "file": "event-eonet-eonet-26577.json"
  },
  {
+  "id": "event-eonet-eonet-26661",
+  "name": "Wildfire Little Ridge, Highland, Virginia",
+  "lat": 38.3136,
+  "lon": -79.7914,
+  "radiusKm": 25,
+  "event": 1795219200000.0,
+  "file": "event-eonet-eonet-26661.json"
+ },
+ {
+  "id": "event-eonet-eonet-26662",
+  "name": "Wildfire White Oak Flat, Alleghany, Virginia",
+  "lat": 37.8422,
+  "lon": -79.8621,
+  "radiusKm": 25,
+  "event": 1795132800000.0,
+  "file": "event-eonet-eonet-26662.json"
+ },
+ {
   "id": "event-eonet-eonet-26665",
   "name": "Prescribed Fire RX D7 Second Skinny Landings, Mineral, Montana",
   "lat": 47.1227,

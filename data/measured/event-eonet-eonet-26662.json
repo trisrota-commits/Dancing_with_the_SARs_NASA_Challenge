@@ -1,0 +1,76 @@
+{
+ "id": "event-eonet-eonet-26662",
+ "name": "Wildfire White Oak Flat, Alleghany, Virginia",
+ "lat": 37.8422,
+ "lon": -79.8621,
+ "radiusKm": 25,
+ "track": "090-A-021-DHDH",
+ "setup": {
+  "lat": 37.8422,
+  "lon": -79.8621,
+  "seriesRadiusM": 500,
+  "mapRadiusM": 6000,
+  "mapPol": "co"
+ },
+ "event": 1795132800000.0,
+ "pols": [
+  "HH",
+  "HV"
+ ],
+ "series": [
+  {
+   "time": 1791282182000,
+   "hh": -5.0,
+   "hv": -10.68,
+   "pixels": 7852,
+   "file": "NISAR_L2_PR_GCOV_032_090_A_021_4005_DHDH_A_20261006T102302_20261006T102336_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1792318982000,
+   "hh": -4.68,
+   "hv": -10.4,
+   "pixels": 7852,
+   "file": "NISAR_L2_PR_GCOV_033_090_A_021_4005_DHDH_A_20261018T102302_20261018T102337_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1793355782000,
+   "hh": -5.51,
+   "hv": -11.02,
+   "pixels": 7852,
+   "file": "NISAR_L2_PR_GCOV_034_090_A_021_4005_DHDH_A_20261030T102302_20261030T102337_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1794392582000,
+   "hh": -5.19,
+   "hv": -10.68,
+   "pixels": 7852,
+   "file": "NISAR_L2_PR_GCOV_035_090_A_021_4005_DHDH_A_20261111T102302_20261111T102337_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1795429383000,
+   "hh": -5.13,
+   "hv": -10.61,
+   "pixels": 7852,
+   "file": "NISAR_L2_PR_GCOV_036_090_A_021_4005_DHDH_A_20261123T102303_20261123T102338_P05036_N_F_J_001.h5"
+  }
+ ],
+ "change": {
+  "before": 1794392582000,
+  "after": 1795429383000,
+  "pol": "HH",
+  "image": "event-eonet-eonet-26662_change.png",
+  "bounds": {
+   "west": -79.93035179206869,
+   "east": -79.7938482079313,
+   "south": 37.788301329500534,
+   "north": 37.89609867049946
+  },
+  "weakerPct": 0.1,
+  "strongerPct": 0.1,
+  "spansEvent": true
+ },
+ "firstDrop": null,
+ "summary": "Across the event of 2026-11-20: between 2026-11-11 and 2026-11-23, HH backscatter here changed by +0.1 dB and HV by +0.1 dB (mean within 500 m). Across the mapped area, 0% got at least 3 dB weaker and 0% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 5 passes on track 090-A-021-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-11-20, and 'before' the last pass before it.",
+ "generated": "2026-11-25T23:44:03Z"
+}
