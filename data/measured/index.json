@@ -270,6 +270,15 @@
   "file": "event-gdacs-fl1104290.json"
  },
  {
+  "id": "event-gdacs-fl1104295",
+  "name": "Flood in Ireland",
+  "lat": 51.6798,
+  "lon": -9.4524,
+  "radiusKm": 25,
+  "event": 1795305600000.0,
+  "file": "event-gdacs-fl1104295.json"
+ },
+ {
   "id": "event-gdacs-fl1104298",
   "name": "Flood in Portugal",
   "lat": 39.6037,
@@ -529,6 +538,15 @@
   "radiusKm": 25,
   "event": 1794873600000.0,
   "file": "event-gdacs-wf1033991.json"
+ },
+ {
+  "id": "event-gdacs-wf1033992",
+  "name": "Forest fires in Australia",
+  "lat": -15.7904,
+  "lon": 130.9587,
+  "radiusKm": 25,
+  "event": 1794787200000.0,
+  "file": "event-gdacs-wf1033992.json"
  },
  {
   "id": "event-gdacs-wf1033996",

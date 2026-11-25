@@ -275,6 +275,32 @@
   "water": 0.0
  },
  {
+  "id": "event-eonet-eonet-26569",
+  "name": "Prescribed Fire 2027 TXTMR HFR RX, Matagorda, Texas",
+  "cells": 384,
+  "passes": 5,
+  "event": {
+   "time": 1794960000000.0,
+   "date": "2026-11-18",
+   "firstPassAfter": "2026-11-21",
+   "stood": 0.0,
+   "recent": 0.099,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-09",
+   "time": 1794224605000,
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0
+  },
+  "water": 0.333
+ },
+ {
   "id": "event-eonet-eonet-26571",
   "name": "Prescribed Fire OAK Compartment 29 RX, Bibb, Alabama",
   "cells": 576,
@@ -303,14 +329,14 @@
  {
   "id": "event-eonet-eonet-26572",
   "name": "Prescribed Fire rx-Lapham Good Oak 2026, Waukesha, Wisconsin",
-  "cells": 576,
-  "passes": 4,
+  "cells": 573,
+  "passes": 5,
   "event": {
    "time": 1794960000000.0,
    "date": "2026-11-18",
-   "firstPassAfter": "2026-11-18",
+   "firstPassAfter": "2026-11-23",
    "stood": 0.0,
-   "recent": 0.0052,
+   "recent": 0.0,
    "long": 0.0,
    "stillNext": null,
    "newVersion": null,
@@ -318,13 +344,13 @@
    "grade": "both"
   },
   "most": {
-   "date": "2026-11-18",
-   "time": 1794963506000,
+   "date": "2026-11-11",
+   "time": 1794358206000,
    "stood": 0.0,
-   "recent": 0.0052,
+   "recent": 0.0,
    "long": 0.0
   },
-  "water": 0.0
+  "water": 0.005
  },
  {
   "id": "event-eonet-eonet-26573",
@@ -709,6 +735,32 @@
   "water": 0.0
  },
  {
+  "id": "event-gdacs-fl1104295",
+  "name": "Flood in Ireland",
+  "cells": 503,
+  "passes": 4,
+  "event": {
+   "time": 1795305600000.0,
+   "date": "2026-11-22",
+   "firstPassAfter": "2026-11-23",
+   "stood": 0.006,
+   "recent": 0.0298,
+   "long": 0.006,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-23",
+   "time": 1795411642000,
+   "stood": 0.006,
+   "recent": 0.0298,
+   "long": 0.006
+  },
+  "water": 0.127
+ },
+ {
   "id": "event-gdacs-fl1104298",
   "name": "Flood in Portugal",
   "cells": 576,
@@ -920,13 +972,13 @@
   "id": "event-gdacs-wf1033904",
   "name": "Forest fires in Nigeria",
   "cells": 576,
-  "passes": 4,
+  "passes": 5,
   "event": {
    "time": 1794700800000.0,
    "date": "2026-11-15",
-   "firstPassAfter": "2026-11-15",
+   "firstPassAfter": "2026-11-23",
    "stood": 0.0,
-   "recent": 0.066,
+   "recent": 0.0278,
    "long": 0.0,
    "stillNext": null,
    "newVersion": null,
@@ -934,10 +986,10 @@
    "grade": "both"
   },
   "most": {
-   "date": "2026-11-15",
-   "time": 1794766237000,
+   "date": "2026-11-11",
+   "time": 1794374165000,
    "stood": 0.0,
-   "recent": 0.066,
+   "recent": 0.0799,
    "long": 0.0
   },
   "water": 0.0
@@ -1205,14 +1257,14 @@
  {
   "id": "event-gdacs-wf1033948",
   "name": "Forest fires in Sudan",
-  "cells": 534,
-  "passes": 4,
+  "cells": 258,
+  "passes": 5,
   "event": {
    "time": 1794700800000.0,
    "date": "2026-11-15",
-   "firstPassAfter": "2026-11-16",
+   "firstPassAfter": "2026-11-23",
    "stood": 0.0,
-   "recent": 0.0,
+   "recent": 0.0271,
    "long": 0.0,
    "stillNext": null,
    "newVersion": null,
@@ -1220,13 +1272,39 @@
    "grade": "both"
   },
   "most": {
-   "date": "2026-11-16",
-   "time": 1794799674000,
+   "date": "2026-11-11",
+   "time": 1794368174000,
    "stood": 0.0,
-   "recent": 0.0,
+   "recent": 0.0194,
    "long": 0.0
   },
-  "water": 0.073
+  "water": 0.552
+ },
+ {
+  "id": "event-gdacs-wf1033953",
+  "name": "Forest fires in Australia",
+  "cells": 576,
+  "passes": 4,
+  "event": {
+   "time": 1794960000000.0,
+   "date": "2026-11-18",
+   "firstPassAfter": "2026-11-18",
+   "stood": 0.1007,
+   "recent": 0.2188,
+   "long": 0.1007,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-18",
+   "time": 1795032936000,
+   "stood": 0.1007,
+   "recent": 0.2188,
+   "long": 0.1007
+  },
+  "water": 0.0
  },
  {
   "id": "event-gdacs-wf1033965",
@@ -1387,28 +1465,28 @@
  {
   "id": "event-gdacs-wf1033985",
   "name": "Forest fires in South Africa",
-  "cells": 526,
-  "passes": 3,
+  "cells": 525,
+  "passes": 4,
   "event": {
    "time": 1794960000000.0,
    "date": "2026-11-18",
    "firstPassAfter": "2026-11-20",
    "stood": 0.0134,
    "recent": 0.0134,
-   "long": null,
+   "long": 0.0153,
    "stillNext": null,
    "newVersion": null,
    "baseline": 2,
-   "grade": "two"
+   "grade": "both"
   },
   "most": {
    "date": "2026-11-20",
    "time": 1795192552000,
    "stood": 0.0134,
    "recent": 0.0134,
-   "long": null
+   "long": 0.0153
   },
-  "water": 0.087
+  "water": 0.089
  },
  {
   "id": "event-gdacs-wf1033991",
@@ -1435,6 +1513,32 @@
    "long": 0.0
   },
   "water": 0.198
+ },
+ {
+  "id": "event-gdacs-wf1033992",
+  "name": "Forest fires in Australia",
+  "cells": 576,
+  "passes": 5,
+  "event": {
+   "time": 1794787200000.0,
+   "date": "2026-11-16",
+   "firstPassAfter": "2026-11-23",
+   "stood": 0.0,
+   "recent": 0.0747,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-11",
+   "time": 1794389151000,
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0
+  },
+  "water": 0.0
  },
  {
   "id": "event-gdacs-wf1033996",
@@ -1489,6 +1593,32 @@
   "water": 0.064
  },
  {
+  "id": "event-gdacs-wf1034001",
+  "name": "Forest fires in Australia",
+  "cells": 338,
+  "passes": 5,
+  "event": {
+   "time": 1794960000000.0,
+   "date": "2026-11-18",
+   "firstPassAfter": "2026-11-21",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-09",
+   "time": 1794259796000,
+   "stood": 0.8018,
+   "recent": 0.8846,
+   "long": 0.8047
+  },
+  "water": 0.413
+ },
+ {
   "id": "event-gdacs-wf1034005",
   "name": "Forest fires in Australia",
   "cells": 576,
@@ -1517,14 +1647,14 @@
  {
   "id": "event-gdacs-wf1034011",
   "name": "Forest fires in Sudan, South Sudan",
-  "cells": 572,
-  "passes": 4,
+  "cells": 548,
+  "passes": 5,
   "event": {
    "time": 1794787200000.0,
    "date": "2026-11-16",
-   "firstPassAfter": "2026-11-16",
+   "firstPassAfter": "2026-11-23",
    "stood": 0.0,
-   "recent": 0.0,
+   "recent": 0.0383,
    "long": 0.0,
    "stillNext": null,
    "newVersion": null,
@@ -1532,13 +1662,13 @@
    "grade": "both"
   },
   "most": {
-   "date": "2026-11-16",
-   "time": 1794799607000,
+   "date": "2026-11-11",
+   "time": 1794368107000,
    "stood": 0.0,
-   "recent": 0.0,
+   "recent": 0.0456,
    "long": 0.0
   },
-  "water": 0.007
+  "water": 0.049
  },
  {
   "id": "event-gdacs-wf1034013",
@@ -1647,26 +1777,26 @@
  {
   "id": "event-gdacs-wf1034056",
   "name": "Forest fires in Mozambique",
-  "cells": 576,
-  "passes": 2,
+  "cells": 422,
+  "passes": 5,
   "event": {
    "time": 1795132800000.0,
    "date": "2026-11-20",
-   "firstPassAfter": "2026-11-21",
-   "stood": 0.0174,
-   "recent": 0.0174,
-   "long": null,
+   "firstPassAfter": "2026-11-23",
+   "stood": 0.0,
+   "recent": 0.0122,
+   "long": 0.0,
    "stillNext": null,
    "newVersion": null,
-   "baseline": 1,
-   "grade": "pair"
+   "baseline": 2,
+   "grade": "both"
   },
   "most": {
-   "date": "2026-11-21",
-   "time": 1795276152000,
-   "stood": 0.0174,
-   "recent": 0.0174,
-   "long": null
+   "date": "2026-11-11",
+   "time": 1794367670000,
+   "stood": 0.0,
+   "recent": 0.0208,
+   "long": 0.0
   },
   "water": 0.0
  },

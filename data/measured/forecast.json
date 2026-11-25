@@ -458,6 +458,50 @@
   }
  },
  {
+  "id": "event-eonet-eonet-26569",
+  "name": "Prescribed Fire 2027 TXTMR HFR RX, Matagorda, Texas",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1794960000000.0,
+   "date": "2026-11-18",
+   "firstPassAfter": "2026-11-21",
+   "outside": 0.309,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-21",
+   "time": 1795261409000,
+   "outside": 0.309,
+   "expected": 1.14
+  },
+  "last": {
+   "rmse": 1.17,
+   "mae": 0.86,
+   "within90": 1.76,
+   "r2": 0.863,
+   "spearman": 0.912,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 2.03,
+   "mae": 1.51,
+   "within90": 3.11,
+   "r2": 0.583,
+   "spearman": 0.807,
+   "skill": -2.031
+  },
+  "peers": {
+   "rmse": 1.03,
+   "mae": 0.71,
+   "within90": 1.46,
+   "r2": 0.894,
+   "spearman": 0.942,
+   "skill": 0.226
+  }
+ },
+ {
   "id": "event-eonet-eonet-26571",
   "name": "Prescribed Fire OAK Compartment 29 RX, Bibb, Alabama",
   "cells": 576,
@@ -499,6 +543,50 @@
    "r2": 0.714,
    "spearman": 0.768,
    "skill": 0.798
+  }
+ },
+ {
+  "id": "event-eonet-eonet-26572",
+  "name": "Prescribed Fire rx-Lapham Good Oak 2026, Waukesha, Wisconsin",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1794960000000.0,
+   "date": "2026-11-18",
+   "firstPassAfter": "2026-11-23",
+   "outside": 0.118,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-23",
+   "time": 1795395007000,
+   "outside": 0.118,
+   "expected": 1.82
+  },
+  "last": {
+   "rmse": 1.54,
+   "mae": 0.8,
+   "within90": 1.9,
+   "r2": 0.591,
+   "spearman": 0.896,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 3.0,
+   "mae": 1.47,
+   "within90": 3.33,
+   "r2": -0.547,
+   "spearman": 0.701,
+   "skill": -2.786
+  },
+  "peers": {
+   "rmse": 1.57,
+   "mae": 0.69,
+   "within90": 1.99,
+   "r2": 0.579,
+   "spearman": 0.907,
+   "skill": -0.031
   }
  },
  {
@@ -1297,6 +1385,50 @@
   }
  },
  {
+  "id": "event-gdacs-wf1033904",
+  "name": "Forest fires in Nigeria",
+  "cells": 576,
+  "passes": 5,
+  "best": "line",
+  "event": {
+   "time": 1794700800000.0,
+   "date": "2026-11-15",
+   "firstPassAfter": "2026-11-23",
+   "outside": 0.083,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-23",
+   "time": 1795410966000,
+   "outside": 0.083,
+   "expected": 0.37
+  },
+  "last": {
+   "rmse": 0.73,
+   "mae": 0.57,
+   "within90": 1.25,
+   "r2": 0.683,
+   "spearman": 0.903,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 0.65,
+   "mae": 0.56,
+   "within90": 1.03,
+   "r2": 0.743,
+   "spearman": 0.828,
+   "skill": 0.188
+  },
+  "peers": {
+   "rmse": 0.22,
+   "mae": 0.17,
+   "within90": 0.36,
+   "r2": 0.971,
+   "spearman": 0.968,
+   "skill": 0.908
+  }
+ },
+ {
   "id": "event-gdacs-wf1033910",
   "name": "Forest fires in Australia",
   "cells": 576,
@@ -1609,6 +1741,50 @@
   }
  },
  {
+  "id": "event-gdacs-wf1033948",
+  "name": "Forest fires in Sudan",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1794700800000.0,
+   "date": "2026-11-15",
+   "firstPassAfter": "2026-11-23",
+   "outside": 0.212,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-23",
+   "time": 1795404974000,
+   "outside": 0.212,
+   "expected": 0.3
+  },
+  "last": {
+   "rmse": 0.63,
+   "mae": 0.49,
+   "within90": 1.04,
+   "r2": 0.777,
+   "spearman": 0.952,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 2.46,
+   "mae": 1.55,
+   "within90": 4.51,
+   "r2": -2.375,
+   "spearman": 0.803,
+   "skill": -14.155
+  },
+  "peers": {
+   "rmse": 0.22,
+   "mae": 0.16,
+   "within90": 0.34,
+   "r2": 0.973,
+   "spearman": 0.984,
+   "skill": 0.881
+  }
+ },
+ {
   "id": "event-gdacs-wf1033965",
   "name": "Forest fires in Benin, Burkina Faso",
   "cells": 428,
@@ -1765,6 +1941,50 @@
   }
  },
  {
+  "id": "event-gdacs-wf1033992",
+  "name": "Forest fires in Australia",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1794787200000.0,
+   "date": "2026-11-16",
+   "firstPassAfter": "2026-11-23",
+   "outside": 0.16,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-23",
+   "time": 1795425952000,
+   "outside": 0.16,
+   "expected": 0.77
+  },
+  "last": {
+   "rmse": 1.11,
+   "mae": 0.83,
+   "within90": 1.98,
+   "r2": 0.271,
+   "spearman": 0.683,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 2.29,
+   "mae": 1.89,
+   "within90": 3.68,
+   "r2": -2.094,
+   "spearman": 0.342,
+   "skill": -3.244
+  },
+  "peers": {
+   "rmse": 0.49,
+   "mae": 0.39,
+   "within90": 0.82,
+   "r2": 0.856,
+   "spearman": 0.906,
+   "skill": 0.802
+  }
+ },
+ {
   "id": "event-gdacs-wf1033996",
   "name": "Forest fires in South Sudan, Sudan",
   "cells": 576,
@@ -1853,6 +2073,94 @@
   }
  },
  {
+  "id": "event-gdacs-wf1034001",
+  "name": "Forest fires in Australia",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1794960000000.0,
+   "date": "2026-11-18",
+   "firstPassAfter": "2026-11-21",
+   "outside": 0.238,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-21",
+   "time": 1795296597000,
+   "outside": 0.238,
+   "expected": 1.54
+  },
+  "last": {
+   "rmse": 3.31,
+   "mae": 2.76,
+   "within90": 5.21,
+   "r2": -0.941,
+   "spearman": -0.067,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 5.35,
+   "mae": 4.21,
+   "within90": 9.22,
+   "r2": -4.049,
+   "spearman": -0.251,
+   "skill": -1.601
+  },
+  "peers": {
+   "rmse": 1.04,
+   "mae": 0.72,
+   "within90": 1.77,
+   "r2": 0.81,
+   "spearman": 0.911,
+   "skill": 0.902
+  }
+ },
+ {
+  "id": "event-gdacs-wf1034011",
+  "name": "Forest fires in Sudan, South Sudan",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1794787200000.0,
+   "date": "2026-11-16",
+   "firstPassAfter": "2026-11-23",
+   "outside": 0.035,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-23",
+   "time": 1795404907000,
+   "outside": 0.035,
+   "expected": 1.37
+  },
+  "last": {
+   "rmse": 1.31,
+   "mae": 0.94,
+   "within90": 2.45,
+   "r2": 0.82,
+   "spearman": 0.918,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 3.88,
+   "mae": 2.7,
+   "within90": 7.24,
+   "r2": -0.585,
+   "spearman": 0.779,
+   "skill": -7.795
+  },
+  "peers": {
+   "rmse": 0.74,
+   "mae": 0.55,
+   "within90": 1.3,
+   "r2": 0.943,
+   "spearman": 0.97,
+   "skill": 0.685
+  }
+ },
+ {
   "id": "event-gdacs-wf1034014",
   "name": "Forest fires in Benin, Burkina Faso",
   "cells": 364,
@@ -1894,6 +2202,50 @@
    "r2": 0.959,
    "spearman": 0.981,
    "skill": 0.803
+  }
+ },
+ {
+  "id": "event-gdacs-wf1034056",
+  "name": "Forest fires in Mozambique",
+  "cells": 422,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1795132800000.0,
+   "date": "2026-11-20",
+   "firstPassAfter": "2026-11-23",
+   "outside": 0.016,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-23",
+   "time": 1795404471000,
+   "outside": 0.016,
+   "expected": 1.19
+  },
+  "last": {
+   "rmse": 1.0,
+   "mae": 0.79,
+   "within90": 1.53,
+   "r2": 0.903,
+   "spearman": 0.96,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 11.98,
+   "mae": 6.71,
+   "within90": 23.91,
+   "r2": -12.7,
+   "spearman": 0.545,
+   "skill": -170.542
+  },
+  "peers": {
+   "rmse": 0.63,
+   "mae": 0.45,
+   "within90": 1.03,
+   "r2": 0.962,
+   "spearman": 0.985,
+   "skill": 0.606
   }
  },
  {
