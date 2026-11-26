@@ -684,6 +684,24 @@
   "file": "event-gdacs-wf1034064.json"
  },
  {
+  "id": "event-gdacs-wf1034065",
+  "name": "Forest fires in Australia",
+  "lat": -14.0146,
+  "lon": 135.2598,
+  "radiusKm": 25,
+  "event": 1795132800000.0,
+  "file": "event-gdacs-wf1034065.json"
+ },
+ {
+  "id": "event-gdacs-wf1034066",
+  "name": "Forest fires in Australia",
+  "lat": -14.3213,
+  "lon": 134.9324,
+  "radiusKm": 25,
+  "event": 1795046400000.0,
+  "file": "event-gdacs-wf1034066.json"
+ },
+ {
   "id": "event-gdacs-wf1034088",
   "name": "Forest fires in South Africa",
   "lat": -34.1963,
@@ -691,6 +709,33 @@
   "radiusKm": 25,
   "event": 1795219200000.0,
   "file": "event-gdacs-wf1034088.json"
+ },
+ {
+  "id": "event-gdacs-wf1034097",
+  "name": "Forest fires in South Sudan",
+  "lat": 8.2998,
+  "lon": 25.3574,
+  "radiusKm": 25,
+  "event": 1795478400000.0,
+  "file": "event-gdacs-wf1034097.json"
+ },
+ {
+  "id": "event-gdacs-wf1034098",
+  "name": "Forest fires in South Sudan",
+  "lat": 7.4639,
+  "lon": 26.9139,
+  "radiusKm": 25,
+  "event": 1795392000000.0,
+  "file": "event-gdacs-wf1034098.json"
+ },
+ {
+  "id": "event-gdacs-wf1034100",
+  "name": "Forest fires in Central African Republic",
+  "lat": 9.1271,
+  "lon": 21.6006,
+  "radiusKm": 25,
+  "event": 1795219200000.0,
+  "file": "event-gdacs-wf1034100.json"
  },
  {
   "id": "event-usgs-us6000u19w",

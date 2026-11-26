@@ -1,0 +1,62 @@
+{
+ "id": "event-gdacs-wf1034100",
+ "name": "Forest fires in Central African Republic",
+ "lat": 9.1271,
+ "lon": 21.6006,
+ "radiusKm": 25,
+ "track": "108-D-084-DHDH",
+ "setup": {
+  "lat": 9.1271,
+  "lon": 21.6006,
+  "seriesRadiusM": 500,
+  "mapRadiusM": 6000,
+  "mapPol": "co"
+ },
+ "event": 1795219200000.0,
+ "pols": [
+  "HH",
+  "HV"
+ ],
+ "series": [
+  {
+   "time": 1791392211000,
+   "hh": -6.32,
+   "hv": -13.56,
+   "pixels": 1959,
+   "file": "NISAR_L2_PR_GCOV_032_108_D_084_2005_DHDH_A_20261007T165651_20261007T165725_P05023_N_F_J_001.h5"
+  },
+  {
+   "time": 1793465811000,
+   "hh": -8.72,
+   "hv": -14.85,
+   "pixels": 1959,
+   "file": "NISAR_L2_PR_GCOV_034_108_D_084_2005_DHDH_A_20261031T165651_20261031T165726_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1795539412000,
+   "hh": -9.05,
+   "hv": -14.89,
+   "pixels": 1959,
+   "file": "NISAR_L2_PR_GCOV_036_108_D_084_2005_DHDH_A_20261124T165652_20261124T165727_P05036_N_F_J_001.h5"
+  }
+ ],
+ "change": {
+  "before": 1793465811000,
+  "after": 1795539412000,
+  "pol": "HH",
+  "image": "event-gdacs-wf1034100_change.png",
+  "bounds": {
+   "west": 21.546010161552896,
+   "east": 21.655189838447104,
+   "south": 9.07320132950054,
+   "north": 9.180998670499461
+  },
+  "weakerPct": 0.4,
+  "strongerPct": 0.0,
+  "spansEvent": true
+ },
+ "firstDrop": null,
+ "summary": "Across the event of 2026-11-21: between 2026-10-31 and 2026-11-24, HH backscatter here changed by -0.3 dB and HV by -0.0 dB (mean within 500 m). Across the mapped area, 0% got at least 3 dB weaker and 0% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 3 passes on track 108-D-084-DHDH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-11-21, and 'before' the last pass before it.",
+ "generated": "2026-11-26T23:57:35Z"
+}
