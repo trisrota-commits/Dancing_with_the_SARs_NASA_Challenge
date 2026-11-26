@@ -460,25 +460,25 @@
   "id": "event-eonet-eonet-26661",
   "name": "Wildfire Little Ridge, Highland, Virginia",
   "cells": 576,
-  "passes": 4,
+  "passes": 5,
   "event": {
    "time": 1795219200000.0,
    "date": "2026-11-21",
-   "firstPassAfter": "2026-11-23",
-   "stood": 0.0,
-   "recent": 0.0,
-   "long": 0.0,
+   "firstPassAfter": "2026-11-24",
+   "stood": 0.0069,
+   "recent": 0.0434,
+   "long": 0.0069,
    "stillNext": null,
    "newVersion": null,
    "baseline": 2,
    "grade": "both"
   },
   "most": {
-   "date": "2026-11-23",
-   "time": 1795429383000,
-   "stood": 0.0,
-   "recent": 0.0,
-   "long": 0.0
+   "date": "2026-11-24",
+   "time": 1795478977000,
+   "stood": 0.0069,
+   "recent": 0.0434,
+   "long": 0.0069
   },
   "water": 0.0
  },
@@ -811,6 +811,32 @@
    "long": 0.006
   },
   "water": 0.127
+ },
+ {
+  "id": "event-gdacs-fl1104297",
+  "name": "Flood in Thailand",
+  "cells": 576,
+  "passes": 4,
+  "event": {
+   "time": 1795305600000.0,
+   "date": "2026-11-22",
+   "firstPassAfter": "2026-11-22",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-22",
+   "time": 1795347665000,
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0
+  },
+  "water": 0.0
  },
  {
   "id": "event-gdacs-fl1104298",
@@ -1257,28 +1283,28 @@
  {
   "id": "event-gdacs-wf1033946",
   "name": "Forest fires in Botswana",
-  "cells": 576,
-  "passes": 4,
+  "cells": 562,
+  "passes": 5,
   "event": {
    "time": 1794873600000.0,
    "date": "2026-11-17",
-   "firstPassAfter": "2026-11-17",
-   "stood": 0.3125,
-   "recent": 0.4097,
-   "long": 0.6701,
+   "firstPassAfter": "2026-11-24",
+   "stood": 0.0374,
+   "recent": 0.2544,
+   "long": 0.0374,
    "stillNext": null,
    "newVersion": null,
    "baseline": 2,
    "grade": "both"
   },
   "most": {
-   "date": "2026-11-17",
-   "time": 1794889001000,
-   "stood": 0.3125,
-   "recent": 0.4097,
-   "long": 0.6701
+   "date": "2026-11-24",
+   "time": 1795494301000,
+   "stood": 0.0374,
+   "recent": 0.2544,
+   "long": 0.0374
   },
-  "water": 0.0
+  "water": 0.024
  },
  {
   "id": "event-gdacs-wf1033947",
@@ -1336,25 +1362,25 @@
   "id": "event-gdacs-wf1033953",
   "name": "Forest fires in Australia",
   "cells": 576,
-  "passes": 4,
+  "passes": 5,
   "event": {
    "time": 1794960000000.0,
    "date": "2026-11-18",
-   "firstPassAfter": "2026-11-18",
-   "stood": 0.1007,
-   "recent": 0.2188,
-   "long": 0.1007,
+   "firstPassAfter": "2026-11-24",
+   "stood": 0.092,
+   "recent": 0.099,
+   "long": 0.1632,
    "stillNext": null,
    "newVersion": null,
    "baseline": 2,
    "grade": "both"
   },
   "most": {
-   "date": "2026-11-18",
-   "time": 1795032936000,
-   "stood": 0.1007,
-   "recent": 0.2188,
-   "long": 0.1007
+   "date": "2026-11-24",
+   "time": 1795509848000,
+   "stood": 0.092,
+   "recent": 0.099,
+   "long": 0.1632
   },
   "water": 0.0
  },
@@ -1674,11 +1700,11 @@
   "id": "event-gdacs-wf1034005",
   "name": "Forest fires in Australia",
   "cells": 576,
-  "passes": 4,
+  "passes": 5,
   "event": {
    "time": 1794873600000.0,
    "date": "2026-11-17",
-   "firstPassAfter": "2026-11-18",
+   "firstPassAfter": "2026-11-24",
    "stood": 0.0,
    "recent": 0.0,
    "long": 0.0,
@@ -1688,8 +1714,8 @@
    "grade": "both"
   },
   "most": {
-   "date": "2026-11-18",
-   "time": 1795032936000,
+   "date": "2026-11-12",
+   "time": 1794473048000,
    "stood": 0.0,
    "recent": 0.0,
    "long": 0.0
@@ -1775,6 +1801,32 @@
   "water": 0.0
  },
  {
+  "id": "event-gdacs-wf1034029",
+  "name": "Forest fires in Bolivia",
+  "cells": 576,
+  "passes": 4,
+  "event": {
+   "time": 1795219200000.0,
+   "date": "2026-11-21",
+   "firstPassAfter": "2026-11-23",
+   "stood": 0.0,
+   "recent": 0.0243,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-23",
+   "time": 1795428511000,
+   "stood": 0.0,
+   "recent": 0.0243,
+   "long": 0.0
+  },
+  "water": 0.0
+ },
+ {
   "id": "event-gdacs-wf1034038",
   "name": "Forest fires in Australia",
   "cells": 576,
@@ -1851,6 +1903,58 @@
    "long": 0.0
   },
   "water": 0.0
+ },
+ {
+  "id": "event-gdacs-wf1034064",
+  "name": "Forest fires in Australia",
+  "cells": 576,
+  "passes": 4,
+  "event": {
+   "time": 1795219200000.0,
+   "date": "2026-11-21",
+   "firstPassAfter": "2026-11-22",
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-22",
+   "time": 1795336116000,
+   "stood": 0.0,
+   "recent": 0.0,
+   "long": 0.0
+  },
+  "water": 0.0
+ },
+ {
+  "id": "event-gdacs-wf1034088",
+  "name": "Forest fires in South Africa",
+  "cells": 414,
+  "passes": 4,
+  "event": {
+   "time": 1795219200000.0,
+   "date": "2026-11-21",
+   "firstPassAfter": "2026-11-21",
+   "stood": 0.0,
+   "recent": 0.0074,
+   "long": 0.0,
+   "stillNext": null,
+   "newVersion": null,
+   "baseline": 2,
+   "grade": "both"
+  },
+  "most": {
+   "date": "2026-11-21",
+   "time": 1795236381000,
+   "stood": 0.0,
+   "recent": 0.0074,
+   "long": 0.0
+  },
+  "water": 0.223
  },
  {
   "id": "event-usgs-us6000u19w",

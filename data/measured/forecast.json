@@ -766,6 +766,50 @@
   }
  },
  {
+  "id": "event-eonet-eonet-26661",
+  "name": "Wildfire Little Ridge, Highland, Virginia",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1795219200000.0,
+   "date": "2026-11-21",
+   "firstPassAfter": "2026-11-24",
+   "outside": 0.116,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-24",
+   "time": 1795478977000,
+   "outside": 0.116,
+   "expected": 0.25
+  },
+  "last": {
+   "rmse": 0.26,
+   "mae": 0.18,
+   "within90": 0.34,
+   "r2": 0.94,
+   "spearman": 0.938,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 0.56,
+   "mae": 0.41,
+   "within90": 0.89,
+   "r2": 0.726,
+   "spearman": 0.772,
+   "skill": -3.587
+  },
+  "peers": {
+   "rmse": 0.21,
+   "mae": 0.13,
+   "within90": 0.25,
+   "r2": 0.962,
+   "spearman": 0.943,
+   "skill": 0.368
+  }
+ },
+ {
   "id": "event-eonet-eonet-26662",
   "name": "Wildfire White Oak Flat, Alleghany, Virginia",
   "cells": 576,
@@ -1829,6 +1873,50 @@
   }
  },
  {
+  "id": "event-gdacs-wf1033946",
+  "name": "Forest fires in Botswana",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1794873600000.0,
+   "date": "2026-11-17",
+   "firstPassAfter": "2026-11-24",
+   "outside": 0.736,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-24",
+   "time": 1795494301000,
+   "outside": 0.736,
+   "expected": 0.2
+  },
+  "last": {
+   "rmse": 0.83,
+   "mae": 0.62,
+   "within90": 1.49,
+   "r2": 0.781,
+   "spearman": 0.613,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 0.87,
+   "mae": 0.7,
+   "within90": 1.45,
+   "r2": 0.759,
+   "spearman": 0.811,
+   "skill": -0.097
+  },
+  "peers": {
+   "rmse": 0.37,
+   "mae": 0.23,
+   "within90": 0.63,
+   "r2": 0.957,
+   "spearman": 0.943,
+   "skill": 0.804
+  }
+ },
+ {
   "id": "event-gdacs-wf1033948",
   "name": "Forest fires in Sudan",
   "cells": 576,
@@ -1870,6 +1958,50 @@
    "r2": 0.973,
    "spearman": 0.984,
    "skill": 0.881
+  }
+ },
+ {
+  "id": "event-gdacs-wf1033953",
+  "name": "Forest fires in Australia",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1794960000000.0,
+   "date": "2026-11-18",
+   "firstPassAfter": "2026-11-24",
+   "outside": 0.542,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-24",
+   "time": 1795509848000,
+   "outside": 0.542,
+   "expected": 0.18
+  },
+  "last": {
+   "rmse": 0.51,
+   "mae": 0.42,
+   "within90": 0.68,
+   "r2": 0.556,
+   "spearman": 0.727,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 0.61,
+   "mae": 0.51,
+   "within90": 0.91,
+   "r2": 0.372,
+   "spearman": 0.693,
+   "skill": -0.414
+  },
+  "peers": {
+   "rmse": 0.29,
+   "mae": 0.17,
+   "within90": 0.39,
+   "r2": 0.853,
+   "spearman": 0.912,
+   "skill": 0.67
   }
  },
  {
@@ -2202,6 +2334,50 @@
    "r2": 0.81,
    "spearman": 0.911,
    "skill": 0.902
+  }
+ },
+ {
+  "id": "event-gdacs-wf1034005",
+  "name": "Forest fires in Australia",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1794873600000.0,
+   "date": "2026-11-17",
+   "firstPassAfter": "2026-11-24",
+   "outside": 0.0,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-24",
+   "time": 1795509848000,
+   "outside": 0.0,
+   "expected": 3.59
+  },
+  "last": {
+   "rmse": 1.8,
+   "mae": 1.15,
+   "within90": 3.46,
+   "r2": -0.172,
+   "spearman": 0.539,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 3.11,
+   "mae": 2.17,
+   "within90": 5.48,
+   "r2": -2.487,
+   "spearman": 0.395,
+   "skill": -1.974
+  },
+  "peers": {
+   "rmse": 1.7,
+   "mae": 1.1,
+   "within90": 3.3,
+   "r2": -0.042,
+   "spearman": 0.546,
+   "skill": 0.111
   }
  },
  {
