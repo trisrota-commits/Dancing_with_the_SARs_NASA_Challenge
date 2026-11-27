@@ -842,13 +842,13 @@
   "id": "event-gdacs-fl1104298",
   "name": "Flood in Portugal",
   "cells": 576,
-  "passes": 4,
+  "passes": 5,
   "event": {
    "time": 1795132800000.0,
    "date": "2026-11-20",
-   "firstPassAfter": "2026-11-20",
+   "firstPassAfter": "2026-11-25",
    "stood": 0.0,
-   "recent": 0.0069,
+   "recent": 0.0,
    "long": 0.0,
    "stillNext": null,
    "newVersion": null,
@@ -856,11 +856,11 @@
    "grade": "both"
   },
   "most": {
-   "date": "2026-11-20",
-   "time": 1795203263000,
-   "stood": 0.0,
-   "recent": 0.0069,
-   "long": 0.0
+   "date": "2026-11-13",
+   "time": 1794548436000,
+   "stood": 0.0017,
+   "recent": 0.5538,
+   "long": 0.0017
   },
   "water": 0.0
  },
@@ -1569,12 +1569,12 @@
  {
   "id": "event-gdacs-wf1033991",
   "name": "Forest fires in Australia",
-  "cells": 262,
-  "passes": 4,
+  "cells": 576,
+  "passes": 5,
   "event": {
    "time": 1794873600000.0,
    "date": "2026-11-17",
-   "firstPassAfter": "2026-11-18",
+   "firstPassAfter": "2026-11-25",
    "stood": 0.0,
    "recent": 0.0,
    "long": 0.0,
@@ -1584,13 +1584,13 @@
    "grade": "both"
   },
   "most": {
-   "date": "2026-11-18",
-   "time": 1794994478000,
+   "date": "2026-11-13",
+   "time": 1794562941000,
    "stood": 0.0,
-   "recent": 0.0,
+   "recent": 0.0069,
    "long": 0.0
   },
-  "water": 0.198
+  "water": 0.0
  },
  {
   "id": "event-gdacs-wf1033992",
