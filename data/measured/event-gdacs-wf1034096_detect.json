@@ -1,0 +1,31 @@
+{
+ "id": "event-gdacs-wf1034096",
+ "name": "Forest fires in Mali",
+ "track": "116-A-009-DHDH",
+ "cellM": 500.0,
+ "cells": 0,
+ "passes": 4,
+ "from": "2026-10-20",
+ "to": "2026-11-25",
+ "water": 0.769,
+ "event": {
+  "time": 1795478400000.0,
+  "date": "2026-11-24",
+  "firstPassAfter": null,
+  "stood": null,
+  "openWater": true
+ },
+ "most": null,
+ "picture": null,
+ "byDate": [],
+ "summary": "77% of the window around this point reads as open water (the cross-polarised echo is under -24 dB there). On water the echo follows the wind from pass to pass, so nothing can be said about change here.",
+ "method": "",
+ "limits": "",
+ "generated": "2026-11-27T23:43:03Z",
+ "bounds": {
+  "west": 0.05608305991653942,
+  "east": 0.1681169400834606,
+  "south": 15.75300132950054,
+  "north": 15.860798670499461
+ }
+}

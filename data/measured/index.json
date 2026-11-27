@@ -648,6 +648,15 @@
   "file": "event-gdacs-wf1034029.json"
  },
  {
+  "id": "event-gdacs-wf1034037",
+  "name": "Forest fires in Australia",
+  "lat": -39.834,
+  "lon": 147.9412,
+  "radiusKm": 25,
+  "event": 1795392000000.0,
+  "file": "event-gdacs-wf1034037.json"
+ },
+ {
   "id": "event-gdacs-wf1034038",
   "name": "Forest fires in Australia",
   "lat": -20.3665,
@@ -711,6 +720,15 @@
   "file": "event-gdacs-wf1034088.json"
  },
  {
+  "id": "event-gdacs-wf1034096",
+  "name": "Forest fires in Mali",
+  "lat": 15.8069,
+  "lon": 0.1121,
+  "radiusKm": 25,
+  "event": 1795478400000.0,
+  "file": "event-gdacs-wf1034096.json"
+ },
+ {
   "id": "event-gdacs-wf1034097",
   "name": "Forest fires in South Sudan",
   "lat": 8.2998,
@@ -729,6 +747,15 @@
   "file": "event-gdacs-wf1034098.json"
  },
  {
+  "id": "event-gdacs-wf1034099",
+  "name": "Forest fires in South Sudan",
+  "lat": 7.63,
+  "lon": 32.2553,
+  "radiusKm": 25,
+  "event": 1795392000000.0,
+  "file": "event-gdacs-wf1034099.json"
+ },
+ {
   "id": "event-gdacs-wf1034100",
   "name": "Forest fires in Central African Republic",
   "lat": 9.1271,
@@ -736,6 +763,42 @@
   "radiusKm": 25,
   "event": 1795219200000.0,
   "file": "event-gdacs-wf1034100.json"
+ },
+ {
+  "id": "event-gdacs-wf1034109",
+  "name": "Forest fires in South Sudan",
+  "lat": 8.0891,
+  "lon": 26.3462,
+  "radiusKm": 25,
+  "event": 1795478400000.0,
+  "file": "event-gdacs-wf1034109.json"
+ },
+ {
+  "id": "event-gdacs-wf1034110",
+  "name": "Forest fires in Australia",
+  "lat": -14.5008,
+  "lon": 143.4612,
+  "radiusKm": 25,
+  "event": 1795392000000.0,
+  "file": "event-gdacs-wf1034110.json"
+ },
+ {
+  "id": "event-gdacs-wf1034117",
+  "name": "Forest fires in South Sudan",
+  "lat": 6.8996,
+  "lon": 27.3541,
+  "radiusKm": 25,
+  "event": 1795564800000.0,
+  "file": "event-gdacs-wf1034117.json"
+ },
+ {
+  "id": "event-gdacs-wf1034118",
+  "name": "Forest fires in South Sudan",
+  "lat": 9.0629,
+  "lon": 32.0735,
+  "radiusKm": 25,
+  "event": 1795564800000.0,
+  "file": "event-gdacs-wf1034118.json"
  },
  {
   "id": "event-usgs-us6000u19w",

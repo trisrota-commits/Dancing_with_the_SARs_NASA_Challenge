@@ -1,0 +1,54 @@
+{
+ "id": "event-gdacs-wf1034118",
+ "name": "Forest fires in South Sudan",
+ "lat": 9.0629,
+ "lon": 32.0735,
+ "radiusKm": 25,
+ "track": "122-D-084-SHSH",
+ "setup": {
+  "lat": 9.0629,
+  "lon": 32.0735,
+  "seriesRadiusM": 500,
+  "mapRadiusM": 6000,
+  "mapPol": "co"
+ },
+ "event": 1795564800000.0,
+ "pols": [
+  "HH"
+ ],
+ "series": [
+  {
+   "time": 1793549714000,
+   "hh": -10.1,
+   "hv": null,
+   "pixels": 1967,
+   "file": "NISAR_L2_PR_GCOV_034_122_D_084_2005_SHSH_A_20261101T161514_20261101T161548_P05036_N_F_J_001.h5"
+  },
+  {
+   "time": 1795623315000,
+   "hh": -10.58,
+   "hv": null,
+   "pixels": 1967,
+   "file": "NISAR_L2_PR_GCOV_036_122_D_084_2005_SHSH_A_20261125T161515_20261125T161550_P05036_N_F_J_001.h5"
+  }
+ ],
+ "change": {
+  "before": 1793549714000,
+  "after": 1795623315000,
+  "pol": "HH",
+  "image": "event-gdacs-wf1034118_change.png",
+  "bounds": {
+   "west": 32.0189199527255,
+   "east": 32.12808004727451,
+   "south": 9.00900132950054,
+   "north": 9.116798670499461
+  },
+  "weakerPct": 0.1,
+  "strongerPct": 0.0,
+  "spansEvent": true
+ },
+ "firstDrop": null,
+ "summary": "Across the event of 2026-11-25: between 2026-11-01 and 2026-11-25, HH backscatter here changed by -0.5 dB (mean within 500 m). Across the mapped area, 0% got at least 3 dB weaker and 0% at least 3 dB stronger.",
+ "method": "NISAR L2 GCOV (terrain-corrected gamma-naught), frequency A, 2 passes on track 122-D-084-SHSH. Time series: mean linear power within 500 m of the point, in dB. Change map: HH after minus before, 5\u00d75 mean filter against speckle, changes under 1.5 dB not drawn; 'after' is the first pass after the event of 2026-11-25, and 'before' the last pass before it.",
+ "generated": "2026-11-27T23:37:09Z"
+}

@@ -2205,6 +2205,50 @@
   }
  },
  {
+  "id": "event-gdacs-wf1033985",
+  "name": "Forest fires in South Africa",
+  "cells": 576,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1794960000000.0,
+   "date": "2026-11-18",
+   "firstPassAfter": "2026-11-26",
+   "outside": 0.101,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-26",
+   "time": 1795667886000,
+   "outside": 0.101,
+   "expected": 1.32
+  },
+  "last": {
+   "rmse": 1.19,
+   "mae": 0.93,
+   "within90": 1.93,
+   "r2": 0.818,
+   "spearman": 0.816,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.58,
+   "mae": 1.17,
+   "within90": 2.63,
+   "r2": 0.681,
+   "spearman": 0.784,
+   "skill": -0.756
+  },
+  "peers": {
+   "rmse": 0.87,
+   "mae": 0.66,
+   "within90": 1.32,
+   "r2": 0.902,
+   "spearman": 0.889,
+   "skill": 0.462
+  }
+ },
+ {
   "id": "event-gdacs-wf1033991",
   "name": "Forest fires in Australia",
   "cells": 576,
@@ -2686,6 +2730,50 @@
    "r2": 0.755,
    "spearman": 0.875,
    "skill": 0.45
+  }
+ },
+ {
+  "id": "event-gdacs-wf1034088",
+  "name": "Forest fires in South Africa",
+  "cells": 356,
+  "passes": 5,
+  "best": "last",
+  "event": {
+   "time": 1795219200000.0,
+   "date": "2026-11-21",
+   "firstPassAfter": "2026-11-26",
+   "outside": 0.07,
+   "newVersion": null
+  },
+  "peerSurprise": {
+   "date": "2026-11-26",
+   "time": 1795667886000,
+   "outside": 0.07,
+   "expected": 0.8
+  },
+  "last": {
+   "rmse": 1.18,
+   "mae": 0.88,
+   "within90": 2.08,
+   "r2": 0.84,
+   "spearman": 0.964,
+   "skill": 0.0
+  },
+  "line": {
+   "rmse": 1.64,
+   "mae": 1.32,
+   "within90": 2.63,
+   "r2": 0.689,
+   "spearman": 0.888,
+   "skill": -0.947
+  },
+  "peers": {
+   "rmse": 0.46,
+   "mae": 0.33,
+   "within90": 0.75,
+   "r2": 0.976,
+   "spearman": 0.986,
+   "skill": 0.848
   }
  },
  {
@@ -3191,62 +3279,62 @@
   "id": "gerd",
   "name": "Grand Ethiopian Renaissance Dam reservoir",
   "cells": 3600,
-  "passes": 12,
+  "passes": 13,
   "best": "last",
   "event": null,
   "peerSurprise": {
-   "date": "2026-11-14",
-   "time": 1794625842000,
-   "outside": 0.077,
-   "expected": 1.57
+   "date": "2026-11-26",
+   "time": 1795662643000,
+   "outside": 0.085,
+   "expected": 1.55
   },
   "last": {
-   "rmse": 0.91,
-   "mae": 0.64,
-   "within90": 1.57,
-   "r2": 0.977,
-   "spearman": 0.925,
+   "rmse": 0.9,
+   "mae": 0.63,
+   "within90": 1.56,
+   "r2": 0.978,
+   "spearman": 0.927,
    "skill": 0.0
   },
   "line": {
-   "rmse": 1.46,
-   "mae": 1.05,
-   "within90": 2.43,
-   "r2": 0.941,
-   "spearman": 0.9,
-   "skill": -1.574
+   "rmse": 1.45,
+   "mae": 1.03,
+   "within90": 2.44,
+   "r2": 0.942,
+   "spearman": 0.901,
+   "skill": -1.613
   },
   "peers": {
-   "rmse": 0.88,
-   "mae": 0.58,
-   "within90": 1.55,
+   "rmse": 0.87,
+   "mae": 0.57,
+   "within90": 1.54,
    "r2": 0.979,
-   "spearman": 0.925,
-   "skill": 0.069
+   "spearman": 0.926,
+   "skill": 0.063
   },
   "mean": {
-   "rmse": 1.44,
+   "rmse": 1.43,
    "mae": 1.0,
-   "within90": 2.15,
-   "r2": 0.943,
-   "spearman": 0.91,
-   "skill": -1.493
+   "within90": 2.14,
+   "r2": 0.944,
+   "spearman": 0.913,
+   "skill": -1.521
   },
   "trend": {
    "rmse": 1.01,
-   "mae": 0.76,
+   "mae": 0.75,
    "within90": 1.68,
    "r2": 0.972,
-   "spearman": 0.914,
-   "skill": -0.234
+   "spearman": 0.916,
+   "skill": -0.263
   },
   "learnt": {
-   "rmse": 1.14,
-   "mae": 0.83,
-   "within90": 1.75,
-   "r2": 0.965,
-   "spearman": 0.909,
-   "skill": -0.549
+   "rmse": 1.1,
+   "mae": 0.79,
+   "within90": 1.69,
+   "r2": 0.967,
+   "spearman": 0.914,
+   "skill": -0.485
   }
  },
  {
