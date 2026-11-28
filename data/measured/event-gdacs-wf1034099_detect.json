@@ -69,7 +69,7 @@
  "summary": "On NISAR's first pass after the event of 2026-11-23 (2026-11-25), 0.0 % of the cells stood out against the pass before. Only one pass lies before the event: there is no past to learn what is ordinary from. The step between the two passes is set against its own spread over the area, and the threshold is the one theory gives. In our test about one cell in four flagged this way is right.",
  "method": "NISAR L2 GCOV backscatter in cells of 500 m. From each pass the middle of all cells is taken away, so that what moved the whole area alike drops out. A cell stands out if two checks agree. One: its step from the mean of the 2 latest passes before (at an event: before the event) is beyond the spread such steps had over the area. Two: it lies beyond its own usual value and spread over the whole baseline (at most 10 passes). Both in HH and, where recorded, HV. Each threshold is the score that 1% of the cells exceeded when the baseline passes were judged against each other, and a cell counts only if at least 2 of its eight neighbours are over it too. Open water (cells whose cross-polarised echo is usually under -24 dB) is left out.",
  "limits": "It says that the ground changed and where, not why. A baseline of a few passes knows nothing of the season: a crop growing or ground freezing stands out as well. Over open water the echo follows the wind from pass to pass. Cells next to each other share speckle and weather, so a cluster is weaker evidence than its size suggests.",
- "generated": "2026-11-27T23:43:03Z",
+ "generated": "2026-11-28T12:07:40Z",
  "bounds": {
   "west": 32.200919856141006,
   "east": 32.30968014385899,
